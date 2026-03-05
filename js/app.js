@@ -117,6 +117,10 @@ function renderSkeletons() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Evitar scroll jump al recargar — restaurar al top inmediatamente
+  if (history.scrollRestoration) history.scrollRestoration = 'manual';
+  window.scrollTo(0, 0);
+
   AOS.init({ duration: 700, once: true, offset: 30, easing: 'ease-out-cubic' });
   renderSkeletons();
   await loadStoreData();
@@ -128,6 +132,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderCatalog();
   renderCart();
   initSearch();
+
+  // Activar scroll suave DESPUÉS de que todo cargó y el layout está estable
+  requestAnimationFrame(() => {
+    document.documentElement.style.scrollBehavior = 'smooth';
+  });
 });
 
 /* ════════════════════════════
@@ -171,8 +180,12 @@ function renderHero(cfg) {
       </div>`;
   }).join('');
 
+  const heroSlides = cfg.carruselHero.length;
   new Swiper('#heroSwiper', {
-    loop: true,
+    loop: heroSlides > 1,
+    loopAdditionalSlides: heroSlides,
+    simulateTouch: true,
+    passiveListeners: false,
     autoplay: { delay: 5000, disableOnInteraction: false },
     pagination: { el: '.swiper-pagination', clickable: true },
     navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
@@ -302,6 +315,8 @@ function buildCatContent(items, catId, view) {
         ${items.map(p => `<div class="swiper-slide cat-slide">${buildCard(p)}</div>`).join('')}
       </div>
       <div class="swiper-pagination cat-pagination" id="catPag-${catId}"></div>
+      <div class="swiper-button-prev cat-btn-prev" id="catPrev-${catId}"></div>
+      <div class="swiper-button-next cat-btn-next" id="catNext-${catId}"></div>
     </div>`;
 }
 
@@ -311,14 +326,18 @@ function initCatSwiper(catId) {
       slidesPerView: 1.4,
       spaceBetween: 14,
       grabCursor: true,
-      freeMode: { enabled: true, momentum: true, momentumRatio: 0.5 },
+      loop: false,
+      watchOverflow: true,
+      simulateTouch: true,
       touchStartPreventDefault: false,
       touchMoveStopPropagation: false,
-      passiveListeners: true,
-      threshold: 8,
+      passiveListeners: false,      // ← false para que el táctil de PC funcione
+      threshold: 5,                 // ← más sensible al gesto
       touchAngle: 45,
       resistance: true,
-      resistanceRatio: 0,
+      resistanceRatio: 0.85,
+      freeMode: { enabled: true, momentum: true, momentumRatio: 0.5 },
+      navigation: { nextEl: `#catNext-${catId}`, prevEl: `#catPrev-${catId}` },
       pagination: { el: `#catPag-${catId}`, clickable: true, dynamicBullets: true },
       breakpoints: {
         480:  { slidesPerView: 2.2, spaceBetween: 16 },
@@ -734,3 +753,4 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('menuPanel').classList.contains('open')) toggleMenu();
   }
 });
+
