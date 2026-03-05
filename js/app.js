@@ -117,10 +117,6 @@ function renderSkeletons() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Evitar scroll jump al recargar — restaurar al top inmediatamente
-  if (history.scrollRestoration) history.scrollRestoration = 'manual';
-  window.scrollTo(0, 0);
-
   AOS.init({ duration: 700, once: true, offset: 30, easing: 'ease-out-cubic' });
   renderSkeletons();
   await loadStoreData();
@@ -132,11 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderCatalog();
   renderCart();
   initSearch();
-
-  // Activar scroll suave DESPUÉS de que todo cargó y el layout está estable
-  requestAnimationFrame(() => {
-    document.documentElement.style.scrollBehavior = 'smooth';
-  });
 });
 
 /* ════════════════════════════
@@ -180,12 +171,8 @@ function renderHero(cfg) {
       </div>`;
   }).join('');
 
-  const heroSlides = cfg.carruselHero.length;
   new Swiper('#heroSwiper', {
-    loop: heroSlides > 1,
-    loopAdditionalSlides: heroSlides,
-    simulateTouch: true,
-    passiveListeners: false,
+    loop: true,
     autoplay: { delay: 5000, disableOnInteraction: false },
     pagination: { el: '.swiper-pagination', clickable: true },
     navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
@@ -315,8 +302,6 @@ function buildCatContent(items, catId, view) {
         ${items.map(p => `<div class="swiper-slide cat-slide">${buildCard(p)}</div>`).join('')}
       </div>
       <div class="swiper-pagination cat-pagination" id="catPag-${catId}"></div>
-      <div class="swiper-button-prev cat-btn-prev" id="catPrev-${catId}"></div>
-      <div class="swiper-button-next cat-btn-next" id="catNext-${catId}"></div>
     </div>`;
 }
 
@@ -326,18 +311,14 @@ function initCatSwiper(catId) {
       slidesPerView: 1.4,
       spaceBetween: 14,
       grabCursor: true,
-      loop: false,
-      watchOverflow: true,
-      simulateTouch: true,
+      freeMode: { enabled: true, momentum: true, momentumRatio: 0.5 },
       touchStartPreventDefault: false,
       touchMoveStopPropagation: false,
-      passiveListeners: false,      // ← false para que el táctil de PC funcione
-      threshold: 5,                 // ← más sensible al gesto
+      passiveListeners: true,
+      threshold: 8,
       touchAngle: 45,
       resistance: true,
-      resistanceRatio: 0.85,
-      freeMode: { enabled: true, momentum: true, momentumRatio: 0.5 },
-      navigation: { nextEl: `#catNext-${catId}`, prevEl: `#catPrev-${catId}` },
+      resistanceRatio: 0,
       pagination: { el: `#catPag-${catId}`, clickable: true, dynamicBullets: true },
       breakpoints: {
         480:  { slidesPerView: 2.2, spaceBetween: 16 },
@@ -554,14 +535,42 @@ function openModal(id) {
     </div>`;
 
   if (modalSwiperInstance) { try { modalSwiperInstance.destroy(true, true); } catch {} }
-  if (allImgs.length > 1) {
-    setTimeout(() => {
+  setTimeout(() => {
+    if (allImgs.length > 1) {
       modalSwiperInstance = new Swiper('#modalSwiper', {
         pagination: { el: '.swiper-pagination', clickable: true, dynamicBullets: true },
         grabCursor: true,
       });
-    }, 50);
-  }
+    }
+    // Zoom en fotos al tocar/click
+    document.querySelectorAll('.modal-slide img').forEach(img => {
+      let zoomed = false;
+      let startX, startY, lastX, lastY;
+      img.addEventListener('click', (e) => {
+        if (zoomed) {
+          img.style.transform = 'scale(1)';
+          img.style.cursor = 'zoom-in';
+          img.style.objectPosition = 'center';
+          zoomed = false;
+        } else {
+          const rect = img.getBoundingClientRect();
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          img.style.transformOrigin = `${x}% ${y}%`;
+          img.style.transform = 'scale(2.5)';
+          img.style.cursor = 'zoom-out';
+          zoomed = true;
+        }
+      });
+      // Touch zoom
+      img.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+    });
+  }, 80);
   document.getElementById('modalOverlay').classList.add('open');
   document.getElementById('modalPanel').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -753,4 +762,3 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('menuPanel').classList.contains('open')) toggleMenu();
   }
 });
-
