@@ -699,6 +699,22 @@
           <p style="font-size:.7rem;color:var(--soft);margin-top:.3rem">Obtén tu llave en <strong>wompi.com → Desarrolladores → Llaves de API</strong></p>
         </div>
         <div class="t-card">
+          <div class="t-title">📊 Meta Pixel — Facebook & Instagram Ads</div>
+          <div class="t-sub">Activa el seguimiento para medir tus anuncios y hacer retargeting.</div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Meta Pixel activo</div>
+              <div class="toggle-desc">Registra visitas y eventos de compra</div>
+            </div>
+            <button class="toggle" id="toggleMetaPixel" onclick="this.classList.toggle('on')"></button>
+          </div>
+          <div class="t-field" style="margin-top:.9rem">
+            <label>Pixel ID</label>
+            <input type="text" id="metaPixelId" placeholder="123456789012345">
+          </div>
+          <p style="font-size:.7rem;color:var(--soft);margin-top:.3rem">Encuéntralo en <strong>Meta Business → Events Manager → Tu Pixel</strong></p>
+        </div>
+        <div class="t-card">
           <div class="t-title">🖼️ Vista por categoría</div>
           <div class="t-sub">Elige cómo se muestran los productos de cada categoría.</div>
           <div id="catViewsList"></div>
@@ -959,6 +975,8 @@ async function loadAll(){
   if(adminCfg.descuentoActivo)document.getElementById('toggleDescuento').classList.add('on');
   if(adminCfg.wompiActivo)document.getElementById('toggleWompi').classList.add('on');
   if(adminCfg.wompiKey)document.getElementById('wompiKey').value=adminCfg.wompiKey;
+  if(adminCfg.metaPixelActivo)document.getElementById('toggleMetaPixel').classList.add('on');
+  if(adminCfg.metaPixelId)document.getElementById('metaPixelId').value=adminCfg.metaPixelId;
 
   const cc=getCloudinaryConfig();
   if(cc.cloudName)document.getElementById('ccCloudName').value=cc.cloudName;
@@ -1649,7 +1667,10 @@ async function saveConfig(){
     descuentoPorcentaje:parseInt(document.getElementById('descPorcentaje').value)||10,
     descuentoTexto:document.getElementById('descTexto').value.trim(),
     wompiActivo:document.getElementById('toggleWompi').classList.contains('on'),
-    wompiKey:document.getElementById('wompiKey').value.trim(),catViews,
+    wompiKey:document.getElementById('wompiKey').value.trim(),
+    metaPixelActivo:document.getElementById('toggleMetaPixel').classList.contains('on'),
+    metaPixelId:document.getElementById('metaPixelId').value.trim(),
+    catViews,
   };
 
   const btn=document.getElementById('globalSaveBtn');

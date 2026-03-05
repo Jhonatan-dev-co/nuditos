@@ -166,6 +166,8 @@ function sbToConfig(rows) {
     wompiActivo:          m.wompi_activo        === 'true',
     wompiKey:             m.wompi_key           || '',
     catViews:             JSON.parse(m.cat_views || '{}'),
+    metaPixelActivo:      m.meta_pixel_activo === 'true',
+    metaPixelId:          m.meta_pixel_id || '',
   };
 }
 
@@ -288,6 +290,8 @@ async function sbAdminSaveConfig(cfg) {
     { clave: 'wompi_activo',         valor: String(!!cfg.wompiActivo) },
     { clave: 'wompi_key',            valor: cfg.wompiKey            || '' },
     { clave: 'cat_views',            valor: JSON.stringify(cfg.catViews || {}) },
+    { clave: 'meta_pixel_activo',    valor: String(!!cfg.metaPixelActivo) },
+    { clave: 'meta_pixel_id',        valor: cfg.metaPixelId || '' },
   ];
   return _post('config', updates, true, 'resolution=merge-duplicates');
 }
