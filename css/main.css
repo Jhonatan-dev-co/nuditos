@@ -42,7 +42,6 @@ body {
   font-family: 'Jost', sans-serif;
   background: var(--cream);
   color: var(--text);
-  overflow-x: hidden;
   max-width: 100%;
   position: relative;
 }
@@ -1024,7 +1023,7 @@ footer { background:var(--text); color:white; padding:3rem 1.5rem 2rem; }
 ══════════════════════════════ */
 .cat-section {
   margin-bottom: 0.5rem;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
   max-width: 100vw;
 }
