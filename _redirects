@@ -1,0 +1,11 @@
+# Nuditos — Netlify redirects
+# URLs limpias (sin .html)
+
+/nosotros     /sobre-mi.html    200
+/blog         /blog.html        200
+/faq          /faq.html         200
+/politicas    /politicas.html   200
+/admin        /admin/index.html 200
+
+# Redirigir 404 a la tienda principal
+/*            /index.html       404

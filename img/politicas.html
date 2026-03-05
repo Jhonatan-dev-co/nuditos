@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Políticas de Nuditos Tejidos — privacidad, envíos, garantía y devoluciones.">
+  <title>Políticas — Nuditos Tejidos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%);
+      padding: 5rem 1.5rem 3rem; text-align: center;
+    }
+    .page-eyebrow {
+      font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem;
+    }
+    .page-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 400; color: var(--text);
+    }
+    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
+
+    /* TABS */
+    .pol-tabs {
+      position: sticky; top: 60px; z-index: 50;
+      background: rgba(250,248,245,0.97);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-dark);
+      padding: 0 1.5rem;
+      display: flex; gap: 0; overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .pol-tabs::-webkit-scrollbar { display: none; }
+    .pol-tab {
+      padding: 1rem 1.4rem; font-size: 0.82rem; font-weight: 500;
+      color: var(--text-soft); border: none; background: none;
+      cursor: pointer; white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      font-family: 'Jost', sans-serif;
+    }
+    .pol-tab.active { color: var(--lila-dark); border-bottom-color: var(--lila-dark); }
+    .pol-tab:hover { color: var(--text); }
+
+    /* CONTENT */
+    .pol-wrap {
+      max-width: 720px; margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+    .pol-section { display: none; }
+    .pol-section.active { display: block; }
+
+    .pol-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.9rem; font-weight: 400;
+      color: var(--text); margin-bottom: 0.4rem;
+    }
+    .pol-section h2 em { font-style: italic; color: var(--lila-dark); }
+    .pol-date {
+      font-size: 0.78rem; color: var(--text-soft);
+      margin-bottom: 2rem; padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-dark);
+    }
+    .pol-section h3 {
+      font-size: 1rem; font-weight: 600;
+      color: var(--text); margin: 2rem 0 0.6rem;
+    }
+    .pol-section p {
+      color: var(--text-soft); line-height: 1.8;
+      font-size: 0.9rem; margin-bottom: 0.8rem;
+    }
+    .pol-section strong { color: var(--text); }
+    .pol-section a { color: var(--lila-dark); }
+
+    .pol-highlight {
+      background: var(--lila-xlight); border-radius: 14px;
+      padding: 1.2rem 1.5rem; margin: 1.5rem 0;
+      border-left: 3px solid var(--lila-dark);
+    }
+    .pol-highlight p { margin: 0; color: var(--text-mid); font-size: 0.88rem; }
+
+    .pol-table {
+      width: 100%; border-collapse: collapse;
+      margin: 1rem 0; font-size: 0.88rem;
+    }
+    .pol-table th {
+      background: var(--lila-xlight); color: var(--lila-dark);
+      padding: 0.7rem 1rem; text-align: left;
+      font-weight: 600; font-size: 0.78rem;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .pol-table td {
+      padding: 0.7rem 1rem; border-bottom: 1px solid var(--border-dark);
+      color: var(--text-soft);
+    }
+    .pol-table tr:last-child td { border-bottom: none; }
+
+    .pol-contact {
+      background: var(--cream-dark); border-radius: 16px;
+      padding: 1.5rem; margin-top: 2.5rem; text-align: center;
+    }
+    .pol-contact p { margin-bottom: 0.8rem; font-size: 0.88rem; color: var(--text-soft); }
+    .pol-wa {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--lila-dark); color: white;
+      padding: 0.7rem 1.5rem; border-radius: 50px;
+      font-size: 0.88rem; font-weight: 500;
+      transition: background 0.2s;
+    }
+    .pol-wa:hover { background: var(--lila); }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="nav-wrap">
+  <nav>
+    <div class="nav-left">
+      <ul class="nav-desktop-links">
+        <li><a href="index.html#catalogSection">Catálogo</a></li>
+        <li><a href="index.html#personalizado">Personalizado</a></li>
+        <li><a href="sobre-mi.html">Nosotros</a></li>
+      </ul>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="logo">NUDITOS<em>.</em></a>
+    </div>
+    <div class="nav-right">
+      <a href="https://wa.me/573144931525" target="_blank" class="nav-icon-btn" aria-label="WhatsApp">
+        <i class="ri-whatsapp-line"></i>
+      </a>
+    </div>
+  </nav>
+</div>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-eyebrow">Información legal</div>
+  <h1>Nuestras <em>políticas</em></h1>
+</div>
+
+<!-- TABS -->
+<div class="pol-tabs">
+  <button class="pol-tab active" onclick="showTab('privacidad', this)">🔒 Privacidad</button>
+  <button class="pol-tab" onclick="showTab('envios', this)">🚚 Envíos</button>
+  <button class="pol-tab" onclick="showTab('garantia', this)">🛡️ Garantía y devoluciones</button>
+</div>
+
+<!-- CONTENT -->
+<div class="pol-wrap">
+
+  <!-- PRIVACIDAD -->
+  <div class="pol-section active" id="privacidad">
+    <h2>Política de <em>privacidad</em></h2>
+    <div class="pol-date">Última actualización: Febrero de 2026 · Nuditos Tejidos</div>
+
+    <p>En Nuditos Tejidos, proteger tu información personal es una prioridad. Esta política explica qué datos recopilamos, cómo los usamos y cómo los protegemos.</p>
+
+    <h3>¿Qué información recopilamos?</h3>
+    <p>Cuando realizas un pedido o nos contactas, podemos recopilar: <strong>nombre, número de teléfono, dirección de envío, correo electrónico</strong> y los detalles de tu pedido. Esta información es necesaria únicamente para procesar y entregar tu compra.</p>
+
+    <h3>¿Cómo usamos tu información?</h3>
+    <p>Usamos tu información exclusivamente para: procesar y enviar tu pedido, comunicarnos contigo sobre el estado de tu compra, y mejorar nuestro servicio. <strong>No vendemos, compartimos ni cedemos tu información a terceros</strong> con fines comerciales.</p>
+
+    <h3>¿Con quién compartimos tu información?</h3>
+    <p>Compartimos tu dirección y nombre únicamente con la empresa de mensajería necesaria para entregar tu pedido. En pagos con tarjeta, tu información financiera es procesada de forma segura por <strong>Wompi</strong> — nosotros nunca vemos ni almacenamos tus datos de pago.</p>
+
+    <h3>¿Por cuánto tiempo guardamos tus datos?</h3>
+    <p>Guardamos la información de tu pedido por el tiempo necesario para completar la transacción y atender cualquier inconveniente posterior (máximo 1 año). Puedes solicitarnos que eliminemos tu información en cualquier momento.</p>
+
+    <h3>Tus derechos</h3>
+    <p>Tienes derecho a: conocer qué información tenemos sobre ti, solicitar correcciones, pedir que eliminemos tus datos, y no recibir comunicaciones de marketing. Para ejercer cualquiera de estos derechos, escríbenos por WhatsApp.</p>
+
+    <h3>Cookies y seguimiento</h3>
+    <p>Nuestra tienda puede usar cookies para mejorar tu experiencia de navegación y recordar tu carrito. También podemos usar herramientas de análisis (como Google Analytics) para entender cómo se usa el sitio — esta información es anónima y agregada.</p>
+
+    <div class="pol-contact">
+      <p>¿Tienes preguntas sobre tu privacidad?</p>
+      <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20sobre%20privacidad" class="pol-wa" target="_blank">
+        <i class="ri-whatsapp-line"></i> Contáctanos
+      </a>
+    </div>
+  </div>
+
+  <!-- ENVÍOS -->
+  <div class="pol-section" id="envios">
+    <h2>Política de <em>envíos</em></h2>
+    <div class="pol-date">Última actualización: Febrero de 2026 · Nuditos Tejidos</div>
+
+    <div class="pol-highlight">
+      <p>📦 Enviamos a <strong>todo Colombia</strong> desde El Dorado, Meta. El tiempo total de entrega incluye el tiempo de elaboración (1–3 días) más el tiempo de transporte.</p>
+    </div>
+
+    <h3>Costo de envío</h3>
+    <p>El costo varía según el valor de tu pedido:</p>
+    <table class="pol-table">
+      <tr>
+        <th>Valor del pedido</th>
+        <th>Costo de envío</th>
+      </tr>
+      <tr>
+        <td>Pedidos de menor valor</td>
+        <td>Desde $17.000 COP</td>
+      </tr>
+      <tr>
+        <td>Pedidos de mayor valor</td>
+        <td>Envío gratis 🎉</td>
+      </tr>
+    </table>
+    <p>El costo exacto se calcula automáticamente al finalizar tu compra según tu ciudad y el valor del pedido.</p>
+
+    <h3>Tiempos de elaboración</h3>
+    <p>Cada ramo se elabora a mano desde cero al recibir tu pedido. El tiempo de elaboración es de <strong>1 a 3 días hábiles</strong>. Los pedidos personalizados pueden tomar un poco más según la complejidad del diseño.</p>
+
+    <h3>Tiempos de envío estimados</h3>
+    <table class="pol-table">
+      <tr>
+        <th>Destino</th>
+        <th>Tiempo estimado</th>
+      </tr>
+      <tr>
+        <td>Villavicencio y alrededores</td>
+        <td>1 a 2 días hábiles</td>
+      </tr>
+      <tr>
+        <td>Bogotá, Medellín, Cali</td>
+        <td>2 a 3 días hábiles</td>
+      </tr>
+      <tr>
+        <td>Otras ciudades principales</td>
+        <td>3 a 4 días hábiles</td>
+      </tr>
+      <tr>
+        <td>Municipios y zonas rurales</td>
+        <td>4 a 6 días hábiles</td>
+      </tr>
+    </table>
+
+    <h3>Seguimiento de tu pedido</h3>
+    <p>Una vez despachado tu pedido, te enviamos el <strong>número de guía</strong> por WhatsApp para que puedas rastrearlo en tiempo real con la empresa de mensajería.</p>
+
+    <h3>Pedido no recibido</h3>
+    <p>Si tu pedido supera el tiempo estimado de entrega, escríbenos por WhatsApp con tu número de pedido. Hacemos seguimiento con la empresa de mensajería para localizar tu paquete.</p>
+
+    <h3>Dirección incorrecta</h3>
+    <p>Es tu responsabilidad proporcionar una dirección de envío correcta y completa. Si el pedido no puede ser entregado por dirección incorrecta y regresa al remitente, el costo de reenvío corre por cuenta del cliente.</p>
+
+    <div class="pol-contact">
+      <p>¿Tienes dudas sobre tu envío?</p>
+      <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20saber%20sobre%20mi%20envío" class="pol-wa" target="_blank">
+        <i class="ri-whatsapp-line"></i> Consultar por WhatsApp
+      </a>
+    </div>
+  </div>
+
+  <!-- GARANTÍA -->
+  <div class="pol-section" id="garantia">
+    <h2>Garantía y <em>devoluciones</em></h2>
+    <div class="pol-date">Última actualización: Febrero de 2026 · Nuditos Tejidos</div>
+
+    <div class="pol-highlight">
+      <p>🌸 Por ser productos <strong>hechos a mano</strong> y elaborados bajo pedido, no aceptamos devoluciones por cambio de opinión. Sin embargo, si tu producto llega con daños del transporte, lo solucionamos.</p>
+    </div>
+
+    <h3>Garantía por daño en el envío</h3>
+    <p>Si tu pedido llega con algún daño causado durante el transporte, tienes <strong>24 horas</strong> desde la recepción para reportarlo. Debes enviarnos por WhatsApp:</p>
+    <p>· Fotos del producto dañado<br>· Fotos del empaque<br>· Número de pedido</p>
+    <p>Evaluamos cada caso y, de ser procedente, enviamos un reemplazo sin costo adicional.</p>
+
+    <h3>¿Por qué no aceptamos devoluciones por cambio de opinión?</h3>
+    <p>Cada producto es elaborado a mano bajo pedido específico. A diferencia de productos en inventario, tu ramo fue creado exclusivamente para ti, con el tiempo y dedicación que eso implica. Por esto, no es posible aceptar devoluciones por cambio de decisión.</p>
+
+    <h3>Cambios antes de la elaboración</h3>
+    <p>Si quieres cambiar tu pedido (diseño, colores, tamaño), puedes hacerlo <strong>antes de que empecemos la elaboración</strong>. Escríbenos lo antes posible por WhatsApp. Una vez iniciado el tejido, no podemos hacer cambios.</p>
+
+    <h3>Productos con descripción incorrecta</h3>
+    <p>Si el producto que recibiste es diferente al que pediste (diseño, categoría o especificaciones), escríbenos dentro de las <strong>24 horas</strong> de recibido. Solucionamos el error sin costo para ti.</p>
+
+    <h3>Recomendaciones de cuidado</h3>
+    <p>Para mantener tu ramo en perfectas condiciones: mantenlo alejado de la humedad y la luz solar directa. Si necesita limpieza, usa un paño seco suave. Un buen cuidado garantiza que dure muchos años.</p>
+
+    <div class="pol-contact">
+      <p>¿Tienes un problema con tu pedido?</p>
+      <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20un%20problema%20con%20mi%20pedido" class="pol-wa" target="_blank">
+        <i class="ri-whatsapp-line"></i> Reportar por WhatsApp
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo-wrap">
+    <div class="footer-logo">NUDITOS<em>.</em></div>
+    <div class="footer-social">
+      <a href="#" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+      <a href="https://wa.me/573144931525" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 Nuditos Tejidos · Hecho con 💜 en El Dorado, Meta 🇨🇴</div>
+  </div>
+</footer>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.pol-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.pol-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

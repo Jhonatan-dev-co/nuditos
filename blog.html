@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Blog de Nuditos Tejidos — ideas de regalo, guías de flores de crochet, cuidados y más desde El Dorado, Meta, Colombia.">
+  <meta name="keywords" content="ideas regalo flores crochet, blog ramos tejidos, flores crochet Colombia, regalos personalizados Meta">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="Blog — Nuditos Tejidos">
+  <meta property="og:description" content="Ideas de regalo, guías de cuidado y todo sobre flores de crochet. Blog de Nuditos Tejidos desde El Dorado, Meta.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_CO">
+  <title>Blog — Ideas y Regalos con Flores de Crochet | Nuditos Tejidos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%);
+      padding: 5rem 1.5rem 4rem; text-align: center;
+    }
+    .page-eyebrow {
+      font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem;
+    }
+    .page-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 6vw, 3.8rem);
+      font-weight: 400; line-height: 1.15;
+      color: var(--text); margin-bottom: 1.2rem;
+    }
+    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
+    .page-hero p {
+      max-width: 500px; margin: 0 auto;
+      color: var(--text-soft); font-size: 1rem; line-height: 1.7;
+    }
+
+    /* GRID */
+    .blog-wrap {
+      max-width: 1000px; margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+    .blog-featured {
+      display: grid; grid-template-columns: 1.4fr 1fr;
+      gap: 1.5rem; margin-bottom: 1.5rem;
+    }
+    .blog-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+    }
+
+    /* CARD */
+    .blog-card {
+      background: white; border-radius: 20px;
+      overflow: hidden; cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s, box-shadow 0.25s;
+      display: flex; flex-direction: column;
+    }
+    .blog-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .blog-card-img {
+      background: var(--lila-xlight);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; aspect-ratio: 16/9;
+    }
+    .blog-card.featured .blog-card-img { aspect-ratio: 4/3; font-size: 6rem; }
+    .blog-card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+    .blog-tag {
+      font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--lila-dark); font-weight: 600; margin-bottom: 0.6rem;
+    }
+    .blog-card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem; font-weight: 400;
+      color: var(--text); line-height: 1.25;
+      margin-bottom: 0.7rem;
+    }
+    .blog-card.featured h2 { font-size: 1.7rem; }
+    .blog-card p {
+      font-size: 0.85rem; color: var(--text-soft);
+      line-height: 1.65; flex: 1;
+    }
+    .blog-meta {
+      display: flex; align-items: center; gap: 0.6rem;
+      margin-top: 1.2rem; font-size: 0.75rem; color: var(--text-soft);
+    }
+    .blog-meta-dot { width: 3px; height: 3px; background: var(--lila); border-radius: 50%; }
+    .blog-read {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      margin-top: 1.2rem; color: var(--lila-dark);
+      font-size: 0.82rem; font-weight: 500;
+    }
+
+    /* MODAL ARTÍCULO */
+    .article-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 200; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .article-overlay.open { opacity: 1; pointer-events: all; }
+    .article-panel {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: min(680px, 100vw); background: white;
+      z-index: 201; overflow-y: auto;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .article-panel.open { transform: translateX(0); }
+    .article-close {
+      position: sticky; top: 0; background: white;
+      padding: 1rem 1.5rem; display: flex;
+      justify-content: flex-end; border-bottom: 1px solid var(--border-dark);
+      z-index: 10;
+    }
+    .article-close-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--cream); border: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; cursor: pointer; color: var(--text);
+    }
+    .article-content { padding: 2rem 2rem 4rem; }
+    .article-tag {
+      font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--lila-dark); font-weight: 600; margin-bottom: 0.8rem;
+    }
+    .article-content h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; font-weight: 400; line-height: 1.2;
+      color: var(--text); margin-bottom: 0.8rem;
+    }
+    .article-content h1 em { font-style: italic; color: var(--lila-dark); }
+    .article-meta {
+      font-size: 0.78rem; color: var(--text-soft);
+      margin-bottom: 2rem; padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-dark);
+    }
+    .article-emoji {
+      font-size: 5rem; text-align: center;
+      background: var(--lila-xlight); border-radius: 16px;
+      padding: 2rem; margin-bottom: 2rem;
+    }
+    .article-content h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 400;
+      color: var(--text); margin: 1.8rem 0 0.6rem;
+    }
+    .article-content p {
+      color: var(--text-soft); line-height: 1.8;
+      font-size: 0.92rem; margin-bottom: 1rem;
+    }
+    .article-content strong { color: var(--text); }
+    .article-cta {
+      background: var(--lila-xlight); border-radius: 14px;
+      padding: 1.5rem; margin-top: 2rem; text-align: center;
+    }
+    .article-cta p { color: var(--text-mid); margin-bottom: 1rem; font-size: 0.88rem; }
+    .article-wa {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--lila-dark); color: white;
+      padding: 0.7rem 1.5rem; border-radius: 50px;
+      font-size: 0.88rem; font-weight: 500;
+    }
+
+    @media (max-width: 640px) {
+      .blog-featured { grid-template-columns: 1fr; }
+      .blog-grid { grid-template-columns: 1fr; }
+      .article-content { padding: 1.5rem 1.2rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="nav-wrap">
+  <nav>
+    <div class="nav-left">
+      <ul class="nav-desktop-links">
+        <li><a href="index.html#catalogSection">Catálogo</a></li>
+        <li><a href="index.html#personalizado">Personalizado</a></li>
+        <li><a href="sobre-mi.html">Nosotros</a></li>
+      </ul>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="logo">NUDITOS<em>.</em></a>
+    </div>
+    <div class="nav-right">
+      <a href="https://wa.me/573144931525" target="_blank" class="nav-icon-btn" aria-label="WhatsApp">
+        <i class="ri-whatsapp-line"></i>
+      </a>
+    </div>
+  </nav>
+</div>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-eyebrow">Ideas e inspiración</div>
+  <h1>El blog de <em>Nuditos</em></h1>
+  <p>Ideas de regalo, guías de cuidado y todo sobre el mundo del crochet.</p>
+</div>
+
+<!-- BLOG -->
+<div class="blog-wrap">
+
+  <!-- DESTACADOS -->
+  <div class="blog-featured">
+    <div class="blog-card featured" onclick="openArticle('regalo')">
+      <div class="blog-card-img">🎁</div>
+      <div class="blog-card-body">
+        <div class="blog-tag">Ideas de regalo</div>
+        <h2>¿Para quién es el regalo? La guía definitiva para escoger el ramo perfecto</h2>
+        <p>Mamá, mejor amiga, graduada, novia... cada persona merece un ramo diferente. Te ayudamos a escoger.</p>
+        <div class="blog-meta">
+          <span>Nuditos Tejidos</span>
+          <div class="blog-meta-dot"></div>
+          <span>5 min de lectura</span>
+        </div>
+        <span class="blog-read">Leer artículo <i class="ri-arrow-right-line"></i></span>
+      </div>
+    </div>
+
+    <div class="blog-card" onclick="openArticle('crochet')">
+      <div class="blog-card-img">🌸</div>
+      <div class="blog-card-body">
+        <div class="blog-tag">Sobre el crochet</div>
+        <h2>¿Por qué las flores de crochet son el mejor regalo?</h2>
+        <p>Te contamos por qué miles de personas en Colombia están eligiendo flores tejidas sobre las naturales.</p>
+        <div class="blog-meta">
+          <span>Nuditos Tejidos</span>
+          <div class="blog-meta-dot"></div>
+          <span>4 min de lectura</span>
+        </div>
+        <span class="blog-read">Leer artículo <i class="ri-arrow-right-line"></i></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÁS ARTÍCULOS -->
+  <div class="blog-grid">
+    <div class="blog-card" onclick="openArticle('cuidado')">
+      <div class="blog-card-img" style="font-size:3rem;">✨</div>
+      <div class="blog-card-body">
+        <div class="blog-tag">Cuidados</div>
+        <h2>Cómo cuidar tu ramo de crochet para que dure años</h2>
+        <p>Con estos simples consejos, tu ramo se verá hermoso por mucho tiempo.</p>
+        <span class="blog-read">Leer <i class="ri-arrow-right-line"></i></span>
+      </div>
+    </div>
+
+    <div class="blog-card" onclick="openArticle('ocasiones')">
+      <div class="blog-card-img" style="font-size:3rem;">🎓</div>
+      <div class="blog-card-body">
+        <div class="blog-tag">Ocasiones especiales</div>
+        <h2>Ramos de crochet para grado: la alternativa que todos recordarán</h2>
+        <p>El ramo más especial para el día más importante.</p>
+        <span class="blog-read">Leer <i class="ri-arrow-right-line"></i></span>
+      </div>
+    </div>
+
+    <div class="blog-card" onclick="openArticle('personalizado')">
+      <div class="blog-card-img" style="font-size:3rem;">🎨</div>
+      <div class="blog-card-body">
+        <div class="blog-tag">Personalización</div>
+        <h2>Cómo funciona un pedido personalizado en Nuditos</h2>
+        <p>Paso a paso, desde tu idea hasta tu ramo en las manos.</p>
+        <span class="blog-read">Leer <i class="ri-arrow-right-line"></i></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL ARTÍCULO -->
+<div class="article-overlay" id="articleOverlay" onclick="closeArticle()"></div>
+<div class="article-panel" id="articlePanel">
+  <div class="article-close">
+    <button class="article-close-btn" onclick="closeArticle()"><i class="ri-close-line"></i></button>
+  </div>
+  <div class="article-content" id="articleContent"></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo-wrap">
+    <div class="footer-logo">NUDITOS<em>.</em></div>
+    <div class="footer-social">
+      <a href="https://www.instagram.com/nuditos_tejidos/" target="_blank" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+      <a href="https://wa.me/573144931525" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 Nuditos Tejidos · Hecho con 💜 en El Dorado, Meta 🇨🇴</div>
+  </div>
+</footer>
+
+<script>
+const articles = {
+  regalo: {
+    tag: 'Ideas de regalo',
+    emoji: '🎁',
+    title: '¿Para quién es el regalo? La guía definitiva para escoger el <em>ramo perfecto</em>',
+    meta: 'Por Nuditos Tejidos · 5 min de lectura',
+    body: `
+      <p>Regalar flores de crochet es una decisión preciosa, pero con tantas opciones en el catálogo, ¿cómo escoger el indicado? Te lo hacemos fácil.</p>
+      <h2>Para mamá</h2>
+      <p>Las mamás merecen algo especial y duradero. Los ramos de <strong>rosas o girasoles</strong> son siempre un éxito. Si quieres algo más único, el <strong>Ramo noche estrellada</strong> o cualquier ramo con flores mixtas transmiten muchísimo amor.</p>
+      <h2>Para la mejor amiga</h2>
+      <p>Aquí puedes ser más creativa. Los ramos de <strong>Snoopy</strong>, <strong>Hello Kitty</strong> o <strong>Cinnamoroll</strong> son perfectos para amigas que aman los personajes. También funcionan los amigurumis personalizados con algo que le guste a ella.</p>
+      <h2>Para la graduada</h2>
+      <p>El <strong>Gran ramo de grado</strong> (dos lirios + cuatro rosas + cinco no me olvides) es nuestro más pedido para grados. También el <strong>Ramo osito grado</strong> o un amigurumi personalizado con toga y birrete.</p>
+      <h2>Para la novia o pareja</h2>
+      <p>El <strong>Ramo noche estrellada</strong> o el <strong>Ramo amora</strong> son románticos y únicos. Si quieres algo completamente personalizado con sus colores favoritos, escríbenos por WhatsApp.</p>
+      <h2>Para alguien muy especial</h2>
+      <p>Un <strong>amigurumi personalizado</strong> — tejido a imagen de alguien, con sus colores favoritos o de su personaje preferido — es el regalo más memorable que puedes dar.</p>
+      <div class="article-cta">
+        <p>¿Todavía tienes dudas? Escríbenos y te ayudamos a escoger.</p>
+        <a href="https://wa.me/573144931525?text=Hola!%20Necesito%20ayuda%20para%20escoger%20un%20ramo%20🌸" class="article-wa" target="_blank">
+          <i class="ri-whatsapp-line"></i> Pedir ayuda por WhatsApp
+        </a>
+      </div>
+    `
+  },
+  crochet: {
+    tag: 'Sobre el crochet',
+    emoji: '🌸',
+    title: '¿Por qué las flores de crochet son el <em>mejor regalo?</em>',
+    meta: 'Por Nuditos Tejidos · 4 min de lectura',
+    body: `
+      <p>Durante siglos, regalar flores naturales fue la forma más bella de expresar amor. Pero hoy, más personas están descubriendo algo mejor: las flores de crochet.</p>
+      <h2>Duran para siempre</h2>
+      <p>Una flor natural dura días. Una flor de crochet puede durar <strong>toda la vida</strong>. No necesita agua, no se marchita, no se pone amarilla. Sigue siendo hermosa exactamente como el primer día.</p>
+      <h2>Son únicas e irrepetibles</h2>
+      <p>Al ser hechas a mano, <strong>no hay dos ramos exactamente iguales</strong>. Cada puntada es diferente, lo que hace que tu regalo sea completamente exclusivo.</p>
+      <h2>Se pueden personalizar totalmente</h2>
+      <p>¿Quieres un ramo en los colores favoritos de alguien? ¿Con su personaje de caricatura? ¿Con su mascota tejida? Con flores de crochet, <strong>todo es posible</strong>.</p>
+      <h2>Son una obra de arte</h2>
+      <p>Cada ramo representa horas de trabajo artesanal. No es solo un regalo — es una pieza hecha con dedicación y amor que quien lo recibe puede conservar como decoración.</p>
+      <h2>Son sostenibles</h2>
+      <p>A diferencia de las flores cortadas, las flores de crochet no requieren pesticidas ni agua. Son un regalo que respeta el planeta.</p>
+      <div class="article-cta">
+        <p>¿Lista para regalar algo eterno?</p>
+        <a href="index.html#catalogSection" class="article-wa">
+          <i class="ri-flower-line"></i> Ver el catálogo
+        </a>
+      </div>
+    `
+  },
+  cuidado: {
+    tag: 'Cuidados',
+    emoji: '✨',
+    title: 'Cómo cuidar tu ramo de crochet para que <em>dure años</em>',
+    meta: 'Por Nuditos Tejidos · 3 min de lectura',
+    body: `
+      <p>Una de las grandes ventajas de los ramos de crochet es que duran muchísimo con cuidados mínimos. Aquí te contamos cómo mantenerlos perfectos.</p>
+      <h2>Protégelo de la humedad</h2>
+      <p>Aunque los hilos acrílicos son resistentes, la humedad excesiva puede afectar la forma del ramo con el tiempo. Evita ponerlo en baños o lugares muy húmedos. Si se moja accidentalmente, déjalo secar al aire.</p>
+      <h2>Evita la luz solar directa prolongada</h2>
+      <p>La luz solar intensa puede desvanecer los colores con el tiempo. Ubica tu ramo en un lugar con luz indirecta para conservar sus colores vivos por más tiempo.</p>
+      <h2>Limpieza del polvo</h2>
+      <p>Con el tiempo, los ramos pueden acumular polvo. Puedes limpiarlos con un <strong>paño seco y suave</strong> o con un cepillo de cerdas suaves. Si necesitas un lavado más profundo, hazlo a mano con agua fría y jabón suave, y déjalo secar completamente al aire.</p>
+      <h2>Almacenamiento</h2>
+      <p>Si vas a guardarlo por algún tiempo, envuélvelo suavemente en papel de seda y guárdalo en una caja. Evita aplastarlo o doblarlo.</p>
+      <h2>¿Se puede reparar?</h2>
+      <p>Si alguna puntada se suelta con el tiempo, escríbenos por WhatsApp. En muchos casos podemos indicarte cómo repararlo fácilmente o, si vives cerca, ayudarte.</p>
+      <div class="article-cta">
+        <p>¿Tienes alguna pregunta sobre el cuidado de tu ramo?</p>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20sobre%20el%20cuidado%20de%20mi%20ramo" class="article-wa" target="_blank">
+          <i class="ri-whatsapp-line"></i> Preguntarnos por WhatsApp
+        </a>
+      </div>
+    `
+  },
+  ocasiones: {
+    tag: 'Ocasiones especiales',
+    emoji: '🎓',
+    title: 'Ramos de crochet para grado: la alternativa que <em>todos recordarán</em>',
+    meta: 'Por Nuditos Tejidos · 4 min de lectura',
+    body: `
+      <p>El día de grado es uno de los momentos más importantes en la vida de una persona. El ramo que reciban ese día quedará en su memoria — y en sus fotos — para siempre.</p>
+      <h2>¿Por qué un ramo de crochet para el grado?</h2>
+      <p>Un ramo de flores naturales dura unos días. Un ramo de crochet <strong>dura toda la vida</strong>. Años después, la graduada puede tenerlo en su habitación como recuerdo permanente de ese día tan especial.</p>
+      <h2>Nuestras opciones para grado</h2>
+      <p>Tenemos varias opciones pensadas especialmente para graduaciones: el <strong>Gran ramo de grado</strong> (dos lirios + cuatro rosas + cinco no me olvides), el <strong>Ramo osito grado</strong>, y los amigurumis personalizados con toga y birrete.</p>
+      <h2>El amigurumi de grado: el más especial</h2>
+      <p>Si quieres un regalo verdaderamente único, el <strong>amigurumi de grado personalizado</strong> es imbatible. Lo tejemos con los rasgos de la graduada — color de piel, de cabello, uniforme de su carrera — para crear una muñeca que la represente a ella.</p>
+      <h2>¿Cuándo hacer el pedido?</h2>
+      <p>Te recomendamos hacer tu pedido con al menos <strong>5 a 7 días de anticipación</strong> antes del grado (incluyendo el tiempo de elaboración de 1–3 días y el envío de 2–4 días según tu ciudad).</p>
+      <div class="article-cta">
+        <p>¿Se acerca un grado? Hagamos el ramo perfecto juntos.</p>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20para%20grado%20🎓" class="article-wa" target="_blank">
+          <i class="ri-whatsapp-line"></i> Pedir ramo de grado
+        </a>
+      </div>
+    `
+  },
+  personalizado: {
+    tag: 'Personalización',
+    emoji: '🎨',
+    title: 'Cómo funciona un pedido personalizado <em>en Nuditos</em>',
+    meta: 'Por Nuditos Tejidos · 3 min de lectura',
+    body: `
+      <p>¿Tienes una idea en mente pero no la ves en el catálogo? No te preocupes — la mayoría de nuestros pedidos más especiales son personalizados. Así funciona el proceso.</p>
+      <h2>Paso 1: Cuéntanos tu idea</h2>
+      <p>Escríbenos por WhatsApp con tu idea. Puedes describir colores, ocasión, personaje, o enviarnos una foto de referencia. Cuanta más información nos des, mejor podemos ayudarte.</p>
+      <h2>Paso 2: Te cotizamos</h2>
+      <p>En menos de 24 horas te enviamos una cotización según el diseño que pediste. Si el precio te parece bien, procedemos. Sin compromiso.</p>
+      <h2>Paso 3: Confirmas y pagamos</h2>
+      <p>Una vez que aceptas la cotización, coordinas el pago (por Wompi o por el método que prefieras). Con el pago confirmado, empezamos a tejer.</p>
+      <h2>Paso 4: Tejemos tu ramo</h2>
+      <p>Nos ponemos a trabajar. En 1 a 3 días hábiles (a veces más para diseños muy complejos), tu ramo estará listo. Te enviamos fotos antes de despacharlo.</p>
+      <h2>Paso 5: Lo enviamos</h2>
+      <p>Empacamos con mucho cuidado y lo enviamos a donde estés en Colombia. Te compartimos el número de guía para que puedas rastrearlo.</p>
+      <div class="article-cta">
+        <p>¿Lista para crear algo único?</p>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20personalizado%20🌸" class="article-wa" target="_blank">
+          <i class="ri-whatsapp-line"></i> Empezar mi pedido personalizado
+        </a>
+      </div>
+    `
+  }
+};
+
+function openArticle(id) {
+  const art = articles[id];
+  document.getElementById('articleContent').innerHTML = `
+    <div class="article-tag">${art.tag}</div>
+    <h1>${art.title}</h1>
+    <div class="article-meta">${art.meta}</div>
+    <div class="article-emoji">${art.emoji}</div>
+    ${art.body}
+  `;
+  document.getElementById('articleOverlay').classList.add('open');
+  document.getElementById('articlePanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeArticle() {
+  document.getElementById('articleOverlay').classList.remove('open');
+  document.getElementById('articlePanel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
+</body>
+</html>

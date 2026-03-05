@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Conoce la historia detrás de Nuditos Tejidos — flores de crochet hechas a mano desde El Dorado, Meta, Colombia.">
+  <title>Sobre Nosotros — Nuditos Tejidos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%);
+      padding: 5rem 1.5rem 4rem;
+      text-align: center;
+    }
+    .page-eyebrow {
+      font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem;
+    }
+    .page-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 6vw, 3.8rem);
+      font-weight: 400; line-height: 1.15;
+      color: var(--text); margin-bottom: 1.2rem;
+    }
+    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
+    .page-hero p {
+      max-width: 560px; margin: 0 auto;
+      color: var(--text-soft); font-size: 1rem; line-height: 1.7;
+    }
+
+    .story-section {
+      max-width: 820px; margin: 0 auto;
+      padding: 4rem 1.5rem;
+    }
+    .story-block {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; align-items: center; margin-bottom: 4rem;
+    }
+    .story-block.reverse { direction: rtl; }
+    .story-block.reverse > * { direction: ltr; }
+    .story-visual {
+      background: var(--lila-xlight);
+      border-radius: 24px; aspect-ratio: 4/5;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+    }
+    .story-text h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.9rem; font-weight: 400;
+      color: var(--text); margin-bottom: 1rem; line-height: 1.2;
+    }
+    .story-text h2 em { font-style: italic; color: var(--lila-dark); }
+    .story-text p {
+      color: var(--text-soft); line-height: 1.75;
+      font-size: 0.95rem; margin-bottom: 0.8rem;
+    }
+
+    .values-section {
+      background: var(--cream-dark); padding: 4rem 1.5rem;
+    }
+    .values-inner { max-width: 820px; margin: 0 auto; }
+    .values-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; text-align: center;
+      margin-bottom: 2.5rem; color: var(--text);
+    }
+    .values-title em { font-style: italic; color: var(--lila-dark); }
+    .values-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem;
+    }
+    .value-card {
+      background: white; border-radius: 18px;
+      padding: 1.8rem; display: flex; gap: 1rem; align-items: flex-start;
+      box-shadow: var(--shadow-sm);
+    }
+    .value-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--lila-xlight); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+    }
+    .value-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; color: var(--text); }
+    .value-card p { font-size: 0.83rem; color: var(--text-soft); line-height: 1.6; }
+
+    .stats-section {
+      max-width: 820px; margin: 0 auto;
+      padding: 4rem 1.5rem;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; text-align: center;
+    }
+    .stat-item {}
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem; font-weight: 600;
+      color: var(--lila-dark); line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .stat-label { font-size: 0.83rem; color: var(--text-soft); line-height: 1.4; }
+
+    .cta-section {
+      background: var(--text); color: white;
+      padding: 4rem 1.5rem; text-align: center;
+    }
+    .cta-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem; font-weight: 400;
+      margin-bottom: 1rem;
+    }
+    .cta-section h2 em { font-style: italic; color: var(--lila); }
+    .cta-section p { color: rgba(255,255,255,0.6); margin-bottom: 2rem; font-size: 0.95rem; }
+    .cta-wa {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      background: var(--lila-dark); color: white;
+      padding: 0.9rem 2rem; border-radius: 50px;
+      font-weight: 500; font-size: 0.95rem;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .cta-wa:hover { background: var(--lila); transform: scale(1.03); }
+
+    @media (max-width: 640px) {
+      .story-block { grid-template-columns: 1fr; gap: 1.5rem; }
+      .story-block.reverse { direction: ltr; }
+      .values-grid { grid-template-columns: 1fr; }
+      .stats-section { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="nav-wrap">
+  <nav>
+    <div class="nav-left">
+      <ul class="nav-desktop-links">
+        <li><a href="index.html#catalogSection">Catálogo</a></li>
+        <li><a href="index.html#personalizado">Personalizado</a></li>
+        <li><a href="sobre-mi.html">Nosotros</a></li>
+      </ul>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="logo">NUDITOS<em>.</em></a>
+    </div>
+    <div class="nav-right">
+      <a href="https://wa.me/573144931525" target="_blank" class="nav-icon-btn" aria-label="WhatsApp">
+        <i class="ri-whatsapp-line"></i>
+      </a>
+    </div>
+  </nav>
+</div>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-eyebrow">Nuestra historia</div>
+  <h1>Flores que <em>no se marchitan,</em><br>amor que no se acaba</h1>
+  <p>Desde El Dorado, Meta, tejemos flores con hilos de alta calidad y muchísimo cariño. Cada ramo lleva horas de dedicación y una historia detrás.</p>
+</div>
+
+<!-- HISTORIA -->
+<div class="story-section">
+  <div class="story-block">
+    <div class="story-visual">🧶</div>
+    <div class="story-text">
+      <h2>Todo empezó con un <em>hilo y una aguja</em></h2>
+      <p>En 2022, Nuditos Tejidos nació desde El Dorado, Meta, impulsado por la pasión por el crochet y el deseo de crear algo que durara para siempre.</p>
+      <p>Lo que comenzó como un hobbie se convirtió en una marca que hoy lleva flores eternas a toda Colombia.</p>
+    </div>
+  </div>
+
+  <div class="story-block reverse">
+    <div class="story-visual">🌸</div>
+    <div class="story-text">
+      <h2>Cada flor, <em>única e irrepetible</em></h2>
+      <p>No usamos moldes ni producción en serie. Cada ramo se teje a mano, puntada por puntada, con hilos premium que garantizan colores vivos y durabilidad.</p>
+      <p>El resultado es un ramo que puede durar años — un recuerdo permanente para quien lo recibe.</p>
+    </div>
+  </div>
+
+  <div class="story-block">
+    <div class="story-visual">💜</div>
+    <div class="story-text">
+      <h2>Para <em>ti,</em> dondequiera que estés</h2>
+      <p>Enviamos a todo Colombia desde El Dorado, Meta. Desde ciudades grandes hasta municipios pequeños — tu ramo llega con el mismo cuidado.</p>
+      <p>Trabajamos con empresas de mensajería confiables para asegurarnos de que tu pedido llegue en perfectas condiciones.</p>
+    </div>
+  </div>
+</div>
+
+<!-- VALORES -->
+<div class="values-section">
+  <div class="values-inner">
+    <h2 class="values-title">Lo que nos hace <em>especiales</em></h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">🌿</div>
+        <div>
+          <h3>Hilos de alta calidad</h3>
+          <p>Usamos hilos premium que garantizan colores vivos y durabilidad. Tus flores se verán hermosas por años.</p>
+        </div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">✋</div>
+        <div>
+          <h3>100% hecho a mano</h3>
+          <p>Cada producto se teje puntada por puntada. No hay dos ramos exactamente iguales — eso es lo mágico del crochet.</p>
+        </div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">⏱️</div>
+        <div>
+          <h3>Elaboración en 1 a 3 días</h3>
+          <p>Cada pedido se empieza desde cero al recibirlo. Te avisamos cuando esté listo y lo enviamos de inmediato.</p>
+        </div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🚚</div>
+        <div>
+          <h3>Envíos a todo Colombia</h3>
+          <p>Desde El Dorado, Meta, enviamos a cualquier rincón del país. El costo de envío varía desde $17.000 hasta gratis según tu pedido.</p>
+        </div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">💬</div>
+        <div>
+          <h3>Atención personalizada</h3>
+          <p>Te acompañamos por WhatsApp e Instagram en todo el proceso — desde escoger el diseño hasta que llegue a tus manos.</p>
+        </div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🎨</div>
+        <div>
+          <h3>Personalización total</h3>
+          <p>¿Tienes una idea específica? Cuéntanos. Podemos crear tu ramo exactamente como lo imaginas, en los colores que quieras.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ESTADÍSTICAS -->
+<div class="stats-section">
+  <div class="stat-item">
+    <div class="stat-num">+3</div>
+    <div class="stat-label">Años tejiendo<br>flores eternas</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">70+</div>
+    <div class="stat-label">Diseños únicos<br>en catálogo</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">🇨🇴</div>
+    <div class="stat-label">Enviamos a todo<br>Colombia</div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>¿Quieres un ramo <em>especial?</em></h2>
+  <p>Cuéntanos tu idea y lo hacemos realidad puntada a puntada.</p>
+  <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20personalizado%20🌸" class="cta-wa" target="_blank">
+    <i class="ri-whatsapp-line"></i> Escribir por WhatsApp
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo-wrap">
+    <div class="footer-logo">NUDITOS<em>.</em></div>
+    <div class="footer-social">
+      <a href="#" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+      <a href="#" aria-label="TikTok"><i class="ri-tiktok-line"></i></a>
+      <a href="https://wa.me/573144931525" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 Nuditos Tejidos · Hecho con 💜 en El Dorado, Meta 🇨🇴</div>
+  </div>
+</footer>
+
+</body>
+</html>

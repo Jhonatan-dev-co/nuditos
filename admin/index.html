@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuditos — Panel Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+  <script src="../js/supabase.js"></script>
+  <script src="../js/datos.js"></script>
+  <style>
+    :root {
+      --lila:#8b5cf6;--lila-light:#ede9fe;--lila-dark:#6d28d9;--lila-xlight:#f5f3ff;
+      --mint:#10b981;--mint-light:#d1fae5;--mint-dark:#059669;
+      --red:#ef4444;--red-light:#fee2e2;
+      --orange:#f59e0b;--orange-light:#fef3c7;
+      --blue:#3b82f6;--blue-light:#dbeafe;
+      --yellow:#eab308;--yellow-light:#fef9c3;
+      --bg:#f5f3ef;--panel:#fff;
+      --sidebar:#0f0e17;--sidebar2:#1a1830;
+      --text:#1a1a1a;--soft:#6b7280;
+      --border:#e5e0d8;--nav-h:52px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+
+    /* ── LOGIN ── */
+    #loginScreen{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,#0f0e17,#1a1830,#0f0e17);z-index:999;
+    }
+    .login-card{
+      background:#fff;border-radius:24px;padding:2.6rem 2.2rem;
+      width:100%;max-width:340px;text-align:center;
+      box-shadow:0 40px 80px rgba(0,0,0,.4);
+    }
+    .login-logo{font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--lila);margin-bottom:.2rem}
+    .login-sub{font-size:.8rem;color:var(--soft);margin-bottom:1.8rem}
+    .login-input{
+      width:100%;padding:.85rem 1rem;border:1.5px solid var(--border);
+      border-radius:14px;font-family:'Outfit',sans-serif;font-size:1rem;
+      outline:none;margin-bottom:.8rem;text-align:center;letter-spacing:4px;
+      transition:border-color .2s;
+    }
+    .login-input:focus{border-color:var(--lila)}
+    .login-btn{
+      width:100%;padding:.85rem;background:var(--lila);color:#fff;border:none;
+      border-radius:14px;font-family:'Outfit',sans-serif;font-size:.95rem;
+      font-weight:600;cursor:pointer;transition:all .2s;
+    }
+    .login-btn:hover{background:var(--lila-dark);transform:translateY(-1px)}
+    .login-err{color:var(--red);font-size:.78rem;margin-top:.6rem;display:none}
+
+    /* ── PANEL SHELL ── */
+    #adminPanel{display:none;height:100vh;flex-direction:column}
+
+    /* ── TOP NAV ── */
+    .admin-nav{
+      height:var(--nav-h);
+      background:linear-gradient(90deg,var(--sidebar),var(--sidebar2));
+      display:flex;align-items:center;gap:.5rem;padding:0 1rem;
+      flex-shrink:0;z-index:50;border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .nav-hamburger{
+      display:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);
+      color:#fff;width:36px;height:36px;border-radius:10px;cursor:pointer;
+      align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
+    }
+    .admin-logo{font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;flex-shrink:0;margin-right:.3rem}
+    .admin-logo span{font-family:'Outfit',sans-serif;font-size:.62rem;color:rgba(255,255,255,.35);font-weight:400}
+    .admin-tabs{display:flex;gap:.3rem;flex:1;overflow-x:auto;scrollbar-width:none}
+    .admin-tabs::-webkit-scrollbar{display:none}
+    .a-tab{
+      background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);
+      border:1px solid rgba(255,255,255,.08);padding:.32rem .78rem;
+      border-radius:50px;cursor:pointer;font-family:'Outfit',sans-serif;
+      font-size:.73rem;transition:all .2s;white-space:nowrap;flex-shrink:0;
+    }
+    .a-tab:hover{background:rgba(255,255,255,.12);color:#fff}
+    .a-tab.active{background:var(--lila);color:#fff;border-color:var(--lila)}
+    .nav-right-actions{display:flex;gap:.4rem;flex-shrink:0;align-items:center}
+    .preview-btn{
+      background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.3);
+      padding:.32rem .75rem;border-radius:50px;font-size:.7rem;cursor:pointer;
+      font-family:'Outfit',sans-serif;transition:all .2s;display:flex;align-items:center;gap:.3rem;
+    }
+    .preview-btn:hover{background:var(--mint);color:#fff;border-color:var(--mint)}
+    .logout-btn{
+      background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);
+      border:1px solid rgba(255,255,255,.08);padding:.32rem .7rem;
+      border-radius:50px;cursor:pointer;font-family:'Outfit',sans-serif;
+      font-size:.7rem;transition:all .2s;
+    }
+    .logout-btn:hover{background:rgba(239,68,68,.25);color:#fca5a5;border-color:rgba(239,68,68,.3)}
+
+    /* ── WORKSPACE ── */
+    .workspace{flex:1;display:flex;overflow:hidden;height:calc(100vh - var(--nav-h))}
+
+    /* ── SIDEBAR ── */
+    .left-col{
+      width:270px;flex-shrink:0;background:var(--sidebar);
+      display:flex;flex-direction:column;overflow:hidden;
+      border-right:1px solid rgba(255,255,255,.05);
+      transition:transform .35s cubic-bezier(.4,0,.2,1);
+    }
+    .left-header{padding:.85rem .9rem .6rem;border-bottom:1px solid rgba(255,255,255,.06)}
+    .left-title{color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:.5rem}
+    .left-search{
+      width:100%;padding:.44rem .75rem;background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.09);border-radius:8px;
+      color:#fff;font-family:'Outfit',sans-serif;font-size:.78rem;outline:none;
+    }
+    .left-search::placeholder{color:rgba(255,255,255,.3)}
+    .left-search:focus{border-color:var(--lila);background:rgba(255,255,255,.11)}
+    .left-filters{display:flex;gap:.3rem;margin-top:.45rem;flex-wrap:wrap}
+    .lf-chip{
+      font-size:.63rem;padding:.16rem .5rem;border-radius:20px;cursor:pointer;
+      border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.45);
+      background:rgba(255,255,255,.04);transition:all .18s;white-space:nowrap;
+    }
+    .lf-chip.active{background:var(--lila);border-color:var(--lila);color:#fff}
+    .left-stats{display:flex;border-bottom:1px solid rgba(255,255,255,.06)}
+    .ls-stat{flex:1;text-align:center;padding:.4rem .2rem;border-right:1px solid rgba(255,255,255,.06)}
+    .ls-stat:last-child{border-right:none}
+    .ls-num{font-size:.88rem;font-weight:700;color:var(--lila)}
+    .ls-num.red{color:#f87171}.ls-num.green{color:#6ee7b7}
+    .ls-label{font-size:.54rem;color:rgba(255,255,255,.3);text-transform:uppercase}
+    .btn-add-prod{
+      margin:.65rem .75rem .3rem;padding:.58rem;background:var(--lila);color:#fff;
+      border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:.78rem;
+      font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.4rem;
+    }
+    .btn-add-prod:hover{background:var(--lila-dark)}
+    .prod-list-scroll{flex:1;overflow-y:auto;padding:.25rem .35rem .4rem}
+    .prod-list-scroll::-webkit-scrollbar{width:3px}
+    .prod-list-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+    .cat-group-label{font-size:.58rem;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.8px;padding:.5rem .45rem .22rem}
+    .prod-item{
+      display:flex;align-items:center;gap:.55rem;padding:.45rem .55rem;
+      border-radius:8px;cursor:pointer;transition:all .18s;margin-bottom:1px;
+      border:1px solid transparent;
+    }
+    .prod-item:hover{background:rgba(255,255,255,.06)}
+    .prod-item.selected{background:rgba(139,92,246,.18);border-color:rgba(139,92,246,.35)}
+    .prod-item.inactive{opacity:.35}
+    .pi-thumb{
+      width:32px;height:32px;border-radius:7px;overflow:hidden;flex-shrink:0;
+      background:rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;font-size:1rem;
+    }
+    .pi-thumb img{width:100%;height:100%;object-fit:cover}
+    .pi-info{flex:1;min-width:0}
+    .pi-name{font-size:.73rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pi-meta{font-size:.6rem;color:rgba(255,255,255,.35);margin-top:.06rem}
+    .pi-tags{display:flex;gap:.2rem;margin-top:.15rem;flex-wrap:wrap}
+    .pi-tag{font-size:.51rem;padding:.05rem .3rem;border-radius:20px;font-weight:600}
+    .pit-oferta{background:rgba(245,158,11,.18);color:#fcd34d}
+    .pit-envio{background:rgba(16,185,129,.18);color:#6ee7b7}
+    .pit-oculto{background:rgba(255,255,255,.06);color:rgba(255,255,255,.28)}
+    .pit-badge{background:rgba(139,92,246,.22);color:#c4b5fd}
+    .pit-stock{background:rgba(239,68,68,.18);color:#fca5a5}
+    .pi-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+    .pi-dot.on{background:var(--mint)}.pi-dot.off{background:#374151}
+
+    /* ── SIDEBAR OVERLAY (móvil) ── */
+    .sidebar-overlay{
+      display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;
+    }
+    .sidebar-overlay.open{display:block}
+
+    /* ── RIGHT AREA ── */
+    .right-col{flex:1;overflow-y:auto;padding:1.4rem 1.6rem 6rem;background:var(--bg)}
+    .right-col::-webkit-scrollbar{width:4px}
+    .right-col::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:4px}
+
+    /* ── TAB CONTENT ── */
+    .tab-content{display:none;flex:1;overflow-y:auto;padding:1.4rem 1.6rem 6rem;background:var(--bg)}
+    .tab-content.active{display:block}
+    .tab-content::-webkit-scrollbar{width:4px}
+    .tab-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:4px}
+
+    /* ── EDITOR EMPTY ── */
+    .editor-empty{
+      height:calc(100vh - var(--nav-h) - 4rem);min-height:280px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      color:var(--soft);text-align:center;gap:.6rem;
+    }
+    .editor-empty-icon{font-size:3rem}
+    .editor-empty h3{font-size:1rem;font-weight:600;color:var(--text)}
+    .editor-empty p{font-size:.8rem;max-width:220px;line-height:1.5}
+
+    /* ── EDITOR CARD ── */
+    .editor-card{background:var(--panel);border-radius:16px;padding:1.3rem;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.04);margin-bottom:1.1rem}
+    .ec-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.1rem;flex-wrap:wrap}
+    .ec-title{font-family:'Playfair Display',serif;font-size:1.05rem}
+    .ec-sub{font-size:.72rem;color:var(--soft);margin-top:.15rem}
+    .ec-actions{display:flex;gap:.4rem;flex-shrink:0;flex-wrap:wrap}
+
+    /* ── FORM ── */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem .9rem;margin-bottom:.85rem}
+    .field-full{grid-column:1/-1}
+    .field label{display:block;font-size:.68rem;font-weight:600;color:var(--soft);margin-bottom:.26rem;text-transform:uppercase;letter-spacing:.5px}
+    .field input,.field select,.field textarea{
+      width:100%;padding:.55rem .8rem;border:1.5px solid var(--border);
+      border-radius:10px;font-family:'Outfit',sans-serif;font-size:.83rem;
+      outline:none;background:var(--bg);color:var(--text);transition:border-color .2s;
+    }
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--lila);background:#fff}
+    .field textarea{resize:vertical;min-height:58px}
+
+    /* ── IMG UPLOAD ── */
+    .img-upload-section{border:1.5px dashed var(--border);border-radius:12px;padding:1rem;background:var(--bg);margin-bottom:.85rem}
+    .img-upload-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}
+    .img-upload-title{font-size:.72rem;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.5px}
+    .upload-zone{
+      border:2px dashed var(--lila-light);border-radius:10px;
+      padding:1.2rem;text-align:center;cursor:pointer;
+      background:var(--lila-xlight);transition:all .2s;margin-bottom:.65rem;
+      position:relative;
+    }
+    .upload-zone:hover{border-color:var(--lila);background:#eee9fe}
+    .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-zone-icon{font-size:1.6rem;margin-bottom:.3rem}
+    .upload-zone-text{font-size:.78rem;color:var(--lila-dark);font-weight:600}
+    .upload-zone-sub{font-size:.68rem;color:var(--soft);margin-top:.18rem}
+    .upload-progress{
+      height:4px;background:var(--lila-light);border-radius:2px;overflow:hidden;
+      margin:.4rem 0;display:none;
+    }
+    .upload-progress-bar{height:100%;background:var(--lila);border-radius:2px;transition:width .3s;width:0}
+    .cloudinary-config{
+      background:var(--lila-xlight);border:1px solid var(--lila-light);
+      border-radius:10px;padding:.8rem;margin-bottom:.7rem;
+    }
+    .cc-title{font-size:.7rem;font-weight:700;color:var(--lila-dark);margin-bottom:.55rem;display:flex;align-items:center;gap:.3rem}
+    .cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+    .cc-field label{font-size:.63rem;font-weight:600;color:var(--soft);text-transform:uppercase;display:block;margin-bottom:.22rem}
+    .cc-field input{
+      width:100%;padding:.44rem .7rem;border:1.5px solid var(--border);
+      border-radius:8px;font-family:'Outfit',sans-serif;font-size:.78rem;
+      outline:none;background:#fff;
+    }
+    .cc-field input:focus{border-color:var(--lila)}
+    .cc-save{
+      margin-top:.55rem;width:100%;background:var(--lila);color:#fff;border:none;
+      padding:.5rem;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.78rem;
+      font-weight:600;cursor:pointer;transition:background .2s;
+    }
+    .cc-save:hover{background:var(--lila-dark)}
+    .img-preview-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.35rem}
+    .img-thumb-wrap{position:relative;display:inline-block}
+    .img-thumb{width:68px;height:68px;border-radius:9px;object-fit:cover;border:2px solid var(--border);display:block}
+    .img-thumb-rm{
+      position:absolute;top:-5px;right:-5px;width:18px;height:18px;
+      background:var(--red);color:#fff;border:none;border-radius:50%;
+      cursor:pointer;font-size:.65rem;display:flex;align-items:center;justify-content:center;
+      line-height:1;
+    }
+    .img-url-input{
+      width:100%;padding:.48rem .75rem;border:1.5px solid var(--border);
+      border-radius:8px;font-family:'Outfit',sans-serif;font-size:.78rem;
+      outline:none;background:var(--bg);margin-bottom:.45rem;
+    }
+    .img-url-input:focus{border-color:var(--lila);background:#fff}
+
+    /* ── LIVE PREVIEW ── */
+    .preview-panel{
+      background:var(--panel);border-radius:16px;padding:1.1rem;
+      border:1px solid var(--border);margin-bottom:1.1rem;
+      box-shadow:0 2px 12px rgba(0,0,0,.04);
+    }
+    .preview-label{font-size:.68rem;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem}
+    .preview-label::before{content:'';flex:1;height:1px;background:var(--border)}
+    .preview-label::after{content:'';flex:1;height:1px;background:var(--border)}
+    .preview-card-wrap{display:flex;justify-content:center}
+    .preview-card{
+      width:160px;border-radius:16px;overflow:hidden;
+      background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.1);
+    }
+    .preview-img{
+      aspect-ratio:3/4;background:var(--lila-xlight);
+      display:flex;align-items:center;justify-content:center;
+      font-size:3.5rem;position:relative;overflow:hidden;
+    }
+    .preview-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+    .preview-badge{
+      position:absolute;top:.5rem;left:.5rem;
+      background:var(--text);color:#fff;
+      font-size:.52rem;font-weight:700;letter-spacing:1px;
+      text-transform:uppercase;padding:.15rem .45rem;border-radius:3px;
+    }
+    .preview-badge.nuevo{background:var(--mint-dark)}
+    .preview-badge.popular{background:var(--red)}
+    .preview-badge.especial{background:var(--lila-dark)}
+    .preview-badge.agotado{background:#6b7280}
+    .preview-info{padding:.65rem .7rem .75rem}
+    .preview-cat{font-size:.55rem;color:var(--soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:.2rem}
+    .preview-name{font-size:.78rem;font-weight:700;color:var(--text);line-height:1.25;margin-bottom:.3rem}
+    .preview-price{font-family:'Playfair Display',serif;font-size:.92rem;color:#6d28d9;font-weight:700}
+    .preview-price .orig{font-family:'Outfit',sans-serif;font-size:.65rem;color:#9ca3af;text-decoration:line-through;font-weight:400;margin-right:.2rem}
+
+    /* ── STOCK FIELD ── */
+    .stock-row{display:flex;align-items:center;gap:.7rem;padding:.65rem .85rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;margin-bottom:.7rem}
+    .stock-icon{font-size:1.2rem}
+    .stock-info{flex:1}
+    .stock-label{font-size:.78rem;font-weight:600}
+    .stock-sub{font-size:.68rem;color:var(--soft)}
+    .stock-input-wrap{display:flex;align-items:center;gap:.4rem}
+    .stock-num{
+      width:64px;padding:.42rem .6rem;border:1.5px solid var(--border);
+      border-radius:8px;font-family:'Outfit',sans-serif;font-size:.85rem;
+      font-weight:700;text-align:center;outline:none;background:#fff;
+    }
+    .stock-num:focus{border-color:var(--lila)}
+    .stock-unlimited{font-size:.68rem;color:var(--soft);display:flex;align-items:center;gap:.3rem;cursor:pointer}
+    .stock-unlimited input{cursor:pointer}
+
+    /* ── TAGS ── */
+    .tags-label{font-size:.68rem;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.42rem}
+    .chips-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+    .chip-check{
+      display:flex;align-items:center;gap:.3rem;padding:.32rem .75rem;
+      border:1.5px solid var(--border);border-radius:50px;cursor:pointer;
+      font-size:.74rem;font-weight:500;transition:all .18s;user-select:none;background:#fff;
+    }
+    .chip-check input{display:none}
+    .chip-check:has(input:checked){border-color:var(--lila);background:var(--lila-light);color:var(--lila)}
+    .chip-oferta:has(input:checked){border-color:var(--orange);background:var(--orange-light);color:#92400e}
+    .chip-envio:has(input:checked){border-color:var(--mint);background:var(--mint-light);color:#065f46}
+    .chip-popular:has(input:checked){border-color:var(--red);background:var(--red-light);color:#991b1b}
+    .chip-especial:has(input:checked){border-color:#d97706;background:var(--orange-light);color:#92400e}
+
+    /* ── BUTTONS ── */
+    .btn-save{background:var(--lila);color:#fff;border:none;padding:.62rem 1.35rem;border-radius:50px;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.38rem}
+    .btn-save:hover{background:var(--lila-dark)}
+    .btn-save.saved{background:var(--mint)}
+    .btn-cancel{background:none;border:1.5px solid var(--border);color:var(--soft);padding:.62rem 1.1rem;border-radius:50px;font-family:'Outfit',sans-serif;font-size:.8rem;cursor:pointer;transition:all .2s}
+    .btn-cancel:hover{border-color:var(--lila);color:var(--lila)}
+    .btn-delete{background:none;border:1.5px solid var(--red-light);color:var(--red);padding:.4rem .82rem;border-radius:50px;font-family:'Outfit',sans-serif;font-size:.74rem;cursor:pointer;transition:all .2s}
+    .btn-delete:hover{background:var(--red);color:#fff;border-color:var(--red)}
+    .btn-vis{padding:.4rem .82rem;border-radius:50px;font-family:'Outfit',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer;transition:all .2s;border:none}
+    .btn-vis.on{background:var(--mint-light);color:#065f46}
+    .btn-vis.on:hover{background:var(--mint);color:#fff}
+    .btn-vis.off{background:var(--red-light);color:var(--red)}
+    .btn-vis.off:hover{background:var(--red);color:#fff}
+
+    /* ── TABS SHARED ── */
+    .t-card{background:var(--panel);border-radius:16px;padding:1.2rem;margin-bottom:1rem;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.04)}
+    .t-title{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:.2rem}
+    .t-sub{font-size:.72rem;color:var(--soft);margin-bottom:.85rem}
+    .t-field{margin-bottom:.72rem}
+    .t-field label{display:block;font-size:.68rem;font-weight:600;color:var(--soft);margin-bottom:.26rem;text-transform:uppercase;letter-spacing:.5px}
+    .t-field input,.t-field select{width:100%;padding:.55rem .8rem;border:1.5px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.83rem;outline:none;background:var(--bg)}
+    .t-field input:focus,.t-field select:focus{border-color:var(--lila);background:#fff}
+
+    /* ── DASHBOARD ── */
+    .dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-bottom:1rem}
+    .dash-stat{background:var(--panel);border-radius:14px;padding:1rem;border:1px solid var(--border);text-align:center}
+    .dash-num{font-size:1.7rem;font-weight:700;font-family:'Playfair Display',serif;color:var(--lila)}
+    .dash-num.green{color:var(--mint-dark)}.dash-num.orange{color:var(--orange)}.dash-num.red{color:var(--red)}
+    .dash-label{font-size:.7rem;color:var(--soft);margin-top:.15rem}
+    .dash-chart{background:var(--panel);border-radius:14px;padding:1.1rem;border:1px solid var(--border);margin-bottom:1rem}
+    .dash-chart-title{font-size:.78rem;font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;gap:.4rem}
+    .bar-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.45rem}
+    .bar-name{font-size:.72rem;width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+    .bar-track{flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+    .bar-fill{height:100%;background:var(--lila);border-radius:4px;transition:width .6s ease}
+    .bar-val{font-size:.68rem;color:var(--soft);flex-shrink:0;min-width:24px;text-align:right}
+
+    /* ── PEDIDOS ── */
+    .pedidos-toolbar{display:flex;gap:.5rem;align-items:center;margin-bottom:.9rem;flex-wrap:wrap}
+    .pedido-filter{
+      padding:.3rem .75rem;border-radius:50px;font-size:.72rem;font-family:'Outfit',sans-serif;
+      cursor:pointer;border:1.5px solid var(--border);background:#fff;transition:all .18s;
+    }
+    .pedido-filter.active{background:var(--lila);color:#fff;border-color:var(--lila)}
+    .btn-new-pedido{
+      margin-left:auto;background:var(--mint);color:#fff;border:none;padding:.38rem .9rem;
+      border-radius:50px;font-family:'Outfit',sans-serif;font-size:.74rem;font-weight:600;
+      cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:.3rem;
+    }
+    .btn-new-pedido:hover{background:var(--mint-dark)}
+    .pedido-card{
+      background:#fff;border:1.5px solid var(--border);border-radius:14px;
+      padding:.9rem 1rem;margin-bottom:.6rem;cursor:pointer;transition:all .2s;
+    }
+    .pedido-card:hover{border-color:var(--lila);box-shadow:0 4px 16px rgba(139,92,246,.1)}
+    .pedido-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.45rem}
+    .pedido-id{font-size:.65rem;font-weight:700;color:var(--soft);letter-spacing:.5px}
+    .pedido-estado{
+      font-size:.63rem;font-weight:700;padding:.18rem .55rem;border-radius:20px;
+    }
+    .estado-pendiente{background:#fef3c7;color:#92400e}
+    .estado-proceso{background:#dbeafe;color:#1e40af}
+    .estado-entregado{background:#d1fae5;color:#065f46}
+    .estado-cancelado{background:#fee2e2;color:#991b1b}
+    .pedido-cliente{font-size:.85rem;font-weight:600;margin-bottom:.2rem}
+    .pedido-items{font-size:.72rem;color:var(--soft);margin-bottom:.3rem}
+    .pedido-bottom{display:flex;align-items:center;justify-content:space-between}
+    .pedido-total{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--lila-dark)}
+    .pedido-fecha{font-size:.64rem;color:var(--soft)}
+    .pedido-actions{display:flex;gap:.35rem;margin-top:.55rem;flex-wrap:wrap}
+    .p-action-btn{
+      font-size:.68rem;padding:.26rem .65rem;border-radius:50px;cursor:pointer;
+      font-family:'Outfit',sans-serif;font-weight:600;border:1.5px solid var(--border);
+      background:#fff;transition:all .18s;
+    }
+    .p-action-btn:hover{border-color:var(--lila);color:var(--lila)}
+    .p-action-btn.primary{background:var(--lila);color:#fff;border-color:var(--lila)}
+    .p-action-btn.primary:hover{background:var(--lila-dark)}
+
+    /* ── MODAL PEDIDO ── */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:998;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:#fff;border-radius:20px;padding:1.8rem;max-width:420px;width:92%;max-height:90vh;overflow-y:auto;box-shadow:0 30px 70px rgba(0,0,0,.2)}
+    .modal-title{font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:.3rem}
+    .modal-sub{font-size:.76rem;color:var(--soft);margin-bottom:1.3rem}
+    .modal-field{margin-bottom:.8rem}
+    .modal-field label{display:block;font-size:.7rem;font-weight:600;color:var(--soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.28rem}
+    .modal-field input,.modal-field select,.modal-field textarea{width:100%;padding:.58rem .85rem;border:1.5px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.84rem;outline:none;background:var(--bg)}
+    .modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--lila);background:#fff}
+    .modal-field textarea{resize:vertical;min-height:70px}
+    .modal-btns{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1.2rem}
+
+    /* ── VITRINA ── */
+    .selected-tag{font-weight:600;color:var(--lila);font-size:.82rem;margin-bottom:.65rem;min-height:1rem}
+    .v-search{width:100%;padding:.46rem .8rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.78rem;outline:none;background:var(--bg);margin-bottom:.55rem}
+    .v-search:focus{border-color:var(--lila)}
+    .v-prod-list{display:flex;flex-direction:column;gap:.35rem}
+    .v-prod-row{display:flex;align-items:center;gap:.7rem;padding:.52rem .72rem;border:1px solid var(--border);border-radius:10px;background:var(--bg)}
+    .v-thumb{width:34px;height:34px;border-radius:7px;overflow:hidden;background:#eee;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1rem}
+    .v-thumb img{width:100%;height:100%;object-fit:cover}
+    .v-info{flex:1;min-width:0}
+    .v-name{font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .v-price{font-size:.65rem;color:var(--soft)}
+    .btn-select{background:var(--bg);color:var(--soft);border:1px solid var(--border);padding:.26rem .62rem;border-radius:50px;cursor:pointer;font-size:.67rem;font-family:'Outfit',sans-serif;font-weight:600;transition:all .2s;flex-shrink:0}
+    .btn-select:hover{background:var(--lila-light);color:var(--lila)}
+    .btn-select.sel{background:var(--lila);color:#fff;border-color:var(--lila)}
+    .hero-slots{display:flex;gap:.5rem;margin-bottom:.85rem;flex-wrap:wrap}
+    .hero-slot{width:82px;height:82px;border-radius:10px;border:2px dashed var(--border);background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.65rem;color:var(--soft);text-align:center}
+    .hero-slot.filled{border-style:solid;border-color:var(--lila-light);padding:.28rem;background:#fff}
+    .hero-slot-name{font-size:.56rem;font-weight:600;margin-top:.2rem;text-align:center;line-height:1.2;color:var(--text)}
+
+    /* ── TOGGLE ── */
+    .toggle{width:42px;height:23px;border-radius:50px;background:#d1d5db;border:none;cursor:pointer;position:relative;transition:background .25s;flex-shrink:0}
+    .toggle::after{content:'';position:absolute;top:2.5px;left:2.5px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+    .toggle.on{background:var(--mint)}
+    .toggle.on::after{transform:translateX(19px)}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.65rem 0;border-bottom:1px solid var(--border)}
+    .toggle-row:last-child{border-bottom:none}
+    .toggle-label{font-size:.82rem;font-weight:600}
+    .toggle-desc{font-size:.68rem;color:var(--soft);margin-top:.08rem}
+    .view-select{padding:.3rem .65rem;border:1.5px solid var(--lila-light);border-radius:50px;font-family:'Outfit',sans-serif;font-size:.72rem;outline:none;background:var(--bg);cursor:pointer}
+
+    /* ── BANNERS ── */
+    .banner-item{border:1.5px solid var(--border);border-radius:12px;padding:.85rem;background:var(--bg);display:flex;gap:.75rem;align-items:flex-start;flex-wrap:wrap;margin-bottom:.55rem}
+    .banner-preview{width:100px;height:56px;border-radius:8px;overflow:hidden;flex-shrink:0;border:1px solid var(--border)}
+    .banner-preview img{width:100%;height:100%;object-fit:cover}
+    .banner-preview-ph{width:100%;height:100%;background:linear-gradient(135deg,#e9d5ff,#ddd6fe);display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+    .banner-fields{display:flex;flex-direction:column;gap:.42rem;flex:1;min-width:160px}
+    .bf-label{font-size:.65rem;font-weight:600;color:var(--soft);display:block;margin-bottom:.16rem}
+    .bf-input{width:100%;padding:.4rem .68rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.76rem;outline:none;background:#fff}
+    .bf-input:focus{border-color:var(--lila)}
+    .bf-select{padding:.4rem .68rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.76rem;outline:none;background:#fff}
+    .btn-rm{background:var(--red-light);color:var(--red);border:none;border-radius:50px;padding:.24rem .55rem;cursor:pointer;font-size:.64rem;font-family:'Outfit',sans-serif;align-self:flex-start;transition:all .2s}
+    .btn-rm:hover{background:var(--red);color:#fff}
+    .btn-add-banner{background:var(--lila-light);color:var(--lila);border:none;border-radius:50px;padding:.5rem .95rem;cursor:pointer;font-size:.76rem;font-family:'Outfit',sans-serif;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:.32rem}
+    .btn-add-banner:hover{background:var(--lila);color:#fff}
+
+    /* ── SAVE BAR ── */
+    .save-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:.62rem 1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;z-index:90;box-shadow:0 -3px 16px rgba(0,0,0,.06)}
+    .save-bar-msg{font-size:.72rem;color:var(--soft)}
+
+    /* ── CONFIRM ── */
+    .confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
+    .confirm-overlay.open{display:flex}
+    .confirm-box{background:#fff;border-radius:16px;padding:1.7rem;max-width:300px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .confirm-icon{font-size:2.2rem;margin-bottom:.6rem}
+    .confirm-title{font-family:'Playfair Display',serif;font-size:.98rem;margin-bottom:.35rem}
+    .confirm-msg{font-size:.76rem;color:var(--soft);margin-bottom:1.1rem}
+    .confirm-btns{display:flex;gap:.5rem;justify-content:center}
+    .conf-cancel{padding:.55rem 1.1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:50px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:.8rem}
+    .conf-ok{padding:.55rem 1.1rem;background:var(--red);color:#fff;border:none;border-radius:50px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:600}
+
+    /* ── TOAST ── */
+    .toast-admin{position:fixed;bottom:4.5rem;left:50%;transform:translateX(-50%) translateY(10px);background:#0f0e17;color:#fff;padding:.44rem 1.1rem;border-radius:50px;font-size:.73rem;font-weight:500;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;z-index:9999;max-width:88vw;width:max-content;box-shadow:0 3px 16px rgba(0,0,0,.25)}
+    .toast-admin.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* ── OFERTA FIELDS ── */
+    #ofertaFields{display:none;margin-bottom:.75rem}
+
+    /* ── HISTORIAL ── */
+    .hist-item{display:flex;align-items:flex-start;gap:.75rem;padding:.7rem 0;border-bottom:1px solid var(--border)}
+    .hist-item:last-child{border-bottom:none}
+    .hist-dot{width:8px;height:8px;border-radius:50%;background:var(--lila);margin-top:.35rem;flex-shrink:0}
+    .hist-action{font-size:.8rem;font-weight:500}
+    .hist-time{font-size:.65rem;color:var(--soft);margin-top:.12rem}
+
+    /* ── RESPONSIVE MÓVIL ── */
+    @media(max-width:768px){
+      body{overflow:auto}
+      .workspace{height:auto;overflow:visible;position:relative}
+      .left-col{
+        position:fixed;top:var(--nav-h);left:0;bottom:0;z-index:200;
+        transform:translateX(-105%);
+        box-shadow:6px 0 30px rgba(0,0,0,.3);
+      }
+      .left-col.open{transform:translateX(0)}
+      .nav-hamburger{display:flex !important}
+      .admin-tabs{flex:1}
+      .right-col,.tab-content{padding:1rem 1rem 6rem;min-height:calc(100vh - var(--nav-h));overflow-y:auto}
+      .form-grid{grid-template-columns:1fr}
+      .field-full{grid-column:1}
+      .dash-grid{grid-template-columns:repeat(2,1fr)}
+      .editor-empty{height:50vh}
+      .cc-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:380px){
+      .dash-grid{grid-template-columns:1fr 1fr}
+      .admin-logo span{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">Nuditos<em style="color:#6d28d9">.</em></div>
+    <div class="login-sub">Panel de administración</div>
+    <input class="login-input" type="email" id="loginEmail" placeholder="tu@correo.com"
+      style="letter-spacing:0;margin-bottom:.6rem"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <input class="login-input" type="password" id="loginPwd" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-err" id="loginErr">Email o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="adminPanel">
+  <nav class="admin-nav">
+    <button class="nav-hamburger" id="navHamburger" onclick="toggleSidebar()">
+      <i class="ri-menu-line"></i>
+    </button>
+    <div class="admin-logo">Nuditos <span>Admin</span></div>
+    <div class="admin-tabs">
+      <button class="a-tab active" onclick="showTab('productos',this)">🌸 Productos</button>
+      <button class="a-tab" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+      <button class="a-tab" onclick="showTab('pedidos',this)">📦 Pedidos</button>
+      <button class="a-tab" onclick="showTab('vitrina',this)">⭐ Vitrina</button>
+      <button class="a-tab" onclick="showTab('banners',this)">🖼️ Banners</button>
+      <button class="a-tab" onclick="showTab('descuentos',this)">🏷️ Descuentos</button>
+      <button class="a-tab" onclick="showTab('tienda',this)">⚙️ Tienda</button>
+    </div>
+    <div class="nav-right-actions">
+      <button class="preview-btn" onclick="window.open('../index.html','_blank')">
+        <i class="ri-eye-line"></i> <span class="hide-xs">Ver tienda</span>
+      </button>
+      <button class="logout-btn" onclick="doLogout()">Salir</button>
+    </div>
+  </nav>
+
+  <div class="workspace" id="workspace">
+
+    <!-- SIDEBAR OVERLAY (móvil) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <div class="left-col" id="leftCol">
+      <div class="left-header">
+        <div class="left-title">🌸 Mis ramos</div>
+        <input class="left-search" type="text" id="sideSearch" placeholder="Buscar ramo..." oninput="renderSidebar()">
+        <div class="left-filters" id="sideFilters"></div>
+      </div>
+      <div class="left-stats" id="sideStats"></div>
+      <button class="btn-add-prod" onclick="newProduct()">
+        <i class="ri-add-line"></i> Agregar ramo nuevo
+      </button>
+      <div class="prod-list-scroll" id="sideList"></div>
+    </div>
+
+    <!-- DERECHA -->
+    <div id="rightArea" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+
+      <!-- PRODUCTOS -->
+      <div class="right-col tab-content active" id="tab-productos"></div>
+
+      <!-- DASHBOARD -->
+      <div class="tab-content" id="tab-dashboard">
+        <div class="dash-grid" id="dashStats"></div>
+        <div class="dash-chart">
+          <div class="dash-chart-title">📈 Productos más vistos (sesión actual)</div>
+          <div id="viewsChart"></div>
+        </div>
+        <div class="dash-chart">
+          <div class="dash-chart-title">🛒 Más agregados al carrito (sesión actual)</div>
+          <div id="cartChart"></div>
+        </div>
+        <div class="t-card">
+          <div class="t-title" style="margin-bottom:.6rem">📋 Historial de cambios</div>
+          <div id="histList"></div>
+        </div>
+      </div>
+
+      <!-- PEDIDOS -->
+      <div class="tab-content" id="tab-pedidos">
+        <div class="pedidos-toolbar">
+          <button class="pedido-filter active" onclick="filterPedidos('todos',this)">Todos</button>
+          <button class="pedido-filter" onclick="filterPedidos('pendiente',this)">⏳ Pendientes</button>
+          <button class="pedido-filter" onclick="filterPedidos('proceso',this)">🔄 En proceso</button>
+          <button class="pedido-filter" onclick="filterPedidos('entregado',this)">✅ Entregados</button>
+          <button class="btn-new-pedido" onclick="openNewPedido()">
+            <i class="ri-add-line"></i> Nuevo pedido
+          </button>
+        </div>
+        <div id="pedidosList"></div>
+      </div>
+
+      <!-- VITRINA -->
+      <div class="tab-content" id="tab-vitrina">
+        <div class="t-card">
+          <div class="t-title">⭐ Ramo del momento</div>
+          <div class="t-sub">Se muestra destacado justo debajo del carrusel.</div>
+          <div id="momentoSelected" class="selected-tag"></div>
+          <input class="v-search" type="text" id="searchMomento" placeholder="Buscar ramo..." oninput="searchMomentoProducts()">
+          <div class="v-prod-list" id="momentoList"></div>
+        </div>
+        <div class="t-card">
+          <div class="t-title">🎠 Carrusel principal</div>
+          <div class="t-sub">Elige hasta 5 ramos para el carrusel de portada.</div>
+          <div class="hero-slots" id="heroSlots"></div>
+          <input class="v-search" type="text" id="searchHero" placeholder="Buscar ramo..." oninput="searchHeroProducts()">
+          <div class="v-prod-list" id="heroList"></div>
+        </div>
+      </div>
+
+      <!-- BANNERS -->
+      <div class="tab-content" id="tab-banners">
+        <div class="t-card">
+          <div class="t-title">🖼️ Banners entre categorías</div>
+          <div class="t-sub">Aparecen entre secciones del catálogo. Puedes poner una foto de fondo.</div>
+          <div id="bannerList"></div>
+          <button class="btn-add-banner" onclick="addBanner()" style="margin-top:.65rem">
+            <i class="ri-add-line"></i> Agregar banner
+          </button>
+        </div>
+      </div>
+
+      <!-- DESCUENTOS -->
+      <div class="tab-content" id="tab-descuentos">
+        <div class="t-card">
+          <div class="t-title">🏷️ Código de descuento</div>
+          <div class="t-sub">Activa un código para tus clientas.</div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Descuento activo</div>
+              <div class="toggle-desc">Muestra el banner y permite usar el código en el carrito</div>
+            </div>
+            <button class="toggle" id="toggleDescuento" onclick="this.classList.toggle('on')"></button>
+          </div>
+          <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.65rem">
+            <div class="t-field"><label>Código</label><input type="text" id="descCodigo" placeholder="NUDITOS10" style="text-transform:uppercase"></div>
+            <div class="t-field"><label>Porcentaje (%)</label><input type="number" id="descPorcentaje" min="1" max="90" placeholder="10"></div>
+            <div class="t-field"><label>Texto del banner</label><input type="text" id="descTexto" placeholder="10% de descuento en tu primer pedido"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIENDA -->
+      <div class="tab-content" id="tab-tienda">
+        <div class="t-card">
+          <div class="t-title">☁️ Cloudinary — Subida de imágenes</div>
+          <div class="t-sub">Configura tu cuenta para subir fotos directamente desde el admin.</div>
+          <div class="cloudinary-config" id="cloudinaryConfig">
+            <div class="cc-title"><i class="ri-settings-3-line"></i> Credenciales de Cloudinary</div>
+            <div class="cc-grid">
+              <div class="cc-field"><label>Cloud Name</label><input type="text" id="ccCloudName" placeholder="mi-cuenta"></div>
+              <div class="cc-field"><label>Upload Preset</label><input type="text" id="ccPreset" placeholder="nuditos_unsigned"></div>
+            </div>
+            <div style="font-size:.68rem;color:var(--soft);margin:.5rem 0 .3rem">Crea un <strong>Upload Preset sin firma</strong> en Cloudinary → Settings → Upload Presets</div>
+            <button class="cc-save" onclick="saveCloudinaryConfig()"><i class="ri-save-line"></i> Guardar configuración</button>
+          </div>
+        </div>
+        <div class="t-card">
+          <div class="t-title">💳 Wompi — Pasarela de pago</div>
+          <div class="t-sub">Activa el botón de pago con tarjeta y PSE en el carrito.</div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Mostrar botón "Pagar con Wompi"</div>
+              <div class="toggle-desc">Si está apagado, solo aparece el botón de WhatsApp</div>
+            </div>
+            <button class="toggle" id="toggleWompi" onclick="this.classList.toggle('on')"></button>
+          </div>
+          <div class="t-field" style="margin-top:.9rem">
+            <label>Llave pública Wompi</label>
+            <input type="text" id="wompiKey" placeholder="pub_prod_xxxxxxxxxxxx">
+          </div>
+          <p style="font-size:.7rem;color:var(--soft);margin-top:.3rem">Obtén tu llave en <strong>wompi.com → Desarrolladores → Llaves de API</strong></p>
+        </div>
+        <div class="t-card">
+          <div class="t-title">🖼️ Vista por categoría</div>
+          <div class="t-sub">Elige cómo se muestran los productos de cada categoría.</div>
+          <div id="catViewsList"></div>
+        </div>
+        <!-- Supabase -->
+        <div class="t-card">
+          <div class="t-title">🗄️ Supabase — Base de datos</div>
+          <div class="t-sub">Tu tienda guarda todos los datos en Supabase en tiempo real desde cualquier dispositivo.</div>
+          <div id="sbStatus" style="background:var(--mint-light);border-radius:10px;padding:.75rem 1rem;font-size:.78rem;color:#065f46;display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:1rem">✅</span>
+            <span>Conectado a Supabase · Los cambios se guardan automáticamente en la nube</span>
+          </div>
+        </div>
+        <div class="t-card">
+          <div class="t-title">📤 Exportar datos.js</div>
+          <div class="t-sub">Descarga el archivo actualizado con todas las fotos para subir a Netlify.</div>
+          <button class="btn-save" onclick="exportDatos()"><i class="ri-download-line"></i> Descargar datos.js</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="save-bar">
+    <div class="save-bar-msg">Recuerda <strong style="color:var(--lila)">guardar cambios</strong> para aplicarlos en la tienda</div>
+    <button class="btn-save" id="globalSaveBtn" onclick="saveConfig()">
+      <i class="ri-save-line"></i> Guardar cambios
+    </button>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">¿Eliminar producto?</div>
+    <div class="confirm-msg" id="confirmMsg">Esta acción no se puede deshacer.</div>
+    <div class="confirm-btns">
+      <button class="conf-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="conf-ok" onclick="confirmDelete()">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO/EDITAR PEDIDO -->
+<div class="modal-overlay" id="pedidoModal">
+  <div class="modal-box">
+    <div class="modal-title" id="pedidoModalTitle">Nuevo pedido</div>
+    <div class="modal-sub">Registra el pedido recibido por WhatsApp</div>
+    <input type="hidden" id="pedidoEditId">
+    <div class="modal-field"><label>Nombre cliente</label><input type="text" id="pCliente" placeholder="Valentina García"></div>
+    <div class="modal-field"><label>Teléfono / WhatsApp</label><input type="text" id="pTel" placeholder="+57 300 000 0000"></div>
+    <div class="modal-field"><label>Productos pedidos</label><textarea id="pItems" placeholder="1x Ramo noche estrellada&#10;1x Maceta girasol"></textarea></div>
+    <div class="modal-field"><label>Total (COP)</label><input type="number" id="pTotal" placeholder="135000" min="0"></div>
+    <div class="modal-field"><label>Estado</label>
+      <select id="pEstado">
+        <option value="pendiente">⏳ Pendiente</option>
+        <option value="proceso">🔄 En proceso</option>
+        <option value="entregado">✅ Entregado</option>
+        <option value="cancelado">❌ Cancelado</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Notas</label><textarea id="pNotas" placeholder="Dirección de entrega, color preferido, etc."></textarea></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closePedidoModal()">Cancelar</button>
+      <button class="btn-save" onclick="savePedido()"><i class="ri-save-line"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-admin" id="toastAdmin"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   NUDITOS Admin v3 — Full Panel (Supabase)
+   ══════════════════════════════════════════ */
+
+let adminCfg={}, heroSelection=[], momentoSelection=null;
+let adminProducts=[], selectedId=null, pendingDeleteId=null;
+let editorialBannersAdmin=[], sideFilterCat='';
+let pedidos=[], pedidoFilter='todos';
+let uploadedImgs=[], currentEditingImgs=[];
+let changeHistory=[];
+
+/* ──────────── LOGIN / AUTH ──────────── */
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd   = document.getElementById('loginPwd').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.style.display = 'none';
+  if (!email || !pwd) { errEl.textContent='Completa email y contraseña'; errEl.style.display='block'; return; }
+  const btn = document.querySelector('.login-btn');
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+  try {
+    await sbSignIn(email, pwd);
+    document.getElementById('loginScreen').style.display='none';
+    const p=document.getElementById('adminPanel'); p.style.display='flex';
+    loadAll();
+  } catch(e) {
+    errEl.textContent = 'Email o contraseña incorrectos';
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Entrar'; btn.disabled = false;
+  }
+}
+async function doLogout(){
+  await sbSignOut();
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('loginPwd').value='';
+  document.getElementById('loginEmail').value='';
+}
+
+// Verificar sesión activa al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+  if (sbRestoreSession()) {
+    document.getElementById('loginScreen').style.display='none';
+    const p=document.getElementById('adminPanel'); p.style.display='flex';
+    loadAll();
+  }
+});
+
+/* ──────────── SIDEBAR MÓVIL ──────────── */
+function toggleSidebar(){
+  const col=document.getElementById('leftCol');
+  const overlay=document.getElementById('sidebarOverlay');
+  col.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
+/* ──────────── TABS ──────────── */
+function showTab(name,btn){
+  document.getElementById('leftCol').classList.toggle('open',false);
+  document.getElementById('sidebarOverlay').classList.remove('open');
+  const leftVisible=(name==='productos');
+  document.getElementById('leftCol').style.display= window.innerWidth>768?(leftVisible?'flex':'none'):'';
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.a-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(name==='dashboard') renderDashboard();
+  if(name==='pedidos') renderPedidosList();
+}
+
+/* ──────────── CONFIG ──────────── */
+function getConfig(){ return adminCfg && Object.keys(adminCfg).length ? adminCfg : {...CONFIG_DEFAULT}; }
+
+/* ──────────── CLOUDINARY ──────────── */
+function getCloudinaryConfig(){
+  const DEFAULT_CL = {cloudName:'dzxgu27wr', preset:'ssjghh9e'};
+  try{const s=localStorage.getItem('nuditos_cloudinary');const saved=s?JSON.parse(s):{};
+    return {cloudName:saved.cloudName||DEFAULT_CL.cloudName, preset:saved.preset||DEFAULT_CL.preset};}
+  catch{return DEFAULT_CL;}
+}
+function saveCloudinaryConfig(){
+  const cfg={cloudName:document.getElementById('ccCloudName').value.trim(),preset:document.getElementById('ccPreset').value.trim()};
+  localStorage.setItem('nuditos_cloudinary',JSON.stringify(cfg));
+  showToast('✓ Cloudinary configurado');
+}
+
+async function uploadToCloudinary(file){
+  showUploadProgress(0);
+  try{
+    // 1. Pedir firma segura al servidor
+    const signRes=await fetch('/.netlify/functions/cloudinary-sign',{method:'POST'});
+    if(!signRes.ok) throw new Error('No se pudo obtener la firma');
+    const {signature,timestamp,apiKey,cloudName,uploadPreset,folder}=await signRes.json();
+
+    // 2. Subir imagen con firma
+    const fd=new FormData();
+    fd.append('file',file);
+    fd.append('upload_preset',uploadPreset);
+    fd.append('folder',folder);
+    fd.append('timestamp',timestamp);
+    fd.append('api_key',apiKey);
+    fd.append('signature',signature);
+
+    showUploadProgress(30);
+    const res=await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,{method:'POST',body:fd});
+    if(!res.ok) throw new Error('Error al subir la imagen');
+    const data=await res.json();
+
+    // 3. URL optimizada automáticamente
+    const url=data.secure_url.replace('/upload/', '/upload/w_1200,q_auto,f_auto/');
+    showUploadProgress(100);
+    setTimeout(()=>hideUploadProgress(),800);
+    addToHistory(`📸 Foto subida: ${data.original_filename||'imagen'}`);
+    return url;
+  }catch(e){
+    hideUploadProgress();showToast('❌ Error subiendo imagen. Revisa tu configuración de Cloudinary.');return null;
+  }
+}
+
+function showUploadProgress(pct){
+  const p=document.getElementById('uploadProgress');
+  const b=document.getElementById('uploadProgressBar');
+  if(p){p.style.display='block';}
+  if(b){b.style.width=pct+'%';}
+}
+function hideUploadProgress(){
+  const p=document.getElementById('uploadProgress');
+  if(p)p.style.display='none';
+}
+
+/* ──────────── LOAD ALL (desde Supabase) ──────────── */
+async function loadAll(){
+  showToast('⏳ Cargando datos...');
+  try {
+    // Cargar productos
+    const sbProds = await sbAdminGetProducts();
+    if (sbProds && sbProds.length > 0) {
+      adminProducts = sbProds;
+    } else {
+      // Fallback a datos.js si Supabase está vacío
+      adminProducts = products.map(p=>({...p}));
+      // Subir productos uno por uno con upsert
+      showToast('⬆️ Subiendo productos a Supabase...');
+      for(const p of adminProducts){
+        try{ await sbAdminSaveProduct({...p, _isNew:true}); }catch(e){}
+      }
+    }
+
+    // Cargar config
+    const sbCfg = await sbAdminGetConfig_();
+    adminCfg = sbCfg || {...CONFIG_DEFAULT};
+
+    // Cargar banners
+    try {
+      const rows = await sbAdminGetBanners_();
+      editorialBannersAdmin = rows && rows.length ? rows : [
+        {id:1,afterCat:'rosas',emoji:'🌸',title:'Flores que <em>jamás se marchitan</em>',imgUrl:''},
+        {id:2,afterCat:'noche',emoji:'🌙',title:'Arte tejido <em>puntada a puntada</em>',imgUrl:''},
+        {id:3,afterCat:'especial',emoji:'✨',title:'Regalos que <em>dejan huella</em>',imgUrl:''},
+      ];
+    } catch { editorialBannersAdmin=[]; }
+
+    // Cargar pedidos
+    try { pedidos = await sbAdminGetPedidos(); } catch { pedidos=[]; }
+
+    // Cargar historial (solo local)
+    try{const sh=localStorage.getItem('nuditos_history');changeHistory=sh?JSON.parse(sh):[];}catch{changeHistory=[];}
+
+  } catch(e) {
+    console.error('Error cargando:', e);
+    showToast('⚠️ Error de conexión — usando datos locales');
+    adminProducts = products.map(p=>({...p}));
+    adminCfg = {...CONFIG_DEFAULT};
+    editorialBannersAdmin = [];
+    pedidos = [];
+  }
+
+  // Restaurar UI
+  heroSelection=[...(adminCfg.carruselHero||[])];
+  momentoSelection=adminCfg.ramoDestacado;
+  document.getElementById('descCodigo').value=adminCfg.descuentoCodigo||'';
+  document.getElementById('descPorcentaje').value=adminCfg.descuentoPorcentaje||10;
+  document.getElementById('descTexto').value=adminCfg.descuentoTexto||'';
+  if(adminCfg.descuentoActivo)document.getElementById('toggleDescuento').classList.add('on');
+  if(adminCfg.wompiActivo)document.getElementById('toggleWompi').classList.add('on');
+  if(adminCfg.wompiKey)document.getElementById('wompiKey').value=adminCfg.wompiKey;
+
+  const cc=getCloudinaryConfig();
+  if(cc.cloudName)document.getElementById('ccCloudName').value=cc.cloudName;
+  if(cc.preset)document.getElementById('ccPreset').value=cc.preset;
+  if(cc.preset)document.getElementById('ccPreset').value=cc.preset;
+
+  buildSideFilters();renderSidebar();renderStats();showEditorEmpty();
+  renderHeroSlots();renderMomentoSelected();renderMomentoList(adminProducts);
+  renderHeroList(adminProducts);renderCatViewsList();renderBannerList();
+  showToast('✅ Todo cargado desde Supabase');
+}
+
+async function sbAdminGetConfig_() {
+  try {
+    const rows = await fetch(`${SB_URL}/rest/v1/config?select=clave,valor`, { headers: _h(true) }).then(r=>r.json());
+    return sbToConfig(rows);
+  } catch { return null; }
+}
+
+async function sbAdminGetBanners_() {
+  try {
+    const rows = await fetch(`${SB_URL}/rest/v1/banners?order=orden.asc`, { headers: _h(true) }).then(r=>r.json());
+    return rows.map(sbToBanner);
+  } catch { return []; }
+}
+
+/* ──────────── SIDEBAR FILTERS ──────────── */
+function buildSideFilters(){
+  const opts=[{id:'',name:'Todos',icon:'🌸'},...categories.filter(c=>c.id!=='todos')];
+  document.getElementById('sideFilters').innerHTML=opts.map(c=>
+    `<span class="lf-chip ${sideFilterCat===c.id?'active':''}" onclick="setSideFilter('${c.id}',this)">${c.icon} ${c.name}</span>`
+  ).join('');
+}
+function setSideFilter(id,el){
+  sideFilterCat=id;
+  document.querySelectorAll('.lf-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');renderSidebar();
+}
+
+/* ──────────── STATS ──────────── */
+function renderStats(){
+  const t=adminProducts.length,v=adminProducts.filter(p=>p.activo!==false).length;
+  const f=adminProducts.filter(p=>p.img&&p.img.trim()).length,o=t-v;
+  const sinFoto=t-f;
+  document.getElementById('sideStats').innerHTML=`
+    <div class="ls-stat"><div class="ls-num">${t}</div><div class="ls-label">Total</div></div>
+    <div class="ls-stat"><div class="ls-num green">${v}</div><div class="ls-label">Visibles</div></div>
+    <div class="ls-stat"><div class="ls-num ${sinFoto>0?'red':'green'}">${f}</div><div class="ls-label">Con foto</div></div>
+    <div class="ls-stat"><div class="ls-num red">${o}</div><div class="ls-label">Ocultos</div></div>`;
+}
+
+/* ──────────── SIDEBAR LIST ──────────── */
+function renderSidebar(){
+  const q=document.getElementById('sideSearch').value.toLowerCase();
+  let list=adminProducts.filter(p=>{
+    const mQ=!q||p.name.toLowerCase().includes(q)||(categories.find(c=>c.id===p.cat)?.name.toLowerCase().includes(q));
+    const mC=!sideFilterCat||p.cat===sideFilterCat;return mQ&&mC;
+  });
+  const groups={};list.forEach(p=>{if(!groups[p.cat])groups[p.cat]=[];groups[p.cat].push(p);});
+  let html='';
+  Object.entries(groups).forEach(([catId,items])=>{
+    if(!sideFilterCat){const cat=categories.find(c=>c.id===catId);html+=`<div class="cat-group-label">${cat?.icon||''} ${cat?.name||catId}</div>`;}
+    items.forEach(p=>{
+      const isActive=p.activo!==false;
+      const tags=[];
+      if(!isActive)tags.push(`<span class="pi-tag pit-oculto">Oculto</span>`);
+      if(p.badge)tags.push(`<span class="pi-tag pit-badge">${p.badge}</span>`);
+      if(p.oferta)tags.push(`<span class="pi-tag pit-oferta">Oferta</span>`);
+      if(p.envioGratis)tags.push(`<span class="pi-tag pit-envio">Envío</span>`);
+      if(p.stock!==undefined&&p.stock<=3&&p.stock>0)tags.push(`<span class="pi-tag pit-stock">Stock bajo</span>`);
+      if(p.stock===0)tags.push(`<span class="pi-tag pit-oculto">Agotado</span>`);
+      html+=`
+        <div class="prod-item ${selectedId===p.id?'selected':''} ${isActive?'':'inactive'}" onclick="selectProduct(${p.id})">
+          <div class="pi-thumb">${p.img?`<img src="${p.img}" onerror="this.parentNode.innerHTML='${p.emoji}'">`:p.emoji}</div>
+          <div class="pi-info">
+            <div class="pi-name">${p.name}</div>
+            <div class="pi-meta">${p.price>0?'$'+p.price.toLocaleString('es-CO')+' COP':'Consultar'}</div>
+            ${tags.length?`<div class="pi-tags">${tags.join('')}</div>`:''}
+          </div>
+          <div class="pi-dot ${isActive?'on':'off'}"></div>
+        </div>`;
+    });
+  });
+  document.getElementById('sideList').innerHTML=html||`<div style="padding:1.5rem;text-align:center;color:rgba(255,255,255,.3);font-size:.76rem">No hay ramos</div>`;
+}
+
+/* ──────────── SELECT / NEW ──────────── */
+function selectProduct(id){
+  selectedId=id;renderSidebar();
+  const p=adminProducts.find(x=>x.id===id);
+  if(p){renderEditor(p);}
+  if(window.innerWidth<=768){
+    document.getElementById('leftCol').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+}
+
+function newProduct(){
+  selectedId=null;renderSidebar();showEditorEmpty();
+  clearEditor();
+  const emptyEl=document.getElementById('tab-productos');
+  emptyEl.innerHTML=buildEditorHTML(null);
+  document.getElementById('editingId').value='';
+  if(window.innerWidth<=768){
+    document.getElementById('leftCol').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+}
+
+/* ──────────── EDITOR ──────────── */
+function showEditorEmpty(){
+  document.getElementById('tab-productos').innerHTML=`
+    <div class="editor-empty">
+      <div class="editor-empty-icon">🌸</div>
+      <h3>Selecciona un ramo</h3>
+      <p>Elige un ramo de la lista para editar sus detalles, precio o fotos.</p>
+    </div>`;
+}
+
+function clearEditor(){
+  uploadedImgs=[];currentEditingImgs=[];
+}
+
+function buildEditorHTML(p){
+  const isNew=!p;
+  const cats=categories.filter(c=>c.id!=='todos').map(c=>`<option value="${c.id}" ${p?.cat===c.id?'selected':''}>${c.icon} ${c.name}</option>`).join('');
+  return `
+    <input type="hidden" id="editingId" value="${p?.id||''}">
+    <div class="editor-card">
+      <div class="ec-header">
+        <div>
+          <div class="ec-title">${isNew?'Nuevo ramo':'Editando ramo'}</div>
+          <div class="ec-sub" id="editorSub">${p?p.name:''}</div>
+        </div>
+        <div class="ec-actions">
+          ${!isNew?`
+            <button class="btn-vis ${p.activo!==false?'on':'off'}" id="visBtn" onclick="quickToggleVis(${p?.id})">${p.activo!==false?'👁 Visible':'🚫 Oculto'}</button>
+            <button class="btn-delete" onclick="askDeleteId(${p?.id})">🗑️ Eliminar</button>
+          `:''}
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field field-full"><label>Nombre del producto *</label><input type="text" id="fNombre" value="${p?.name||''}" oninput="updatePreview()" placeholder="Ramo de rosas con mariposas"></div>
+        <div class="field"><label>Precio (COP)</label><input type="number" id="fPrecio" value="${p?.price||0}" oninput="updatePreview()" min="0"></div>
+        <div class="field"><label>Categoría *</label><select id="fCat" onchange="updatePreview()">${cats}</select></div>
+        <div class="field"><label>Emoji (si no hay foto)</label><input type="text" id="fEmoji" value="${p?.emoji||'🌸'}" oninput="updatePreview()"></div>
+        <div class="field field-full"><label>Descripción / detalles</label><textarea id="fDesc" oninput="updatePreview()" rows="2" placeholder="Envío gratis · 3 rosas + margaritas">${p?.desc||''}</textarea></div>
+        <div class="field field-full"><label>Estado</label>
+          <select id="fActivo" onchange="updatePreview()">
+            <option value="true" ${p?.activo!==false?'selected':''}>✅ Visible en tienda</option>
+            <option value="false" ${p?.activo===false?'selected':''}>🚫 Oculto</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="img-upload-section">
+        <div class="img-upload-header">
+          <span class="img-upload-title">📸 Fotos del producto</span>
+        </div>
+        <div class="cloudinary-config" id="cloudinaryConfig" style="display:none"></div>
+        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(this.files)">
+          <div class="upload-zone-icon">📤</div>
+          <div class="upload-zone-text">Clic para subir foto</div>
+          <div class="upload-zone-sub">JPG, PNG, WEBP · Sube y se optimiza automáticamente</div>
+        </div>
+        <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
+        <div class="img-preview-row" id="imgPreviewRow"></div>
+        <label style="font-size:.65rem;font-weight:600;color:var(--soft);text-transform:uppercase;letter-spacing:.5px;display:block;margin:.5rem 0 .25rem">O pega links de Cloudinary</label>
+        <textarea class="img-url-input" id="fImgs" rows="3" placeholder="https://res.cloudinary.com/... (uno por línea)">${(p?.imgs||[]).join('\n')}</textarea>
+        <div class="field" style="margin-top:.5rem"><label>Foto principal (URL)</label><input type="text" id="fImg" value="${p?.img||''}" oninput="updatePreview()" placeholder="https://res.cloudinary.com/..."></div>
+      </div>
+
+      <div class="stock-row">
+        <span class="stock-icon">📦</span>
+        <div class="stock-info">
+          <div class="stock-label">Stock</div>
+          <div class="stock-sub">Cuántas unidades disponibles</div>
+        </div>
+        <div class="stock-input-wrap">
+          <input class="stock-num" type="number" id="fStock" value="${p?.stock??99}" min="0" max="999">
+          <label class="stock-unlimited"><input type="checkbox" id="fStockUnlimited" ${p?.stock===undefined||p?.stock===null?'checked':''}> Sin límite</label>
+        </div>
+      </div>
+
+      <div class="tags-label">Etiquetas</div>
+      <div class="chips-row">
+        <label class="chip-check"><input type="checkbox" id="fTagNuevo" ${p?.badge==='Nuevo'?'checked':''}> 🟢 Nuevo</label>
+        <label class="chip-check chip-popular"><input type="checkbox" id="fTagPopular" ${p?.badge==='Popular'?'checked':''}> 🔥 Popular</label>
+        <label class="chip-check chip-especial"><input type="checkbox" id="fTagEspecial" ${p?.badge==='Especial'?'checked':''}> ⭐ Especial</label>
+        <label class="chip-check chip-oferta" id="chipOferta"><input type="checkbox" id="fTagOferta" ${p?.oferta?'checked':''} onchange="toggleOfertaFields()"> 🏷️ Oferta</label>
+        <label class="chip-check chip-envio"><input type="checkbox" id="fTagEnvio" ${p?.envioGratis?'checked':''}> 🚚 Envío gratis</label>
+      </div>
+      <div id="ofertaFields" style="${p?.oferta?'display:block':''};margin-bottom:.75rem">
+        <div class="form-grid">
+          <div class="field"><label>Precio original (tachado)</label><input type="number" id="fPrecioOriginal" value="${p?.precioOriginal||0}" placeholder="85000" min="0"></div>
+          <div class="field"><label>Precio con oferta</label><input type="number" id="fPrecioOferta" value="${p?.precioOferta||0}" placeholder="69000" min="0"></div>
+        </div>
+      </div>
+
+      <div class="preview-panel">
+        <div class="preview-label">Vista previa en tienda</div>
+        <div class="preview-card-wrap"><div class="preview-card" id="livePreview"></div></div>
+      </div>
+
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem">
+        <button class="btn-save" id="saveProdBtn" onclick="saveProduct()">
+          <i class="ri-save-line"></i> <span>${isNew?'Crear producto':'Guardar cambios'}</span>
+        </button>
+        <button class="btn-cancel" onclick="showEditorEmpty()">Cancelar</button>
+      </div>
+    </div>`;
+}
+
+function renderEditor(p){
+  currentEditingImgs=p.imgs?[...p.imgs]:[];
+  uploadedImgs=[];
+  const el=document.getElementById('tab-productos');
+  el.innerHTML=buildEditorHTML(p);
+  renderImgPreviews();
+  updatePreview();
+  const cc=getCloudinaryConfig();
+  const ccDiv=document.getElementById('cloudinaryConfig');
+  if(ccDiv){
+    if(!cc.cloudName||!cc.preset){
+      ccDiv.style.display='block';
+      ccDiv.innerHTML=`<div class="cc-title"><i class="ri-settings-3-line"></i> Configura Cloudinary para subir fotos</div>
+        <div class="cc-grid">
+          <div class="cc-field"><label>Cloud Name</label><input type="text" id="ccCloudName" placeholder="mi-cuenta" value="${cc.cloudName}"></div>
+          <div class="cc-field"><label>Upload Preset</label><input type="text" id="ccPreset" placeholder="nuditos_unsigned" value="${cc.preset}"></div>
+        </div>
+        <button class="cc-save" onclick="saveCloudinaryConfig();document.getElementById('cloudinaryConfig').style.display='none'"><i class="ri-save-line"></i> Guardar</button>`;
+    }
+  }
+}
+
+function toggleOfertaFields(){
+  const show=document.getElementById('fTagOferta').checked;
+  document.getElementById('ofertaFields').style.display=show?'block':'none';
+}
+
+/* ──────────── IMG HANDLING ──────────── */
+async function handleFileUpload(files){
+  if(!files.length) return;
+  for(const file of files){
+    const url=await uploadToCloudinary(file);
+    if(url){
+      currentEditingImgs.push(url);
+      if(!document.getElementById('fImg').value) document.getElementById('fImg').value=url;
+      renderImgPreviews();
+      updatePreview();
+    }
+  }
+}
+
+function syncImgsFromTextarea(){
+  const ta=document.getElementById('fImgs');
+  if(!ta) return;
+  const lines=ta.value.split('\n').map(l=>l.trim()).filter(l=>l.startsWith('http'));
+  lines.forEach(url=>{ if(!currentEditingImgs.includes(url)) currentEditingImgs.push(url); });
+}
+
+function updateImgsTextarea(){
+  const ta=document.getElementById('fImgs');
+  if(ta) ta.value=currentEditingImgs.join('\n');
+}
+
+function renderImgPreviews(){
+  const row=document.getElementById('imgPreviewRow');
+  if(!row) return;
+  row.innerHTML=currentEditingImgs.map((url,i)=>`
+    <div class="img-thumb-wrap">
+      <img class="img-thumb" src="${url}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1 1\'/%3E'">
+      <button class="img-thumb-rm" onclick="removeImg(${i})">×</button>
+    </div>`).join('');
+}
+
+function removeImg(i){
+  currentEditingImgs.splice(i,1);
+  renderImgPreviews();updateImgsTextarea();updatePreview();
+}
+
+/* ──────────── LIVE PREVIEW ──────────── */
+function updatePreview(){
+  const name=document.getElementById('fNombre')?.value||'Nombre del ramo';
+  const price=parseInt(document.getElementById('fPrecio')?.value)||0;
+  const emoji=document.getElementById('fEmoji')?.value||'🌸';
+  const img=document.getElementById('fImg')?.value||'';
+  const isNew=document.getElementById('fTagNuevo')?.checked;
+  const isPopular=document.getElementById('fTagPopular')?.checked;
+  const isEspecial=document.getElementById('fTagEspecial')?.checked;
+  const isOferta=document.getElementById('fTagOferta')?.checked;
+  const precioOrig=parseInt(document.getElementById('fPrecioOriginal')?.value)||0;
+  const catId=document.getElementById('fCat')?.value;
+  const cat=categories.find(c=>c.id===catId);
+  const isActive=document.getElementById('fActivo')?.value==='true';
+  const badge=isNew?'Nuevo':isPopular?'Popular':isEspecial?'Especial':'';
+  const badgeCls=isNew?'nuevo':isPopular?'popular':isEspecial?'especial':'';
+  let priceHtml=price>0?`$${price.toLocaleString('es-CO')} COP`:'Consultar';
+  let origHtml='';
+  if(isOferta&&precioOrig>0&&price>0){
+    origHtml=`<span class="orig">$${precioOrig.toLocaleString('es-CO')}</span>`;
+  }
+  const preview=document.getElementById('livePreview');
+  if(!preview) return;
+  preview.innerHTML=`
+    <div class="preview-img">
+      ${img?`<img src="${img}" onerror="this.remove()">`:`<span>${emoji}</span>`}
+      ${badge?`<div class="preview-badge ${badgeCls}">${badge}</div>`:''}
+      ${!isActive?`<div class="preview-badge agotado">Oculto</div>`:''}
+    </div>
+    <div class="preview-info">
+      <div class="preview-cat">${cat?.icon||''} ${cat?.name||'Categoría'}</div>
+      <div class="preview-name">${name}</div>
+      <div class="preview-price">${origHtml}${priceHtml}</div>
+    </div>`;
+}
+
+/* ──────────── SAVE PRODUCT (Supabase) ──────────── */
+async function saveProduct(){
+  const nombre=document.getElementById('fNombre')?.value.trim();
+  const precio=parseInt(document.getElementById('fPrecio')?.value)||0;
+  const cat=document.getElementById('fCat')?.value;
+  const emoji=document.getElementById('fEmoji')?.value.trim()||'🌸';
+  const desc=document.getElementById('fDesc')?.value.trim()||'';
+  const img=document.getElementById('fImg')?.value.trim()||'';
+  syncImgsFromTextarea();
+  const imgs=[...currentEditingImgs];
+  const activo=document.getElementById('fActivo')?.value==='true';
+  const editId=document.getElementById('editingId')?.value;
+  const tagNuevo=document.getElementById('fTagNuevo')?.checked;
+  const tagPopular=document.getElementById('fTagPopular')?.checked;
+  const tagEspecial=document.getElementById('fTagEspecial')?.checked;
+  const tagOferta=document.getElementById('fTagOferta')?.checked;
+  const tagEnvio=document.getElementById('fTagEnvio')?.checked;
+  const stockUnlimited=document.getElementById('fStockUnlimited')?.checked;
+  const stockVal=parseInt(document.getElementById('fStock')?.value);
+  const stock=stockUnlimited?undefined:(isNaN(stockVal)?undefined:stockVal);
+  let badge='',badgeClass='';
+  if(tagNuevo){badge='Nuevo';badgeClass='nuevo';}else if(tagPopular){badge='Popular';}else if(tagEspecial){badge='Especial';}
+  const precioOriginal=parseInt(document.getElementById('fPrecioOriginal')?.value)||0;
+  const precioOferta=parseInt(document.getElementById('fPrecioOferta')?.value)||0;
+  if(!nombre){showToast('⚠️ El nombre es obligatorio');return;}
+  if(!cat){showToast('⚠️ Selecciona una categoría');return;}
+  
+  const data={name:nombre,price:precio,cat,emoji,desc,img,imgs,badge,badgeClass,activo,
+    oferta:tagOferta,envioGratis:tagEnvio,stock,
+    precioOriginal:tagOferta?precioOriginal:0,precioOferta:tagOferta?precioOferta:0};
+
+  const btn=document.getElementById('saveProdBtn');
+  if(btn){btn.disabled=true;btn.querySelector('span').textContent='Guardando...';}
+
+  try {
+    if(editId && editId!==''){
+      // Actualizar en Supabase
+      data.id=parseInt(editId);
+      const saved=await sbAdminSaveProduct({...data,_isNew:false});
+      const idx=adminProducts.findIndex(p=>p.id===parseInt(editId));
+      if(idx!==-1){adminProducts[idx]={...adminProducts[idx],...data};}
+      selectedId=parseInt(editId);
+      showToast(`✓ "${nombre}" actualizado en Supabase`);
+      addToHistory(`✏️ Editado: ${nombre}`);
+    } else {
+      // Nuevo producto en Supabase
+      const saved=await sbAdminSaveProduct({...data,_isNew:true});
+      if(saved){
+        const newProduct={...data, id:saved.id};
+        adminProducts.push(newProduct);
+        selectedId=saved.id;
+        document.getElementById('editingId').value=saved.id;
+        showToast(`✓ "${nombre}" creado en Supabase`);
+        addToHistory(`➕ Agregado: ${nombre}`);
+      }
+    }
+    renderSidebar();renderStats();renderMomentoList(adminProducts);renderHeroList(adminProducts);
+    // Invalidar cache de la tienda para que clientes vean cambios al instante
+    try{localStorage.removeItem('nuditos_sb_data');localStorage.removeItem('nuditos_sb_ts');}catch{}
+    if(btn){btn.classList.add('saved');btn.querySelector('span').textContent='¡Guardado!';}
+    setTimeout(()=>{const b=document.getElementById('saveProdBtn');if(b){b.classList.remove('saved');b.querySelector('span').textContent='Guardar cambios';}},1800);
+  } catch(e) {
+    showToast('❌ Error guardando. Revisa tu conexión.');
+    if(btn){btn.querySelector('span').textContent='Guardar cambios';}
+  } finally {
+    if(btn) btn.disabled=false;
+  }
+}
+
+/* ──────────── VIS / DELETE ──────────── */
+async function quickToggleVis(id){
+  const idx=adminProducts.findIndex(p=>p.id===id);if(idx===-1)return;
+  adminProducts[idx].activo=!(adminProducts[idx].activo!==false);
+  try {
+    await sbAdminSaveProduct({...adminProducts[idx],_isNew:false});
+    renderSidebar();renderStats();
+    const p=adminProducts[idx];
+    const btn=document.getElementById('visBtn');
+    if(btn){btn.className=`btn-vis ${p.activo!==false?'on':'off'}`;btn.textContent=p.activo!==false?'👁 Visible':'🚫 Oculto';}
+    addToHistory(`${p.activo!==false?'👁 Visible':'🚫 Oculto'}: ${p.name}`);
+    showToast(p.activo!==false?'✓ Visible en tienda':'🚫 Producto oculto');
+  } catch { showToast('❌ Error actualizando visibilidad'); }
+}
+
+function askDeleteId(id){
+  pendingDeleteId=id;const p=adminProducts.find(x=>x.id===id);
+  document.getElementById('confirmMsg').textContent=`¿Eliminar "${p?.name||''}"? Esta acción no se puede deshacer.`;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');pendingDeleteId=null;}
+async function confirmDelete(){
+  if(!pendingDeleteId)return;
+  const idx=adminProducts.findIndex(p=>p.id===pendingDeleteId);
+  const name=adminProducts[idx]?.name;
+  try {
+    await sbAdminDeleteProduct(pendingDeleteId);
+    if(idx!==-1)adminProducts.splice(idx,1);
+    heroSelection=heroSelection.filter(id=>id!==pendingDeleteId);
+    if(momentoSelection===pendingDeleteId)momentoSelection=adminProducts[0]?.id||null;
+    selectedId=null;renderSidebar();renderStats();
+    renderHeroSlots();renderMomentoList(adminProducts);renderHeroList(adminProducts);
+    addToHistory(`🗑️ Eliminado: ${name}`);
+    showEditorEmpty();closeConfirm();showToast(`🗑️ "${name}" eliminado`);
+  } catch { showToast('❌ Error eliminando producto'); }
+}
+
+/* ──────────── PEDIDOS (Supabase) ──────────── */
+function openNewPedido(){
+  document.getElementById('pedidoEditId').value='';
+  document.getElementById('pedidoModalTitle').textContent='Nuevo pedido';
+  document.getElementById('pCliente').value='';
+  document.getElementById('pTel').value='';
+  document.getElementById('pItems').value='';
+  document.getElementById('pTotal').value='';
+  document.getElementById('pEstado').value='pendiente';
+  document.getElementById('pNotas').value='';
+  document.getElementById('pedidoModal').classList.add('open');
+}
+function openEditPedido(id){
+  const p=pedidos.find(x=>x.id===id);if(!p)return;
+  document.getElementById('pedidoEditId').value=p.id;
+  document.getElementById('pedidoModalTitle').textContent='Editar pedido';
+  document.getElementById('pCliente').value=p.cliente||'';
+  document.getElementById('pTel').value=p.tel||'';
+  document.getElementById('pItems').value=p.items||'';
+  document.getElementById('pTotal').value=p.total||'';
+  document.getElementById('pEstado').value=p.estado||'pendiente';
+  document.getElementById('pNotas').value=p.notas||'';
+  document.getElementById('pedidoModal').classList.add('open');
+}
+function closePedidoModal(){document.getElementById('pedidoModal').classList.remove('open');}
+
+async function savePedido(){
+  const editId=document.getElementById('pedidoEditId').value;
+  const data={
+    cliente:document.getElementById('pCliente').value.trim(),
+    tel:document.getElementById('pTel').value.trim(),
+    items:document.getElementById('pItems').value.trim(),
+    total:parseInt(document.getElementById('pTotal').value)||0,
+    estado:document.getElementById('pEstado').value,
+    notas:document.getElementById('pNotas').value.trim(),
+  };
+  if(!data.cliente){showToast('⚠️ El nombre del cliente es obligatorio');return;}
+  try {
+    if(editId){
+      const saved=await sbAdminSavePedido({...data,id:parseInt(editId),_isNew:false});
+      const idx=pedidos.findIndex(p=>p.id===parseInt(editId));
+      if(idx!==-1){pedidos[idx]={...pedidos[idx],...data,id:parseInt(editId)};}
+      showToast('✓ Pedido actualizado');
+    } else {
+      const saved=await sbAdminSavePedido({...data,_isNew:true});
+      if(saved){pedidos.unshift(saved);}
+      showToast('✓ Pedido registrado');
+      addToHistory(`📦 Pedido nuevo: ${data.cliente} — $${data.total.toLocaleString('es-CO')}`);
+    }
+    closePedidoModal();renderPedidosList();
+  } catch { showToast('❌ Error guardando pedido'); }
+}
+
+async function cambiarEstadoPedido(id,estado){
+  const idx=pedidos.findIndex(p=>p.id===id);if(idx===-1)return;
+  try {
+    await sbAdminUpdateEstadoPedido(id, estado);
+    pedidos[idx].estado=estado;
+    renderPedidosList();showToast('✓ Estado actualizado');
+    // Si es "enviado", dispara correo automático
+    if(estado==='enviado'&&pedidos[idx].clienteEmail){
+      await correoPedidoEnviado({
+        clienteEmail:pedidos[idx].clienteEmail,
+        clienteNombre:pedidos[idx].cliente,
+        guia:pedidos[idx].guia||'',
+        transportadora:pedidos[idx].transportadora||''
+      });
+    }
+  } catch { showToast('❌ Error actualizando estado'); }
+}
+
+async function deletePedido(id){
+  try {
+    await sbAdminDeletePedido(id);
+    pedidos=pedidos.filter(p=>p.id!==id);
+    renderPedidosList();showToast('🗑️ Pedido eliminado');
+  } catch { showToast('❌ Error eliminando pedido'); }
+}
+
+function filterPedidos(f,btn){
+  pedidoFilter=f;
+  document.querySelectorAll('.pedido-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPedidosList();
+}
+
+function renderPedidosList(){
+  const list=pedidoFilter==='todos'?pedidos:pedidos.filter(p=>p.estado===pedidoFilter);
+  const estadoLabels={pendiente:'⏳ Pendiente',proceso:'🔄 En proceso',entregado:'✅ Entregado',cancelado:'❌ Cancelado'};
+  const estadoClasses={pendiente:'estado-pendiente',proceso:'estado-proceso',entregado:'estado-entregado',cancelado:'estado-cancelado'};
+  document.getElementById('pedidosList').innerHTML=list.length?list.map(p=>`
+    <div class="pedido-card">
+      <div class="pedido-top">
+        <div class="pedido-id">#${String(p.id).slice(-6)}</div>
+        <span class="pedido-estado ${estadoClasses[p.estado]||'estado-pendiente'}">${estadoLabels[p.estado]||p.estado}</span>
+      </div>
+      <div class="pedido-cliente">${p.cliente}</div>
+      <div class="pedido-items">${p.items||'—'}</div>
+      ${p.notas?`<div style="font-size:.7rem;color:var(--soft);margin-top:.2rem;font-style:italic">📝 ${p.notas}</div>`:''}
+      <div class="pedido-bottom">
+        <div class="pedido-total">${p.total>0?'$'+p.total.toLocaleString('es-CO')+' COP':'Sin total'}</div>
+        <div class="pedido-fecha">${p.fecha||''}</div>
+      </div>
+      <div class="pedido-actions">
+        ${p.tel?`<button class="p-action-btn primary" onclick="window.open('https://wa.me/${p.tel.replace(/\D/g,'')}','_blank')"><i class="ri-whatsapp-line"></i> WhatsApp</button>`:''}
+        <button class="p-action-btn" onclick="openEditPedido(${p.id})">✏️ Editar</button>
+        ${p.estado!=='proceso'?`<button class="p-action-btn" onclick="cambiarEstadoPedido(${p.id},'proceso')">🔄 En proceso</button>`:''}
+        ${p.estado!=='entregado'?`<button class="p-action-btn" onclick="cambiarEstadoPedido(${p.id},'entregado')">✅ Entregado</button>`:''}
+        <button class="p-action-btn" style="color:var(--red)" onclick="deletePedido(${p.id})">🗑️</button>
+      </div>
+    </div>`).join(''):`<div style="text-align:center;padding:3rem 1rem;color:var(--soft);font-size:.85rem">No hay pedidos ${pedidoFilter!=='todos'?'en este estado':''}</div>`;
+}
+
+/* ──────────── DASHBOARD ──────────── */
+function renderDashboard(){
+  const total=adminProducts.length;
+  const visibles=adminProducts.filter(p=>p.activo!==false).length;
+  const sinFoto=adminProducts.filter(p=>!p.img||!p.img.trim()).length;
+  const totalPedidos=pedidos.length;
+  const pendientes=pedidos.filter(p=>p.estado==='pendiente').length;
+  const entregados=pedidos.filter(p=>p.estado==='entregado').length;
+  const totalVentas=pedidos.filter(p=>p.estado==='entregado').reduce((s,p)=>s+(p.total||0),0);
+  document.getElementById('dashStats').innerHTML=`
+    <div class="dash-stat"><div class="dash-num">${total}</div><div class="dash-label">Ramos en catálogo</div></div>
+    <div class="dash-stat"><div class="dash-num green">${visibles}</div><div class="dash-label">Visibles en tienda</div></div>
+    <div class="dash-stat"><div class="dash-num orange">${sinFoto}</div><div class="dash-label">Sin foto todavía</div></div>
+    <div class="dash-stat"><div class="dash-num">${totalPedidos}</div><div class="dash-label">Pedidos registrados</div></div>
+    <div class="dash-stat"><div class="dash-num orange">${pendientes}</div><div class="dash-label">Pendientes</div></div>
+    <div class="dash-stat"><div class="dash-num green">${entregados}</div><div class="dash-label">Entregados</div></div>
+  `;
+  const topByPrice=[...adminProducts].filter(p=>p.activo!==false).sort((a,b)=>b.price-a.price).slice(0,6);
+  const maxP=topByPrice[0]?.price||1;
+  document.getElementById('viewsChart').innerHTML=topByPrice.map(p=>`
+    <div class="bar-row">
+      <div class="bar-name">${p.emoji} ${p.name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(p.price/maxP*100).toFixed(0)}%;background:var(--lila)"></div></div>
+      <div class="bar-val">$${Math.round(p.price/1000)}k</div>
+    </div>`).join('');
+  const pedidosCounts={};
+  pedidos.forEach(p=>{(p.items||'').split('\n').forEach(line=>{const m=line.match(/\d+x (.+)/);if(m)pedidosCounts[m[1]]=(pedidosCounts[m[1]]||0)+1;});});
+  const topItems=Object.entries(pedidosCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxC=topItems[0]?.[1]||1;
+  document.getElementById('cartChart').innerHTML=topItems.length?topItems.map(([name,cnt])=>`
+    <div class="bar-row">
+      <div class="bar-name">${name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(cnt/maxC*100).toFixed(0)}%;background:var(--mint)"></div></div>
+      <div class="bar-val">${cnt}</div>
+    </div>`).join(''):`<div style="font-size:.78rem;color:var(--soft);padding:.5rem 0">Registra pedidos para ver estadísticas aquí</div>`;
+  document.getElementById('histList').innerHTML=changeHistory.length?
+    [...changeHistory].reverse().slice(0,20).map(h=>`
+      <div class="hist-item">
+        <div class="hist-dot"></div>
+        <div>
+          <div class="hist-action">${h.action}</div>
+          <div class="hist-time">${h.time}</div>
+        </div>
+      </div>`).join(''):`<div style="font-size:.78rem;color:var(--soft);padding:.5rem 0">Los cambios que hagas aparecerán aquí</div>`;
+}
+
+/* ──────────── HISTORY ──────────── */
+function addToHistory(action){
+  changeHistory.push({action,time:new Date().toLocaleString('es-CO',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})});
+  if(changeHistory.length>50)changeHistory.shift();
+  try{localStorage.setItem('nuditos_history',JSON.stringify(changeHistory));}catch{}
+}
+
+/* ──────────── VITRINA ──────────── */
+function renderMomentoSelected(){
+  const p=momentoSelection?adminProducts.find(x=>x.id===momentoSelection):null;
+  document.getElementById('momentoSelected').textContent=p?`✅ Seleccionado: ${p.emoji} ${p.name}`:'Sin seleccionar';
+}
+function renderMomentoList(list){
+  const q=document.getElementById('searchMomento')?.value.toLowerCase()||'';
+  const filtered=list.filter(p=>!q||p.name.toLowerCase().includes(q));
+  document.getElementById('momentoList').innerHTML=filtered.map(p=>`
+    <div class="v-prod-row">
+      <div class="v-thumb">${p.img?`<img src="${p.img}">`:p.emoji}</div>
+      <div class="v-info"><div class="v-name">${p.name}</div><div class="v-price">${p.price>0?'$'+p.price.toLocaleString('es-CO')+' COP':'Consultar'}</div></div>
+      <button class="btn-select ${momentoSelection===p.id?'sel':''}" onclick="selectMomento(${p.id})">
+        ${momentoSelection===p.id?'✓ Seleccionado':'Seleccionar'}
+      </button>
+    </div>`).join('');
+}
+function selectMomento(id){momentoSelection=id;renderMomentoSelected();renderMomentoList(adminProducts);}
+function searchMomentoProducts(){renderMomentoList(adminProducts);}
+
+function renderHeroSlots(){
+  document.getElementById('heroSlots').innerHTML=heroSelection.map(id=>{
+    const p=adminProducts.find(x=>x.id===id);
+    if(!p)return'';
+    return`<div class="hero-slot filled" onclick="removeFromHero(${id})">
+      <div style="font-size:1.4rem">${p.img?`<img src="${p.img}" style="width:100%;height:50px;object-fit:cover;border-radius:4px">`:p.emoji}</div>
+      <div class="hero-slot-name">${p.name.slice(0,20)}</div>
+    </div>`;
+  }).join('')+`<div class="hero-slot" style="cursor:default">+ Agrega desde abajo</div>`;
+}
+function renderHeroList(list){
+  const q=document.getElementById('searchHero')?.value.toLowerCase()||'';
+  const filtered=list.filter(p=>!q||p.name.toLowerCase().includes(q));
+  document.getElementById('heroList').innerHTML=filtered.map(p=>`
+    <div class="v-prod-row">
+      <div class="v-thumb">${p.img?`<img src="${p.img}">`:p.emoji}</div>
+      <div class="v-info"><div class="v-name">${p.name}</div><div class="v-price">${p.price>0?'$'+p.price.toLocaleString('es-CO')+' COP':'Consultar'}</div></div>
+      <button class="btn-select ${heroSelection.includes(p.id)?'sel':''}" onclick="toggleHero(${p.id})">
+        ${heroSelection.includes(p.id)?'✓ En carrusel':'+ Agregar'}
+      </button>
+    </div>`).join('');
+}
+function toggleHero(id){
+  if(heroSelection.includes(id)){removeFromHero(id);}
+  else{if(heroSelection.length>=5){showToast('⚠️ Máximo 5 en el carrusel');return;}heroSelection.push(id);}
+  renderHeroSlots();renderHeroList(adminProducts);
+}
+function removeFromHero(id){heroSelection=heroSelection.filter(x=>x!==id);renderHeroSlots();renderHeroList(adminProducts);}
+function searchHeroProducts(){renderHeroList(adminProducts);}
+
+/* ──────────── BANNERS ──────────── */
+function renderBannerList(){
+  const catOpts=categories.filter(c=>c.id!=='todos').map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+  document.getElementById('bannerList').innerHTML=editorialBannersAdmin.map((b,i)=>`
+    <div class="banner-item">
+      <div class="banner-preview">
+        ${b.imgUrl?`<img src="${b.imgUrl}">`:`<div class="banner-preview-ph">${b.emoji}</div>`}
+      </div>
+      <div class="banner-fields">
+        <label class="bf-label">Después de</label>
+        <select class="bf-select" onchange="updateBanner(${i},'afterCat',this.value)">${categories.filter(c=>c.id!=='todos').map(c=>`<option value="${c.id}" ${b.afterCat===c.id?'selected':''}>${c.icon} ${c.name}</option>`).join('')}</select>
+        <label class="bf-label">Título (HTML permitido)</label>
+        <input class="bf-input" value="${b.title||''}" oninput="updateBanner(${i},'title',this.value)">
+        <label class="bf-label">Emoji</label>
+        <input class="bf-input" value="${b.emoji||'🌸'}" oninput="updateBanner(${i},'emoji',this.value)" style="width:60px">
+        <label class="bf-label">Imagen de fondo (URL)</label>
+        <input class="bf-input" value="${b.imgUrl||''}" oninput="updateBanner(${i},'imgUrl',this.value)" placeholder="https://...">
+      </div>
+      <button class="btn-rm" onclick="removeBanner(${i})">✕</button>
+    </div>`).join('');
+}
+function updateBanner(i,key,val){editorialBannersAdmin[i][key]=val;}
+function addBanner(){editorialBannersAdmin.push({afterCat:'rosas',emoji:'🌸',title:'Tu mensaje aquí',imgUrl:''});renderBannerList();}
+function removeBanner(i){editorialBannersAdmin.splice(i,1);renderBannerList();}
+
+/* ──────────── VISTAS POR CATEGORÍA ──────────── */
+function renderCatViewsList(){
+  const views=['carousel','grid','list'];
+  document.getElementById('catViewsList').innerHTML=categories.filter(c=>c.id!=='todos').map(c=>`
+    <div class="toggle-row" style="align-items:center">
+      <div><div class="toggle-label">${c.icon} ${c.name}</div></div>
+      <select class="view-select" data-cat="${c.id}">
+        ${views.map(v=>`<option value="${v}" ${(adminCfg.catViews?.[c.id]||'carousel')===v?'selected':''}>${v==='carousel'?'Carrusel':v==='grid'?'Cuadrícula':'Lista'}</option>`).join('')}
+      </select>
+    </div>`).join('');
+}
+
+/* ──────────── GUARDAR CONFIG (Supabase) ──────────── */
+async function saveConfig(){
+  if(heroSelection.length===0){showToast('⚠️ Agrega al menos 1 ramo al carrusel');return;}
+  if(!momentoSelection){showToast('⚠️ Selecciona el ramo del momento');return;}
+  const catViews={};document.querySelectorAll('.view-select').forEach(sel=>{catViews[sel.dataset.cat]=sel.value;});
+  const newCfg={
+    ramoDestacado:momentoSelection,
+    carruselHero:heroSelection.filter(id=>adminProducts.find(p=>p.id===id)),
+    descuentoActivo:document.getElementById('toggleDescuento').classList.contains('on'),
+    descuentoCodigo:document.getElementById('descCodigo').value.trim().toUpperCase(),
+    descuentoPorcentaje:parseInt(document.getElementById('descPorcentaje').value)||10,
+    descuentoTexto:document.getElementById('descTexto').value.trim(),
+    wompiActivo:document.getElementById('toggleWompi').classList.contains('on'),
+    wompiKey:document.getElementById('wompiKey').value.trim(),catViews,
+  };
+
+  const btn=document.getElementById('globalSaveBtn');
+  btn.innerHTML='<i class="ri-loader-line"></i> Guardando...'; btn.disabled=true;
+
+  try {
+    // Guardar config en Supabase
+    await sbAdminSaveConfig(newCfg);
+    // Guardar banners en Supabase
+    await sbAdminSaveBanners(editorialBannersAdmin);
+    // Guardar productos uno por uno con PATCH
+    for(const p of adminProducts){
+      if(p.id) try{ await sbAdminSaveProduct({...p,_isNew:false}); }catch(e){}
+    }
+    adminCfg=newCfg;
+    addToHistory('💾☁️ Config guardada en Supabase');
+    btn.innerHTML='<i class="ri-check-line"></i> ¡Guardado en Supabase!';
+    btn.classList.add('saved');
+    showToast('✅ Cambios guardados en Supabase');
+    // Limpiar cache de la tienda
+    try{localStorage.removeItem('nuditos_sb_data');localStorage.removeItem('nuditos_sb_ts');}catch{}
+  } catch(e) {
+    showToast('❌ Error guardando. Verifica tu conexión.');
+    btn.innerHTML='<i class="ri-save-line"></i> Guardar cambios';
+  } finally {
+    btn.disabled=false;
+    setTimeout(()=>{const b=document.getElementById('globalSaveBtn');if(b){b.innerHTML='<i class="ri-save-line"></i> Guardar cambios';b.classList.remove('saved');}},2200);
+  }
+}
+
+/* ──────────── EXPORT ──────────── */
+function exportDatos(){
+  const content=`/* NUDITOS — datos.js exportado ${new Date().toLocaleDateString('es-CO')} */\n\nconst CONFIG_DEFAULT = ${JSON.stringify(adminCfg,null,2)};\n\nconst categories = ${JSON.stringify(categories,null,2)};\n\nconst products = ${JSON.stringify(adminProducts,null,2)};\n`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'text/javascript'}));a.download='datos.js';a.click();
+  showToast('📤 datos.js descargado');
+}
+
+/* ──────────── TOAST ──────────── */
+function showToast(msg){
+  const t=document.getElementById('toastAdmin');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Preguntas frecuentes sobre Nuditos Tejidos — envíos, materiales, tiempos de entrega y pedidos personalizados.">
+  <title>Preguntas Frecuentes — Nuditos Tejidos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%);
+      padding: 5rem 1.5rem 4rem; text-align: center;
+    }
+    .page-eyebrow {
+      font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem;
+    }
+    .page-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 6vw, 3.5rem);
+      font-weight: 400; line-height: 1.15;
+      color: var(--text); margin-bottom: 1.2rem;
+    }
+    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
+    .page-hero p {
+      max-width: 500px; margin: 0 auto;
+      color: var(--text-soft); font-size: 1rem; line-height: 1.7;
+    }
+
+    .faq-wrap {
+      max-width: 720px; margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .faq-category {
+      margin-bottom: 2.5rem;
+    }
+    .faq-cat-title {
+      font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--lila-dark); font-weight: 600;
+      margin-bottom: 1rem; padding-bottom: 0.5rem;
+      border-bottom: 1.5px solid var(--lila-light);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border-dark);
+    }
+    .faq-q {
+      width: 100%; background: none; border: none;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.1rem 0; text-align: left; cursor: pointer;
+      font-family: 'Jost', sans-serif; font-size: 0.95rem;
+      font-weight: 500; color: var(--text); gap: 1rem;
+      transition: color 0.2s;
+    }
+    .faq-q:hover { color: var(--lila-dark); }
+    .faq-q i {
+      font-size: 1.2rem; color: var(--lila-dark);
+      transition: transform 0.3s; flex-shrink: 0;
+    }
+    .faq-q.open i { transform: rotate(45deg); }
+    .faq-a {
+      display: none; padding: 0 0 1.2rem;
+      color: var(--text-soft); font-size: 0.9rem; line-height: 1.75;
+    }
+    .faq-a.open { display: block; }
+    .faq-a strong { color: var(--text); }
+    .faq-a a { color: var(--lila-dark); text-decoration: underline; }
+
+    .faq-cta {
+      background: var(--lila-xlight); border-radius: 20px;
+      padding: 2.5rem; text-align: center; margin-top: 3rem;
+    }
+    .faq-cta h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem; font-weight: 400; margin-bottom: 0.6rem;
+    }
+    .faq-cta h3 em { font-style: italic; color: var(--lila-dark); }
+    .faq-cta p { color: var(--text-soft); font-size: 0.88rem; margin-bottom: 1.5rem; }
+    .faq-wa {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--lila-dark); color: white;
+      padding: 0.8rem 1.8rem; border-radius: 50px;
+      font-size: 0.9rem; font-weight: 500;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .faq-wa:hover { background: var(--lila); transform: scale(1.03); }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="nav-wrap">
+  <nav>
+    <div class="nav-left">
+      <ul class="nav-desktop-links">
+        <li><a href="index.html#catalogSection">Catálogo</a></li>
+        <li><a href="index.html#personalizado">Personalizado</a></li>
+        <li><a href="sobre-mi.html">Nosotros</a></li>
+      </ul>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="logo">NUDITOS<em>.</em></a>
+    </div>
+    <div class="nav-right">
+      <a href="https://wa.me/573144931525" target="_blank" class="nav-icon-btn" aria-label="WhatsApp">
+        <i class="ri-whatsapp-line"></i>
+      </a>
+    </div>
+  </nav>
+</div>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-eyebrow">Centro de ayuda</div>
+  <h1>Preguntas <em>frecuentes</em></h1>
+  <p>Todo lo que necesitas saber sobre nuestros productos, envíos y pedidos personalizados.</p>
+</div>
+
+<!-- FAQ -->
+<div class="faq-wrap">
+
+  <!-- PRODUCTOS -->
+  <div class="faq-category">
+    <div class="faq-cat-title"><i class="ri-leaf-line"></i> Sobre los productos</div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿De qué están hechos los ramos? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Todos nuestros ramos están tejidos con <strong>hilos de alta calidad</strong> en técnica crochet. Usamos hilos acrílicos premium que garantizan colores vivos, durabilidad y resistencia. Las flores no se marchitan, no necesitan agua y pueden durar años en perfectas condiciones.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Cuánto tiempo dura un ramo de crochet? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Con los cuidados básicos, un ramo de crochet puede durar <strong>muchos años</strong>. Recomendamos mantenerlo alejado de la humedad excesiva y la luz solar directa prolongada para preservar los colores. A diferencia de las flores naturales, nunca se marchitan.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Puedo lavar los ramos? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Sí, pero con cuidado. Si el ramo acumula polvo, puedes limpiarlo suavemente con un paño seco o un cepillo suave. Si necesita un lavado más profundo, hazlo a mano con agua fría y jabón suave, y déjalo secar al aire — nunca en secadora.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Los colores son exactamente como en las fotos? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Hacemos todo lo posible para que las fotos representen fielmente los colores reales. Sin embargo, las pantallas pueden variar ligeramente. En algunos productos indicamos que <strong>"el color puede variar"</strong> — esto se debe a que trabajamos con hilos disponibles en el momento. Si tienes dudas sobre algún color específico, escríbenos por WhatsApp.
+      </div>
+    </div>
+  </div>
+
+  <!-- PEDIDOS -->
+  <div class="faq-category">
+    <div class="faq-cat-title"><i class="ri-shopping-bag-line"></i> Pedidos y pagos</div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Cómo hago un pedido? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Tienes dos opciones: <strong>1)</strong> Agrega el producto al carrito en nuestra tienda y confirma por WhatsApp o paga directo con tarjeta/PSE. <strong>2)</strong> Escríbenos directamente por WhatsApp al <a href="https://wa.me/573144931525" target="_blank">+57 314 4931525</a> y te ayudamos con tu pedido.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Qué métodos de pago aceptan? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Aceptamos pagos por <strong>Wompi</strong> (tarjetas de crédito y débito, PSE, Nequi, Daviplata) directamente desde la tienda. También puedes coordinar tu pago por WhatsApp si prefieres otro método.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Cuánto tiempo tarda en elaborarse mi pedido? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Cada ramo se elabora a mano desde cero al recibir tu pedido. El tiempo de elaboración es de <strong>1 a 3 días hábiles</strong>. Una vez listo, se despacha ese mismo día o al siguiente día hábil. Te avisamos por WhatsApp cuando esté en camino.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Puedo cancelar o modificar mi pedido? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Puedes cancelar o modificar tu pedido <strong>antes de que empiece la elaboración</strong>. Una vez que iniciamos el tejido, no es posible hacer cambios. Escríbenos lo antes posible por WhatsApp si necesitas hacer algún ajuste.
+      </div>
+    </div>
+  </div>
+
+  <!-- PERSONALIZADO -->
+  <div class="faq-category">
+    <div class="faq-cat-title"><i class="ri-magic-line"></i> Pedidos personalizados</div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Puedo pedir un diseño que no está en el catálogo? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        ¡Sí! Amamos los retos creativos. Cuéntanos tu idea por WhatsApp — colores, ocasión, personaje favorito o referencia — y te cotizamos sin compromiso. Hemos hecho desde flores inspiradas en películas hasta ramos con mascotas tejidas.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Cuánto cuesta un pedido personalizado? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        El precio depende del diseño, tamaño y cantidad de detalles. Escríbenos por WhatsApp con tu idea y te damos una cotización exacta. Algunos personalizados tienen precio fijo en el catálogo (como el amigurumi de grado o el ramo gatito).
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Puedo enviar una foto de referencia? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        ¡Claro que sí! De hecho, una foto de referencia nos ayuda mucho a entender lo que quieres. Puedes enviarla directamente por WhatsApp junto con tu solicitud.
+      </div>
+    </div>
+  </div>
+
+  <!-- ENVÍOS -->
+  <div class="faq-category">
+    <div class="faq-cat-title"><i class="ri-truck-line"></i> Envíos y entregas</div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿A dónde hacen envíos? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Hacemos envíos a <strong>todo Colombia</strong> desde El Dorado, Meta. No importa si estás en una ciudad grande o en un municipio pequeño — tu ramo llega.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Cuánto cuesta el envío? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        El costo de envío varía según el valor de tu pedido: desde <strong>$17.000</strong> hasta <strong>gratis</strong> en pedidos de mayor valor. El costo exacto se muestra al finalizar tu compra. Muchos de nuestros productos ya incluyen envío gratis.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Cuánto tarda en llegar? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Al tiempo de elaboración (1–3 días) se suma el tiempo de envío según tu ciudad: <strong>2 a 5 días hábiles</strong> en promedio para todo Colombia. Ciudades principales como Bogotá, Medellín o Cali suelen tardar menos. Te compartimos el número de guía para que puedas rastrear tu pedido.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        ¿Qué pasa si mi pedido llega dañado? <i class="ri-add-line"></i>
+      </button>
+      <div class="faq-a">
+        Si tu pedido llega con algún daño causado durante el envío, escríbenos por WhatsApp <strong>dentro de las 24 horas</strong> de haberlo recibido, con fotos del producto y el empaque. Evaluamos cada caso y buscamos la mejor solución para ti.
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="faq-cta">
+    <h3>¿Tu pregunta no está <em>aquí?</em></h3>
+    <p>Escríbenos por WhatsApp y te respondemos lo antes posible.</p>
+    <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸" class="faq-wa" target="_blank">
+      <i class="ri-whatsapp-line"></i> Escribir por WhatsApp
+    </a>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo-wrap">
+    <div class="footer-logo">NUDITOS<em>.</em></div>
+    <div class="footer-social">
+      <a href="#" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+      <a href="https://wa.me/573144931525" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 Nuditos Tejidos · Hecho con 💜 en El Dorado, Meta 🇨🇴</div>
+  </div>
+</footer>
+
+<script>
+function toggleFaq(btn) {
+  const answer = btn.nextElementSibling;
+  const isOpen = btn.classList.contains('open');
+  // Cerrar todos
+  document.querySelectorAll('.faq-q.open').forEach(b => {
+    b.classList.remove('open');
+    b.nextElementSibling.classList.remove('open');
+  });
+  // Abrir el seleccionado si estaba cerrado
+  if (!isOpen) {
+    btn.classList.add('open');
+    answer.classList.add('open');
+  }
+}
+</script>
+</body>
+</html>
