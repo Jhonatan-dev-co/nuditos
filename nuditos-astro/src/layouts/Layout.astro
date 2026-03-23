@@ -1,0 +1,272 @@
+---
+/**
+ * Layout base de Nuditos Tejidos
+ * Incluye: navbar, footer, fuentes, meta SEO básico
+ * Props: title, description, ogImage, ogType, canonical
+ */
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: string;
+  canonical?: string;
+  noIndex?: boolean;
+}
+
+const {
+  title,
+  description = 'Nuditos Tejidos — Ramos de crochet hechos a mano en El Dorado, Meta. Flores eternas tejidas con amor. Envíos a todo Colombia.',
+  ogImage = 'https://nuditos.com.co/og-default.jpg',
+  ogType = 'website',
+  canonical,
+  noIndex = false,
+} = Astro.props;
+
+const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO básico -->
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonicalURL} />
+  {noIndex && <meta name="robots" content="noindex, nofollow" />}
+  {!noIndex && <meta name="robots" content="index, follow" />}
+
+  <!-- Open Graph -->
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:url" content={canonicalURL} />
+  <meta property="og:locale" content="es_CO" />
+  <meta property="og:site_name" content="Nuditos Tejidos" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImage} />
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Iconos -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet" />
+
+  <!-- CSS global -->
+  <link rel="stylesheet" href="/styles/main.css" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <!-- Slot para head extra (meta producto, schema.org, etc.) -->
+  <slot name="head" />
+</head>
+<body>
+
+  <!-- ════════ NAVBAR ════════ -->
+  <div class="nav-wrap">
+    <nav>
+      <div class="nav-left">
+        <button class="nav-icon-btn nav-hamburger" onclick="toggleMenu()" aria-label="Menú">
+          <i class="ri-menu-line"></i>
+        </button>
+        <ul class="nav-desktop-links">
+          <li><a href="/#catalogSection">Catálogo</a></li>
+          <li><a href="/#personalizado">Personalizado</a></li>
+          <li><a href="/sobre-nosotros">Nosotros</a></li>
+          <li><a href="/blog">Blog</a></li>
+        </ul>
+      </div>
+      <div class="nav-center">
+        <a href="/" class="logo">NUDITOS<em>.</em></a>
+      </div>
+      <div class="nav-right">
+        <button class="nav-icon-btn" onclick="toggleSearch()" aria-label="Buscar">
+          <i class="ri-search-line"></i>
+        </button>
+        <button class="nav-icon-btn" onclick="toggleCart()" aria-label="Carrito">
+          <i class="ri-shopping-bag-line"></i>
+          <span class="cart-badge hidden" id="cartCount">0</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ════════ MENÚ LATERAL ════════ -->
+  <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+  <div class="menu-panel" id="menuPanel">
+    <div class="menu-head">
+      <span class="menu-logo">NUDITOS<em>.</em></span>
+      <button class="menu-close" onclick="toggleMenu()">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="menu-nav">
+      <a class="menu-nav-item" href="/#catalogSection" onclick="toggleMenu()">
+        Catálogo <i class="ri-arrow-right-line"></i>
+      </a>
+      <a class="menu-nav-item" href="/#personalizado" onclick="toggleMenu()">
+        Personalizado <i class="ri-arrow-right-line"></i>
+      </a>
+      <a class="menu-nav-item" href="/sobre-nosotros">
+        Nosotros <i class="ri-arrow-right-line"></i>
+      </a>
+      <a class="menu-nav-item" href="/blog">
+        Blog <i class="ri-arrow-right-line"></i>
+      </a>
+      <a class="menu-nav-item" href="/preguntas-frecuentes">
+        Preguntas frecuentes <i class="ri-arrow-right-line"></i>
+      </a>
+      <a class="menu-nav-item" href="https://wa.me/573144931525" target="_blank">
+        WhatsApp <i class="ri-whatsapp-line"></i>
+      </a>
+    </div>
+    <div class="menu-footer">
+      <a class="menu-footer-link" href="/sobre-nosotros">Sobre la marca</a>
+      <a class="menu-footer-link" href="/politicas">Políticas</a>
+      <a class="menu-footer-link" href="https://wa.me/573144931525" target="_blank">Contacto</a>
+    </div>
+  </div>
+
+  <!-- ════════ CONTENIDO DE CADA PÁGINA ════════ -->
+  <slot />
+
+  <!-- ════════ FOOTER ════════ -->
+  <footer>
+    <div class="footer-logo-wrap">
+      <div class="footer-logo">NUDITOS<em>.</em></div>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/nuditos_tejidos/" target="_blank" aria-label="Instagram">
+          <i class="ri-instagram-line"></i>
+        </a>
+        <a href="#" aria-label="TikTok"><i class="ri-tiktok-line"></i></a>
+        <a href="https://wa.me/573144931525" aria-label="WhatsApp">
+          <i class="ri-whatsapp-line"></i>
+        </a>
+        <a href="#" aria-label="Facebook"><i class="ri-facebook-line"></i></a>
+      </div>
+    </div>
+    <div class="footer-accordion">
+      <div class="footer-acc-item">
+        <button class="footer-acc-btn" onclick="toggleAcc(this)">
+          Sobre la marca <i class="ri-add-line"></i>
+        </button>
+        <div class="footer-acc-content">
+          <a class="footer-acc-link" href="/sobre-nosotros">Nuestra historia</a>
+          <a class="footer-acc-link" href="/#personalizado">Ramos personalizados</a>
+          <a class="footer-acc-link" href="/blog">Blog</a>
+        </div>
+      </div>
+      <div class="footer-acc-item">
+        <button class="footer-acc-btn" onclick="toggleAcc(this)">
+          Contacto <i class="ri-add-line"></i>
+        </button>
+        <div class="footer-acc-content">
+          <a class="footer-acc-link" href="https://wa.me/573144931525" target="_blank">WhatsApp</a>
+          <a class="footer-acc-link" href="https://www.instagram.com/nuditos_tejidos/" target="_blank">Instagram</a>
+        </div>
+      </div>
+      <div class="footer-acc-item">
+        <button class="footer-acc-btn" onclick="toggleAcc(this)">
+          Ayuda <i class="ri-add-line"></i>
+        </button>
+        <div class="footer-acc-content">
+          <a class="footer-acc-link" href="/politicas">Envíos y entregas</a>
+          <a class="footer-acc-link" href="/preguntas-frecuentes">Preguntas frecuentes</a>
+          <a class="footer-acc-link" href="/politicas">Política de privacidad</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Nuditos Tejidos · Hecho con 💜 en El Dorado, Meta 🇨🇴</div>
+    </div>
+  </footer>
+
+  <!-- ════════ CARRITO ════════ -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <div class="cart-panel" id="cartPanel">
+    <div class="cart-head">
+      <span class="cart-title">Bolsa de compras</span>
+      <button class="close-cart" onclick="toggleCart()"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="cart-body" id="cartBody"></div>
+    <div class="cart-foot" id="cartFoot" style="display:none">
+      <div class="discount-row">
+        <input class="discount-input" id="discountInput" placeholder="Código de descuento" maxlength="20" />
+        <button class="discount-apply" onclick="applyDiscount()">Aplicar</button>
+      </div>
+      <div class="discount-msg" id="discountMsg"></div>
+      <div class="disc-saved" id="discSaved">
+        <span>Descuento:</span><span id="discAmount"></span>
+      </div>
+      <div class="total-row">
+        <span class="total-label">Total</span>
+        <span class="total-price" id="cartTotal">$0</span>
+      </div>
+      <div class="checkout-btns">
+        <button class="wa-checkout" onclick="checkoutWA()">
+          <i class="ri-whatsapp-line"></i> Confirmar por WhatsApp
+        </button>
+        <button class="wompi-checkout" onclick="checkoutWompi()">
+          <i class="ri-bank-card-line"></i> Pagar con tarjeta / PSE
+        </button>
+      </div>
+      <div class="checkout-note">
+        Pago seguro con <strong>Wompi</strong> · PSE · Tarjetas · Nequi
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ MODAL PRODUCTO ════════ -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+  <div class="modal-panel" id="modalPanel">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <button class="modal-close" onclick="closeModal()"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+
+  <!-- ════════ WHATSAPP FLOTANTE ════════ -->
+  <a
+    href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸"
+    class="wa-float"
+    target="_blank"
+    aria-label="WhatsApp"
+  >
+    <i class="ri-whatsapp-line"></i>
+    <span class="wa-float-tooltip">¿Tienes dudas? ¡Escríbenos!</span>
+  </a>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- ════════ SCRIPTS ════════ -->
+  <!-- AOS y Swiper como antes -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" is:inline></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js" is:inline></script>
+
+  <!-- Scripts propios como módulos -->
+  <script src="/scripts/datos.js" is:inline></script>
+  <script src="/scripts/supabase.js" is:inline></script>
+  <script src="/scripts/emails.js" is:inline></script>
+  <script src="/scripts/app.js" is:inline></script>
+
+  <!-- Slot para scripts extra de cada página -->
+  <slot name="scripts" />
+
+</body>
+</html>

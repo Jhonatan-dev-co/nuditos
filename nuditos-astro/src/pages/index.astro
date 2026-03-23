@@ -1,0 +1,136 @@
+---
+/**
+ * Página principal — Nuditos Tejidos
+ * Equivalente al index.html actual, adaptado a Astro
+ */
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Nuditos Tejidos — Ramos de Crochet hechos a mano | Colombia"
+  description="Ramos de crochet únicos e irrepetibles. Flores que nunca se marchitan. Envíos a todo Colombia desde El Dorado, Meta."
+  ogType="website"
+>
+
+  <!-- ════════ BANNER DESCUENTO ════════ -->
+  <div id="discountBanner">
+    🎁 <span id="bannerText"></span>
+  </div>
+
+  <!-- ════════ HERO SWIPER ════════ -->
+  <div class="swiper hero-swiper" id="heroSwiper">
+    <div class="swiper-wrapper" id="heroSlides"></div>
+    <div class="swiper-pagination"></div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+  </div>
+
+  <!-- ════════ RAMO DEL MOMENTO ════════ -->
+  <div class="momento-wrap">
+    <div class="momento-card" id="ramoMomento"></div>
+  </div>
+
+  <!-- ════════ CATEGORÍAS STICKY ════════ -->
+  <div class="cat-sticky" id="catalogSection">
+    <div class="cat-inner">
+      <div class="cat-row" id="catRow"></div>
+    </div>
+  </div>
+
+  <!-- ════════ CATÁLOGO ════════ -->
+  <div class="catalog-section" id="catalogRows"></div>
+
+  <!-- ════════ FILTRO ACTIVO ════════ -->
+  <div id="filteredView">
+    <div class="filtered-header">
+      <h2 class="filtered-title" id="filteredTitle"></h2>
+      <button class="clear-filter" onclick="clearFilter()">← Ver todo</button>
+    </div>
+    <div class="filtered-grid" id="filteredGrid"></div>
+  </div>
+
+  <!-- ════════ RESEÑAS ════════ -->
+  <section class="reviews-section" id="resenas">
+    <div class="reviews-inner">
+      <div class="reviews-eyebrow">Lo que dicen nuestras clientas</div>
+      <h2 class="reviews-title">Amor tejido, <em>amor recibido</em></h2>
+      <div class="reviews-grid">
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Me llegó súper bien empacado y la calidad es increíble. Mi mamá lloró cuando lo vio 🌸 definitivamente vuelvo a pedir."</p>
+          <div class="review-author">
+            <div class="review-avatar">S</div>
+            <div>
+              <div class="review-name">Sara M.</div>
+              <div class="review-loc">Bogotá</div>
+            </div>
+          </div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Lo pedí para el grado de mi hija y quedó hermoso. Exactamente como en las fotos y llegó rapidísimo. 100% recomendado."</p>
+          <div class="review-author">
+            <div class="review-avatar">L</div>
+            <div>
+              <div class="review-name">Lucía R.</div>
+              <div class="review-loc">Medellín</div>
+            </div>
+          </div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Pedí un ramo personalizado con los colores favoritos de mi novia y quedó perfecto. El servicio fue muy atento y el envío llegó a tiempo."</p>
+          <div class="review-author">
+            <div class="review-avatar">C</div>
+            <div>
+              <div class="review-name">Carlos V.</div>
+              <div class="review-loc">Cali</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ PERSONALIZADO ════════ -->
+  <section class="custom-section" id="personalizado">
+    <div class="custom-inner">
+      <div class="custom-eyebrow">Hecho para ti</div>
+      <h2>¿Quieres algo <em>único?</em></h2>
+      <p>Cuéntame tus colores, la ocasión especial o el personaje que amas. Creo tu ramo exactamente como lo imaginas, puntada a puntada.</p>
+      <div class="custom-chips">
+        <button class="chip">🎂 Cumpleaños</button>
+        <button class="chip">💍 Bodas</button>
+        <button class="chip">💝 Aniversario</button>
+        <button class="chip">🎓 Grado</button>
+        <button class="chip">🎁 Regalo especial</button>
+        <button class="chip">🐱 Tu Michi</button>
+      </div>
+      <a
+        href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20personalizado%20🌸"
+        class="wa-btn"
+        target="_blank"
+      >
+        <i class="ri-whatsapp-line"></i> Escribir por WhatsApp
+      </a>
+    </div>
+  </section>
+
+  <!-- ════════ NOSOTROS ════════ -->
+  <section class="about-section" id="nosotros">
+    <div class="about-visual"><span>🧶</span></div>
+    <div class="about-content">
+      <div class="about-eyebrow">Nuestra historia</div>
+      <h2>Amor tejido <em>puntada a puntada</em></h2>
+      <p>Nuditos nació de la pasión por el crochet y el deseo de crear flores que jamás se marchiten. Cada ramo lleva horas de dedicación y mucho amor.</p>
+      <p>Trabajamos con hilos de alta calidad para garantizar colores vivos y durabilidad. Desde Colombia, llevamos flores eternas a todo el país.</p>
+      <div class="about-features">
+        <div class="about-feat"><i class="ri-plant-line"></i><span>Hilos premium</span></div>
+        <div class="about-feat"><i class="ri-hand-heart-line"></i><span>100% hecho a mano</span></div>
+        <div class="about-feat"><i class="ri-heart-3-line"></i><span>Con mucho amor</span></div>
+        <div class="about-feat"><i class="ri-truck-line"></i><span>Envío a Colombia</span></div>
+      </div>
+    </div>
+  </section>
+
+</Layout>

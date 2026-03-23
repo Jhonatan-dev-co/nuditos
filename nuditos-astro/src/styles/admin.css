@@ -1,0 +1,167 @@
+/* ══════════════════════════════════════════
+   NUDITOS — Estilos Panel Admin
+   css/admin.css
+   ══════════════════════════════════════════ */
+
+:root {
+  --lila:#9b76b8; --lila-light:#f0e8f8; --mint:#5eab80; --mint-light:#e3f5ec;
+  --cream:#fdf9f4; --white:#fff; --text:#1e1624; --text-soft:#7a6882;
+  --red:#e74c3c; --gold:#d4a843;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);}
+
+/* ── LOGIN ── */
+#loginScreen {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,var(--lila-light),var(--mint-light));
+}
+.login-card {
+  background:white; border-radius:24px; padding:2.5rem 2rem;
+  width:min(380px,92vw); text-align:center;
+  box-shadow:0 20px 60px rgba(155,118,184,0.2);
+}
+.login-logo { font-family:'Playfair Display',serif; font-size:2rem; color:var(--lila); margin-bottom:0.3rem; }
+.login-sub { color:var(--text-soft); font-size:0.85rem; margin-bottom:2rem; }
+.login-input {
+  width:100%; padding:0.85rem 1.2rem; border:1.5px solid var(--lila-light);
+  border-radius:50px; font-family:'Outfit',sans-serif; font-size:0.9rem;
+  outline:none; margin-bottom:1rem; text-align:center; letter-spacing:4px;
+  transition:border-color 0.3s;
+}
+.login-input:focus { border-color:var(--lila); }
+.login-btn {
+  width:100%; background:var(--lila); color:white; border:none;
+  padding:0.9rem; border-radius:50px; font-family:'Outfit',sans-serif;
+  font-size:0.95rem; font-weight:600; cursor:pointer; transition:all 0.3s;
+}
+.login-btn:hover { background:#8a65a7; }
+.login-err { color:var(--red); font-size:0.82rem; margin-top:0.8rem; display:none; }
+
+/* ── ADMIN PANEL ── */
+#adminPanel { display:none; }
+.admin-nav {
+  background:var(--text); color:white; padding:1rem 2rem;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:10;
+}
+.admin-logo { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--lila-light); }
+.admin-logo span { font-family:'Outfit',sans-serif; font-size:0.78rem; font-weight:400; opacity:0.5; margin-left:0.5rem; }
+.logout-btn {
+  background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);
+  padding:0.4rem 1rem; border-radius:50px; cursor:pointer;
+  font-family:'Outfit',sans-serif; font-size:0.8rem; transition:all 0.3s;
+}
+.logout-btn:hover { background:rgba(255,255,255,0.2); }
+
+.admin-body { max-width:900px; margin:0 auto; padding:2rem 1.5rem; display:flex; flex-direction:column; gap:1.5rem; }
+
+/* ── CARDS ── */
+.admin-card { background:white; border-radius:20px; padding:1.8rem; box-shadow:0 4px 20px rgba(155,118,184,0.08); }
+.card-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; margin-bottom:0.3rem; color:var(--text); display:flex; align-items:center; gap:0.5rem; }
+.card-sub { font-size:0.82rem; color:var(--text-soft); margin-bottom:1.5rem; }
+
+/* ── FORM ELEMENTS ── */
+label { font-size:0.83rem; font-weight:600; color:var(--text-soft); display:block; margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.5px; }
+.field { margin-bottom:1.2rem; }
+input[type=text], input[type=number], select, textarea {
+  width:100%; padding:0.75rem 1rem; border:1.5px solid var(--lila-light);
+  border-radius:12px; font-family:'Outfit',sans-serif; font-size:0.88rem;
+  outline:none; color:var(--text); background:var(--cream);
+  transition:border-color 0.3s;
+}
+input:focus, select:focus, textarea:focus { border-color:var(--lila); background:white; }
+textarea { resize:vertical; min-height:80px; }
+
+/* ── TOGGLE ── */
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:0.8rem 0; border-bottom:1px solid var(--lila-light); }
+.toggle-row:last-child { border-bottom:none; }
+.toggle-label { font-weight:500; font-size:0.9rem; }
+.toggle-desc { font-size:0.78rem; color:var(--text-soft); margin-top:0.2rem; }
+.toggle {
+  width:48px; height:26px; background:#ddd; border-radius:50px; border:none;
+  cursor:pointer; position:relative; transition:background 0.3s; flex-shrink:0;
+}
+.toggle::after {
+  content:''; position:absolute; top:3px; left:3px;
+  width:20px; height:20px; background:white; border-radius:50%;
+  transition:transform 0.3s; box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+.toggle.on { background:var(--mint); }
+.toggle.on::after { transform:translateX(22px); }
+
+/* ── SAVE BTN ── */
+.save-btn {
+  background:var(--lila); color:white; border:none;
+  padding:0.8rem 2rem; border-radius:50px;
+  font-family:'Outfit',sans-serif; font-size:0.9rem; font-weight:600;
+  cursor:pointer; transition:all 0.3s; display:flex; align-items:center; gap:0.5rem;
+}
+.save-btn:hover { background:#8a65a7; transform:scale(1.02); }
+.save-btn.saved { background:var(--mint); }
+
+/* ── PRODUCT LIST ── */
+.product-list { display:flex; flex-direction:column; gap:0.6rem; max-height:400px; overflow-y:auto; }
+.product-row {
+  display:flex; align-items:center; gap:1rem;
+  padding:0.7rem 1rem; border-radius:12px;
+  border:1.5px solid var(--lila-light); background:var(--cream);
+  transition:border-color 0.2s;
+}
+.product-row:hover { border-color:var(--lila); }
+.product-row-emoji { font-size:1.6rem; flex-shrink:0; }
+.product-row-info { flex:1; }
+.product-row-name { font-weight:600; font-size:0.88rem; }
+.product-row-price { font-size:0.78rem; color:var(--text-soft); }
+.select-star {
+  background:var(--lila-light); color:var(--lila); border:none;
+  padding:0.35rem 0.9rem; border-radius:50px; cursor:pointer;
+  font-size:0.78rem; font-weight:600; transition:all 0.2s;
+}
+.select-star:hover, .select-star.selected { background:var(--lila); color:white; }
+
+/* ── HERO SELECTOR ── */
+.hero-slots { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.8rem; margin-bottom:1.2rem; }
+.hero-slot {
+  border:2px dashed var(--lila-light); border-radius:14px;
+  padding:1rem; text-align:center; font-size:0.82rem; color:var(--text-soft);
+  min-height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.4rem;
+}
+.hero-slot.filled { border-color:var(--lila); background:var(--lila-light); color:var(--lila); }
+.hero-slot-emoji { font-size:1.8rem; }
+.hero-slot-name { font-weight:600; font-size:0.78rem; }
+
+.search-input {
+  width:100%; padding:0.7rem 1rem; border:1.5px solid var(--lila-light);
+  border-radius:50px; font-family:'Outfit',sans-serif; font-size:0.85rem;
+  outline:none; margin-bottom:1rem; transition:border-color 0.3s;
+}
+.search-input:focus { border-color:var(--lila); }
+
+/* ── SAVE BAR ── */
+.save-bar {
+  position:fixed; bottom:0; left:0; right:0;
+  background:white; padding:1rem 2rem;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.08);
+  display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; flex-wrap:wrap; z-index:20;
+}
+.save-bar-msg { font-size:0.85rem; color:var(--text-soft); }
+.save-bar-msg strong { color:var(--lila); }
+
+/* ── TOAST ADMIN ── */
+.toast-admin {
+  position:fixed; top:80px; right:1.5rem;
+  background:var(--mint); color:white;
+  padding:0.7rem 1.5rem; border-radius:50px;
+  font-size:0.85rem; font-weight:600; z-index:300;
+  transform:translateX(150%); transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast-admin.show { transform:translateX(0); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px) {
+  .hero-slots { grid-template-columns:1fr 1fr; }
+  .admin-body { padding:1rem; }
+}
