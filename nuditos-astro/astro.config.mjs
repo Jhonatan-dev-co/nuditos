@@ -4,18 +4,16 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://nuditos.com.co',
-  output: 'hybrid',          // Mayoría estático + SSR donde se necesite
+  output: 'hybrid',
   adapter: netlify(),
   integrations: [
     sitemap({
-      // El sitemap incluye todas las páginas generadas automáticamente
       changefreq: 'weekly',
       priority: 0.7,
-      lastmod: new Date(),
+      lastmod: new Date('2025-03-23'),
     }),
   ],
   vite: {
-    // Permite importar CSS desde src/styles/
     css: {
       devSourcemap: true,
     },
