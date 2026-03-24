@@ -1,7 +1,8 @@
 [build]
-  command = "npx astro build"
-  publish   = "dist"
-  functions = "netlify/functions"
+  base      = "nuditos-astro"
+  command   = "npm install && npx astro build"
+  publish   = "nuditos-astro/dist"
+  functions = "nuditos-astro/netlify/functions"
 
 [[headers]]
   for = "/*"
@@ -10,7 +11,6 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Cache largo para assets estáticos (Astro los hashea)
 [[headers]]
   for = "/_astro/*"
   [headers.values]
