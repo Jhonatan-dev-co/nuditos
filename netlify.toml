@@ -1,6 +1,5 @@
 [build]
-  base      = "nuditos-astro"
-  command   = "npm install && chmod +x ./node_modules/.bin/astro && ./node_modules/.bin/astro build"
+  command   = "npm install && npm run build"
   publish   = "dist"
   functions = "netlify/functions"
 

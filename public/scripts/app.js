@@ -4,13 +4,22 @@
    ══════════════════════════════════════════ */
 
 const WA_NUMBER      = '573144931525';
-const WOMPI_PUBLIC_KEY = 'pub_test_XXXXXXXXXXXXXXXX'; // Cambia por tu llave real de Wompi
+const WOMPI_PUBLIC_KEY = 'pub_test_XXXXXXXXXXXXXXXX';
 
 let cart = [];
 let appliedDiscount = null;
 let activeFilter = null;
 let modalSwiperInstance = null;
 let catSwipers = {};
+
+/* ════════════════════════════
+   SLUG
+════════════════════════════ */
+function slugify(text) {
+  return (text || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+}
 
 /* ════════════════════════════
    SUPABASE — Carga de datos
@@ -22,9 +31,8 @@ let _sbBanners  = null;
 async function loadStoreData() {
   const CACHE_KEY = 'nuditos_sb_data';
   const CACHE_TS  = 'nuditos_sb_ts';
-  const TTL = 30 * 60 * 1000; // 30 minutos
+  const TTL = 30 * 60 * 1000;
 
-  // 1. Mostrar cache inmediatamente si existe (velocidad)
   try {
     const cached = localStorage.getItem(CACHE_KEY);
     const ts     = parseInt(localStorage.getItem(CACHE_TS) || '0');
@@ -34,11 +42,9 @@ async function loadStoreData() {
       if (d.config)   _sbConfig   = d.config;
       if (d.banners)  _sbBanners  = d.banners;
     }
-    // 2. Si el cache es reciente (< 30 min) no hace falta recargar
     if (_sbProducts && _sbConfig && (Date.now() - ts < TTL)) return;
   } catch {}
 
-  // 3. Actualizar desde Supabase en segundo plano (frescura)
   try {
     const [products, config, banners] = await Promise.all([
       sbGetProducts(),
@@ -49,19 +55,15 @@ async function loadStoreData() {
     if (config)   _sbConfig   = config;
     if (banners)  _sbBanners  = banners;
 
-    // Guardar cache actualizado
     localStorage.setItem(CACHE_KEY, JSON.stringify({
       products: _sbProducts,
       config:   _sbConfig,
       banners:  _sbBanners,
     }));
     localStorage.setItem(CACHE_TS, Date.now().toString());
-  } catch {
-    // Supabase no disponible → usa datos.js como fallback
-  }
+  } catch {}
 }
 
-// Llamar esto desde el admin después de guardar cualquier cambio
 function invalidarCacheTienda() {
   try {
     localStorage.removeItem('nuditos_sb_data');
@@ -74,7 +76,6 @@ function invalidarCacheTienda() {
 ════════════════════════════ */
 function getProducts() {
   if (_sbProducts) return _sbProducts;
-  // Fallback: datos.js
   return products;
 }
 const activeProducts = () => getProducts().filter(p => p.activo !== false);
@@ -131,13 +132,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSearch();
 });
 
-
 /* ════════════════════════════
    META PIXEL
 ════════════════════════════ */
 function loadMetaPixel(cfg) {
   if (!cfg || !cfg.metaPixelActivo || !cfg.metaPixelId) return;
-  if (window.fbq) return; // ya cargado
+  if (window.fbq) return;
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){
   n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
   if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
@@ -180,9 +180,7 @@ function renderHero(cfg) {
             ${p.price > 0 ? `$${p.price.toLocaleString('es-CO')}<span> COP</span>` : `<span>Consultar precio</span>`}
           </div>
           <div class="hero-ctas">
-            ${p.price > 0
-              ? `<button class="btn-hero" onclick="addToCart(${p.id});toggleCart()"><i class="ri-shopping-bag-line"></i> Agregar</button>`
-              : `<a href="https://wa.me/${WA_NUMBER}?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}" target="_blank" class="btn-hero"><i class="ri-whatsapp-line"></i> Consultar</a>`}
+            <a href="/ramo/${slugify(p.name)}" class="btn-hero"><i class="ri-eye-line"></i> Ver producto</a>
             <a href="#catalogSection" class="btn-hero-ghost"><i class="ri-grid-line"></i> Ver catálogo</a>
           </div>
         </div>
@@ -228,8 +226,8 @@ function renderMomento(cfg) {
         ${p.price > 0 ? `$${p.price.toLocaleString('es-CO')}<span> COP</span>` : `Consultar`}
       </div>
       ${p.price > 0 ? `<button class="btn-momento" onclick="addToCart(${p.id})"><i class="ri-shopping-bag-line"></i> Agregar</button>` : ''}
-      <a href="https://wa.me/${WA_NUMBER}?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}" target="_blank" class="btn-momento-ghost">
-        <i class="ri-whatsapp-line"></i> Preguntar
+      <a href="/ramo/${slugify(p.name)}" class="btn-momento-ghost">
+        <i class="ri-eye-line"></i> Ver detalle
       </a>
     </div>`;
 }
@@ -349,7 +347,7 @@ function initCatSwiper(catId) {
 }
 
 /* ════════════════════════════
-   BUILD CARD
+   BUILD CARD — con link a página de producto
 ════════════════════════════ */
 function badgeIcon(badge) {
   if (badge === 'Nuevo')    return '<i class="ri-sparkling-line"></i>';
@@ -381,14 +379,16 @@ function buildCard(p) {
     ? `<button class="p-add-btn" id="padd-${p.id}" onclick="event.stopPropagation();addToCart(${p.id})"><i class="ri-shopping-bag-line"></i></button>`
     : `<a class="p-add-btn p-wa-btn" href="https://wa.me/${WA_NUMBER}?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}" target="_blank" onclick="event.stopPropagation()"><i class="ri-whatsapp-line"></i></a>`;
 
+  const productSlug = slugify(p.name);
+
   return `
-    <div class="product-card" onclick="openModal(${p.id})">
+    <a class="product-card" href="/ramo/${productSlug}" style="text-decoration:none;color:inherit;display:block">
       <div class="product-img-wrap">
         ${badgeHtml}${imgContent}
         <div class="card-overlay">
-          <button class="card-overlay-btn" onclick="event.stopPropagation();openModal(${p.id})">
+          <span class="card-overlay-btn">
             <i class="ri-eye-line"></i> Ver detalle
-          </button>
+          </span>
         </div>
         ${addBtn}
       </div>
@@ -398,17 +398,17 @@ function buildCard(p) {
         <div class="p-price">${priceHtml}</div>
         ${envioTag}
       </div>
-    </div>`;
+    </a>`;
 }
 
 /* ════════════════════════════
-   BUILD LIST ITEM
+   BUILD LIST ITEM — con link
 ════════════════════════════ */
 function buildListItem(p) {
   const thumb = p.img ? `<img src="${p.img}" alt="${p.name}" loading="lazy">` : `<span>${p.emoji}</span>`;
   const price = p.price > 0 ? `$${p.price.toLocaleString('es-CO')} COP` : 'Consultar';
   return `
-    <div class="product-list-item" onclick="openModal(${p.id})">
+    <a class="product-list-item" href="/ramo/${slugify(p.name)}" style="text-decoration:none;color:inherit;display:flex">
       <div class="list-item-img">${thumb}</div>
       <div class="list-item-info">
         <div class="list-item-name">${p.name}</div>
@@ -417,11 +417,11 @@ function buildListItem(p) {
       </div>
       <div class="list-item-actions">
         ${p.price > 0
-          ? `<button class="p-add-btn" id="padd-${p.id}" onclick="event.stopPropagation();addToCart(${p.id})"><i class="ri-shopping-bag-line"></i></button>`
+          ? `<button class="p-add-btn" id="padd-${p.id}" onclick="event.preventDefault();event.stopPropagation();addToCart(${p.id})"><i class="ri-shopping-bag-line"></i></button>`
           : `<a class="p-add-btn p-wa-btn" href="https://wa.me/${WA_NUMBER}?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}" target="_blank" onclick="event.stopPropagation()"><i class="ri-whatsapp-line"></i></a>`}
         <i class="ri-arrow-right-s-line list-arrow"></i>
       </div>
-    </div>`;
+    </a>`;
 }
 
 /* ════════════════════════════
@@ -456,7 +456,7 @@ function clearFilter() {
 }
 
 /* ════════════════════════════
-   BÚSQUEDA
+   BÚSQUEDA — con links
 ════════════════════════════ */
 function initSearch() {
   const overlay = document.createElement('div');
@@ -494,14 +494,14 @@ function renderSearchResults(items, q) {
   el.innerHTML = items.map(p => {
     const thumb = p.img ? `<img src="${p.img}" alt="${p.name}">` : `<span>${p.emoji}</span>`;
     return `
-      <div class="search-item" onclick="closeSearch();openModal(${p.id})">
+      <a class="search-item" href="/ramo/${slugify(p.name)}" onclick="closeSearch()" style="text-decoration:none;color:inherit">
         <div class="search-item-img">${thumb}</div>
         <div class="search-item-info">
           <div class="search-item-name">${p.name}</div>
           <div class="search-item-price">${p.price > 0 ? `$${p.price.toLocaleString('es-CO')} COP` : 'Consultar'}</div>
         </div>
         <i class="ri-arrow-right-s-line"></i>
-      </div>`;
+      </a>`;
   }).join('');
 }
 
@@ -518,80 +518,12 @@ function closeSearch() {
 }
 
 /* ════════════════════════════
-   MODAL
+   MODAL (se mantiene para compatibilidad)
 ════════════════════════════ */
 function openModal(id) {
+  // Redirige a la página del producto
   const p = getProducts().find(x => x.id === id);
-  if (!p) return;
-  const cat = categories.find(c => c.id === p.cat);
-  const allImgs = p.imgs && p.imgs.length ? p.imgs : (p.img ? [p.img] : []);
-  const slides = allImgs.length
-    ? allImgs.map(src => `<div class="swiper-slide modal-slide"><img src="${src}" alt="${p.name}"></div>`).join('')
-    : `<div class="swiper-slide modal-slide modal-slide-emoji">${p.emoji}</div>`;
-
-  document.getElementById('modalBody').innerHTML = `
-    <div class="swiper modal-swiper" id="modalSwiper">
-      <div class="swiper-wrapper">${slides}</div>
-      ${allImgs.length > 1 ? '<div class="swiper-pagination"></div>' : ''}
-    </div>
-    <div class="modal-info">
-      <div class="modal-top-row">
-        <div class="modal-category"><i class="ri-price-tag-3-line"></i> ${cat ? cat.name : ''}</div>
-        ${p.badge ? `<div class="p-badge ${p.badgeClass||''}">${badgeIcon(p.badge)} ${p.badge}</div>` : ''}
-      </div>
-      <div class="modal-name">${p.name}</div>
-      <div class="modal-desc"><i class="ri-information-line"></i> ${p.desc}</div>
-      ${p.price > 0
-        ? `<div class="modal-price"><i class="ri-price-tag-3-line"></i> $${p.price.toLocaleString('es-CO')}<span> COP</span></div>`
-        : `<div class="modal-price modal-price-consultar"><i class="ri-whatsapp-line"></i> Consultar precio</div>`}
-    </div>
-    <div class="modal-actions">
-      ${p.price > 0 ? `<button class="btn-add-cart" id="modalAddBtn" onclick="addToCart(${p.id});updateModalBtn(${p.id})"><i class="ri-shopping-bag-line"></i> Agregar al carrito</button>` : ''}
-      <a href="https://wa.me/${WA_NUMBER}?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}" target="_blank" class="btn-wa-modal">
-        <i class="ri-whatsapp-line"></i> Preguntar por WhatsApp
-      </a>
-    </div>`;
-
-  if (modalSwiperInstance) { try { modalSwiperInstance.destroy(true, true); } catch {} }
-  setTimeout(() => {
-    if (allImgs.length > 1) {
-      modalSwiperInstance = new Swiper('#modalSwiper', {
-        pagination: { el: '.swiper-pagination', clickable: true, dynamicBullets: true },
-        grabCursor: true,
-      });
-    }
-    // Zoom en fotos al tocar/click
-    document.querySelectorAll('.modal-slide img').forEach(img => {
-      let zoomed = false;
-      let startX, startY, lastX, lastY;
-      img.addEventListener('click', (e) => {
-        if (zoomed) {
-          img.style.transform = 'scale(1)';
-          img.style.cursor = 'zoom-in';
-          img.style.objectPosition = 'center';
-          zoomed = false;
-        } else {
-          const rect = img.getBoundingClientRect();
-          const x = ((e.clientX - rect.left) / rect.width) * 100;
-          const y = ((e.clientY - rect.top) / rect.height) * 100;
-          img.style.transformOrigin = `${x}% ${y}%`;
-          img.style.transform = 'scale(2.5)';
-          img.style.cursor = 'zoom-out';
-          zoomed = true;
-        }
-      });
-      // Touch zoom
-      img.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1) {
-          startX = e.touches[0].clientX;
-          startY = e.touches[0].clientY;
-        }
-      }, { passive: true });
-    });
-  }, 80);
-  document.getElementById('modalOverlay').classList.add('open');
-  document.getElementById('modalPanel').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  if (p) window.location.href = `/ramo/${slugify(p.name)}`;
 }
 
 function closeModal() {
@@ -693,7 +625,6 @@ async function applyDiscount() {
   const msg  = document.getElementById('discountMsg');
   const cfg  = getConfig();
 
-  // Primero verificar en config local
   if (cfg.descuentoActivo && code === cfg.descuentoCodigo.toUpperCase()) {
     appliedDiscount = { code, pct: cfg.descuentoPorcentaje };
     msg.textContent = `✓ ${cfg.descuentoPorcentaje}% de descuento aplicado`;
@@ -703,7 +634,6 @@ async function applyDiscount() {
     return;
   }
 
-  // Verificar en Supabase (cupones de tabla)
   msg.textContent = 'Verificando...';
   msg.className = 'discount-msg';
   const cupon = await sbCheckCupon(code);
