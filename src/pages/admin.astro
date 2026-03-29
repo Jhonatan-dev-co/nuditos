@@ -6,6 +6,7 @@
  * noindex para que Google no lo indexe
  */
 export const prerender = false;
+Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
 ---
 
 <!DOCTYPE html>
@@ -364,7 +365,7 @@ function saveCloudinaryConfig(){
 async function uploadToCloudinary(file){
   showUploadProgress(0);
   try{
-    const signRes=await fetch('/.netlify/functions/cloudinary-sign',{method:'POST'});
+    const signRes=await fetch('/api/cloudinary-sign',{method:'POST'});
     if(!signRes.ok)throw new Error('No se pudo obtener la firma');
     const{signature,timestamp,apiKey,cloudName,uploadPreset,folder}=await signRes.json();
     const fd=new FormData();

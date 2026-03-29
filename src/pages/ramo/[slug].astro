@@ -9,12 +9,13 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 
 const { slug } = Astro.params;
+Astro.response.headers.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=600');
 
 const SB_URL  = 'https://fpyhkxikxdwjhukltmqf.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweWhreGlreGR3amh1a2x0bXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzE1OTIsImV4cCI6MjA4ODI0NzU5Mn0.U1fHtV23e3uTlaH9qoeibzbm1d6MEcUaFE7rDhnokgM';
 
 const WA_NUMBER = '573144931525';
-const SITE_URL  = 'https://flourishing-jalebi-c858a8.netlify.app';
+const SITE_URL  = Astro.site?.toString().replace(/\/$/, '') || Astro.url.origin;
 
 function slugify(text: string) {
   return (text || '').toLowerCase()
