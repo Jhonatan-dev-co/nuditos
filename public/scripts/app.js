@@ -117,6 +117,23 @@ function renderSkeletons() {
   catalog.innerHTML = grid + grid;
 }
 
+/* ════════════════════════════
+   SCROLL AL CATÁLOGO
+════════════════════════════ */
+function scrollToCatalog() {
+  // Intenta el id "catalogSection", si no existe busca el primer cat-section
+  const target =
+    document.getElementById('catalogSection') ||
+    document.querySelector('.cat-sticky') ||
+    document.getElementById('catalogRows');
+  if (!target) return;
+  const navH   = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 60;
+  const pillsH = document.querySelector('.cat-sticky')?.offsetHeight || 52;
+  const offset = navH + pillsH;
+  const top    = target.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top, behavior: 'smooth' });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   AOS.init({ duration: 700, once: true, offset: 30, easing: 'ease-out-cubic' });
   renderSkeletons();
@@ -181,7 +198,7 @@ function renderHero(cfg) {
           </div>
           <div class="hero-ctas">
             <a href="/ramo/${slugify(p.name)}" class="btn-hero"><i class="ri-eye-line"></i> Ver producto</a>
-            <a href="#catalogSection" class="btn-hero-ghost"><i class="ri-grid-line"></i> Ver catálogo</a>
+            <a href="/catalogo" class="btn-hero-ghost"><i class="ri-grid-line"></i> Ver catálogo</a>
           </div>
         </div>
       </div>`;

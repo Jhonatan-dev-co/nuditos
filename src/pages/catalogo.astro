@@ -1,0 +1,931 @@
+---
+/**
+ * Nuditos — Catálogo completo
+ * URL: /catalogo
+ * SSR · Filtros client-side · SEO completo · Schema.org ItemList
+ */
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+
+const SB_URL  = 'https://fpyhkxikxdwjhukltmqf.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweWhreGlreGR3amh1a2x0bXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzE1OTIsImV4cCI6MjA4ODI0NzU5Mn0.U1fHtV23e3uTlaH9qoeibzbm1d6MEcUaFE7rDhnokgM';
+const WA_NUMBER = '573144931525';
+const SITE_URL  = Astro.site?.toString().replace(/\/$/, '') || Astro.url.origin;
+
+function slugify(text: string) {
+  return (text || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+}
+
+const catMeta: Record<string, { name: string; icon: string; desc: string }> = {
+  rosas:      { name: 'Rosas',            icon: '🌹', desc: 'Ramos de rosas tejidas a mano' },
+  amarillas:  { name: 'Flores Amarillas', icon: '🌻', desc: 'Girasoles y flores amarillas' },
+  noche:      { name: 'Noche Estrellada', icon: '🌙', desc: 'Inspirados en Van Gogh' },
+  snoopy:     { name: 'Snoopy',           icon: '🐶', desc: 'Ramos temáticos Snoopy' },
+  macetas:    { name: 'Macetas',          icon: '🌱', desc: 'Macetas tejidas decorativas' },
+  rapunzel:   { name: 'Rapunzel',         icon: '🌸', desc: 'Colección Rapunzel' },
+  especial:   { name: 'Especiales',       icon: '✨', desc: 'Ramos únicos y personalizados' },
+  amigurumis: { name: 'Amigurumis',       icon: '🧸', desc: 'Muñecos tejidos a crochet' },
+};
+
+let allProducts: any[] = [];
+let fetchError = false;
+
+try {
+  const res = await fetch(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc`, {
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
+  });
+  const rows = await res.json();
+  allProducts = rows.map((p: any) => ({
+    id:             p.id,
+    name:           p.nombre          || '',
+    price:          p.precio          || 0,
+    precioOriginal: p.precio_original || 0,
+    desc:           p.descripcion     || '',
+    cat:            p.categoria       || '',
+    emoji:          p.emoji           || '🌸',
+    img:            p.img             || '',
+    stock:          p.stock,
+    badge:          p.badge           || '',
+    badgeClass:     p.badge_class     || '',
+    oferta:         p.oferta          || false,
+    envioGratis:    p.envio_gratis    || false,
+    destacado:      p.destacado       || false,
+    slug:           slugify(p.nombre  || ''),
+  }));
+} catch (e) {
+  console.error('[catalogo]', e);
+  fetchError = true;
+}
+
+// URL param: categoria inicial
+const urlCat = Astro.url.searchParams.get('categoria') || 'todos';
+
+const totalProducts = allProducts.length;
+const seoTitle   = 'Catálogo | Nuditos Tejidos — Ramos y Amigurumis Hechos a Mano';
+const seoDesc    = `Explora más de ${totalProducts} productos tejidos a mano: ramos eternos, amigurumis, macetas y regalos únicos. Envío a toda Colombia. ¡Encuentra tu regalo perfecto!`;
+const canonical  = `${SITE_URL}/catalogo`;
+
+// Schema ItemList para SEO
+const schemaItemList = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Catálogo Nuditos Tejidos',
+  description: seoDesc,
+  numberOfItems: totalProducts,
+  itemListElement: allProducts.slice(0, 30).map((p, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: {
+      '@type': 'Product',
+      name: p.name,
+      description: p.desc,
+      image: p.img || '',
+      url: `${SITE_URL}/ramo/${p.slug}`,
+      brand: { '@type': 'Brand', name: 'Nuditos Tejidos' },
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'COP',
+        price: p.price || 0,
+        availability: 'https://schema.org/InStock',
+      },
+    },
+  })),
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Inicio',   item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Catálogo', item: canonical },
+  ],
+};
+---
+
+<Layout
+  title={seoTitle}
+  description={seoDesc}
+  canonical={canonical}
+  ogType="website"
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(schemaItemList)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title"       content={seoTitle} />
+    <meta property="og:description" content={seoDesc} />
+    <meta property="og:url"         content={canonical} />
+    <meta name="robots" content="index, follow" />
+  </Fragment>
+
+  <!-- ══════════════ HERO CATÁLOGO ══════════════ -->
+  <section class="cat-hero" aria-label="Catálogo Nuditos">
+    <div class="cat-hero-inner">
+      <nav class="cat-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Inicio</a>
+        <i class="ri-arrow-right-s-line"></i>
+        <span>Catálogo</span>
+      </nav>
+      <h1 class="cat-hero-title">
+        <span class="cat-hero-emoji">🌸</span>
+        Catálogo Nuditos
+      </h1>
+      <p class="cat-hero-sub">
+        {totalProducts} productos tejidos a mano · Envío a toda Colombia
+      </p>
+    </div>
+    <div class="cat-hero-deco" aria-hidden="true">
+      <span>🌹</span><span>🌻</span><span>🧸</span><span>✨</span><span>🌙</span>
+    </div>
+  </section>
+
+  <!-- ══════════════ BARRA FILTROS (sticky) ══════════════ -->
+  <div class="cfilter-wrap" id="filterBar">
+    <div class="cfilter-inner">
+
+      <!-- Categorías pills -->
+      <div class="cfilter-cats" id="catPills" role="tablist" aria-label="Filtrar por categoría">
+        <button class="cfpill active" data-cat="todos" role="tab" aria-selected="true">
+          🌸 Todos <span class="cfpill-count" id="cnt-todos">{totalProducts}</span>
+        </button>
+        {Object.entries(catMeta).map(([id, c]) => {
+          const cnt = allProducts.filter(p => p.cat === id).length;
+          return cnt > 0 ? (
+            <button class="cfpill" data-cat={id} role="tab" aria-selected="false">
+              {c.icon} {c.name} <span class="cfpill-count">{cnt}</span>
+            </button>
+          ) : null;
+        })}
+      </div>
+
+      <!-- Controles derecha -->
+      <div class="cfilter-controls">
+        <!-- Búsqueda -->
+        <div class="cfilter-search-wrap">
+          <i class="ri-search-line"></i>
+          <input
+            type="search"
+            id="catSearch"
+            placeholder="Buscar producto..."
+            autocomplete="off"
+            aria-label="Buscar en el catálogo"
+          />
+          <button class="cfilter-search-clear" id="searchClear" aria-label="Limpiar búsqueda">
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+
+        <!-- Ordenar -->
+        <div class="cfilter-sort-wrap">
+          <i class="ri-sort-desc"></i>
+          <select id="catSort" aria-label="Ordenar productos">
+            <option value="default">Destacados</option>
+            <option value="price-asc">Precio: menor a mayor</option>
+            <option value="price-desc">Precio: mayor a menor</option>
+            <option value="name-asc">Nombre A–Z</option>
+            <option value="oferta">Solo ofertas</option>
+            <option value="envio">Envío gratis</option>
+          </select>
+        </div>
+
+        <!-- Toggle vista -->
+        <div class="cfilter-view-toggle" role="group" aria-label="Vista">
+          <button class="cvtoggle active" id="viewGrid" aria-label="Vista cuadrícula" title="Cuadrícula">
+            <i class="ri-grid-line"></i>
+          </button>
+          <button class="cvtoggle" id="viewList" aria-label="Vista lista" title="Lista">
+            <i class="ri-list-unordered"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chips activos -->
+    <div class="active-chips-bar" id="activeChips" style="display:none">
+      <div class="active-chips-inner">
+        <span class="chips-label">Filtros:</span>
+        <div id="chipsContainer"></div>
+        <button class="chip-clear-all" id="clearAllFilters">
+          <i class="ri-close-circle-line"></i> Limpiar todo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ CONTENIDO PRINCIPAL ══════════════ -->
+  <main class="catalog-main" id="catalogMain">
+
+    <!-- Conteo resultados -->
+    <div class="catalog-topbar">
+      <p class="catalog-count" id="resultCount">
+        Mostrando <strong>{totalProducts}</strong> productos
+      </p>
+    </div>
+
+    <!-- Grid de productos -->
+    <div class="catalog-grid" id="catalogGrid" data-view="grid">
+      {allProducts.map(p => {
+        const cat = catMeta[p.cat] || { name: p.cat, icon: '🌸', desc: '' };
+        const productUrl = `/ramo/${p.slug}`;
+        const priceDisplay = p.oferta && p.precioOriginal > 0
+          ? `<span class="cp-orig">$${p.precioOriginal.toLocaleString('es-CO')}</span> $${p.price.toLocaleString('es-CO')}<small> COP</small>`
+          : p.price > 0
+            ? `$${p.price.toLocaleString('es-CO')}<small> COP</small>`
+            : `<span class="cp-consultar"><i class="ri-whatsapp-line"></i> Consultar</span>`;
+        const badgeHtml = p.badge
+          ? `<div class="cp-badge cp-badge-${p.badge.toLowerCase()}">${
+              p.badge === 'Nuevo' ? '<i class="ri-sparkling-line"></i>' :
+              p.badge === 'Popular' ? '<i class="ri-fire-line"></i>' :
+              p.badge === 'Especial' ? '<i class="ri-award-line"></i>' : ''
+            } ${p.badge}</div>`
+          : p.oferta ? '<div class="cp-badge cp-badge-oferta"><i class="ri-price-tag-3-fill"></i> Oferta</div>' : '';
+
+        return (
+          <article
+            class="cp-card"
+            data-cat={p.cat}
+            data-price={p.price}
+            data-name={p.name.toLowerCase()}
+            data-badge={p.badge}
+            data-oferta={p.oferta ? '1' : '0'}
+            data-envio={p.envioGratis ? '1' : '0'}
+            data-destacado={p.destacado ? '1' : '0'}
+          >
+            <a href={productUrl} class="cp-card-link" aria-label={`Ver ${p.name}`}>
+              <div class="cp-img-wrap">
+                {p.img
+                  ? <img src={p.img} alt={p.name} loading="lazy" width="400" height="400" />
+                  : <div class="cp-emoji-ph">{p.emoji}</div>
+                }
+                <Fragment set:html={badgeHtml} />
+                {p.envioGratis && (
+                  <div class="cp-envio-tag"><i class="ri-truck-line"></i> Envío gratis</div>
+                )}
+                <div class="cp-overlay">
+                  <span><i class="ri-eye-line"></i> Ver detalle</span>
+                </div>
+              </div>
+
+              <div class="cp-info">
+                <div class="cp-cat-label">{cat.icon} {cat.name}</div>
+                <h2 class="cp-name">{p.name}</h2>
+                {p.desc && <p class="cp-desc">{p.desc}</p>}
+                <div class="cp-price" set:html={priceDisplay} />
+              </div>
+            </a>
+
+            <div class="cp-actions">
+              {p.price > 0
+                ? <button
+                    class="cp-btn-add"
+                    data-id={p.id}
+                    aria-label={`Agregar ${p.name} al carrito`}
+                    onclick={`catAddToCart(${p.id}, this)`}
+                  >
+                    <i class="ri-shopping-bag-line"></i>
+                  </button>
+                : <a
+                    class="cp-btn-wa"
+                    href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hola Nuditos! 🌸 Me interesa: *${p.name}*`)}`}
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="Consultar por WhatsApp"
+                  >
+                    <i class="ri-whatsapp-line"></i>
+                  </a>
+              }
+            </div>
+          </article>
+        );
+      })}
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="cat-empty" id="catEmpty" style="display:none" aria-live="polite">
+      <div class="cat-empty-icon">🌸</div>
+      <h3>No encontramos resultados</h3>
+      <p>Prueba con otra categoría o término de búsqueda</p>
+      <button class="cat-empty-btn" onclick="catResetFilters()">
+        <i class="ri-refresh-line"></i> Ver todos los productos
+      </button>
+    </div>
+
+  </main>
+
+  <!-- CTA WhatsApp flotante -->
+  <a
+    href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent('Hola Nuditos! 🌸 Quisiera información sobre sus productos')}`}
+    class="cat-wa-fab"
+    target="_blank"
+    rel="noopener"
+    aria-label="Escríbenos por WhatsApp"
+    title="¿Tienes dudas? ¡Escríbenos!"
+  >
+    <i class="ri-whatsapp-line"></i>
+    <span class="cat-wa-tooltip">¿Tienes dudas?</span>
+  </a>
+
+</Layout>
+
+<!-- ══════════════ ESTILOS ══════════════ -->
+<style>
+/* ── Hero catálogo ─────────────────────────────── */
+.cat-hero {
+  position: relative;
+  background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%);
+  padding: 3rem 1.5rem 2.5rem;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-dark);
+}
+.cat-hero-inner { position: relative; z-index: 2; max-width: 900px; }
+.cat-breadcrumb {
+  display: flex; align-items: center; gap: 0.3rem;
+  font-size: 0.68rem; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text-soft); margin-bottom: 1rem;
+}
+.cat-breadcrumb a { color: var(--lila-dark); }
+.cat-breadcrumb a:hover { text-decoration: underline; }
+.cat-breadcrumb i { font-size: 0.75rem; opacity: 0.5; }
+.cat-hero-title {
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 700; letter-spacing: -0.03em; line-height: 1.1;
+  color: var(--text); display: flex; align-items: center; gap: 0.6rem;
+}
+.cat-hero-emoji { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+.cat-hero-sub {
+  margin-top: 0.6rem; font-size: 0.78rem; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text-soft); font-weight: 400;
+}
+.cat-hero-deco {
+  position: absolute; right: 2rem; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 0.3rem; opacity: 0.15;
+  font-size: 2.5rem; pointer-events: none; user-select: none;
+}
+@media (max-width: 600px) { .cat-hero-deco { display: none; } }
+
+/* ── Barra filtros ─────────────────────────────── */
+.cfilter-wrap {
+  position: sticky; top: var(--nav-h); z-index: 90;
+  background: rgba(250,248,245,0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-dark);
+  box-shadow: 0 2px 20px rgba(26,18,32,0.05);
+}
+.cfilter-inner {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0 1rem; max-width: 1600px; margin: 0 auto;
+  min-height: 52px;
+}
+/* Pills categorías (scroll horizontal en mobile) */
+.cfilter-cats {
+  display: flex; gap: 0; overflow-x: auto; flex: 1;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.cfilter-cats::-webkit-scrollbar { display: none; }
+.cfpill {
+  flex-shrink: 0;
+  padding: 0.75rem 0.9rem;
+  background: none; border: none; border-bottom: 2px solid transparent;
+  font-size: 0.63rem; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-soft);
+  transition: all 0.2s; white-space: nowrap; cursor: pointer;
+  display: flex; align-items: center; gap: 0.35rem;
+}
+.cfpill:hover { color: var(--text); }
+.cfpill.active {
+  color: var(--text);
+  border-bottom-color: var(--lila-dark);
+}
+.cfpill-count {
+  background: var(--lila-light); color: var(--lila-dark);
+  border-radius: 20px; padding: 0.1rem 0.5rem;
+  font-size: 0.6rem; font-weight: 700;
+}
+.cfpill.active .cfpill-count { background: var(--lila-dark); color: white; }
+
+/* Controles derecha */
+.cfilter-controls {
+  display: flex; align-items: center; gap: 0.5rem;
+  flex-shrink: 0; padding-left: 0.5rem;
+  border-left: 1px solid var(--border-dark);
+}
+/* Search */
+.cfilter-search-wrap {
+  position: relative; display: flex; align-items: center;
+}
+.cfilter-search-wrap > i {
+  position: absolute; left: 0.6rem; color: var(--text-soft);
+  font-size: 0.85rem; pointer-events: none;
+}
+.cfilter-search-wrap input {
+  padding: 0.45rem 2rem 0.45rem 1.9rem;
+  border: 1px solid var(--border-dark); border-radius: 6px;
+  background: var(--cream-dark); font-size: 0.72rem;
+  font-family: 'Jost', sans-serif; color: var(--text); outline: none;
+  width: 160px; transition: all 0.2s;
+}
+.cfilter-search-wrap input:focus {
+  border-color: var(--lila); background: white; width: 200px;
+}
+.cfilter-search-wrap input::placeholder { color: var(--text-soft); }
+.cfilter-search-clear {
+  position: absolute; right: 0.4rem; background: none; border: none;
+  color: var(--text-soft); font-size: 0.85rem; cursor: pointer;
+  display: none; padding: 0.1rem;
+}
+.cfilter-search-clear.visible { display: flex; }
+
+/* Sort */
+.cfilter-sort-wrap {
+  position: relative; display: flex; align-items: center;
+}
+.cfilter-sort-wrap > i {
+  position: absolute; left: 0.5rem; color: var(--text-soft);
+  font-size: 0.85rem; pointer-events: none;
+}
+.cfilter-sort-wrap select {
+  padding: 0.45rem 0.7rem 0.45rem 1.75rem;
+  border: 1px solid var(--border-dark); border-radius: 6px;
+  background: var(--cream-dark); font-size: 0.72rem;
+  font-family: 'Jost', sans-serif; color: var(--text); outline: none;
+  cursor: pointer; appearance: none; -webkit-appearance: none;
+}
+
+/* Toggle vista */
+.cfilter-view-toggle { display: flex; gap: 0.15rem; }
+.cvtoggle {
+  width: 32px; height: 32px; border-radius: 6px;
+  background: none; border: 1px solid var(--border-dark);
+  color: var(--text-soft); font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.cvtoggle.active { background: var(--lila-dark); border-color: var(--lila-dark); color: white; }
+.cvtoggle:hover:not(.active) { border-color: var(--lila); color: var(--lila-dark); }
+
+/* Active chips bar */
+.active-chips-bar {
+  border-top: 1px solid var(--border-dark);
+  padding: 0.4rem 1rem;
+}
+.active-chips-inner {
+  display: flex; align-items: center; gap: 0.5rem;
+  max-width: 1600px; margin: 0 auto; flex-wrap: wrap;
+}
+.chips-label {
+  font-size: 0.63rem; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-soft); font-weight: 600;
+}
+.active-chip {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: var(--lila-light); color: var(--lila-dark);
+  border-radius: 20px; padding: 0.2rem 0.7rem; font-size: 0.65rem;
+  font-weight: 600; letter-spacing: 0.5px;
+}
+.active-chip button {
+  background: none; border: none; cursor: pointer;
+  color: var(--lila-dark); font-size: 0.75rem; line-height: 1; padding: 0;
+  display: flex; align-items: center;
+}
+.chip-clear-all {
+  margin-left: auto; background: none; border: none;
+  color: var(--text-soft); font-size: 0.65rem; cursor: pointer;
+  display: flex; align-items: center; gap: 0.2rem;
+  font-family: 'Jost', sans-serif; letter-spacing: 0.5px;
+  padding: 0.2rem 0.4rem; border-radius: 4px; transition: color 0.15s;
+}
+.chip-clear-all:hover { color: var(--text); }
+
+/* ── Main catalog ──────────────────────────────── */
+.catalog-main {
+  max-width: 1600px; margin: 0 auto;
+  padding: 1.5rem 1.2rem 4rem;
+}
+.catalog-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+.catalog-count { font-size: 0.72rem; color: var(--text-soft); letter-spacing: 0.5px; }
+.catalog-count strong { color: var(--text); font-weight: 700; }
+
+/* ── Grid ──────────────────────────────────────── */
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.2rem;
+}
+@media (min-width: 480px)  { .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
+@media (min-width: 768px)  { .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.4rem; } }
+@media (min-width: 1200px) { .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.6rem; } }
+@media (min-width: 1600px) { .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); } }
+
+/* Vista lista */
+.catalog-grid[data-view="list"] {
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+}
+
+/* ── Cards ─────────────────────────────────────── */
+.cp-card {
+  background: white;
+  border: 1px solid var(--border-dark);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  display: flex; flex-direction: column;
+}
+.cp-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+.cp-card-link {
+  display: flex; flex-direction: column; flex: 1;
+  text-decoration: none; color: inherit;
+}
+
+/* Imagen */
+.cp-img-wrap {
+  position: relative; aspect-ratio: 1/1; overflow: hidden;
+  background: var(--cream-dark);
+}
+.cp-img-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.35s;
+}
+.cp-card:hover .cp-img-wrap img { transform: scale(1.04); }
+.cp-emoji-ph {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3.5rem;
+}
+.cp-overlay {
+  position: absolute; inset: 0;
+  background: rgba(26,18,32,0.35);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.2s;
+}
+.cp-card:hover .cp-overlay { opacity: 1; }
+.cp-overlay span {
+  background: white; color: var(--text);
+  padding: 0.5rem 1.2rem; border-radius: 50px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; display: flex; align-items: center; gap: 0.35rem;
+}
+
+/* Badges */
+.cp-badge {
+  position: absolute; top: 0.7rem; left: 0.7rem; z-index: 3;
+  padding: 0.25rem 0.65rem; border-radius: 20px;
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 0.25rem;
+}
+.cp-badge-popular  { background: #ff6b35; color: white; }
+.cp-badge-nuevo    { background: var(--mint-dark); color: white; }
+.cp-badge-especial { background: var(--lila-dark); color: white; }
+.cp-badge-oferta   { background: #e53e3e; color: white; }
+
+.cp-envio-tag {
+  position: absolute; bottom: 0.6rem; left: 0.6rem; z-index: 3;
+  background: rgba(79,168,118,0.92); color: white;
+  padding: 0.2rem 0.55rem; border-radius: 20px;
+  font-size: 0.58rem; font-weight: 600; letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 0.25rem;
+}
+
+/* Info */
+.cp-info {
+  padding: 0.9rem 1rem 0.5rem;
+  flex: 1; display: flex; flex-direction: column; gap: 0.25rem;
+}
+.cp-cat-label {
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--lila-dark); opacity: 0.8;
+}
+.cp-name {
+  font-size: 0.9rem; font-weight: 600; line-height: 1.3;
+  color: var(--text); margin: 0;
+}
+.cp-desc {
+  font-size: 0.72rem; color: var(--text-soft); line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cp-price {
+  margin-top: auto; padding-top: 0.4rem;
+  font-size: 0.95rem; font-weight: 700; color: var(--text);
+}
+.cp-price small { font-size: 0.65rem; font-weight: 400; color: var(--text-soft); }
+.cp-orig { font-size: 0.72rem; font-weight: 400; color: var(--text-soft); text-decoration: line-through; margin-right: 0.3rem; }
+.cp-consultar { font-size: 0.78rem; color: #25d366; display: flex; align-items: center; gap: 0.3rem; }
+
+/* Acciones */
+.cp-actions {
+  padding: 0.5rem 1rem 0.9rem;
+  display: flex; justify-content: flex-end;
+}
+.cp-btn-add, .cp-btn-wa {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: none; cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.cp-btn-add {
+  background: var(--lila-dark); color: white;
+}
+.cp-btn-add:hover { background: #7a4d9a; transform: scale(1.1); }
+.cp-btn-add.added { background: var(--mint-dark); }
+.cp-btn-wa {
+  background: #25d366; color: white; text-decoration: none;
+}
+.cp-btn-wa:hover { background: #1ebe5b; transform: scale(1.1); }
+
+/* ── Vista lista ───────────────────────────────── */
+.catalog-grid[data-view="list"] .cp-card {
+  flex-direction: row; border-radius: 10px; height: 100px; gap: 0;
+}
+.catalog-grid[data-view="list"] .cp-card-link { flex-direction: row; flex: 1; }
+.catalog-grid[data-view="list"] .cp-img-wrap {
+  width: 100px; min-width: 100px; aspect-ratio: unset; border-radius: 0; flex-shrink: 0;
+}
+.catalog-grid[data-view="list"] .cp-info {
+  flex-direction: row; align-items: center; gap: 1rem; padding: 0.8rem 1rem; flex-wrap: wrap;
+}
+.catalog-grid[data-view="list"] .cp-cat-label { display: none; }
+.catalog-grid[data-view="list"] .cp-name { flex: 1; min-width: 140px; font-size: 0.85rem; }
+.catalog-grid[data-view="list"] .cp-desc { display: none; }
+.catalog-grid[data-view="list"] .cp-price { padding-top: 0; margin-top: 0; }
+.catalog-grid[data-view="list"] .cp-overlay { display: none; }
+.catalog-grid[data-view="list"] .cp-actions { padding: 0 1rem 0 0; align-items: center; }
+.catalog-grid[data-view="list"] .cp-envio-tag { display: none; }
+@media (max-width: 480px) {
+  .catalog-grid[data-view="list"] .cp-card { height: auto; flex-wrap: wrap; }
+}
+
+/* ── Estado vacío ──────────────────────────────── */
+.cat-empty {
+  text-align: center; padding: 5rem 2rem;
+}
+.cat-empty-icon { font-size: 4rem; margin-bottom: 1rem; }
+.cat-empty h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }
+.cat-empty p { color: var(--text-soft); font-size: 0.85rem; margin-bottom: 1.5rem; }
+.cat-empty-btn {
+  background: var(--lila-dark); color: white;
+  border: none; border-radius: 8px; padding: 0.7rem 1.6rem;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; display: inline-flex;
+  align-items: center; gap: 0.4rem; font-family: 'Jost', sans-serif;
+  transition: background 0.2s;
+}
+.cat-empty-btn:hover { background: #7a4d9a; }
+
+/* ── WhatsApp FAB ──────────────────────────────── */
+.cat-wa-fab {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #25d366; color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.cat-wa-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 28px rgba(37,211,102,0.5);
+}
+.cat-wa-tooltip {
+  position: absolute; right: 60px;
+  background: var(--text); color: white;
+  padding: 0.35rem 0.8rem; border-radius: 6px;
+  font-size: 0.68rem; font-weight: 500; letter-spacing: 0.5px;
+  white-space: nowrap; opacity: 0; pointer-events: none;
+  transition: opacity 0.2s; font-family: 'Jost', sans-serif;
+}
+.cat-wa-fab:hover .cat-wa-tooltip { opacity: 1; }
+
+/* ── Responsive filtros ────────────────────────── */
+@media (max-width: 640px) {
+  .cfilter-controls { display: none; }
+  .cfilter-inner { padding: 0 0.8rem; }
+  .catalog-main { padding: 1rem 0.8rem 4rem; }
+}
+@media (min-width: 641px) and (max-width: 900px) {
+  .cfilter-search-wrap input { width: 130px; }
+  .cfilter-search-wrap input:focus { width: 150px; }
+  .cfilter-sort-wrap select { max-width: 130px; }
+  .cvtoggle { display: none; }
+}
+/* Barra de controles mobile (aparece debajo de pills en mobile) */
+@media (max-width: 640px) {
+  .cfilter-wrap { position: sticky; top: var(--nav-h); }
+  .cfilter-inner { flex-wrap: wrap; padding: 0; gap: 0; }
+  .cfilter-cats { padding: 0 0.8rem; min-height: 48px; }
+  .cat-hero { padding: 2rem 1.2rem 1.8rem; }
+}
+
+/* Animación entrada cards */
+@keyframes cpFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.cp-card {
+  animation: cpFadeUp 0.35s ease both;
+}
+.cp-card.hidden { display: none; }
+</style>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script is:inline>
+/* ── Estado filtros ── */
+let catActive   = new URLSearchParams(window.location.search).get('categoria') || 'todos';
+let sortActive  = 'default';
+let searchQuery = '';
+let viewMode    = 'grid';
+
+const grid      = document.getElementById('catalogGrid');
+const emptyEl   = document.getElementById('catEmpty');
+const countEl   = document.getElementById('resultCount');
+const chips     = document.getElementById('activeChips');
+const chipsBox  = document.getElementById('chipsContainer');
+
+/* ── Aplicar filtros ── */
+function catApplyFilters() {
+  const cards = grid.querySelectorAll('.cp-card');
+  let visible = 0;
+
+  cards.forEach(card => {
+    const cat    = card.dataset.cat;
+    const price  = parseInt(card.dataset.price) || 0;
+    const name   = card.dataset.name;
+    const oferta = card.dataset.oferta === '1';
+    const envio  = card.dataset.envio  === '1';
+
+    let show = true;
+    if (catActive !== 'todos' && cat !== catActive) show = false;
+    if (searchQuery && !name.includes(searchQuery.toLowerCase())) show = false;
+    if (sortActive === 'oferta' && !oferta) show = false;
+    if (sortActive === 'envio'  && !envio)  show = false;
+
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+
+  // Ordenar visible
+  const visibleCards = Array.from(cards).filter(c => !c.classList.contains('hidden'));
+  if (sortActive === 'price-asc') {
+    visibleCards.sort((a, b) => {
+      const pa = parseInt(a.dataset.price) || 999999;
+      const pb = parseInt(b.dataset.price) || 999999;
+      return pa - pb;
+    });
+  } else if (sortActive === 'price-desc') {
+    visibleCards.sort((a, b) => {
+      const pa = parseInt(a.dataset.price) || 0;
+      const pb = parseInt(b.dataset.price) || 0;
+      return pb - pa;
+    });
+  } else if (sortActive === 'name-asc') {
+    visibleCards.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+  }
+  visibleCards.forEach(c => grid.appendChild(c));
+
+  // Conteo
+  countEl.innerHTML = `Mostrando <strong>${visible}</strong> ${visible === 1 ? 'producto' : 'productos'}`;
+  emptyEl.style.display   = visible === 0 ? 'block' : 'none';
+  grid.style.display      = visible > 0   ? ''      : 'none';
+
+  catUpdateChips();
+}
+
+/* ── Chips activos ── */
+function catUpdateChips() {
+  const active = [];
+  if (catActive !== 'todos') active.push({ label: catActive, type: 'cat' });
+  if (searchQuery)            active.push({ label: `"${searchQuery}"`, type: 'search' });
+  if (sortActive !== 'default' && sortActive !== 'oferta' && sortActive !== 'envio') {
+    const labels = { 'price-asc': 'Precio ↑', 'price-desc': 'Precio ↓', 'name-asc': 'A–Z' };
+    active.push({ label: labels[sortActive] || sortActive, type: 'sort' });
+  }
+  if (sortActive === 'oferta') active.push({ label: 'Solo ofertas', type: 'sort' });
+  if (sortActive === 'envio')  active.push({ label: 'Envío gratis', type: 'sort' });
+
+  chips.style.display = active.length ? 'block' : 'none';
+  chipsBox.innerHTML  = active.map(a => `
+    <span class="active-chip">
+      ${a.label}
+      <button onclick="catRemoveChip('${a.type}')" aria-label="Quitar filtro ${a.label}">
+        <i class="ri-close-line"></i>
+      </button>
+    </span>`).join('');
+}
+
+window.catRemoveChip = function(type) {
+  if (type === 'cat')    { catActive = 'todos'; catSyncPills('todos'); }
+  if (type === 'search') { searchQuery = ''; document.getElementById('catSearch').value = ''; document.getElementById('searchClear').classList.remove('visible'); }
+  if (type === 'sort')   { sortActive = 'default'; document.getElementById('catSort').value = 'default'; }
+  catApplyFilters();
+};
+
+window.catResetFilters = function() {
+  catActive = 'todos'; sortActive = 'default'; searchQuery = '';
+  document.getElementById('catSearch').value = '';
+  document.getElementById('catSort').value   = 'default';
+  document.getElementById('searchClear').classList.remove('visible');
+  catSyncPills('todos');
+  catApplyFilters();
+};
+
+/* ── Sincronizar pills ── */
+function catSyncPills(catId) {
+  document.querySelectorAll('.cfpill').forEach(btn => {
+    const active = btn.dataset.cat === catId;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+}
+
+/* ── Carrito (delega a app.js) ── */
+window.catAddToCart = function(id, btn) {
+  if (typeof addToCart === 'function') {
+    addToCart(id);
+    btn.classList.add('added');
+    btn.innerHTML = '<i class="ri-check-line"></i>';
+    setTimeout(() => {
+      btn.classList.remove('added');
+      btn.innerHTML = '<i class="ri-shopping-bag-line"></i>';
+    }, 1300);
+  }
+};
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => {
+  /* Categoría inicial desde URL */
+  if (catActive !== 'todos') {
+    catSyncPills(catActive);
+    catApplyFilters();
+  }
+
+  /* Pills click */
+  document.querySelectorAll('.cfpill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      catActive = btn.dataset.cat;
+      catSyncPills(catActive);
+      catApplyFilters();
+      // Actualizar URL sin recargar (accesible/indexable)
+      const url = catActive !== 'todos'
+        ? `${location.pathname}?categoria=${catActive}`
+        : location.pathname;
+      history.replaceState({}, '', url);
+    });
+  });
+
+  /* Búsqueda */
+  const searchInput = document.getElementById('catSearch');
+  const searchClear = document.getElementById('searchClear');
+  let searchTimer;
+  searchInput.addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    searchQuery = e.target.value.trim();
+    searchClear.classList.toggle('visible', searchQuery.length > 0);
+    searchTimer = setTimeout(catApplyFilters, 220);
+  });
+  searchClear.addEventListener('click', () => {
+    searchQuery = ''; searchInput.value = '';
+    searchClear.classList.remove('visible');
+    catApplyFilters(); searchInput.focus();
+  });
+
+  /* Ordenar */
+  document.getElementById('catSort').addEventListener('change', e => {
+    sortActive = e.target.value;
+    catApplyFilters();
+  });
+
+  /* Toggle vista */
+  document.getElementById('viewGrid').addEventListener('click', () => {
+    viewMode = 'grid'; grid.dataset.view = 'grid';
+    document.getElementById('viewGrid').classList.add('active');
+    document.getElementById('viewList').classList.remove('active');
+  });
+  document.getElementById('viewList').addEventListener('click', () => {
+    viewMode = 'list'; grid.dataset.view = 'list';
+    document.getElementById('viewList').classList.add('active');
+    document.getElementById('viewGrid').classList.remove('active');
+  });
+
+  /* Limpiar todos */
+  document.getElementById('clearAllFilters').addEventListener('click', catResetFilters);
+
+  /* Scroll suave al grid cuando se filtra */
+  document.querySelectorAll('.cfpill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const top = document.getElementById('catalogMain').getBoundingClientRect().top + window.scrollY - 120;
+      if (window.scrollY > top) window.scrollTo({ top, behavior: 'smooth' });
+    });
+  });
+});
+</script>
