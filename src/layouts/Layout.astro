@@ -83,7 +83,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
           <i class="ri-menu-line"></i>
         </button>
         <ul class="nav-desktop-links">
-          <li><a href="/#catalogSection">Catálogo</a></li>
+          <li><a href="/catalogo">Catálogo</a></li>
           <li><a href="/#personalizado">Personalizado</a></li>
           <li><a href="/sobre-nosotros">Nosotros</a></li>
           <li><a href="/blog">Blog</a></li>
@@ -114,7 +114,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       </button>
     </div>
     <div class="menu-nav">
-      <a class="menu-nav-item" href="/#catalogSection" onclick="toggleMenu()">
+      <a class="menu-nav-item" href="/catalogo" onclick="toggleMenu()">
         Catálogo <i class="ri-arrow-right-line"></i>
       </a>
       <a class="menu-nav-item" href="/#personalizado" onclick="toggleMenu()">
@@ -253,13 +253,12 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <div class="toast" id="toast"></div>
 
   <!-- ════════ SCRIPTS ════════ -->
-  <!-- AOS y Swiper como antes -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" is:inline></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js" is:inline></script>
 
-  <!-- Scripts propios como módulos -->
+  <!-- Scripts propios -->
   <script src="/scripts/datos.js" is:inline></script>
   <script src="/scripts/supabase.js" is:inline></script>
   <script src="/scripts/emails.js" is:inline></script>

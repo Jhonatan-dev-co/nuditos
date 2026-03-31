@@ -210,6 +210,9 @@ function renderHero(cfg) {
     pagination: { el: '.swiper-pagination', clickable: true },
     navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
     effect: 'fade', fadeEffect: { crossFade: true }, speed: 900,
+    preventClicks: false,
+    preventClicksPropagation: false,
+    touchStartPreventDefault: false,
   });
 }
 
