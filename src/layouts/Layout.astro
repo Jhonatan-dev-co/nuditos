@@ -1,4 +1,7 @@
 ---
+import SearchOverlay from '../components/SearchOverlay.astro';
+import { ViewTransitions } from 'astro:transitions';
+
 /**
  * Layout base de Nuditos Tejidos
  * Incluye: navbar, footer, fuentes, meta SEO básico
@@ -70,9 +73,12 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
+  <ViewTransitions />
+
   <!-- Slot para head extra (meta producto, schema.org, etc.) -->
   <slot name="head" />
 </head>
+
 <body>
 
   <!-- ════════ NAVBAR ════════ -->
@@ -239,18 +245,23 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     <div class="modal-body" id="modalBody"></div>
   </div>
 
+  <SearchOverlay />
+
   <!-- ════════ WHATSAPP FLOTANTE ════════ -->
-  <a
-    href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸"
-    class="wa-float"
-    target="_blank"
-    aria-label="WhatsApp"
-  >
-    <i class="ri-whatsapp-line"></i>
-    <span class="wa-float-tooltip">¿Tienes dudas? ¡Escríbenos!</span>
-  </a>
+  <div class="wa-float-wrap">
+    <div class="wa-bubble" id="waBubble">¿Tienes dudas? ¡Escríbenos! 🌸</div>
+    <a
+      href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸"
+      class="wa-float"
+      target="_blank"
+      aria-label="WhatsApp"
+    >
+      <i class="ri-whatsapp-line"></i>
+    </a>
+  </div>
 
   <div class="toast" id="toast"></div>
+
 
   <!-- ════════ SCRIPTS ════════ -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
@@ -263,6 +274,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <script src="/scripts/supabase.js" is:inline></script>
   <script src="/scripts/emails.js" is:inline></script>
   <script src="/scripts/app.js" is:inline></script>
+  <script src="../scripts/cart-ui.ts"></script>
 
   <!-- Slot para scripts extra de cada página -->
   <slot name="scripts" />

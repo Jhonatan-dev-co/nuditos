@@ -6,8 +6,8 @@
 const WA_NUMBER      = '573144931525';
 const WOMPI_PUBLIC_KEY = 'pub_test_XXXXXXXXXXXXXXXX';
 
-let cart = [];
-let appliedDiscount = null;
+// let cart = []; // Ahora en Nanostores
+// let appliedDiscount = null; // Ahora en Nanostores
 let activeFilter = null;
 let modalSwiperInstance = null;
 let catSwipers = {};
@@ -27,6 +27,8 @@ function slugify(text) {
 let _sbProducts = null;
 let _sbConfig   = null;
 let _sbBanners  = null;
+let _sbCategories = null;
+
 
 async function loadStoreData() {
   const CACHE_KEY = 'nuditos_sb_data';
@@ -38,28 +40,34 @@ async function loadStoreData() {
     const ts     = parseInt(localStorage.getItem(CACHE_TS) || '0');
     if (cached) {
       const d = JSON.parse(cached);
-      if (d.products) _sbProducts = d.products;
-      if (d.config)   _sbConfig   = d.config;
-      if (d.banners)  _sbBanners  = d.banners;
+      if (d.products)   _sbProducts = d.products;
+      if (d.config)     _sbConfig   = d.config;
+      if (d.banners)    _sbBanners  = d.banners;
+      if (d.categories) _sbCategories = d.categories;
     }
+
     if (_sbProducts && _sbConfig && (Date.now() - ts < TTL)) return;
   } catch {}
 
   try {
-    const [products, config, banners] = await Promise.all([
+    const [products, config, banners, categoriesSB] = await Promise.all([
       sbGetProducts(),
       sbGetConfig(),
       sbGetBanners(),
+      sbGetCategories(),
     ]);
-    if (products) _sbProducts = products;
-    if (config)   _sbConfig   = config;
-    if (banners)  _sbBanners  = banners;
+    if (products)     _sbProducts = products;
+    if (config)       _sbConfig   = config;
+    if (banners)      _sbBanners  = banners;
+    if (categoriesSB) _sbCategories = categoriesSB;
 
     localStorage.setItem(CACHE_KEY, JSON.stringify({
-      products: _sbProducts,
-      config:   _sbConfig,
-      banners:  _sbBanners,
+      products:   _sbProducts,
+      config:     _sbConfig,
+      banners:    _sbBanners,
+      categories: _sbCategories,
     }));
+
     localStorage.setItem(CACHE_TS, Date.now().toString());
   } catch {}
 }
@@ -103,9 +111,18 @@ function getEditorialBanners() {
 /* ════════════════════════════
    INIT
 ════════════════════════════ */
-function renderSkeletons() {
-  const catalog = document.getElementById('catalogRows');
-  if (!catalog) return;
+/* ════════════════════════════
+   CATEGORÍAS
+════════════════════════════ */
+function getCategories() {
+  if (window.NUDITOS_CATEGORIES) return window.NUDITOS_CATEGORIES;
+  if (_sbCategories) return _sbCategories;
+  return categories;
+}
+
+function renderSkeletons(targetId = 'catalogRows') {
+  const target = document.getElementById(targetId);
+  if (!target) return;
   const skeletonCard = `
     <div class="skeleton-card">
       <div class="skeleton skeleton-img"></div>
@@ -113,9 +130,9 @@ function renderSkeletons() {
       <div class="skeleton skeleton-line short"></div>
       <div class="skeleton skeleton-line price"></div>
     </div>`;
-  const grid = `<div style="padding:2rem 1.2rem 0"><div style="height:12px;width:80px;background:var(--cream-dark);border-radius:4px;margin-bottom:1rem"></div><div class="products-grid">${skeletonCard.repeat(6)}</div></div>`;
-  catalog.innerHTML = grid + grid;
+  target.innerHTML = `<div class="products-grid">${skeletonCard.repeat(4)}</div>`;
 }
+
 
 /* ════════════════════════════
    SCROLL AL CATÁLOGO
@@ -134,20 +151,27 @@ function scrollToCatalog() {
   window.scrollTo({ top, behavior: 'smooth' });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  AOS.init({ duration: 700, once: true, offset: 30, easing: 'ease-out-cubic' });
-  renderSkeletons();
+document.addEventListener('astro:page-load', async () => {
+  if (typeof AOS !== 'undefined') AOS.init({ duration: 700, once: true, offset: 30, easing: 'ease-out-cubic' });
+  // renderSkeletons(); // Ya no es necesario con el render estático
   await loadStoreData();
   const cfg = getConfig();
   renderBanner(cfg);
-  renderHero(cfg);
-  renderMomento(cfg);
+  // renderHero(cfg); // Ahora renderizado estáticamente por Astro
+  // renderMomento(cfg); // Ahora renderizado estáticamente por Astro
   loadMetaPixel(cfg);
   renderCatPills();
-  renderCatalog();
-  renderCart();
+  // renderCatalog(); // Ahora renderizado estáticamente por Astro
+  // renderCart(); // Ahora en Nanostores (cart-ui.ts)
   initSearch();
+
+  // Burbuja de WhatsApp después de 5s
+  setTimeout(() => {
+    const bub = document.getElementById('waBubble');
+    if (bub) bub.classList.add('show');
+  }, 5000);
 });
+
 
 /* ════════════════════════════
    META PIXEL
@@ -170,16 +194,22 @@ function loadMetaPixel(cfg) {
 ════════════════════════════ */
 function renderBanner(cfg) {
   if (!cfg.descuentoActivo) return;
-  document.getElementById('bannerText').innerHTML =
-    `${cfg.descuentoTexto} — código <strong>${cfg.descuentoCodigo}</strong>`;
-  document.getElementById('discountBanner').classList.add('visible');
+  const bannerText = document.getElementById('bannerText');
+  const discountBanner = document.getElementById('discountBanner');
+  if (!bannerText || !discountBanner) return;
+  
+  bannerText.innerHTML = `${cfg.descuentoTexto} — código <strong>${cfg.descuentoCodigo}</strong>`;
+  discountBanner.classList.add('visible');
 }
+
 
 /* ════════════════════════════
    HERO
 ════════════════════════════ */
 function renderHero(cfg) {
   const wrap = document.getElementById('heroSlides');
+  if (!wrap) return;
+
   wrap.innerHTML = cfg.carruselHero.map(id => {
     const p = getProducts().find(x => x.id === id);
     if (!p) return '';
@@ -216,6 +246,7 @@ function renderHero(cfg) {
   });
 }
 
+
 function heroTitle(p) {
   const n = p.name.toLowerCase();
   if (n.includes('grado') || n.includes('goku') || n.includes('potter') || n.includes('amigurumi'))
@@ -232,9 +263,11 @@ function heroTitle(p) {
 ════════════════════════════ */
 function renderMomento(cfg) {
   const p = getProducts().find(x => x.id === cfg.ramoDestacado);
-  if (!p) return;
+  const target = document.getElementById('ramoMomento');
+  if (!p || !target) return;
   const vis = p.img ? `<img src="${p.img}" alt="${p.name}">` : `<span class="momento-emoji">${p.emoji}</span>`;
-  document.getElementById('ramoMomento').innerHTML = `
+  target.innerHTML = `
+
     <div class="momento-img">${vis}</div>
     <div class="momento-info">
       <div class="momento-eyebrow"><i class="ri-fire-line"></i> Ramo del momento</div>
@@ -257,14 +290,20 @@ function renderMomento(cfg) {
 ════════════════════════════ */
 function renderCatPills() {
   const ap = activeProducts();
-  document.getElementById('catRow').innerHTML = categories.map((c, i) => {
+  const catRow = document.getElementById('catRow');
+  if (!catRow) return;
+
+  const cats = getCategories();
+  catRow.innerHTML = cats.map((c, i) => {
     const count = c.id === 'todos' ? ap.length : ap.filter(p => p.cat?.toLowerCase() === c.id?.toLowerCase()).length;
-    if (count === 0) return '';
-    return `<button class="cat-pill${i === 0 ? ' active' : ''}" onclick="filterCat('${c.id}',this)">
-      ${c.icon} ${c.name}<span class="cat-count">${count}</span>
+    if (count === 0 && c.id !== 'todos') return '';
+    return `<button class="cat-pill${(activeFilter||'todos') === c.id ? ' active' : ''}" onclick="filterCat('${c.id}',this)">
+      ${c.icon} ${c.nombre || c.name}<span class="cat-count">${count}</span>
     </button>`;
   }).join('');
 }
+
+
 
 /* ════════════════════════════
    VISTA POR CATEGORÍA
@@ -281,15 +320,20 @@ function getCatView(catId) {
    RENDER CATÁLOGO
 ════════════════════════════ */
 function renderCatalog() {
-  document.getElementById('catalogRows').style.display = 'block';
-  document.getElementById('filteredView').style.display = 'none';
+  const rows = document.getElementById('catalogRows');
+  const filtered = document.getElementById('filteredView');
+  if (!rows || !filtered) return;
+
+  rows.style.display = 'block';
+  filtered.style.display = 'none';
+
   Object.values(catSwipers).forEach(s => { try { s.destroy(true, true); } catch {} });
   catSwipers = {};
 
   const container = document.getElementById('catalogRows');
   container.innerHTML = '';
 
-  categories.filter(c => c.id !== 'todos').forEach(cat => {
+  getCategories().filter(c => c.id !== 'todos').forEach(cat => {
     const items = activeProducts().filter(p => p.cat?.toLowerCase() === cat.id?.toLowerCase());
     if (!items.length) return;
     const view = getCatView(cat.id);
@@ -455,18 +499,49 @@ function filterCat(catId, el) {
 }
 
 function filterCatByName(catId) {
-  const cat = categories.find(c => c.id === catId);
-  const items = activeProducts().filter(p => p.cat?.toLowerCase() === catId?.toLowerCase());
-  const view = getCatView(catId);
-  document.getElementById('catalogRows').style.display = 'none';
-  document.getElementById('filteredView').style.display = 'block';
-  document.getElementById('filteredTitle').innerHTML = `${cat.icon} ${cat.name}`;
+  const rows = document.getElementById('catalogRows');
+  const filtered = document.getElementById('filteredView');
   const grid = document.getElementById('filteredGrid');
-  grid.className = view === 'list' ? 'filtered-list' : 'filtered-grid';
-  grid.innerHTML = view === 'list'
-    ? items.map(p => buildListItem(p)).join('')
-    : items.map(p => buildCard(p)).join('');
-  document.getElementById('filteredView').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!filtered || !grid) return;
+
+  activeFilter = catId;
+  const cats = getCategories();
+  const c = cats.find(x => x.id === catId);
+  if (!c) { clearFilter(); return; }
+
+  // UI
+  if (rows) rows.style.display = 'none';
+  filtered.style.display = 'block';
+  document.getElementById('filteredTitle').innerText = c.nombre || c.name;
+  
+  // Skeletons antes de mostrar
+  renderSkeletons('filteredGrid');
+  filtered.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  setTimeout(() => {
+    const ap = activeProducts();
+    const items = catId === 'todos' ? ap : ap.filter(p => p.cat?.toLowerCase() === catId.toLowerCase());
+    
+    if (items.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;padding:4rem 0;text-align:center;color:var(--text-soft)">No hay productos en esta categoría aún.</div>';
+    } else {
+      const view = getCatView(catId);
+      grid.className = view === 'list' ? 'filtered-list' : 'filtered-grid';
+      grid.innerHTML = view === 'list'
+        ? items.map(p => buildListItem(p)).join('')
+        : items.map(p => buildCard(p)).join('');
+    }
+  }, 300);
+}
+
+function renderSkeletons(containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = Array(4).fill(0).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-text"></div>
+      <div class="skeleton-text short"></div>
+    </div>`).join('');
 }
 
 function clearFilter() {
@@ -563,113 +638,11 @@ function updateModalBtn(id) {
 /* ════════════════════════════
    CARRITO
 ════════════════════════════ */
-function addToCart(id) {
-  const p = getProducts().find(x => x.id === id);
-  if (!p || p.price === 0) return;
-  const ex = cart.find(x => x.id === id);
-  if (ex) ex.qty++;
-  else cart.push({ ...p, qty: 1 });
-  renderCart();
-  updateCartBadge();
-  document.querySelectorAll(`#padd-${id}`).forEach(btn => {
-    btn.classList.add('added');
-    btn.innerHTML = '<i class="ri-check-line"></i>';
-    setTimeout(() => { btn.classList.remove('added'); btn.innerHTML = '<i class="ri-shopping-bag-line"></i>'; }, 1300);
-  });
-  const badge = document.getElementById('cartCount');
-  badge.classList.add('bump');
-  setTimeout(() => badge.classList.remove('bump'), 350);
-  showToast(`<i class="ri-check-line"></i> ${p.name} agregado`);
-}
+/* addToCart migrado a Nanostores */
 
-function changeQty(id, d) {
-  const i = cart.findIndex(x => x.id === id);
-  if (i === -1) return;
-  cart[i].qty += d;
-  if (cart[i].qty <= 0) cart.splice(i, 1);
-  renderCart();
-  updateCartBadge();
-}
+/* changeQty y updateCartBadge migrados */
 
-function updateCartBadge() {
-  const total = cart.reduce((s, i) => s + i.qty, 0);
-  const badge = document.getElementById('cartCount');
-  badge.textContent = total;
-  badge.classList.toggle('hidden', total === 0);
-}
-
-function renderCart() {
-  const body = document.getElementById('cartBody');
-  const foot = document.getElementById('cartFoot');
-  if (!cart.length) {
-    body.innerHTML = `<div class="cart-empty"><span class="cart-empty-icon">🌸</span><p>Tu bolsa está vacía</p><small>Agrega tus ramos favoritos</small></div>`;
-    foot.style.display = 'none';
-    return;
-  }
-  foot.style.display = 'block';
-  body.innerHTML = cart.map(item => {
-    const thumb = item.img ? `<img src="${item.img}" alt="${item.name}">` : item.emoji;
-    return `
-      <div class="cart-item">
-        <div class="cart-item-img">${thumb}</div>
-        <div class="cart-item-info">
-          <div class="cart-item-name">${item.name}</div>
-          <div class="cart-item-price">$${(item.price * item.qty).toLocaleString('es-CO')} COP</div>
-        </div>
-        <div class="qty-wrap">
-          <button class="qty-btn" onclick="changeQty(${item.id},-1)"><i class="ri-subtract-line"></i></button>
-          <span class="qty-num">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty(${item.id}, 1)"><i class="ri-add-line"></i></button>
-        </div>
-      </div>`;
-  }).join('');
-  updateTotals();
-}
-
-function updateTotals() {
-  const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  let total = sub;
-  const ds = document.getElementById('discSaved');
-  const da = document.getElementById('discAmount');
-  if (appliedDiscount) {
-    const sav = Math.round(sub * appliedDiscount.pct / 100);
-    total = sub - sav;
-    ds.style.display = 'flex';
-    da.textContent = `-$${sav.toLocaleString('es-CO')} COP`;
-  } else { ds.style.display = 'none'; }
-  document.getElementById('cartTotal').textContent = `$${total.toLocaleString('es-CO')} COP`;
-}
-
-async function applyDiscount() {
-  const code = document.getElementById('discountInput').value.trim().toUpperCase();
-  const msg  = document.getElementById('discountMsg');
-  const cfg  = getConfig();
-
-  if (cfg.descuentoActivo && code === cfg.descuentoCodigo.toUpperCase()) {
-    appliedDiscount = { code, pct: cfg.descuentoPorcentaje };
-    msg.textContent = `✓ ${cfg.descuentoPorcentaje}% de descuento aplicado`;
-    msg.className = 'discount-msg ok';
-    updateTotals();
-    showToast(`🎉 ${cfg.descuentoPorcentaje}% de descuento!`);
-    return;
-  }
-
-  msg.textContent = 'Verificando...';
-  msg.className = 'discount-msg';
-  const cupon = await sbCheckCupon(code);
-  if (cupon) {
-    appliedDiscount = { code, pct: cupon.porcentaje };
-    msg.textContent = `✓ ${cupon.porcentaje}% de descuento aplicado`;
-    msg.className = 'discount-msg ok';
-    updateTotals();
-    showToast(`🎉 ${cupon.porcentaje}% de descuento!`);
-  } else {
-    appliedDiscount = null;
-    msg.textContent = 'Código incorrecto o no disponible.';
-    msg.className = 'discount-msg err';
-    updateTotals();
-  }
-}
+/* Funciones de renderizado y lógica de negocio portadas a Nanostores */
 
 function toggleCart() {
   document.getElementById('cartOverlay').classList.toggle('open');
@@ -678,27 +651,7 @@ function toggleCart() {
   document.body.style.overflow = isOpen ? 'hidden' : '';
 }
 
-function checkoutWA() {
-  const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  let total = sub, discMsg = '';
-  const items = cart.map(i => `${i.qty}x ${i.name} ($${(i.price * i.qty).toLocaleString('es-CO')})`).join('\n');
-  if (appliedDiscount) {
-    const sav = Math.round(sub * appliedDiscount.pct / 100);
-    total = sub - sav;
-    discMsg = `\nDescuento (${appliedDiscount.pct}%): -$${sav.toLocaleString('es-CO')}`;
-  }
-  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hola Nuditos! 🌸\nQuiero pedir:\n\n${items}${discMsg}\n\nTotal: $${total.toLocaleString('es-CO')} COP`)}`, '_blank');
-}
-
-function checkoutWompi() {
-  const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  let total = sub;
-  if (appliedDiscount) total = sub - Math.round(sub * appliedDiscount.pct / 100);
-  if (total === 0) { showToast('Agrega productos para pagar'); return; }
-  const cfg = getConfig();
-  const key = (cfg.wompiKey && cfg.wompiKey.length > 10) ? cfg.wompiKey : WOMPI_PUBLIC_KEY;
-  window.open(`https://checkout.wompi.co/l/?public-key=${key}&currency=COP&amount-in-cents=${total * 100}&reference=NUDITOS-${Date.now()}`, '_blank');
-}
+/* Checkout migrado a Nanostores */
 
 /* ════════════════════════════
    MENÚ / FOOTER / TOAST / ESC

@@ -1,0 +1,76 @@
+---
+import { products as fallbackProducts, CONFIG_DEFAULT, slugify, clUrl } from '../data/datos';
+
+const { heroProducts: propProducts, config: propConfig } = Astro.props;
+
+const config = propConfig || CONFIG_DEFAULT;
+const heroIds = config.carruselHero || [];
+const heroProducts = propProducts || [];
+
+
+function heroTitle(p: any) {
+  const n = p.name.toLowerCase();
+  if (n.includes('grado') || n.includes('goku') || n.includes('potter') || n.includes('amigurumi'))
+    return 'Un regalo que <em>jamás olvidarán</em>';
+  if (n.includes('noche') || n.includes('van gogh'))
+    return 'Arte tejido <em>puntada a puntada</em>';
+  if (n.includes('snoopy') || n.includes('kitty') || n.includes('coraline'))
+    return 'Flores con <em>personalidad propia</em>';
+  return 'Ramos que <em>duran para siempre</em>';
+}
+---
+
+<!-- ════════ HERO SWIPER ════════ -->
+<div class="swiper hero-swiper" id="heroSwiper">
+  <div class="swiper-wrapper" id="heroSlides">
+    {heroProducts.map((p) => (
+      <div class="swiper-slide hero-slide">
+        {p.img ? (
+          <div class="hero-slide-bg">
+            <img src={clUrl(p.img, 800)} alt={p.name} loading="lazy" />
+          </div>
+        ) : (
+          <div class="hero-slide-bg hero-slide-emoji">{p.emoji}</div>
+        )}
+        <div class="hero-overlay"></div>
+        <div class="hero-label"><i class="ri-scissors-cut-line"></i> Nueva colección</div>
+        <div class="hero-content">
+          <div class="hero-eyebrow"><i class="ri-map-pin-line"></i> Hecho a mano · Colombia</div>
+          <h1 set:html={heroTitle(p)}></h1>
+          <div class="hero-price-tag">
+            {p.price > 0 ? (
+              <>${p.price.toLocaleString('es-CO')}<span> COP</span></>
+            ) : (
+              <span>Consultar precio</span>
+            )}
+          </div>
+          <div class="hero-ctas">
+            <a href={`/ramo/${slugify(p.name)}`} class="btn-hero"><i class="ri-eye-line"></i> Ver producto</a>
+            <a href="/catalogo" class="btn-hero-ghost"><i class="ri-grid-line"></i> Ver catálogo</a>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+  <div class="swiper-pagination"></div>
+  <div class="swiper-button-prev"></div>
+  <div class="swiper-button-next"></div>
+</div>
+
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    // Inicializar swiper cuando el script global de CDN ya esté listo
+    if (typeof Swiper !== 'undefined') {
+      new Swiper('#heroSwiper', {
+        loop: true,
+        autoplay: { delay: 5000, disableOnInteraction: false },
+        pagination: { el: '.swiper-pagination', clickable: true },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+        effect: 'fade', fadeEffect: { crossFade: true }, speed: 900,
+        preventClicks: false,
+        preventClicksPropagation: false,
+        touchStartPreventDefault: false,
+      });
+    }
+  });
+</script>

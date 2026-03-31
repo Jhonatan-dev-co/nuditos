@@ -7,6 +7,8 @@
 export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+
 
 const SB_URL  = 'https://fpyhkxikxdwjhukltmqf.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweWhreGlreGR3amh1a2x0bXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzE1OTIsImV4cCI6MjA4ODI0NzU5Mn0.U1fHtV23e3uTlaH9qoeibzbm1d6MEcUaFE7rDhnokgM';
@@ -19,26 +21,17 @@ function slugify(text: string) {
     .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
 }
 
-const catMeta: Record<string, { name: string; icon: string; desc: string }> = {
-  rosas:      { name: 'Rosas',            icon: '🌹', desc: 'Ramos de rosas tejidas a mano' },
-  amarillas:  { name: 'Flores Amarillas', icon: '🌻', desc: 'Girasoles y flores amarillas' },
-  noche:      { name: 'Noche Estrellada', icon: '🌙', desc: 'Inspirados en Van Gogh' },
-  snoopy:     { name: 'Snoopy',           icon: '🐶', desc: 'Ramos temáticos Snoopy' },
-  macetas:    { name: 'Macetas',          icon: '🌱', desc: 'Macetas tejidas decorativas' },
-  rapunzel:   { name: 'Rapunzel',         icon: '🌸', desc: 'Colección Rapunzel' },
-  especial:   { name: 'Especiales',       icon: '✨', desc: 'Ramos únicos y personalizados' },
-  amigurumis: { name: 'Amigurumis',       icon: '🧸', desc: 'Muñecos tejidos a crochet' },
-};
-
 let allProducts: any[] = [];
+let categories: any[] = [];
 let fetchError = false;
 
 try {
-  const res = await fetch(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc`, {
+  // 1. Cargar productos
+  const resP = await fetch(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc`, {
     headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
   });
-  const rows = await res.json();
-  allProducts = rows.map((p: any) => ({
+  const rowsP = await resP.json();
+  allProducts = rowsP.map((p: any) => ({
     id:             p.id,
     name:           p.nombre          || '',
     price:          p.precio          || 0,
@@ -55,10 +48,24 @@ try {
     destacado:      p.destacado       || false,
     slug:           slugify(p.nombre  || ''),
   }));
+
+  // 2. Cargar categorías dinámicas
+  const resC = await fetch(`${SB_URL}/rest/v1/categorias?order=orden.asc`, {
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
+  });
+  categories = await resC.json();
+
 } catch (e) {
   console.error('[catalogo]', e);
   fetchError = true;
 }
+
+// Mapa para SEO y etiquetas
+const catMap: Record<string, any> = {};
+categories.forEach(c => {
+  catMap[c.id] = { name: c.nombre || c.name, icon: c.emoji || '🌸' };
+});
+
 
 // URL param: categoria inicial
 const urlCat = Astro.url.searchParams.get('categoria') || 'todos';
@@ -151,14 +158,15 @@ const breadcrumbSchema = {
         <button class="cfpill active" data-cat="todos" role="tab" aria-selected="true">
           🌸 Todos <span class="cfpill-count" id="cnt-todos">{totalProducts}</span>
         </button>
-        {Object.entries(catMeta).map(([id, c]) => {
-          const cnt = allProducts.filter(p => p.cat === id).length;
+        {categories.map((c) => {
+          const cnt = allProducts.filter(p => p.cat === c.id).length;
           return cnt > 0 ? (
-            <button class="cfpill" data-cat={id} role="tab" aria-selected="false">
-              {c.icon} {c.name} <span class="cfpill-count">{cnt}</span>
+            <button class="cfpill" data-cat={c.id} role="tab" aria-selected="false">
+              {c.emoji || '🌸'} {c.nombre || c.name} <span class="cfpill-count">{cnt}</span>
             </button>
           ) : null;
         })}
+
       </div>
 
       <!-- Controles derecha -->
@@ -227,81 +235,11 @@ const breadcrumbSchema = {
 
     <!-- Grid de productos -->
     <div class="catalog-grid" id="catalogGrid" data-view="grid">
-      {allProducts.map(p => {
-        const cat = catMeta[p.cat] || { name: p.cat, icon: '🌸', desc: '' };
-        const productUrl = `/ramo/${p.slug}`;
-        const priceDisplay = p.oferta && p.precioOriginal > 0
-          ? `<span class="cp-orig">$${p.precioOriginal.toLocaleString('es-CO')}</span> $${p.price.toLocaleString('es-CO')}<small> COP</small>`
-          : p.price > 0
-            ? `$${p.price.toLocaleString('es-CO')}<small> COP</small>`
-            : `<span class="cp-consultar"><i class="ri-whatsapp-line"></i> Consultar</span>`;
-        const badgeHtml = p.badge
-          ? `<div class="cp-badge cp-badge-${p.badge.toLowerCase()}">${
-              p.badge === 'Nuevo' ? '<i class="ri-sparkling-line"></i>' :
-              p.badge === 'Popular' ? '<i class="ri-fire-line"></i>' :
-              p.badge === 'Especial' ? '<i class="ri-award-line"></i>' : ''
-            } ${p.badge}</div>`
-          : p.oferta ? '<div class="cp-badge cp-badge-oferta"><i class="ri-price-tag-3-fill"></i> Oferta</div>' : '';
-
-        return (
-          <article
-            class="cp-card"
-            data-cat={p.cat}
-            data-price={p.price}
-            data-name={p.name.toLowerCase()}
-            data-badge={p.badge}
-            data-oferta={p.oferta ? '1' : '0'}
-            data-envio={p.envioGratis ? '1' : '0'}
-            data-destacado={p.destacado ? '1' : '0'}
-          >
-            <a href={productUrl} class="cp-card-link" aria-label={`Ver ${p.name}`}>
-              <div class="cp-img-wrap">
-                {p.img
-                  ? <img src={p.img} alt={p.name} loading="lazy" width="400" height="400" />
-                  : <div class="cp-emoji-ph">{p.emoji}</div>
-                }
-                <Fragment set:html={badgeHtml} />
-                {p.envioGratis && (
-                  <div class="cp-envio-tag"><i class="ri-truck-line"></i> Envío gratis</div>
-                )}
-                <div class="cp-overlay">
-                  <span><i class="ri-eye-line"></i> Ver detalle</span>
-                </div>
-              </div>
-
-              <div class="cp-info">
-                <div class="cp-cat-label">{cat.icon} {cat.name}</div>
-                <h2 class="cp-name">{p.name}</h2>
-                {p.desc && <p class="cp-desc">{p.desc}</p>}
-                <div class="cp-price" set:html={priceDisplay} />
-              </div>
-            </a>
-
-            <div class="cp-actions">
-              {p.price > 0
-                ? <button
-                    class="cp-btn-add"
-                    data-id={p.id}
-                    aria-label={`Agregar ${p.name} al carrito`}
-                    onclick={`catAddToCart(${p.id}, this)`}
-                  >
-                    <i class="ri-shopping-bag-line"></i>
-                  </button>
-                : <a
-                    class="cp-btn-wa"
-                    href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hola Nuditos! 🌸 Me interesa: *${p.name}*`)}`}
-                    target="_blank"
-                    rel="noopener"
-                    aria-label="Consultar por WhatsApp"
-                  >
-                    <i class="ri-whatsapp-line"></i>
-                  </a>
-              }
-            </div>
-          </article>
-        );
-      })}
+      {allProducts.map(p => (
+        <ProductCard p={p} />
+      ))}
     </div>
+
 
     <!-- Estado vacío -->
     <div class="cat-empty" id="catEmpty" style="display:none" aria-live="polite">

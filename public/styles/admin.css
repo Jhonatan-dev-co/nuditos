@@ -361,6 +361,23 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);heig
   .cc-grid{grid-template-columns:1fr}
 }
 @media(max-width:380px){
+  .cc-grid{grid-template-columns:1fr}
   .dash-grid{grid-template-columns:1fr 1fr}
   .admin-logo span{display:none}
 }
+
+/* ── CATEGORÍAS ADMIN ── */
+.cat-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-top:1.2rem}
+.cat-admin-card{background:var(--bg);border:1.5px solid var(--border);border-radius:16px;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.9rem;transition:all .2s;}
+.cat-admin-card:hover{border-color:var(--lila);box-shadow:0 6px 20px rgba(139,92,246,.1);transform:translateY(-2px)}
+.ca-icon{width:48px;height:48px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:var(--shadow-sm);border:1px solid var(--border);flex-shrink:0}
+.ca-info{flex:1;min-width:0}
+.ca-name{font-size:.92rem;font-weight:700;color:var(--text);margin-bottom:.15rem}
+.ca-slug{font-size:.65rem;color:var(--soft);text-transform:uppercase;letter-spacing:.5px}
+.ca-actions{display:flex;gap:.4rem;flex-shrink:0}
+.ca-btn{width:32px;height:32px;border:1.5px solid var(--border);background:#fff;color:var(--soft);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:.9rem;}
+.ca-btn:hover{background:var(--lila-light);color:var(--lila);border-color:var(--lila)}
+.ca-btn.ca-del:hover{background:var(--red-light);color:var(--red);border-color:var(--red)}
+
+.t-header-row{display:flex;align-items:center;justify-content:space-between;gap:1.2rem;margin-bottom:1.4rem;flex-wrap:wrap}
+

@@ -1,0 +1,33 @@
+---
+import { slugify, clUrl } from '../data/datos';
+const { p } = Astro.props;
+---
+<a class="product-list-item" href={`/ramo/${slugify(p.name)}`} style="text-decoration:none;color:inherit;display:flex">
+  <div class="list-item-img">
+    {p.img ? (
+      <img src={clUrl(p.img, 200)} alt={p.name} loading="lazy" />
+    ) : (
+      <span>{p.emoji}</span>
+    )}
+
+  </div>
+  <div class="list-item-info">
+    <div class="list-item-name">{p.name}</div>
+    <div class="list-item-desc">{p.desc}</div>
+    <div class="list-item-price">
+      {p.price > 0 ? `$${p.price.toLocaleString('es-CO')} COP` : 'Consultar'}
+    </div>
+  </div>
+  <div class="list-item-actions">
+    {p.price > 0 ? (
+      <button class="p-add-btn" id={`padd-${p.id}`} onclick={`event.preventDefault(); event.stopPropagation(); addToCart(${p.id})`}>
+        <i class="ri-shopping-bag-line"></i>
+      </button>
+    ) : (
+      <a class="p-add-btn p-wa-btn" href={`https://wa.me/573144931525?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}`} target="_blank" onclick="event.stopPropagation()">
+        <i class="ri-whatsapp-line"></i>
+      </a>
+    )}
+    <i class="ri-arrow-right-s-line list-arrow"></i>
+  </div>
+</a>

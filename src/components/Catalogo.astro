@@ -1,0 +1,109 @@
+---
+import { products as fallbackProducts, CONFIG_DEFAULT as FALLBACK_CONFIG } from '../data/datos';
+import ProductCard from './ProductCard.astro';
+import ProductListItem from './ProductListItem.astro';
+
+const { products: propProducts, config: propConfig, categories: propCategories, banners: propBanners } = Astro.props;
+
+const activeProducts = (propProducts || fallbackProducts).filter(p => p.activo !== false);
+const config = propConfig || FALLBACK_CONFIG;
+const categories = propCategories || [];
+const banners = propBanners || [];
+
+function getCatView(catId: string) {
+  // @ts-ignore
+  if (config.catViews && config.catViews[catId]) return config.catViews[catId];
+  return 'carousel';
+}
+
+const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
+  const items = activeProducts.filter(p => p.cat?.toLowerCase() === cat.id?.toLowerCase());
+  return { cat, items };
+}).filter(c => c.items.length > 0);
+
+---
+
+{catsToRender.map(({ cat, items }) => {
+  const view = getCatView(cat.id);
+  const catBanners = banners.filter(b => b.afterCat === cat.id);
+  
+  return (
+    <>
+      <div class="cat-section" id={`section-${cat.id}`}>
+        <div class="cat-section-header">
+          <span class="cat-section-title">{cat.icon} {cat.name}</span>
+          <a href="#" class="cat-ver-todo" onclick={`filterCatByName('${cat.id}');return false;`}>
+            Ver todo <i class="ri-arrow-right-line"></i>
+          </a>
+        </div>
+        
+        {view === 'list' && (
+          <div class="products-list">
+            {items.map(p => <ProductListItem p={p} />)}
+          </div>
+        )}
+        
+        {view === 'grid' && (
+          <div class="products-grid">
+            {items.map(p => <ProductCard p={p} />)}
+          </div>
+        )}
+        
+        {view === 'carousel' && (
+          <div class="swiper cat-swiper" id={`catSwiper-${cat.id}`}>
+            <div class="swiper-wrapper">
+              {items.map(p => (
+                <div class="swiper-slide cat-slide">
+                  <ProductCard p={p} />
+                </div>
+              ))}
+            </div>
+            <div class="swiper-pagination cat-pagination" id={`catPag-${cat.id}`}></div>
+          </div>
+        )}
+      </div>
+
+      {catBanners.map(banner => (
+        <div class="editorial-banner" style={(banner as any).imgUrl ? `background-image: url(${(banner as any).imgUrl}); background-size: cover; background-position: center;` : ''}>
+          {!(banner as any).imgUrl && <div class="editorial-banner-bg">{banner.emoji || '🌸'}</div>}
+          <div class="editorial-banner-overlay">
+            <div class="editorial-banner-title" set:html={banner.title || ''}></div>
+          </div>
+        </div>
+      ))}
+      <div class="cat-section-end"></div>
+    </>
+  );
+})}
+
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    if (typeof Swiper !== 'undefined') {
+      const catSwiperEls = document.querySelectorAll('.cat-swiper');
+      catSwiperEls.forEach(el => {
+        const id = el.id.replace('catSwiper-', '');
+        new Swiper(`#catSwiper-${id}`, {
+          slidesPerView: 1.4,
+          spaceBetween: 14,
+          grabCursor: true,
+          freeMode: { enabled: true, momentum: true, momentumRatio: 0.8, momentumVelocityRatio: 0.8 },
+          touchStartPreventDefault: false,
+          touchMoveStopPropagation: false,
+          passiveListeners: true,
+          touchRatio: 1.2,
+          threshold: 5,
+          touchAngle: 45,
+          resistance: true,
+          resistanceRatio: 0.85,
+          pagination: { el: `#catPag-${id}`, clickable: true, dynamicBullets: true },
+          breakpoints: {
+            480:  { slidesPerView: 2.2, spaceBetween: 16 },
+            768:  { slidesPerView: 3.2, spaceBetween: 20 },
+            1024: { slidesPerView: 4.2, spaceBetween: 22 },
+            1280: { slidesPerView: 5,   spaceBetween: 24, freeMode: { enabled: false } },
+          },
+        });
+      });
+    }
+  });
+</script>

@@ -48,10 +48,12 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       <button class="a-tab active" onclick="showTab('productos',this)">🌸 Productos</button>
       <button class="a-tab" onclick="showTab('dashboard',this)">📊 Dashboard</button>
       <button class="a-tab" onclick="showTab('pedidos',this)">📦 Pedidos</button>
+      <button class="a-tab" onclick="showTab('categorias',this)">📁 Categorías</button>
       <button class="a-tab" onclick="showTab('vitrina',this)">⭐ Vitrina</button>
       <button class="a-tab" onclick="showTab('banners',this)">🖼️ Banners</button>
       <button class="a-tab" onclick="showTab('descuentos',this)">🏷️ Descuentos</button>
       <button class="a-tab" onclick="showTab('tienda',this)">⚙️ Tienda</button>
+
     </div>
     <div class="nav-right-actions">
       <button class="preview-btn" onclick="window.open('/','_blank')">
@@ -113,7 +115,24 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         <div id="pedidosList"></div>
       </div>
 
+      <!-- CATEGORÍAS -->
+      <div class="tab-content" id="tab-categorias">
+        <div class="t-card">
+          <div class="t-header-row">
+            <div>
+              <div class="t-title">📁 Gestión de Categorías</div>
+              <div class="t-sub">Controla las secciones del catálogo, sus iconos y el orden.</div>
+            </div>
+            <button class="btn-add-prod" onclick="newCategory()" style="margin:0;width:auto;padding:.5rem 1rem">
+              <i class="ri-add-line"></i> Nueva categoría
+            </button>
+          </div>
+          <div id="catAdminList" class="cat-admin-grid"></div>
+        </div>
+      </div>
+
       <!-- VITRINA -->
+
       <div class="tab-content" id="tab-vitrina">
         <div class="t-card">
           <div class="t-title">⭐ Ramo del momento</div>
@@ -275,6 +294,23 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
   </div>
 </div>
 
+<!-- MODAL CATEGORÍA -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal-box">
+    <div class="modal-title" id="catModalTitle">Nueva categoría</div>
+    <input type="hidden" id="catEditId">
+    <div class="modal-field"><label>ID (Slug - Ej: ramos-novia)</label><input type="text" id="catId" placeholder="ramos-novia"></div>
+    <div class="modal-field"><label>Nombre visible</label><input type="text" id="catNombre" placeholder="Ramos de Novia"></div>
+    <div class="modal-field"><label>Icono / Emoji</label><input type="text" id="catIcon" placeholder="👰"></div>
+    <div class="modal-field"><label>Orden (1, 2, 3...)</label><input type="number" id="catOrden" placeholder="1"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeCatModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveCategory()"><i class="ri-save-line"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+
 <div class="toast-admin" id="toastAdmin"></div>
 
 <!-- Scripts — orden importante -->
@@ -291,8 +327,10 @@ let adminCfg={}, heroSelection=[], momentoSelection=null;
 let adminProducts=[], selectedId=null, pendingDeleteId=null;
 let editorialBannersAdmin=[], sideFilterCat='';
 let pedidos=[], pedidoFilter='todos';
+let adminCategories=[];
 let uploadedImgs=[], currentEditingImgs=[];
 let changeHistory=[];
+
 
 /* ── LOGIN / AUTH ── */
 async function doLogin(){
@@ -403,7 +441,9 @@ async function loadAll(){
       {id:3,afterCat:'especial',emoji:'✨',title:'Regalos que <em>dejan huella</em>',imgUrl:''},
     ];}catch{editorialBannersAdmin=[];}
     try{pedidos=await sbAdminGetPedidos();}catch{pedidos=[];}
+    try{adminCategories=await sbAdminGetCategories();if(!adminCategories.length)adminCategories=[...categories];}catch{adminCategories=[...categories];}
     try{const sh=localStorage.getItem('nuditos_history');changeHistory=sh?JSON.parse(sh):[];}catch{changeHistory=[];}
+
   }catch(e){
     showToast('⚠️ Error de conexión — usando datos locales');
     adminProducts=products.map(p=>({...p}));adminCfg={...CONFIG_DEFAULT};editorialBannersAdmin=[];pedidos=[];
@@ -417,11 +457,13 @@ async function loadAll(){
   if(adminCfg.wompiKey)document.getElementById('wompiKey').value=adminCfg.wompiKey;
   if(adminCfg.metaPixelActivo)document.getElementById('toggleMetaPixel').classList.add('on');
   if(adminCfg.metaPixelId)document.getElementById('metaPixelId').value=adminCfg.metaPixelId;
-  const cc=getCloudinaryConfig();
+  cc=getCloudinaryConfig();
   if(cc.cloudName)document.getElementById('ccCloudName').value=cc.cloudName;
   if(cc.preset)document.getElementById('ccPreset').value=cc.preset;
   buildSideFilters();renderSidebar();renderStats();showEditorEmpty();
+  renderCategoriasList();
   renderHeroSlots();renderMomentoSelected();renderMomentoList(adminProducts);
+
   renderHeroList(adminProducts);renderCatViewsList();renderBannerList();
   showToast('✅ Todo cargado');
 }
@@ -761,7 +803,102 @@ function renderPedidosList(){
       </div>
     </div>`).join(''):`<div style="text-align:center;padding:3rem 1rem;color:var(--soft);font-size:.85rem">No hay pedidos</div>`;}
 
+/* ── CATEGORÍAS ── */
+function renderCategoriasList() {
+  const list = adminCategories;
+  document.getElementById('catAdminList').innerHTML = list.length ? list.map(c => `
+    <div class="cat-admin-card">
+      <div class="ca-icon">${c.icon}</div>
+      <div class="ca-info">
+        <div class="ca-name">${c.nombre}</div>
+        <div class="ca-slug">ID: ${c.id} · Orden: ${c.orden}</div>
+      </div>
+      <div class="ca-actions">
+        <button class="ca-btn" onclick="editCategory('${c.id}')"><i class="ri-edit-line"></i></button>
+        <button class="ca-btn ca-del" onclick="deleteCategory('${c.id}')"><i class="ri-delete-bin-line"></i></button>
+      </div>
+    </div>`).join('') : `<div style="text-align:center;padding:2rem;color:var(--soft)">No hay categorías registradas</div>`;
+}
+
+function newCategory() {
+  document.getElementById('catModalTitle').textContent = 'Nueva categoría';
+  document.getElementById('catEditId').value = '';
+  document.getElementById('catId').value = '';
+  document.getElementById('catId').disabled = false;
+  document.getElementById('catNombre').value = '';
+  document.getElementById('catIcon').value = '🌸';
+  document.getElementById('catOrden').value = adminCategories.length + 1;
+  document.getElementById('catModal').classList.add('open');
+}
+
+function editCategory(id) {
+  const c = adminCategories.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('catModalTitle').textContent = 'Editar categoría';
+  document.getElementById('catEditId').value = id;
+  document.getElementById('catId').value = id;
+  document.getElementById('catId').disabled = true;
+  document.getElementById('catNombre').value = c.nombre;
+  document.getElementById('catIcon').value = c.icon;
+  document.getElementById('catOrden').value = c.orden;
+  document.getElementById('catModal').classList.add('open');
+}
+
+function closeCatModal() { document.getElementById('catModal').classList.remove('open'); }
+
+async function saveCategory() {
+  const editId = document.getElementById('catEditId').value;
+  const id = document.getElementById('catId').value.trim().toLowerCase().replace(/\s+/g, '-');
+  const data = {
+    id: id,
+    nombre: document.getElementById('catNombre').value.trim(),
+    icon: document.getElementById('catIcon').value.trim() || '🌸',
+    orden: parseInt(document.getElementById('catOrden').value) || 0,
+    activo: true
+  };
+
+  if (!data.id || !data.nombre) { showToast('⚠️ ID y Nombre son obligatorios'); return; }
+
+  try {
+    const isNew = !editId;
+    await sbAdminSaveCategory(data, isNew);
+    if (isNew) {
+      adminCategories.push(data);
+    } else {
+      const idx = adminCategories.findIndex(x => x.id === editId);
+      if (idx !== -1) adminCategories[idx] = data;
+    }
+    adminCategories.sort((a,b) => a.orden - b.orden);
+    renderCategoriasList();
+    buildSideFilters();
+    renderCatViewsList();
+    closeCatModal();
+    showToast(`✓ Categoría "${data.nombre}" guardada`);
+    addToHistory(`📁 Categoría: ${data.nombre}`);
+  } catch (e) {
+    showToast('❌ Error al guardar categoría');
+    console.error(e);
+  }
+}
+
+async function deleteCategory(id) {
+  const cat = adminCategories.find(x => x.id === id);
+  if (!confirm(`¿Estás seguro de eliminar la categoría "${cat?.nombre}"? Los productos asociados quedarán huérfanos.`)) return;
+  try {
+    await sbAdminDeleteCategory(id);
+    adminCategories = adminCategories.filter(x => x.id !== id);
+    renderCategoriasList();
+    buildSideFilters();
+    renderCatViewsList();
+    showToast(`🗑️ Categoría eliminada`);
+    addToHistory(`🗑️ Eliminada cat: ${cat?.nombre}`);
+  } catch (e) {
+    showToast('❌ Error al eliminar');
+  }
+}
+
 /* ── DASHBOARD ── */
+
 function renderDashboard(){
   const total=adminProducts.length,visibles=adminProducts.filter(p=>p.activo!==false).length;
   const sinFoto=adminProducts.filter(p=>!p.img||!p.img.trim()).length;

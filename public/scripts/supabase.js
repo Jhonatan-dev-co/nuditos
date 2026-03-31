@@ -199,9 +199,36 @@ function sbToPedido(p) {
   };
 }
 
+function sbToCategory(c) {
+  return {
+    id:     c.id,
+    nombre: c.nombre || '',
+    icon:   c.icon   || '🌸',
+    orden:  c.orden  || 0,
+    activo: c.activo !== false
+  };
+}
+
+function categoryToSb(c) {
+  return {
+    id:     c.id,
+    nombre: c.nombre || '',
+    icon:   c.icon   || '🌸',
+    orden:  c.orden  || 0,
+    activo: c.activo !== false
+  };
+}
+
 /* ════════════════════════════
    API PÚBLICA (tienda)
 ════════════════════════════ */
+async function sbGetCategories() {
+  try {
+    const rows = await _get('categorias', 'activo=eq.true&order=orden.asc');
+    return rows.map(sbToCategory);
+  } catch { return []; }
+}
+
 async function sbGetProducts() {
   try {
     const rows = await _get('productos', 'activo=eq.true&order=id.asc');
@@ -239,7 +266,27 @@ async function sbInsertPedido(data) {
 /* ════════════════════════════
    API ADMIN (requiere auth)
 ════════════════════════════ */
+async function sbAdminGetCategories() {
+  const rows = await _get('categorias', 'order=orden.asc', true);
+  return rows.map(sbToCategory);
+}
+
+async function sbAdminSaveCategory(c, isNew) {
+  const data = categoryToSb(c);
+  if (isNew) {
+    return await _post('categorias', data, true);
+  } else {
+    // Para categorías usamos id (slug) como identificador único en el filtro
+    return await _patch('categorias', `id=eq.${c.id}`, data, true);
+  }
+}
+
+async function sbAdminDeleteCategory(id) {
+  return await _del('categorias', `id=eq.${id}`, true);
+}
+
 async function sbAdminGetProducts() {
+
   const rows = await _get('productos', 'order=id.asc', true);
   return rows.map(sbToProduct);
 }

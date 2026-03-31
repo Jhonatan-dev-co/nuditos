@@ -1,0 +1,15 @@
+---
+// Overlay de búsqueda global. La lógica reside en src/scripts/search-ui.ts
+---
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <i class="ri-search-line"></i>
+      <input type="text" id="searchInput" placeholder="Buscar ramos, amigurumis..." autocomplete="off">
+      <button id="closeSearchBtn" aria-label="Cerrar búsqueda"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="../scripts/search-ui.ts"></script>

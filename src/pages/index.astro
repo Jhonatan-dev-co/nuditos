@@ -4,13 +4,44 @@
  * Equivalente al index.html actual, adaptado a Astro
  */
 import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import RamoDestacado from '../components/RamoDestacado.astro';
+import Catalogo from '../components/Catalogo.astro';
+
+import { getLiveProducts, getLiveConfig, getLiveCategories, getLiveBanners } from '../lib/supabase';
+import { CONFIG_DEFAULT as FALLBACK_CONFIG, categories as FALLBACK_CATEGORIES } from '../data/datos';
+
+const liveProducts = await getLiveProducts();
+const liveConfigRaw = await getLiveConfig();
+const liveConfig = liveConfigRaw ? { ...FALLBACK_CONFIG, ...liveConfigRaw } : FALLBACK_CONFIG;
+
+// Categorías y Banners dinámicos
+const sbCategories = await getLiveCategories();
+const liveCategories = sbCategories.length > 0 ? sbCategories : FALLBACK_CATEGORIES;
+const liveBanners = await getLiveBanners();
+
+// Preparar hero products
+const heroIds = liveConfig.carruselHero || [];
+const heroProducts = heroIds.map(id => liveProducts.find(p => p.id === id)).filter(p => p !== undefined);
+
+// Ramo destacado
+const ramoDestacado = liveProducts.find(p => p.id === liveConfig.ramoDestacado);
 ---
+
 
 <Layout
   title="Nuditos Tejidos — Ramos de Crochet hechos a mano | Colombia"
   description="Ramos de crochet únicos e irrepetibles. Flores que nunca se marchitan. Envíos a todo Colombia desde El Dorado, Meta."
   ogType="website"
 >
+  <script is:inline define:vars={{ 
+    liveProducts: liveProducts.map(p => ({ id: p.id, name: p.name, price: p.price, emoji: p.emoji, img: p.img, cat: p.cat, desc: p.desc })),
+    liveCategories: liveCategories
+  }}>
+    window.NUDITOS_LIVE_PRODUCTS = liveProducts;
+    window.NUDITOS_CATEGORIES = liveCategories;
+  </script>
+
 
   <!-- ════════ BANNER DESCUENTO ════════ -->
   <div id="discountBanner">
@@ -18,16 +49,11 @@ import Layout from '../layouts/Layout.astro';
   </div>
 
   <!-- ════════ HERO SWIPER ════════ -->
-  <div class="swiper hero-swiper" id="heroSwiper">
-    <div class="swiper-wrapper" id="heroSlides"></div>
-    <div class="swiper-pagination"></div>
-    <div class="swiper-button-prev"></div>
-    <div class="swiper-button-next"></div>
-  </div>
+  <Hero heroProducts={heroProducts} />
 
   <!-- ════════ RAMO DEL MOMENTO ════════ -->
   <div class="momento-wrap">
-    <div class="momento-card" id="ramoMomento"></div>
+    <RamoDestacado p={ramoDestacado} />
   </div>
 
   <!-- ════════ CATEGORÍAS STICKY ════════ -->
@@ -38,7 +64,9 @@ import Layout from '../layouts/Layout.astro';
   </div>
 
   <!-- ════════ CATÁLOGO ════════ -->
-  <div class="catalog-section" id="catalogRows"></div>
+  <div class="catalog-section" id="catalogRows">
+    <Catalogo products={liveProducts} config={liveConfig} categories={liveCategories} banners={liveBanners} />
+  </div>
 
   <!-- ════════ FILTRO ACTIVO ════════ -->
   <div id="filteredView">
