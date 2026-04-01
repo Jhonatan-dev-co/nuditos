@@ -1,0 +1,90 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Políticas — Nuditos Tejidos"
+  description="Consulta nuestras políticas de envío, cambios, devoluciones y privacidad en Nuditos Tejidos."
+>
+  <style>
+    .page-hero { background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%); padding: 5rem 1.5rem 4rem; text-align: center; }
+    .page-eyebrow { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem; }
+    .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 6vw, 3.5rem); font-weight: 400; line-height: 1.15; color: var(--text); margin-bottom: 1.2rem; }
+    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
+    .page-hero p { max-width: 500px; margin: 0 auto; color: var(--text-soft); font-size: 1rem; line-height: 1.7; }
+
+    .policy-wrap { max-width: 800px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+    .policy-section { margin-bottom: 4rem; }
+    .policy-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; color: var(--text); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+    .policy-title i { color: var(--lila-dark); font-size: 1.5rem; }
+    .policy-content { color: var(--text-soft); font-size: 0.95rem; line-height: 1.8; }
+    .policy-content p { margin-bottom: 1.2rem; }
+    .policy-content ul { margin-bottom: 1.5rem; padding-left: 1.2rem; }
+    .policy-content li { margin-bottom: 0.6rem; position: relative; list-style: none; }
+    .policy-content li::before { content: '🌸'; position: absolute; left: -1.5rem; font-size: 0.8rem; }
+    
+    .policy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
+    .policy-card { background: var(--white); border-radius: 20px; padding: 2rem; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+    .policy-card h4 { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; color: var(--lila-dark); }
+
+    @media (max-width: 768px) {
+      .policy-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <div class="page-hero">
+    <div class="page-eyebrow">Información legal</div>
+    <h1>Nuestras <em>políticas</em></h1>
+    <p>En Nuditos Tejidos nos importa tu confianza. Aquí detallamos cómo trabajamos para darte la mejor experiencia.</p>
+  </div>
+
+  <div class="policy-wrap">
+    
+    <!-- ENVÍOS -->
+    <section class="policy-section" id="envios">
+      <h2 class="policy-title"><i class="ri-truck-line"></i> Envíos y Entregas</h2>
+      <div class="policy-content">
+        <p>Realizamos envíos a todo el territorio colombiano utilizando empresas de mensajería certificadas (Interrapidisimo, Servientrega, Envia).</p>
+        <div class="policy-grid">
+          <div class="policy-card">
+            <h4>Tiempos de preparación</h4>
+            <p>Cada ramo es tejido a mano. El tiempo de elaboración es de <strong>1 a 3 días hábiles</strong> tras confirmar el pago.</p>
+          </div>
+          <div class="policy-card">
+            <h4>Tiempos de transporte</h4>
+            <p>Una vez despachado, la entrega tarda de <strong>2 a 5 días hábiles</strong> según la ubicación (ciudades principales son más rápidas).</p>
+          </div>
+        </div>
+        <p style="margin-top: 1.5rem;"><strong>Costo de envío:</strong> El valor base es de $17.000 COP, pero puede variar según el peso y destino. Ofrecemos promociones de envío gratuito en pedidos superiores a cierto monto indicado en el carrito.</p>
+      </div>
+    </section>
+
+    <!-- CAMBIOS Y DEVOLUCIONES -->
+    <section class="policy-section" id="cambios">
+      <h2 class="policy-title"><i class="ri-refresh-line"></i> Cambios y Devoluciones</h2>
+      <div class="policy-content">
+        <p>Debido a que nuestros productos son artesanales y, en muchos casos, personalizados, aplicamos las siguientes reglas:</p>
+        <ul>
+          <li><strong>Defectos de fábrica:</strong> Tienes 15 días calendario para reportar cualquier daño estructural en el tejido.</li>
+          <li><strong>Productos personalizados:</strong> No se aceptan devoluciones por retracto una vez iniciada la producción del diseño a medida.</li>
+          <li><strong>Proceso:</strong> Escríbenos a WhatsApp con fotos del estado del producto para iniciar el trámite de garantía.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PRIVACIDAD -->
+    <section class="policy-section" id="privacidad">
+      <h2 class="policy-title"><i class="ri-shield-user-line"></i> Protección de Datos</h2>
+      <div class="policy-content">
+        <p>En cumplimiento con la Ley 1581 de 2012, informamos que tus datos personales (Nombre, Cédula, Dirección, Teléfono) se utilizan exclusivamente para:</p>
+        <ul>
+          <li>Gestión y despacho de tus pedidos.</li>
+          <li>Comunicación directa vía WhatsApp para soporte.</li>
+          <li>Información sobre novedades y descuentos (siempre puedes darte de baja).</li>
+        </ul>
+        <p>No compartimos tu información con terceros, excepto con las transportadoras necesarias para realizar tu entrega.</p>
+      </div>
+    </section>
+
+  </div>
+</Layout>

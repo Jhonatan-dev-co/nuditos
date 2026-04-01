@@ -41,6 +41,8 @@ const ramoDestacado = liveProducts.find(p => p.id === liveConfig.ramoDestacado);
     window.NUDITOS_LIVE_PRODUCTS = liveProducts;
     window.NUDITOS_CATEGORIES = liveCategories;
   </script>
+  
+  <h1 class="sr-only">Nuditos Tejidos — Ramos y Flores Eternas de Crochet en Colombia</h1>
 
 
   <!-- ════════ BANNER DESCUENTO ════════ -->
@@ -60,6 +62,19 @@ const ramoDestacado = liveProducts.find(p => p.id === liveConfig.ramoDestacado);
   <div class="cat-sticky" id="catalogSection">
     <div class="cat-inner">
       <div class="cat-row" id="catRow"></div>
+      
+      <!-- Selector Global de Vista -->
+      <div class="view-toggle-global">
+        <button class="vtoggle active" data-view="carousel" title="Ver como carrusel">
+          <i class="ri-slideshow-3-line"></i>
+        </button>
+        <button class="vtoggle" data-view="grid" title="Ver como mosaico">
+          <i class="ri-grid-fill"></i>
+        </button>
+        <button class="vtoggle" data-view="list" title="Ver como lista">
+          <i class="ri-list-check-2"></i>
+        </button>
+      </div>
     </div>
   </div>
 

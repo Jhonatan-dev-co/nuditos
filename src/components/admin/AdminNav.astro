@@ -1,0 +1,22 @@
+<nav class="admin-nav">
+  <button class="nav-hamburger" id="navHamburger" onclick="toggleSidebar()">
+    <i class="ri-menu-line"></i>
+  </button>
+  <div class="admin-logo">Nuditos <span>Admin</span></div>
+  <div class="admin-tabs">
+    <button class="a-tab active" onclick="showTab('productos',this)">🌸 Productos</button>
+    <button class="a-tab" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+    <button class="a-tab" onclick="showTab('pedidos',this)">📦 Pedidos</button>
+    <button class="a-tab" onclick="showTab('categorias',this)">📁 Categorías</button>
+    <button class="a-tab" onclick="showTab('vitrina',this)">⭐ Vitrina</button>
+    <button class="a-tab" onclick="showTab('banners',this)">🖼️ Banners</button>
+    <button class="a-tab" onclick="showTab('descuentos',this)">🏷️ Descuentos</button>
+    <button class="a-tab" onclick="showTab('tienda',this)">⚙️ Tienda</button>
+  </div>
+  <div class="nav-right-actions">
+    <button class="preview-btn" onclick="window.open('/','_blank')">
+      <i class="ri-eye-line"></i> <span class="hide-xs">Ver tienda</span>
+    </button>
+    <button class="logout-btn" onclick="doLogout()">Salir</button>
+  </div>
+</nav>

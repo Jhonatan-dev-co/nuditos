@@ -1,0 +1,68 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Cómo cuidar tus flores de crochet — Blog Nuditos"
+  description="Guía completa para que tus ramos de crochet duren años. Limpieza, ubicación y consejos útiles."
+>
+  <style>
+    .post-hero { background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%); padding: 6rem 1.5rem 5rem; text-align: center; }
+    .post-meta { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--lila-dark); letter-spacing: 2px; margin-bottom: 1rem; }
+    .post-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600; line-height: 1.1; color: var(--text); max-width: 900px; margin: 0 auto 2rem; }
+    .post-img { max-width: 1000px; margin: -3rem auto 4rem; aspect-ratio: 16/9; border-radius: 32px; overflow: hidden; box-shadow: var(--shadow-lg); }
+    .post-img img { width: 100%; height: 100%; object-fit: cover; }
+
+    .post-content { max-width: 720px; margin: 0 auto; padding: 0 1.5rem 8rem; color: var(--text-mid); font-size: 1.1rem; line-height: 1.8; }
+    .post-content h2 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 600; color: var(--text); margin: 3rem 0 1.5rem; }
+    .post-content p { margin-bottom: 1.5rem; }
+    .post-content ul { margin-bottom: 2rem; padding-left: 1.5rem; }
+    .post-content li { margin-bottom: 1rem; }
+    .post-content strong { color: var(--text); }
+    
+    .post-tip { background: var(--lila-xlight); border-radius: 24px; padding: 2rem; border-left: 4px solid var(--lila-dark); margin: 3rem 0; font-style: italic; }
+    
+    .post-footer { border-top: 1px solid var(--border); padding-top: 3rem; margin-top: 5rem; display: flex; justify-content: space-between; align-items: center; }
+    .back-blog { text-decoration: none; color: var(--lila-dark); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; transition: transform 0.3s; }
+    .back-blog:hover { transform: translateX(-5px); }
+
+    @media (max-width: 768px) {
+      .post-hero { padding: 4rem 1.2rem 3rem; }
+      .post-img { margin: -1.5rem 1.2rem 3rem; border-radius: 20px; }
+      .post-content { font-size: 1rem; }
+    }
+  </style>
+
+  <div class="post-hero">
+    <div class="post-meta">Cuidados • 31 de Marzo, 2026</div>
+    <h1>Cómo cuidar tus flores de crochet para que <em>duren años</em></h1>
+  </div>
+
+  <div class="post-img">
+    <img src="https://images.unsplash.com/photo-1544833058-e70f9ca2bf2e?q=80&w=2000&auto=format&fit=crop" alt="Flores de crochet tejidas a mano" />
+  </div>
+
+  <article class="post-content">
+    <p>Una de las mayores ventajas de los ramos de **Nuditos Tejidos** es que, a diferencia de las flores naturales, ¡nunca se marchitan! Sin embargo, como cualquier pieza artesanal hecha con hilos premium, requieren ciertos cuidados básicos para mantener sus colores vivos y su forma perfecta.</p>
+
+    <h2>1. ¡Nada de agua!</h2>
+    <p>Parece obvio, pero recuerda que tus flores están hechas de hilo y algodón. El agua puede deformar el relleno o incluso causar moho si no se seca bien. Si por accidente se mojan, déjalas secar en un lugar ventilado a la sombra, nunca directo al sol.</p>
+
+    <div class="post-tip">
+      "Un ramo de crochet bien cuidado es un recuerdo tangible que puede pasar de generación en generación."
+    </div>
+
+    <h2>2. Limpieza suave</h2>
+    <p>Para quitar el polvo acumulado, lo mejor es usar un **cepillo de cerdas muy suaves** (como un pincel de maquillaje limpio) o un secador de pelo en la opción de aire frío a una distancia prudente. Si hay una mancha puntual, usa un paño ligeramente húmedo con jabón neutro y presiona sin fregar.</p>
+
+    <h2>3. Ojo con el sol</h2>
+    <p>La luz solar directa y constante puede desvanecer los pigmentos del algodón a largo plazo. Busca un lugar en tu casa que reciba **luz indirecta** para que el color de tus pétalos se mantenga vibrante por años.</p>
+
+    <h2>4. Un toque de aroma</h2>
+    <p>¿Quieres que tu ramo huela delicioso? Puedes rociar un poco de tu perfume favorito o una esencia textil sobre el ramo, pero hazlo a unos **30cm de distancia**. La fibra de algodón absorbe muy bien el aroma y lo liberará suavemente en el ambiente.</p>
+
+    <div class="post-footer">
+      <a href="/blog" class="back-blog"><i class="ri-arrow-left-line"></i> Volver al blog</a>
+    </div>
+  </article>
+</Layout>

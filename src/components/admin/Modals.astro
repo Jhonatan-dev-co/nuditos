@@ -1,0 +1,58 @@
+<!-- ════════ MODALS & FEEDBACK ════════ -->
+
+<!-- CONFIRM DELETE -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">¿Eliminar producto?</div>
+    <div class="confirm-msg" id="confirmMsg">Esta acción no se puede deshacer.</div>
+    <div class="confirm-btns">
+      <button class="conf-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="conf-ok" onclick="confirmDelete()">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PEDIDO -->
+<div class="modal-overlay" id="pedidoModal">
+  <div class="modal-box">
+    <div class="modal-title" id="pedidoModalTitle">Nuevo pedido</div>
+    <div class="modal-sub">Registra el pedido recibido por WhatsApp</div>
+    <input type="hidden" id="pedidoEditId">
+    <div class="modal-field"><label>Nombre cliente</label><input type="text" id="pCliente" placeholder="Valentina García"></div>
+    <div class="modal-field"><label>Teléfono / WhatsApp</label><input type="text" id="pTel" placeholder="+57 300 000 0000"></div>
+    <div class="modal-field"><label>Productos pedidos</label><textarea id="pItems" placeholder="1x Ramo noche estrellada&#10;1x Maceta girasol"></textarea></div>
+    <div class="modal-field"><label>Total (COP)</label><input type="number" id="pTotal" placeholder="135000" min="0"></div>
+    <div class="modal-field"><label>Estado</label>
+      <select id="pEstado">
+        <option value="pendiente">⏳ Pendiente</option>
+        <option value="proceso">🔄 En proceso</option>
+        <option value="entregado">✅ Entregado</option>
+        <option value="cancelado">❌ Cancelado</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Notas</label><textarea id="pNotas" placeholder="Dirección de entrega, color preferido, etc."></textarea></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closePedidoModal()">Cancelar</button>
+      <button class="btn-save" onclick="savePedido()"><i class="ri-save-line"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CATEGORÍA -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal-box">
+    <div class="modal-title" id="catModalTitle">Nueva categoría</div>
+    <input type="hidden" id="catEditId">
+    <div class="modal-field"><label>ID (Slug - Ej: ramos-novia)</label><input type="text" id="catId" placeholder="ramos-novia"></div>
+    <div class="modal-field"><label>Nombre visible</label><input type="text" id="catNombre" placeholder="Ramos de Novia"></div>
+    <div class="modal-field"><label>Icono / Emoji</label><input type="text" id="catIcon" placeholder="👰"></div>
+    <div class="modal-field"><label>Orden (1, 2, 3...)</label><input type="number" id="catOrden" placeholder="1"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeCatModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveCategory()"><i class="ri-save-line"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-admin" id="toastAdmin"></div>

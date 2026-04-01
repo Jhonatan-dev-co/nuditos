@@ -1,0 +1,15 @@
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div class="left-col" id="leftCol">
+  <div class="left-header">
+    <div class="left-title">🌸 Mis ramos</div>
+    <input class="left-search" type="text" id="sideSearch" placeholder="Buscar ramo..." oninput="renderSidebar()">
+    <div class="left-filters" id="sideFilters"></div>
+  </div>
+  <div class="left-stats" id="sideStats"></div>
+  <button class="btn-add-prod" onclick="newProduct()">
+    <i class="ri-add-line"></i> Agregar ramo nuevo
+  </button>
+  <div class="prod-list-scroll" id="sideList"></div>
+</div>

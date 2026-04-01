@@ -7,8 +7,6 @@
 export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
-import ProductCard from '../components/ProductCard.astro';
-
 
 const SB_URL  = 'https://fpyhkxikxdwjhukltmqf.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweWhreGlreGR3amh1a2x0bXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzE1OTIsImV4cCI6MjA4ODI0NzU5Mn0.U1fHtV23e3uTlaH9qoeibzbm1d6MEcUaFE7rDhnokgM';
@@ -21,17 +19,26 @@ function slugify(text: string) {
     .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
 }
 
+const catMeta: Record<string, { name: string; icon: string; desc: string }> = {
+  rosas:      { name: 'Rosas',            icon: '🌹', desc: 'Ramos de rosas tejidas a mano' },
+  amarillas:  { name: 'Flores Amarillas', icon: '🌻', desc: 'Girasoles y flores amarillas' },
+  noche:      { name: 'Noche Estrellada', icon: '🌙', desc: 'Inspirados en Van Gogh' },
+  snoopy:     { name: 'Snoopy',           icon: '🐶', desc: 'Ramos temáticos Snoopy' },
+  macetas:    { name: 'Macetas',          icon: '🌱', desc: 'Macetas tejidas decorativas' },
+  rapunzel:   { name: 'Rapunzel',         icon: '🌸', desc: 'Colección Rapunzel' },
+  especial:   { name: 'Especiales',       icon: '✨', desc: 'Ramos únicos y personalizados' },
+  amigurumis: { name: 'Amigurumis',       icon: '🧸', desc: 'Muñecos tejidos a crochet' },
+};
+
 let allProducts: any[] = [];
-let categories: any[] = [];
 let fetchError = false;
 
 try {
-  // 1. Cargar productos
-  const resP = await fetch(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc`, {
+  const res = await fetch(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc`, {
     headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
   });
-  const rowsP = await resP.json();
-  allProducts = rowsP.map((p: any) => ({
+  const rows = await res.json();
+  allProducts = rows.map((p: any) => ({
     id:             p.id,
     name:           p.nombre          || '',
     price:          p.precio          || 0,
@@ -48,24 +55,10 @@ try {
     destacado:      p.destacado       || false,
     slug:           slugify(p.nombre  || ''),
   }));
-
-  // 2. Cargar categorías dinámicas
-  const resC = await fetch(`${SB_URL}/rest/v1/categorias?order=orden.asc`, {
-    headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
-  });
-  categories = await resC.json();
-
 } catch (e) {
   console.error('[catalogo]', e);
   fetchError = true;
 }
-
-// Mapa para SEO y etiquetas
-const catMap: Record<string, any> = {};
-categories.forEach(c => {
-  catMap[c.id] = { name: c.nombre || c.name, icon: c.emoji || '🌸' };
-});
-
 
 // URL param: categoria inicial
 const urlCat = Astro.url.searchParams.get('categoria') || 'todos';
@@ -140,8 +133,8 @@ const breadcrumbSchema = {
         <span class="cat-hero-emoji">🌸</span>
         Catálogo Nuditos
       </h1>
-      <p class="cat-hero-sub">
-        {totalProducts} productos tejidos a mano · Envío a toda Colombia
+      <p class="cat-hero-sub" id="heroSubCount">
+        <span class="cat-hero-sub-count">{totalProducts}</span> productos tejidos a mano · Envío a toda Colombia
       </p>
     </div>
     <div class="cat-hero-deco" aria-hidden="true">
@@ -158,15 +151,14 @@ const breadcrumbSchema = {
         <button class="cfpill active" data-cat="todos" role="tab" aria-selected="true">
           🌸 Todos <span class="cfpill-count" id="cnt-todos">{totalProducts}</span>
         </button>
-        {categories.map((c) => {
-          const cnt = allProducts.filter(p => p.cat === c.id).length;
+        {Object.entries(catMeta).map(([id, c]) => {
+          const cnt = allProducts.filter(p => p.cat === id).length;
           return cnt > 0 ? (
-            <button class="cfpill" data-cat={c.id} role="tab" aria-selected="false">
-              {c.emoji || '🌸'} {c.nombre || c.name} <span class="cfpill-count">{cnt}</span>
+            <button class="cfpill" data-cat={id} role="tab" aria-selected="false">
+              {c.icon} {c.name} <span class="cfpill-count">{cnt}</span>
             </button>
           ) : null;
         })}
-
       </div>
 
       <!-- Controles derecha -->
@@ -201,11 +193,14 @@ const breadcrumbSchema = {
 
         <!-- Toggle vista -->
         <div class="cfilter-view-toggle" role="group" aria-label="Vista">
-          <button class="cvtoggle active" id="viewGrid" aria-label="Vista cuadrícula" title="Cuadrícula">
-            <i class="ri-grid-line"></i>
+          <button class="cvtoggle active" id="viewCarousel" data-view="carousel" aria-label="Vista carrusel" title="Carrusel">
+            <i class="ri-slideshow-3-line"></i>
           </button>
-          <button class="cvtoggle" id="viewList" aria-label="Vista lista" title="Lista">
-            <i class="ri-list-unordered"></i>
+          <button class="cvtoggle" id="viewGrid" data-view="grid" aria-label="Vista cuadrícula" title="Mosaico">
+            <i class="ri-grid-fill"></i>
+          </button>
+          <button class="cvtoggle" id="viewList" data-view="list" aria-label="Vista lista" title="Lista">
+            <i class="ri-list-check-2"></i>
           </button>
         </div>
       </div>
@@ -235,11 +230,81 @@ const breadcrumbSchema = {
 
     <!-- Grid de productos -->
     <div class="catalog-grid" id="catalogGrid" data-view="grid">
-      {allProducts.map(p => (
-        <ProductCard p={p} />
-      ))}
-    </div>
+      {allProducts.map(p => {
+        const cat = catMeta[p.cat] || { name: p.cat, icon: '🌸', desc: '' };
+        const productUrl = `/ramo/${p.slug}`;
+        const priceDisplay = p.oferta && p.precioOriginal > 0
+          ? `<span class="cp-orig">$${p.precioOriginal.toLocaleString('es-CO')}</span> $${p.price.toLocaleString('es-CO')}<small> COP</small>`
+          : p.price > 0
+            ? `$${p.price.toLocaleString('es-CO')}<small> COP</small>`
+            : `<span class="cp-consultar"><i class="ri-whatsapp-line"></i> Consultar</span>`;
+        const badgeHtml = p.badge
+          ? `<div class="cp-badge cp-badge-${p.badge.toLowerCase()}">${
+              p.badge === 'Nuevo' ? '<i class="ri-sparkling-line"></i>' :
+              p.badge === 'Popular' ? '<i class="ri-fire-line"></i>' :
+              p.badge === 'Especial' ? '<i class="ri-award-line"></i>' : ''
+            } ${p.badge}</div>`
+          : p.oferta ? '<div class="cp-badge cp-badge-oferta"><i class="ri-price-tag-3-fill"></i> Oferta</div>' : '';
 
+        return (
+          <article
+            class="cp-card"
+            data-cat={p.cat}
+            data-price={p.price}
+            data-name={p.name.toLowerCase()}
+            data-badge={p.badge}
+            data-oferta={p.oferta ? '1' : '0'}
+            data-envio={p.envioGratis ? '1' : '0'}
+            data-destacado={p.destacado ? '1' : '0'}
+          >
+            <a href={productUrl} class="cp-card-link" aria-label={`Ver ${p.name}`}>
+              <div class="cp-img-wrap">
+                {p.img
+                  ? <img src={p.img} alt={p.name} loading="lazy" width="400" height="400" />
+                  : <div class="cp-emoji-ph">{p.emoji}</div>
+                }
+                <Fragment set:html={badgeHtml} />
+                {p.envioGratis && (
+                  <div class="cp-envio-tag"><i class="ri-truck-line"></i> Envío gratis</div>
+                )}
+                <div class="cp-overlay">
+                  <span><i class="ri-eye-line"></i> Ver detalle</span>
+                </div>
+              </div>
+
+              <div class="cp-info">
+                <div class="cp-cat-label">{cat.icon} {cat.name}</div>
+                <h2 class="cp-name">{p.name}</h2>
+                {p.desc && <p class="cp-desc">{p.desc}</p>}
+                <div class="cp-price" set:html={priceDisplay} />
+              </div>
+            </a>
+
+            <div class="cp-actions">
+              {p.price > 0
+                ? <button
+                    class="cp-btn-add"
+                    data-id={p.id}
+                    aria-label={`Agregar ${p.name} al carrito`}
+                    onclick={`catAddToCart(${p.id}, this)`}
+                  >
+                    <i class="ri-shopping-bag-line"></i>
+                  </button>
+                : <a
+                    class="cp-btn-wa"
+                    href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hola Nuditos! 🌸 Me interesa: *${p.name}*`)}`}
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="Consultar por WhatsApp"
+                  >
+                    <i class="ri-whatsapp-line"></i>
+                  </a>
+              }
+            </div>
+          </article>
+        );
+      })}
+    </div>
 
     <!-- Estado vacío -->
     <div class="cat-empty" id="catEmpty" style="display:none" aria-live="polite">
@@ -302,7 +367,15 @@ const breadcrumbSchema = {
   display: flex; flex-direction: column; gap: 0.3rem; opacity: 0.15;
   font-size: 2.5rem; pointer-events: none; user-select: none;
 }
-@media (max-width: 600px) { .cat-hero-deco { display: none; } }
+.cat-hero-sub-count { font-weight: 700; color: var(--lila-dark); }
+@media (max-width: 600px) {
+  .cat-hero-deco { display: none; }
+  .cat-hero { padding: 1.5rem 1.2rem 1.8rem; }
+  .cat-breadcrumb { display: none; }
+  .cat-hero-title { font-size: 1.8rem; }
+  .cat-hero-emoji { font-size: 1.6rem; }
+  .cat-hero-sub { font-size: 0.68rem; margin-top: 0.4rem; }
+}
 
 /* ── Barra filtros ─────────────────────────────── */
 .cfilter-wrap {
@@ -346,12 +419,16 @@ const breadcrumbSchema = {
 .cfpill.active .cfpill-count { background: var(--lila-dark); color: white; }
 
 /* Controles derecha */
-.cfilter-controls {
-  display: flex; align-items: center; gap: 0.5rem;
-  flex-shrink: 0; padding-left: 0.5rem;
-  border-left: 1px solid var(--border-dark);
+@media (max-width: 600px) {
+  .cfilter-controls {
+    border-left: none;
+    padding-left: 0;
+    gap: 0.35rem;
+  }
+  .cfilter-search-wrap input { width: 100px; }
+  .cfilter-search-wrap input:focus { width: 130px; }
 }
-/* Search */
+/* Search input */
 .cfilter-search-wrap {
   position: relative; display: flex; align-items: center;
 }
@@ -364,10 +441,10 @@ const breadcrumbSchema = {
   border: 1px solid var(--border-dark); border-radius: 6px;
   background: var(--cream-dark); font-size: 0.72rem;
   font-family: 'Jost', sans-serif; color: var(--text); outline: none;
-  width: 160px; transition: all 0.2s;
+  width: 140px; transition: all 0.2s;
 }
 .cfilter-search-wrap input:focus {
-  border-color: var(--lila); background: white; width: 200px;
+  border-color: var(--lila); background: white; width: 170px;
 }
 .cfilter-search-wrap input::placeholder { color: var(--text-soft); }
 .cfilter-search-clear {
@@ -443,9 +520,12 @@ const breadcrumbSchema = {
   max-width: 1600px; margin: 0 auto;
   padding: 1.5rem 1.2rem 4rem;
 }
-.catalog-topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1.2rem;
+@media (max-width: 600px) {
+  .catalog-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }
 .catalog-count { font-size: 0.72rem; color: var(--text-soft); letter-spacing: 0.5px; }
 .catalog-count strong { color: var(--text); font-weight: 700; }
@@ -465,6 +545,26 @@ const breadcrumbSchema = {
 .catalog-grid[data-view="list"] {
   grid-template-columns: 1fr;
   gap: 0.6rem;
+}
+
+/* Vista carrusel (Scroll horizontal) */
+.catalog-grid[data-view="carousel"] {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lila-dark) transparent;
+  scroll-padding: 0 1rem;
+}
+.catalog-grid[data-view="carousel"]::-webkit-scrollbar { height: 6px; }
+.catalog-grid[data-view="carousel"]::-webkit-scrollbar-thumb { background: var(--lila-dark); border-radius: 10px; }
+.catalog-grid[data-view="carousel"] > * {
+  flex-shrink: 0;
+  width: 280px;
+}
+@media (max-width: 480px) {
+  .catalog-grid[data-view="carousel"] > * { width: 220px; }
 }
 
 /* ── Cards ─────────────────────────────────────── */
@@ -499,7 +599,10 @@ const breadcrumbSchema = {
 .cp-emoji-ph {
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 3.5rem;
+  font-size: 4rem;
+  background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+  color: #fff;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 .cp-overlay {
   position: absolute; inset: 0;
@@ -645,24 +748,25 @@ const breadcrumbSchema = {
 }
 .cat-wa-fab:hover .cat-wa-tooltip { opacity: 1; }
 
-/* ── Responsive filtros ────────────────────────── */
+/* Responsive filtros */
 @media (max-width: 640px) {
-  .cfilter-controls { display: none; }
-  .cfilter-inner { padding: 0 0.8rem; }
-  .catalog-main { padding: 1rem 0.8rem 4rem; }
-}
-@media (min-width: 641px) and (max-width: 900px) {
-  .cfilter-search-wrap input { width: 130px; }
-  .cfilter-search-wrap input:focus { width: 150px; }
-  .cfilter-sort-wrap select { max-width: 130px; }
+  .cfilter-controls { 
+    display: flex; 
+    border-top: 1px solid var(--border-dark);
+    padding: 0.6rem 0.8rem;
+    width: 100%;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.5);
+  }
+  .cfilter-inner { flex-direction: column; padding: 0; min-height: auto; }
+  .cfilter-cats { padding: 0.2rem 0.8rem; width: 100%; }
+  .cfilter-search-wrap input { width: 100%; flex: 1; min-width: 120px; }
+  .cfilter-search-wrap input:focus { width: 100%; }
+  .cfilter-sort-wrap { flex: 1; }
+  .cfilter-sort-wrap select { width: 100%; max-width: none; }
   .cvtoggle { display: none; }
-}
-/* Barra de controles mobile (aparece debajo de pills en mobile) */
-@media (max-width: 640px) {
-  .cfilter-wrap { position: sticky; top: var(--nav-h); }
-  .cfilter-inner { flex-wrap: wrap; padding: 0; gap: 0; }
-  .cfilter-cats { padding: 0 0.8rem; min-height: 48px; }
-  .cat-hero { padding: 2rem 1.2rem 1.8rem; }
+  .catalog-main { padding: 1rem 0.8rem 4rem; }
+  .cat-hero { padding: 2.5rem 1.2rem 2rem; }
 }
 
 /* Animación entrada cards */
@@ -677,193 +781,206 @@ const breadcrumbSchema = {
 </style>
 
 <!-- ══════════════ SCRIPTS ══════════════ -->
+<script is:inline define:vars={{ allProducts }}>
+  window.NUDITOS_LIVE_PRODUCTS = allProducts;
+</script>
 <script is:inline>
-/* ── Estado filtros ── */
-let catActive   = new URLSearchParams(window.location.search).get('categoria') || 'todos';
-let sortActive  = 'default';
-let searchQuery = '';
-let viewMode    = 'grid';
+  document.addEventListener('astro:page-load', () => {
+    /* ── Estado filtros ── */
+    let catActive   = new URLSearchParams(window.location.search).get('categoria') || 'todos';
+    let sortActive  = 'default';
+    let searchQuery = '';
+    let viewMode    = 'grid';
 
-const grid      = document.getElementById('catalogGrid');
-const emptyEl   = document.getElementById('catEmpty');
-const countEl   = document.getElementById('resultCount');
-const chips     = document.getElementById('activeChips');
-const chipsBox  = document.getElementById('chipsContainer');
+    const grid      = document.getElementById('catalogGrid');
+    const emptyEl   = document.getElementById('catEmpty');
+    const countEl   = document.getElementById('resultCount');
+    const chips     = document.getElementById('activeChips');
+    const chipsBox  = document.getElementById('chipsContainer');
 
-/* ── Aplicar filtros ── */
-function catApplyFilters() {
-  const cards = grid.querySelectorAll('.cp-card');
-  let visible = 0;
+    /* ── Aplicar filtros ── */
+    function catApplyFilters() {
+      if (!grid) return;
+      const cards = grid.querySelectorAll('.cp-card');
+      let visible = 0;
 
-  cards.forEach(card => {
-    const cat    = card.dataset.cat;
-    const price  = parseInt(card.dataset.price) || 0;
-    const name   = card.dataset.name;
-    const oferta = card.dataset.oferta === '1';
-    const envio  = card.dataset.envio  === '1';
+      cards.forEach(card => {
+        const cat    = card.dataset.cat;
+        const name   = card.dataset.name;
+        const oferta = card.dataset.oferta === '1';
+        const envio  = card.dataset.envio  === '1';
 
-    let show = true;
-    if (catActive !== 'todos' && cat !== catActive) show = false;
-    if (searchQuery && !name.includes(searchQuery.toLowerCase())) show = false;
-    if (sortActive === 'oferta' && !oferta) show = false;
-    if (sortActive === 'envio'  && !envio)  show = false;
+        let show = true;
+        if (catActive !== 'todos' && cat !== catActive) show = false;
+        if (searchQuery && !name.includes(searchQuery.toLowerCase())) show = false;
+        if (sortActive === 'oferta' && !oferta) show = false;
+        if (sortActive === 'envio'  && !envio)  show = false;
 
-    card.classList.toggle('hidden', !show);
-    if (show) visible++;
-  });
+        card.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
 
-  // Ordenar visible
-  const visibleCards = Array.from(cards).filter(c => !c.classList.contains('hidden'));
-  if (sortActive === 'price-asc') {
-    visibleCards.sort((a, b) => {
-      const pa = parseInt(a.dataset.price) || 999999;
-      const pb = parseInt(b.dataset.price) || 999999;
-      return pa - pb;
-    });
-  } else if (sortActive === 'price-desc') {
-    visibleCards.sort((a, b) => {
-      const pa = parseInt(a.dataset.price) || 0;
-      const pb = parseInt(b.dataset.price) || 0;
-      return pb - pa;
-    });
-  } else if (sortActive === 'name-asc') {
-    visibleCards.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
-  }
-  visibleCards.forEach(c => grid.appendChild(c));
+      // Ordenar visible
+      const visibleCards = Array.from(cards).filter(c => !c.classList.contains('hidden'));
+      if (sortActive === 'price-asc') {
+        visibleCards.sort((a, b) => (parseInt(a.dataset.price) || 0) - (parseInt(b.dataset.price) || 0));
+      } else if (sortActive === 'price-desc') {
+        visibleCards.sort((a, b) => (parseInt(b.dataset.price) || 0) - (parseInt(a.dataset.price) || 0));
+      } else if (sortActive === 'name-asc') {
+        visibleCards.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+      }
+      visibleCards.forEach(c => grid.appendChild(c));
 
-  // Conteo
-  countEl.innerHTML = `Mostrando <strong>${visible}</strong> ${visible === 1 ? 'producto' : 'productos'}`;
-  emptyEl.style.display   = visible === 0 ? 'block' : 'none';
-  grid.style.display      = visible > 0   ? ''      : 'none';
+      // Conteo
+      if (countEl) countEl.innerHTML = `Mostrando <strong>${visible}</strong> ${visible === 1 ? 'producto' : 'productos'}`;
+      if (emptyEl) emptyEl.style.display = visible === 0 ? 'block' : 'none';
+      grid.style.display = visible > 0 ? '' : 'none';
 
-  catUpdateChips();
-}
+      const heroSub = document.getElementById('heroSubCount');
+      if (heroSub) {
+        heroSub.innerHTML = `<span class="cat-hero-sub-count">${visible}</span> ${visible === 1 ? 'producto tejido' : 'productos tejidos'} a mano · Envío a toda Colombia`;
+      }
 
-/* ── Chips activos ── */
-function catUpdateChips() {
-  const active = [];
-  if (catActive !== 'todos') active.push({ label: catActive, type: 'cat' });
-  if (searchQuery)            active.push({ label: `"${searchQuery}"`, type: 'search' });
-  if (sortActive !== 'default' && sortActive !== 'oferta' && sortActive !== 'envio') {
-    const labels = { 'price-asc': 'Precio ↑', 'price-desc': 'Precio ↓', 'name-asc': 'A–Z' };
-    active.push({ label: labels[sortActive] || sortActive, type: 'sort' });
-  }
-  if (sortActive === 'oferta') active.push({ label: 'Solo ofertas', type: 'sort' });
-  if (sortActive === 'envio')  active.push({ label: 'Envío gratis', type: 'sort' });
+      catUpdateChips();
+    }
 
-  chips.style.display = active.length ? 'block' : 'none';
-  chipsBox.innerHTML  = active.map(a => `
-    <span class="active-chip">
-      ${a.label}
-      <button onclick="catRemoveChip('${a.type}')" aria-label="Quitar filtro ${a.label}">
-        <i class="ri-close-line"></i>
-      </button>
-    </span>`).join('');
-}
+    /* ── Chips activos ── */
+    function catUpdateChips() {
+      if (!chips || !chipsBox) return;
+      const active = [];
+      if (catActive !== 'todos') active.push({ label: catActive, type: 'cat' });
+      if (searchQuery) active.push({ label: `"${searchQuery}"`, type: 'search' });
+      if (sortActive !== 'default' && sortActive !== 'oferta' && sortActive !== 'envio') {
+        const labels = { 'price-asc': 'Precio ↑', 'price-desc': 'Precio ↓', 'name-asc': 'A–Z' };
+        active.push({ label: labels[sortActive] || sortActive, type: 'sort' });
+      }
+      if (sortActive === 'oferta') active.push({ label: 'Solo ofertas', type: 'sort' });
+      if (sortActive === 'envio')  active.push({ label: 'Envío gratis', type: 'sort' });
 
-window.catRemoveChip = function(type) {
-  if (type === 'cat')    { catActive = 'todos'; catSyncPills('todos'); }
-  if (type === 'search') { searchQuery = ''; document.getElementById('catSearch').value = ''; document.getElementById('searchClear').classList.remove('visible'); }
-  if (type === 'sort')   { sortActive = 'default'; document.getElementById('catSort').value = 'default'; }
-  catApplyFilters();
-};
+      chips.style.display = active.length ? 'block' : 'none';
+      chipsBox.innerHTML  = active.map(a => `
+        <span class="active-chip">
+          ${a.label}
+          <button onclick="catRemoveChip('${a.type}')" aria-label="Quitar filtro ${a.label}">
+            <i class="ri-close-line"></i>
+          </button>
+        </span>`).join('');
+    }
 
-window.catResetFilters = function() {
-  catActive = 'todos'; sortActive = 'default'; searchQuery = '';
-  document.getElementById('catSearch').value = '';
-  document.getElementById('catSort').value   = 'default';
-  document.getElementById('searchClear').classList.remove('visible');
-  catSyncPills('todos');
-  catApplyFilters();
-};
+    window.catRemoveChip = function(type) {
+      if (type === 'cat')    { catActive = 'todos'; catSyncPills('todos'); }
+      if (type === 'search') { searchQuery = ''; document.getElementById('catSearch').value = ''; document.getElementById('searchClear').classList.remove('visible'); }
+      if (type === 'sort')   { sortActive = 'default'; document.getElementById('catSort').value = 'default'; }
+      catApplyFilters();
+    };
 
-/* ── Sincronizar pills ── */
-function catSyncPills(catId) {
-  document.querySelectorAll('.cfpill').forEach(btn => {
-    const active = btn.dataset.cat === catId;
-    btn.classList.toggle('active', active);
-    btn.setAttribute('aria-selected', active ? 'true' : 'false');
-  });
-}
+    window.catResetFilters = function() {
+      catActive = 'todos'; sortActive = 'default'; searchQuery = '';
+      if (document.getElementById('catSearch')) document.getElementById('catSearch').value = '';
+      if (document.getElementById('catSort')) document.getElementById('catSort').value = 'default';
+      if (document.getElementById('searchClear')) document.getElementById('searchClear').classList.remove('visible');
+      catSyncPills('todos');
+      catApplyFilters();
+    };
 
-/* ── Carrito (delega a app.js) ── */
-window.catAddToCart = function(id, btn) {
-  if (typeof addToCart === 'function') {
-    addToCart(id);
-    btn.classList.add('added');
-    btn.innerHTML = '<i class="ri-check-line"></i>';
-    setTimeout(() => {
-      btn.classList.remove('added');
-      btn.innerHTML = '<i class="ri-shopping-bag-line"></i>';
-    }, 1300);
-  }
-};
+    function catSyncPills(catId) {
+      document.querySelectorAll('.cfpill').forEach(btn => {
+        const active = btn.dataset.cat === catId;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+    }
 
-/* ── Init ── */
-document.addEventListener('DOMContentLoaded', () => {
-  /* Categoría inicial desde URL */
-  if (catActive !== 'todos') {
-    catSyncPills(catActive);
-    catApplyFilters();
-  }
+    window.catAddToCart = function(id, btn) {
+      if (typeof addToCart === 'function') {
+        addToCart(id);
+        btn.classList.add('added');
+        btn.innerHTML = '<i class="ri-check-line"></i>';
+        setTimeout(() => {
+          btn.classList.remove('added');
+          btn.innerHTML = '<i class="ri-shopping-bag-line"></i>';
+        }, 1300);
+      }
+    };
 
-  /* Pills click */
-  document.querySelectorAll('.cfpill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      catActive = btn.dataset.cat;
+    /* Categoría inicial desde URL */
+    if (catActive !== 'todos') {
       catSyncPills(catActive);
       catApplyFilters();
-      // Actualizar URL sin recargar (accesible/indexable)
-      const url = catActive !== 'todos'
-        ? `${location.pathname}?categoria=${catActive}`
-        : location.pathname;
-      history.replaceState({}, '', url);
+    }
+
+    /* Pills click */
+    document.querySelectorAll('.cfpill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        catActive = btn.dataset.cat;
+        catSyncPills(catActive);
+        catApplyFilters();
+        const url = catActive !== 'todos' ? `${location.pathname}?categoria=${catActive}` : location.pathname;
+        history.replaceState({}, '', url);
+      });
     });
-  });
 
-  /* Búsqueda */
-  const searchInput = document.getElementById('catSearch');
-  const searchClear = document.getElementById('searchClear');
-  let searchTimer;
-  searchInput.addEventListener('input', e => {
-    clearTimeout(searchTimer);
-    searchQuery = e.target.value.trim();
-    searchClear.classList.toggle('visible', searchQuery.length > 0);
-    searchTimer = setTimeout(catApplyFilters, 220);
-  });
-  searchClear.addEventListener('click', () => {
-    searchQuery = ''; searchInput.value = '';
-    searchClear.classList.remove('visible');
-    catApplyFilters(); searchInput.focus();
-  });
+    /* Búsqueda */
+    const searchInput = document.getElementById('catSearch');
+    const searchClear = document.getElementById('searchClear');
+    let searchTimer;
+    if (searchInput) {
+      searchInput.addEventListener('input', e => {
+        clearTimeout(searchTimer);
+        searchQuery = e.target.value.trim();
+        if (searchClear) searchClear.classList.toggle('visible', searchQuery.length > 0);
+        searchTimer = setTimeout(catApplyFilters, 220);
+      });
+    }
+    if (searchClear) {
+      searchClear.addEventListener('click', () => {
+        searchQuery = ''; if (searchInput) searchInput.value = '';
+        searchClear.classList.remove('visible');
+        catApplyFilters(); if (searchInput) searchInput.focus();
+      });
+    }
 
-  /* Ordenar */
-  document.getElementById('catSort').addEventListener('change', e => {
-    sortActive = e.target.value;
-    catApplyFilters();
-  });
+    /* Ordenar */
+    const sortSelect = document.getElementById('catSort');
+    if (sortSelect) {
+      sortSelect.addEventListener('change', e => {
+        sortActive = e.target.value;
+        catApplyFilters();
+      });
+    }
 
-  /* Toggle vista */
-  document.getElementById('viewGrid').addEventListener('click', () => {
-    viewMode = 'grid'; grid.dataset.view = 'grid';
-    document.getElementById('viewGrid').classList.add('active');
-    document.getElementById('viewList').classList.remove('active');
-  });
-  document.getElementById('viewList').addEventListener('click', () => {
-    viewMode = 'list'; grid.dataset.view = 'list';
-    document.getElementById('viewList').classList.add('active');
-    document.getElementById('viewGrid').classList.remove('active');
-  });
+    /* Toggle Vista */
+    const savedView = localStorage.getItem('nuditos_cat_view') || 'carousel';
+    setCatView(savedView);
 
-  /* Limpiar todos */
-  document.getElementById('clearAllFilters').addEventListener('click', catResetFilters);
-
-  /* Scroll suave al grid cuando se filtra */
-  document.querySelectorAll('.cfpill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const top = document.getElementById('catalogMain').getBoundingClientRect().top + window.scrollY - 120;
-      if (window.scrollY > top) window.scrollTo({ top, behavior: 'smooth' });
+    document.querySelectorAll('.cvtoggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const view = btn.dataset.view;
+        localStorage.setItem('nuditos_cat_view', view);
+        setCatView(view);
+      });
     });
+
+    function setCatView(view) {
+      const gridEl = document.getElementById('catalogGrid');
+      if(!gridEl) return;
+      gridEl.setAttribute('data-view', view);
+      document.querySelectorAll('.cvtoggle').forEach(b => {
+        b.classList.toggle('active', b.dataset.view === view);
+      });
+    }
+
+    /* Limpiar todos */
+    const clearBtn = document.getElementById('clearAllFilters');
+    if (clearBtn) clearBtn.addEventListener('click', catResetFilters);
+
+    /* Scroll suave */
+    document.querySelectorAll('.cfpill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const main = document.getElementById('catalogMain');
+        if (!main) return;
+        const top = main.getBoundingClientRect().top + window.scrollY - 120;
+        if (window.scrollY > top) window.scrollTo({ top, behavior: 'smooth' });
+      });
   });
-});
 </script>

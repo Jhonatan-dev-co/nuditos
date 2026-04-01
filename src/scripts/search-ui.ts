@@ -1,6 +1,6 @@
 import { slugify, categories } from '../data/datos';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('astro:page-load', () => {
   const overlay = document.getElementById('searchOverlay');
   const input = document.getElementById('searchInput') as HTMLInputElement;
   const results = document.getElementById('searchResults');
@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return; 
     }
     
-    // Obtenemos los productos y categorías inyectados globalmente
     const liveProducts = (window as any).NUDITOS_LIVE_PRODUCTS || [];
     const liveCategories = (window as any).NUDITOS_CATEGORIES || [];
 
@@ -35,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
       (liveCategories.find((c: any) => c.id === p.cat)?.name.toLowerCase().includes(q))
     );
 
-    
     if (!found.length) {
       results.innerHTML = `<div class="search-empty"><i class="ri-search-eye-line"></i><p>No encontramos "${q}"</p><small>Escríbenos por WhatsApp 🌸</small></div>`;
       return;
@@ -55,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
         </a>`;
     }).join('');
 
-    // Agregar evento para cerrar overlay al navegar
     document.querySelectorAll('.search-item').forEach(el => {
         el.addEventListener('click', closeSearch);
     });

@@ -36,7 +36,7 @@ function heroTitle(p: any) {
         <div class="hero-label"><i class="ri-scissors-cut-line"></i> Nueva colección</div>
         <div class="hero-content">
           <div class="hero-eyebrow"><i class="ri-map-pin-line"></i> Hecho a mano · Colombia</div>
-          <h1 set:html={heroTitle(p)}></h1>
+          <h2 set:html={heroTitle(p)}></h2>
           <div class="hero-price-tag">
             {p.price > 0 ? (
               <>${p.price.toLocaleString('es-CO')}<span> COP</span></>

@@ -1,0 +1,87 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { clUrl } from '../../data/datos';
+
+const posts = [
+  {
+    title: 'Cómo cuidar tus flores de crochet para que duren años',
+    date: '31 de Marzo, 2026',
+    excerpt: 'Descubre los secretos para mantener tus ramos de crochet tan frescos como el primer día. Limpieza, luz y almacenamiento.',
+    category: 'Cuidados',
+    slug: 'cuidados-ramos-crochet',
+    img: 'https://images.unsplash.com/photo-1544833058-e70f9ca2bf2e?q=80&w=2000&auto=format&fit=crop'
+  },
+  {
+    title: 'El lenguaje de las flores eternas: ¿Qué significa cada color?',
+    date: '25 de Marzo, 2026',
+    excerpt: '¿Rojo, amarillo o lila? Te contamos el significado detrás de cada tono en nuestros ramos tejidos.',
+    category: 'Regalos',
+    slug: 'significado-colores-crochet',
+    img: 'https://images.unsplash.com/photo-1490750967868-88aa3386c946?q=80&w=2000&auto=format&fit=crop'
+  }
+];
+---
+
+<Layout
+  title="Blog — Nuditos Tejidos"
+  description="Inspiración, cuidados y detrás de cámaras de nuestras flores de crochet hechas a mano."
+>
+  <style>
+    .page-hero { background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%); padding: 5rem 1.5rem 4rem; text-align: center; }
+    .page-eyebrow { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem; }
+    .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 6vw, 3.5rem); font-weight: 400; line-height: 1.15; color: var(--text); margin-bottom: 1.2rem; }
+    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
+    
+    .blog-container { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+    .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem; }
+    
+    .blog-card { background: var(--white); border-radius: 24px; overflow: hidden; border: 1px solid var(--border); transition: transform 0.4s, box-shadow 0.4s; text-decoration: none; display: flex; flex-direction: column; }
+    .blog-card:hover { transform: translateY(-10px); box-shadow: var(--shadow-lg); border-color: var(--lila-light); }
+    
+    .blog-img-wrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--lila-xlight); }
+    .blog-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+    .blog-card:hover .blog-img-wrap img { transform: scale(1.08); }
+    
+    .blog-content { padding: 1.8rem; flex-grow: 1; display: flex; flex-direction: column; }
+    .blog-meta { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--lila-dark); margin-bottom: 0.8rem; display: flex; gap: 1rem; align-items: center; }
+    .blog-meta span { opacity: 0.5; }
+    
+    .blog-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 1rem; }
+    .blog-excerpt { font-size: 0.9rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    
+    .blog-footer { margin-top: auto; padding-top: 1.2rem; border-top: 1px solid var(--lila-xlight); font-size: 0.85rem; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 0.5rem; }
+    .blog-footer i { color: var(--lila-dark); transition: transform 0.3s; }
+    .blog-card:hover .blog-footer i { transform: translateX(5px); }
+
+    @media (max-width: 480px) {
+      .blog-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+
+  <div class="page-hero">
+    <div class="page-eyebrow">Puntadas & Consejos</div>
+    <h1>Blog <em>Nuditos</em></h1>
+  </div>
+
+  <div class="blog-container">
+    <div class="blog-grid">
+      {posts.map(post => (
+        <a href={`/blog/${post.slug}`} class="blog-card">
+          <div class="blog-img-wrap">
+            <img src={post.img} alt={post.title} loading="lazy" />
+          </div>
+          <div class="blog-content">
+            <div class="blog-meta">
+              {post.category} <span>•</span> {post.date}
+            </div>
+            <h2 class="blog-title">{post.title}</h2>
+            <p class="blog-excerpt">{post.excerpt}</p>
+            <div class="blog-footer">
+              Leer artículo <i class="ri-arrow-right-line"></i>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</Layout>

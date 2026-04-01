@@ -1,0 +1,13 @@
+<!-- PEDIDOS -->
+<div class="tab-content" id="tab-pedidos">
+  <div class="pedidos-toolbar">
+    <button class="pedido-filter active" onclick="filterPedidos('todos',this)">Todos</button>
+    <button class="pedido-filter" onclick="filterPedidos('pendiente',this)">⏳ Pendientes</button>
+    <button class="pedido-filter" onclick="filterPedidos('proceso',this)">🔄 En proceso</button>
+    <button class="pedido-filter" onclick="filterPedidos('entregado',this)">✅ Entregados</button>
+    <button class="btn-new-pedido" onclick="openNewPedido()">
+      <i class="ri-add-line"></i> Nuevo pedido
+    </button>
+  </div>
+  <div id="pedidosList"></div>
+</div>

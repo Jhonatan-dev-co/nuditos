@@ -45,13 +45,25 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:image" content={ogImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:type" content={ogType} />
   <meta property="og:url" content={canonicalURL} />
   <meta property="og:locale" content="es_CO" />
   <meta property="og:site_name" content="Nuditos Tejidos" />
 
+  {ogType === 'product' && (
+    <>
+      <meta property="product:brand" content="Nuditos Tejidos" />
+      <meta property="product:availability" content="in stock" />
+      <meta property="product:condition" content="new" />
+    </>
+  )}
+
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@nuditos_tejidos" />
+  <meta name="twitter:creator" content="@nuditos_tejidos" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={ogImage} />
@@ -72,8 +84,43 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#b794cc" />
 
   <ViewTransitions />
+
+  <!-- Global Structured Data -->
+  {Astro.url.pathname === '/' && (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Nuditos Tejidos",
+      "url": "https://nuditos.com.co",
+      "logo": "https://nuditos.com.co/logo.png",
+      "sameAs": [
+        "https://www.instagram.com/nuditos_tejidos/",
+        "https://wa.me/573144931525"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+57-314-493-1525",
+        "contactType": "customer service",
+        "areaServed": "CO",
+        "availableLanguage": "Spanish"
+      }
+    })} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://nuditos.com.co",
+      "name": "Nuditos Tejidos",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://nuditos.com.co/catalogo?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    })} />
+  )}
 
   <!-- Slot para head extra (meta producto, schema.org, etc.) -->
   <slot name="head" />
@@ -91,14 +138,15 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
         <ul class="nav-desktop-links">
           <li><a href="/catalogo">Catálogo</a></li>
           <li><a href="/#personalizado">Personalizado</a></li>
-          <li><a href="/sobre-nosotros">Nosotros</a></li>
           <li><a href="/blog">Blog</a></li>
+          <li><a href="/sobre-nosotros">Nosotros</a></li>
+          <li><a href="/#resenas">Reseñas</a></li>
         </ul>
       </div>
       <div class="nav-center">
         <a href="/" class="logo">NUDITOS<em>.</em></a>
       </div>
-      <div class="nav-right">
+      <div class="nav-right hide-mobile">
         <button class="nav-icon-btn" onclick="toggleSearch()" aria-label="Buscar">
           <i class="ri-search-line"></i>
         </button>
@@ -126,11 +174,14 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       <a class="menu-nav-item" href="/#personalizado" onclick="toggleMenu()">
         Personalizado <i class="ri-arrow-right-line"></i>
       </a>
-      <a class="menu-nav-item" href="/sobre-nosotros">
+      <a class="menu-nav-item" href="/sobre-nosotros" onclick="toggleMenu()">
         Nosotros <i class="ri-arrow-right-line"></i>
       </a>
-      <a class="menu-nav-item" href="/blog">
+      <a class="menu-nav-item" href="/blog" onclick="toggleMenu()">
         Blog <i class="ri-arrow-right-line"></i>
+      </a>
+      <a class="menu-nav-item" href="/#resenas" onclick="toggleMenu()">
+        Reseñas <i class="ri-arrow-right-line"></i>
       </a>
       <a class="menu-nav-item" href="/preguntas-frecuentes">
         Preguntas frecuentes <i class="ri-arrow-right-line"></i>
@@ -149,7 +200,31 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <!-- ════════ CONTENIDO DE CADA PÁGINA ════════ -->
   <slot />
 
+  <!-- ════════ MOBILE BOTTOM NAV ════════ -->
+  <nav class="mobile-bottom-nav">
+    <a href="/catalogo" class="mb-nav-item">
+      <i class="ri-store-2-line"></i>
+      <span>Catálogo</span>
+    </a>
+    <button class="mb-nav-item" onclick="toggleSearch()">
+      <i class="ri-search-line"></i>
+      <span>Buscar</span>
+    </button>
+    <a href="/#personalizado" class="mb-nav-item">
+      <i class="ri-magic-line"></i>
+      <span>Ramos</span>
+    </a>
+    <button class="mb-nav-item" onclick="toggleCart()">
+      <div class="mb-cart-icon-wrap">
+        <i class="ri-shopping-bag-3-line"></i>
+        <span class="mb-cart-badge hidden" id="mbCartCount">0</span>
+      </div>
+      <span>Carrito</span>
+    </button>
+  </nav>
+
   <!-- ════════ FOOTER ════════ -->
+
   <footer>
     <div class="footer-logo-wrap">
       <div class="footer-logo">NUDITOS<em>.</em></div>
@@ -171,8 +246,9 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
         </button>
         <div class="footer-acc-content">
           <a class="footer-acc-link" href="/sobre-nosotros">Nuestra historia</a>
-          <a class="footer-acc-link" href="/#personalizado">Ramos personalizados</a>
           <a class="footer-acc-link" href="/blog">Blog</a>
+          <a class="footer-acc-link" href="/#personalizado">Ramos personalizados</a>
+          <a class="footer-acc-link" href="/#resenas">Reseñas</a>
         </div>
       </div>
       <div class="footer-acc-item">

@@ -1,0 +1,38 @@
+---
+const { title = "Nuditos — Panel Admin" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>{title}</title>
+  <meta name="robots" content="noindex, nofollow" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet" />
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/styles/admin.css">
+  
+  <style is:global>
+    /* Estilos base adicionales si es necesario */
+    [onclick] { cursor: pointer; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <slot />
+  
+  <!-- Global Admin Scripts -->
+  <script src="/scripts/datos.js" is:inline></script>
+  <script src="/scripts/supabase.js" is:inline></script>
+  <script src="/scripts/emails.js" is:inline></script>
+</body>
+</html>

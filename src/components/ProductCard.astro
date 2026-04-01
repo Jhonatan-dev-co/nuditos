@@ -24,7 +24,7 @@ const productSlug = slugify(p.name);
     ) : null}
 
     {p.img ? (
-      <img src={clUrl(p.img, 400)} alt={p.name} loading="lazy" />
+      <img src={clUrl(p.img, 500)} alt={`${p.name} - Ramo tejido a mano`} loading="lazy" />
     ) : (
       <span class="card-emoji">{p.emoji}</span>
     )}
@@ -36,11 +36,11 @@ const productSlug = slugify(p.name);
     </div>
     
     {p.price > 0 ? (
-      <button class="p-add-btn" id={`padd-${p.id}`} onclick={`event.preventDefault(); event.stopPropagation(); addToCart(${p.id})`}>
-        <i class="ri-shopping-bag-line"></i>
+      <button class="p-add-btn" id={`padd-${p.id}`} onclick={`event.preventDefault(); event.stopPropagation(); addToCart(${p.id})`} aria-label="Agregar al carrito">
+        <i class="ri-shopping-bag-3-line"></i>
       </button>
     ) : (
-      <a class="p-add-btn p-wa-btn" href={`https://wa.me/573144931525?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}`} target="_blank" onclick="event.stopPropagation()">
+      <a class="p-add-btn p-wa-btn" href={`https://wa.me/573144931525?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}`} target="_blank" onclick="event.stopPropagation()" aria-label="Consultar por WhatsApp">
         <i class="ri-whatsapp-line"></i>
       </a>
     )}
@@ -49,17 +49,21 @@ const productSlug = slugify(p.name);
   <div class="p-info">
     <div class="p-category"><i class="ri-price-tag-3-line"></i> {cat ? cat.name : ''}</div>
     <div class="p-name">{p.name}</div>
-    <div class="p-price">
-     {p.price > 0 ? (
-        p.oferta && p.precioOriginal && p.precioOriginal > 0 ? (
-          <><span class="p-price-original">${p.precioOriginal.toLocaleString('es-CO')}</span> ${p.price.toLocaleString('es-CO')}<small> COP</small></>
+    
+    <div class="p-price-row">
+      <div class="p-price">
+       {p.price > 0 ? (
+          p.oferta && p.precioOriginal && p.precioOriginal > 0 ? (
+            <><span class="p-price-original">${p.precioOriginal.toLocaleString('es-CO')}</span> ${p.price.toLocaleString('es-CO')}</>
+          ) : (
+            <>${p.price.toLocaleString('es-CO')}</>
+          )
         ) : (
-          <>${p.price.toLocaleString('es-CO')}<small> COP</small></>
-        )
-      ) : (
-        <span class="price-consultar"><i class="ri-whatsapp-line"></i> Consultar</span>
-      )}
+          <span class="price-consultar">Consultar</span>
+        )}
+      </div>
+      {p.envioGratis && <div class="p-envio-gratis-icon" title="Envío gratis"><i class="ri-truck-line"></i></div>}
     </div>
-    {p.envioGratis && <div class="p-envio-gratis"><i class="ri-truck-line"></i> Envío gratis</div>}
   </div>
 </a>
+

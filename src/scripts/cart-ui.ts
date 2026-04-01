@@ -20,12 +20,16 @@ function updateCartUI(cart: readonly any[]) {
 
   // Actualizar contador
   const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
-  if (badge) {
-    badge.textContent = totalItems.toString();
-    badge.classList.toggle('hidden', totalItems === 0);
-    badge.classList.add('bump');
-    setTimeout(() => badge.classList.remove('bump'), 350);
-  }
+  const badges = [document.getElementById('cartCount'), document.getElementById('mbCartCount')];
+  
+  badges.forEach(badge => {
+    if (badge) {
+      badge.textContent = totalItems.toString();
+      badge.classList.toggle('hidden', totalItems === 0);
+      badge.classList.add('bump');
+      setTimeout(() => badge.classList.remove('bump'), 350);
+    }
+  });
 
   // Actualizar cuerpo del carrito
   if (body) {
@@ -125,18 +129,30 @@ $discount.subscribe(() => {
   const subtotal = getCartTotal();
   const WA_NUMBER = '573144931525';
   
+  if (cart.length === 0) return showToast('Agrega productos para pedir');
+
+  let text = `*NUEVO PEDIDO - NUDITOS TRJIDOS* 🌸\n\n`;
+  text += `🛒 *Detalle de compra:*\n`;
+  
+  cart.forEach(i => {
+    text += `- ${i.qty}x ${i.name} ($${(i.price * i.qty).toLocaleString('es-CO')})\n`;
+  });
+
+  text += `\n---`;
+  text += `\nSubtotal: $${subtotal.toLocaleString('es-CO')} COP`;
+  
   let total = subtotal;
-  let discMsg = '';
-  
-  const items = cart.map(i => `${i.qty}x ${i.name} ($${(i.price * i.qty).toLocaleString('es-CO')})`).join('\n');
-  
   if (discount) {
     const saved = Math.round(subtotal * discount.pct / 100);
     total = subtotal - saved;
-    discMsg = `\nDescuento (${discount.pct}%): -$${saved.toLocaleString('es-CO')}`;
+    text += `\nDescuento (${discount.pct}%): -$${saved.toLocaleString('es-CO')}`;
   }
   
-  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hola Nuditos! 🌸\nQuiero pedir:\n\n${items}${discMsg}\n\nTotal: $${total.toLocaleString('es-CO')} COP`)}`, '_blank');
+  text += `\n✨ *Total: $${total.toLocaleString('es-CO')} COP*`;
+  text += `\n---\n`;
+  text += `\n¿Me podrías confirmar disponibilidad y tiempos de entrega? ¡Gracias! 💜`;
+  
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`, '_blank');
 };
 
 (window as any).checkoutWompi = () => {

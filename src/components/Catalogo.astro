@@ -29,27 +29,30 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
   
   return (
     <>
-      <div class="cat-section" id={`section-${cat.id}`}>
+      <div class="cat-section" id={`section-${cat.id}`} data-view="carousel">
         <div class="cat-section-header">
-          <span class="cat-section-title">{cat.icon} {cat.name}</span>
+          <h3 class="cat-section-title">{cat.icon} {cat.name}</h3>
           <a href="#" class="cat-ver-todo" onclick={`filterCatByName('${cat.id}');return false;`}>
             Ver todo <i class="ri-arrow-right-line"></i>
           </a>
         </div>
         
-        {view === 'list' && (
+        <!-- View: List -->
+        <div class="view-content view-list">
           <div class="products-list">
             {items.map(p => <ProductListItem p={p} />)}
           </div>
-        )}
+        </div>
         
-        {view === 'grid' && (
+        <!-- View: Grid (Mosaic) -->
+        <div class="view-content view-grid">
           <div class="products-grid">
             {items.map(p => <ProductCard p={p} />)}
           </div>
-        )}
+        </div>
         
-        {view === 'carousel' && (
+        <!-- View: Carousel -->
+        <div class="view-content view-carousel">
           <div class="swiper cat-swiper" id={`catSwiper-${cat.id}`}>
             <div class="swiper-wrapper">
               {items.map(p => (
@@ -60,7 +63,7 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
             </div>
             <div class="swiper-pagination cat-pagination" id={`catPag-${cat.id}`}></div>
           </div>
-        )}
+        </div>
       </div>
 
       {catBanners.map(banner => (
@@ -78,13 +81,20 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
 
 <script is:inline>
   document.addEventListener('astro:page-load', () => {
-    if (typeof Swiper !== 'undefined') {
+    /* ── Swiper init ── */
+    function initSwipers() {
+      if (typeof Swiper === 'undefined') return;
       const catSwiperEls = document.querySelectorAll('.cat-swiper');
       catSwiperEls.forEach(el => {
         const id = el.id.replace('catSwiper-', '');
+        // Destroy existing if any
+        if (el.swiper) el.swiper.destroy(true, true);
+        
         new Swiper(`#catSwiper-${id}`, {
-          slidesPerView: 1.4,
+          slidesPerView: 1.3,
           spaceBetween: 14,
+          slidesOffsetBefore: 24,
+          slidesOffsetAfter: 24,
           grabCursor: true,
           freeMode: { enabled: true, momentum: true, momentumRatio: 0.8, momentumVelocityRatio: 0.8 },
           touchStartPreventDefault: false,
@@ -97,7 +107,7 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
           resistanceRatio: 0.85,
           pagination: { el: `#catPag-${id}`, clickable: true, dynamicBullets: true },
           breakpoints: {
-            480:  { slidesPerView: 2.2, spaceBetween: 16 },
+            480:  { slidesPerView: 2.2, spaceBetween: 16, slidesOffsetBefore: 0, slidesOffsetAfter: 0 },
             768:  { slidesPerView: 3.2, spaceBetween: 20 },
             1024: { slidesPerView: 4.2, spaceBetween: 22 },
             1280: { slidesPerView: 5,   spaceBetween: 24, freeMode: { enabled: false } },
@@ -105,5 +115,87 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
         });
       });
     }
+
+    window.initCatSwipersGlobal = initSwipers;
+    initSwipers();
+
+    /* ── Global View Toggle logic ── */
+    const toggles = document.querySelectorAll('.vtoggle');
+    const sections = document.querySelectorAll('.cat-section');
+    
+    // Load preference
+    const savedView = localStorage.getItem('nuditos_cat_view') || 'carousel';
+    applyView(savedView);
+    
+    function applyView(view) {
+      sections.forEach(s => s.setAttribute('data-view', view));
+      toggles.forEach(t => {
+        const isActive = t.dataset.view === view;
+        t.classList.toggle('active', isActive);
+      });
+      
+      // If we switch back to carousel, we might need a swiper update
+      if (view === 'carousel') {
+        setTimeout(initSwipers, 10);
+      }
+    }
+    
+    toggles.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const view = btn.dataset.view;
+        localStorage.setItem('nuditos_cat_view', view);
+        applyView(view);
+      });
+    });
   });
 </script>
+
+<style>
+  /* Base content hiding */
+  .view-content { display: none; }
+  
+  .cat-section[data-view="carousel"] .view-carousel { display: block; animation: viewIn 0.3s ease; }
+  .cat-section[data-view="grid"]     .view-grid     { display: block; animation: viewIn 0.3s ease; }
+  .cat-section[data-view="list"]     .view-list     { display: block; animation: viewIn 0.3s ease; }
+  
+  @keyframes viewIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Global Toggle CSS (can also move to main.css if preferred) */
+  :global(.view-toggle-global) {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.3rem;
+    background: rgba(0,0,0,0.04);
+    border-radius: 50px;
+    margin-left: auto;
+  }
+  :global(.vtoggle) {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+  }
+  :global(.vtoggle:hover) {
+    color: var(--lila-dark);
+    background: rgba(0,0,0,0.03);
+  }
+  :global(.vtoggle.active) {
+    background: white;
+    color: var(--lila-dark);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  /* Force swiper visibility on mobile now that carousel is default */
+  .cat-swiper { display: block !important; }
+</style>

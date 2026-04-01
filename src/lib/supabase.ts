@@ -57,7 +57,19 @@ export async function getLiveCategories(): Promise<any[]> {
       headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
     });
     if (!res.ok) return [];
-    return await res.json();
+    
+    const rows = await res.json();
+    return rows.map((c: any) => {
+      let icon = c.icon || c.emoji || '🌸';
+      if (icon.includes(':(')) icon = '🌸'; // Fallback para icono roto
+      
+      let name = c.nombre || c.name || '';
+      if (name.toLowerCase().includes('lindsas')) {
+        name = name.replace(/lindsas/gi, 'lindas');
+      }
+
+      return { ...c, icon, name: name, nombre: name };
+    });
   } catch {
     return [];
   }

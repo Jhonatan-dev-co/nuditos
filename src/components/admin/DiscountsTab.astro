@@ -1,0 +1,19 @@
+<!-- DESCUENTOS -->
+<div class="tab-content" id="tab-descuentos">
+  <div class="t-card">
+    <div class="t-title">🏷️ Código de descuento</div>
+    <div class="t-sub">Activa un código para tus clientas.</div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Descuento activo</div>
+        <div class="toggle-desc">Muestra el banner y permite usar el código en el carrito</div>
+      </div>
+      <button class="toggle" id="toggleDescuento" onclick="this.classList.toggle('on')"></button>
+    </div>
+    <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.65rem">
+      <div class="t-field"><label>Código</label><input type="text" id="descCodigo" placeholder="NUDITOS10" style="text-transform:uppercase"></div>
+      <div class="t-field"><label>Porcentaje (%)</label><input type="number" id="descPorcentaje" min="1" max="90" placeholder="10"></div>
+      <div class="t-field"><label>Texto del banner</label><input type="text" id="descTexto" placeholder="10% de descuento en tu primer pedido"></div>
+    </div>
+  </div>
+</div>

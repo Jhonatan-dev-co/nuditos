@@ -293,12 +293,18 @@ function renderCatPills() {
   const catRow = document.getElementById('catRow');
   if (!catRow) return;
 
-  const cats = getCategories();
+  let cats = getCategories();
+  if (!cats.find(c => c.id === 'todos')) {
+    cats = [{ id: 'todos', name: 'Todos', icon: '🌸' }, ...cats];
+  }
+
   catRow.innerHTML = cats.map((c, i) => {
     const count = c.id === 'todos' ? ap.length : ap.filter(p => p.cat?.toLowerCase() === c.id?.toLowerCase()).length;
     if (count === 0 && c.id !== 'todos') return '';
+    const icon = c.icon || '🌸';
+    const name = c.nombre || c.name || 'Sin nombre';
     return `<button class="cat-pill${(activeFilter||'todos') === c.id ? ' active' : ''}" onclick="filterCat('${c.id}',this)">
-      ${c.icon} ${c.nombre || c.name}<span class="cat-count">${count}</span>
+      ${icon} ${name}<span class="cat-count">${count}</span>
     </button>`;
   }).join('');
 }
@@ -377,11 +383,14 @@ function buildCatContent(items, catId, view) {
   if (view === 'grid')
     return `<div class="products-grid">${items.map(p => buildCard(p)).join('')}</div>`;
   return `
-    <div class="swiper cat-swiper" id="catSwiper-${catId}">
+    <div class="swiper cat-swiper hide-mobile" id="catSwiper-${catId}">
       <div class="swiper-wrapper">
         ${items.map(p => `<div class="swiper-slide cat-slide">${buildCard(p)}</div>`).join('')}
       </div>
       <div class="swiper-pagination cat-pagination" id="catPag-${catId}"></div>
+    </div>
+    <div class="products-grid show-mobile">
+      ${items.map(p => buildCard(p)).join('')}
     </div>`;
 }
 
@@ -424,43 +433,45 @@ function buildCard(p) {
   const imgContent = p.img
     ? `<img src="${p.img}" alt="${p.name}" loading="lazy">`
     : `<span class="card-emoji">${p.emoji}</span>`;
+  
   const badgeHtml = p.badge
     ? `<div class="p-badge ${p.badgeClass || ''} ${p.badge === 'Nuevo' ? 'badge-pulse' : ''}">${badgeIcon(p.badge)} ${p.badge}</div>`
     : (p.oferta ? `<div class="p-badge p-badge-oferta"><i class="ri-price-tag-3-fill"></i> Oferta</div>` : '');
-  const envioTag = p.envioGratis ? `<div class="p-envio-gratis"><i class="ri-truck-line"></i> Envío gratis</div>` : '';
+    
+  const productSlug = slugify(p.name);
+  const cat = getCategories().find(c => c.id === p.cat);
+  
+  const addBtn = p.price > 0
+    ? `<button class="p-add-btn" id="padd-${p.id}" onclick="event.preventDefault();event.stopPropagation();addToCart(${p.id})" aria-label="Agregar al carrito"><i class="ri-shopping-bag-3-line"></i></button>`
+    : `<a class="p-add-btn p-wa-btn" href="https://wa.me/${WA_NUMBER}?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}" target="_blank" onclick="event.stopPropagation()" aria-label="Consultar por WhatsApp"><i class="ri-whatsapp-line"></i></a>`;
+
   let priceHtml;
   if (p.price > 0) {
     if (p.oferta && p.precioOriginal > 0) {
-      priceHtml = `<span class="p-price-original">$${p.precioOriginal.toLocaleString('es-CO')}</span> $${p.price.toLocaleString('es-CO')}<small> COP</small>`;
+      priceHtml = `<span class="p-price-original">$${p.precioOriginal.toLocaleString('es-CO')}</span> $${p.price.toLocaleString('es-CO')}`;
     } else {
-      priceHtml = `$${p.price.toLocaleString('es-CO')}<small> COP</small>`;
+      priceHtml = `$${p.price.toLocaleString('es-CO')}`;
     }
   } else {
-    priceHtml = `<span class="price-consultar"><i class="ri-whatsapp-line"></i> Consultar</span>`;
+    priceHtml = `<span class="price-consultar">Consultar</span>`;
   }
-  const cat = categories.find(c => c.id === p.cat);
-  const addBtn = p.price > 0
-    ? `<button class="p-add-btn" id="padd-${p.id}" onclick="event.stopPropagation();addToCart(${p.id})"><i class="ri-shopping-bag-line"></i></button>`
-    : `<a class="p-add-btn p-wa-btn" href="https://wa.me/${WA_NUMBER}?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}" target="_blank" onclick="event.stopPropagation()"><i class="ri-whatsapp-line"></i></a>`;
-
-  const productSlug = slugify(p.name);
 
   return `
     <a class="product-card" href="/ramo/${productSlug}" style="text-decoration:none;color:inherit;display:block">
       <div class="product-img-wrap">
         ${badgeHtml}${imgContent}
         <div class="card-overlay">
-          <span class="card-overlay-btn">
-            <i class="ri-eye-line"></i> Ver detalle
-          </span>
+          <span class="card-overlay-btn"><i class="ri-eye-line"></i> Ver detalle</span>
         </div>
         ${addBtn}
       </div>
       <div class="p-info">
-        <div class="p-category"><i class="ri-price-tag-3-line"></i> ${cat ? cat.name : ''}</div>
+        <div class="p-category"><i class="ri-price-tag-3-line"></i> ${cat ? (cat.nombre || cat.name) : ''}</div>
         <div class="p-name">${p.name}</div>
-        <div class="p-price">${priceHtml}</div>
-        ${envioTag}
+        <div class="p-price-row">
+          <div class="p-price">${priceHtml}</div>
+          ${p.envioGratis ? `<div class="p-envio-gratis-icon" title="Envío gratis"><i class="ri-truck-line"></i></div>` : ''}
+        </div>
       </div>
     </a>`;
 }
@@ -470,7 +481,7 @@ function buildCard(p) {
 ════════════════════════════ */
 function buildListItem(p) {
   const thumb = p.img ? `<img src="${p.img}" alt="${p.name}" loading="lazy">` : `<span>${p.emoji}</span>`;
-  const price = p.price > 0 ? `$${p.price.toLocaleString('es-CO')} COP` : 'Consultar';
+  const price = p.price > 0 ? `$${p.price.toLocaleString('es-CO')}` : 'Consultar';
   return `
     <a class="product-list-item" href="/ramo/${slugify(p.name)}" style="text-decoration:none;color:inherit;display:flex">
       <div class="list-item-img">${thumb}</div>
@@ -481,8 +492,8 @@ function buildListItem(p) {
       </div>
       <div class="list-item-actions">
         ${p.price > 0
-          ? `<button class="p-add-btn" id="padd-${p.id}" onclick="event.preventDefault();event.stopPropagation();addToCart(${p.id})"><i class="ri-shopping-bag-line"></i></button>`
-          : `<a class="p-add-btn p-wa-btn" href="https://wa.me/${WA_NUMBER}?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}" target="_blank" onclick="event.stopPropagation()"><i class="ri-whatsapp-line"></i></a>`}
+          ? `<button class="p-add-btn" id="padd-${p.id}" onclick="event.preventDefault();event.stopPropagation();addToCart(${p.id})" aria-label="Agregar al carrito"><i class="ri-shopping-bag-3-line"></i></button>`
+          : `<a class="p-add-btn p-wa-btn" href="https://wa.me/${WA_NUMBER}?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}" target="_blank" onclick="event.stopPropagation()" aria-label="Consultar por WhatsApp"><i class="ri-whatsapp-line"></i></a>`}
         <i class="ri-arrow-right-s-line list-arrow"></i>
       </div>
     </a>`;
@@ -492,10 +503,20 @@ function buildListItem(p) {
    FILTROS
 ════════════════════════════ */
 function filterCat(catId, el) {
+  // Deseleccionar si se vuelve a hacer clic en la misma categoría activa
+  if (el && el.classList.contains('active') && catId !== 'todos') {
+    clearFilter();
+    return;
+  }
+
   document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
+  if (el) {
+    el.classList.add('active');
+    el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
   if (catId === 'todos') { clearFilter(); return; }
   filterCatByName(catId);
+  scrollToCatalog(); // Asegurar que el usuario vea los resultados
 }
 
 function filterCatByName(catId) {
@@ -547,7 +568,15 @@ function renderSkeletons(containerId) {
 function clearFilter() {
   activeFilter = null;
   document.querySelectorAll('.cat-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
-  renderCatalog();
+  
+  const rows = document.getElementById('catalogRows');
+  const filtered = document.getElementById('filteredView');
+  if (rows) rows.style.display = 'block';
+  if (filtered) filtered.style.display = 'none';
+
+  if (typeof window.initCatSwipersGlobal === 'function') {
+    setTimeout(window.initCatSwipersGlobal, 10);
+  }
 }
 
 /* ════════════════════════════
