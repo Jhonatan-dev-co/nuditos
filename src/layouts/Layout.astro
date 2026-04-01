@@ -1,6 +1,7 @@
 ---
 import SearchOverlay from '../components/SearchOverlay.astro';
 import { ViewTransitions } from 'astro:transitions';
+import { categories } from '../data/datos';
 
 /**
  * Layout base de Nuditos Tejidos
@@ -183,6 +184,18 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       <a class="menu-nav-item" href="/#resenas" onclick="toggleMenu()">
         Reseñas <i class="ri-arrow-right-line"></i>
       </a>
+
+      <!-- Submenu Categorías -->
+      <div class="menu-divider">Categorías</div>
+      <div class="menu-submenu">
+        {categories.filter(c => c.id !== 'todos').map(cat => (
+          <a class="menu-sub-item" href={`/catalogo?categoria=${cat.id}`} onclick="toggleMenu()">
+            <span class="sub-item-icon">{cat.icon}</span> {cat.name}
+          </a>
+        ))}
+      </div>
+
+      <div class="menu-divider">Ayuda</div>
       <a class="menu-nav-item" href="/preguntas-frecuentes">
         Preguntas frecuentes <i class="ri-arrow-right-line"></i>
       </a>

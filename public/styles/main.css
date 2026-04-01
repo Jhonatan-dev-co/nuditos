@@ -58,6 +58,7 @@ body {
   color: var(--text);
   max-width: 100%;
   position: relative;
+  overflow-x: hidden;
 }
 img { display:block; max-width:100%; }
 button { font-family:'Jost',sans-serif; cursor:pointer; }
@@ -210,6 +211,42 @@ nav {
 .menu-nav-item:hover { color:var(--lila-dark); }
 .menu-nav-item i { font-size:0.85rem; opacity:0.35; }
 
+/* Especial para WhatsApp en menú */
+.menu-nav-item.wa-item {
+  margin-top: 0.5rem;
+  background: #e7f9ee;
+  color: #1da851;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  border: none;
+}
+.menu-nav-item.wa-item i { color: #25d366; opacity: 1; font-size: 1.2rem; }
+
+.menu-divider {
+  font-size: 0.62rem; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--text-soft); font-weight: 700;
+  padding: 2.5rem 0 1.2rem;
+  border-bottom: 1px solid var(--border-dark);
+  margin-bottom: 1.2rem;
+}
+
+.menu-submenu {
+  display: flex; flex-wrap: wrap; gap: 0.6rem;
+  padding-bottom: 1.5rem;
+}
+
+.menu-sub-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 0.9rem; background: white; 
+  border: 1px solid var(--border-dark);
+  border-radius: 50px;
+  font-size: 0.75rem; font-weight: 500; color: var(--text-mid);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.menu-sub-item:active { transform: scale(0.95); background: var(--lila-light); border-color: var(--lila); }
+.sub-item-icon { font-size: 1rem; }
+
 .menu-footer { padding:1.5rem 1.2rem; border-top:1px solid var(--border-dark); }
 .menu-footer-link {
   display:block; padding:0.55rem 0;
@@ -300,7 +337,7 @@ nav {
 /* ══════════════════════════════
    RAMO DEL MOMENTO
 ══════════════════════════════ */
-.momento-wrap { padding:1.5rem 1.5rem 0; }
+.momento-wrap { padding:2.5rem 1.5rem 0; }
 
 /* ── Móvil: layout vertical con foto grande arriba ── */
 .momento-card {
@@ -401,7 +438,7 @@ nav {
 /* ══════════════════════════════
    SECCIÓN PRODUCTOS
 ══════════════════════════════ */
-.catalog-section { padding:0 0 4rem; }
+.catalog-section { padding:2.5rem 0 6rem; }
 
 .cat-section-header {
   display:flex; align-items:baseline; justify-content:space-between;
@@ -627,7 +664,7 @@ nav {
    PERSONALIZADO
 ══════════════════════════════ */
 .custom-section {
-  background:var(--text); padding:4rem 1.5rem;
+  background:var(--text); padding:6rem 1.5rem;
   position:relative; overflow:hidden;
 }
 .custom-section::before {
@@ -682,7 +719,7 @@ nav {
   background:radial-gradient(ellipse at 50% 50%, var(--lila-light), transparent 70%);
 }
 .about-visual span { position:relative; z-index:1; animation:floatY 5s ease-in-out infinite; }
-.about-content { padding:2.5rem 1.5rem; }
+.about-content { padding:3.5rem 1.5rem; }
 .about-eyebrow {
   font-size:0.6rem; letter-spacing:3px; text-transform:uppercase;
   color:var(--mint-dark); margin-bottom:0.7rem;
@@ -706,7 +743,7 @@ nav {
 /* ══════════════════════════════
    FOOTER
 ══════════════════════════════ */
-footer { background:var(--text); color:white; padding:3rem 1.5rem 2rem; }
+footer { background:var(--text); color:white; padding:5rem 1.5rem 3rem; }
 .footer-logo-wrap {
   text-align:center; margin-bottom:2rem; padding-bottom:2rem;
   border-bottom:1px solid rgba(255,255,255,0.06);
