@@ -223,29 +223,26 @@ nav {
 .menu-nav-item.wa-item i { color: #25d366; opacity: 1; font-size: 1.2rem; }
 
 .menu-divider {
-  font-size: 0.62rem; letter-spacing: 2.5px; text-transform: uppercase;
-  color: var(--text-soft); font-weight: 700;
-  padding: 2.5rem 0 1.2rem;
-  border-bottom: 1px solid var(--border-dark);
-  margin-bottom: 1.2rem;
+  font-size: 0.62rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--lila-dark); font-weight: 800;
+  padding: 3rem 0 1rem; border-bottom: 2px solid var(--lila-xlight);
+  margin-bottom: 0.5rem;
 }
 
 .menu-submenu {
-  display: flex; flex-wrap: wrap; gap: 0.6rem;
-  padding-bottom: 1.5rem;
+  display: flex; flex-direction: column; gap: 0.1rem;
+  padding: 0.5rem 0 2rem;
 }
 
 .menu-sub-item {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.6rem 0.9rem; background: white; 
-  border: 1px solid var(--border-dark);
-  border-radius: 50px;
-  font-size: 0.75rem; font-weight: 500; color: var(--text-mid);
-  transition: all 0.2s;
-  white-space: nowrap;
+  display: flex; align-items: center; gap: 1.2rem;
+  padding: 1.1rem 0.65rem;
+  font-size: 0.95rem; font-weight: 500; color: var(--text-mid);
+  transition: all 0.25s; border-radius: 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.02);
 }
-.menu-sub-item:active { transform: scale(0.95); background: var(--lila-light); border-color: var(--lila); }
-.sub-item-icon { font-size: 1rem; }
+.menu-sub-item:active { background: var(--white); color: var(--lila-dark); box-shadow: var(--shadow-sm); }
+.sub-item-icon { font-size: 1.4rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
 
 .menu-footer { padding:1.5rem 1.2rem; border-top:1px solid var(--border-dark); }
 .menu-footer-link {
@@ -412,28 +409,48 @@ nav {
 
 /* ══════════════════════════════
    CATEGORÍAS STICKY
+   Refinado para evitar cortes y mejorar estética
 ══════════════════════════════ */
 .cat-sticky {
   position:sticky; top:var(--nav-h); z-index:90;
   background:rgba(250,248,245,0.98);
-  backdrop-filter:blur(12px);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
   border-bottom:1px solid var(--border-dark);
+  box-shadow: 0 4px 15px rgba(26,18,32,0.03);
 }
-.cat-inner { padding:0 1.5rem; }
+.cat-inner { padding: 0.5rem 0 0; } /* Un poco de aire arriba */
 .cat-row {
-  display:flex; overflow-x:auto;
+  display:flex; overflow-x:auto; padding: 0 1.5rem 0.6rem;
   scrollbar-width:none; -webkit-overflow-scrolling:touch;
 }
 .cat-row::-webkit-scrollbar { display:none; }
 .cat-pill {
-  flex-shrink:0; padding:0.85rem 1rem;
-  background:none; border:none; border-bottom:2px solid transparent;
-  font-size:0.65rem; font-weight:600; letter-spacing:1.5px;
+  flex-shrink:0; padding:0.6rem 1rem; margin-right: 0.5rem;
+  background: white; border: 1px solid var(--border-dark);
+  border-radius: 50px;
+  font-size:0.65rem; font-weight:700; letter-spacing:1.5px;
   text-transform:uppercase; color:var(--text-soft);
-  transition:all 0.2s; white-space:nowrap;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1); white-space:nowrap;
+  display: flex; align-items: center; gap: 0.5rem;
 }
-.cat-pill:hover { color:var(--text); }
-.cat-pill.active { color:var(--text); border-bottom-color:var(--text); }
+.cat-pill:hover { border-color: var(--lila); color: var(--text); }
+.cat-pill.active { background: var(--lila-dark); color: white; border-color: var(--lila-dark); box-shadow: 0 4px 12px rgba(183,148,204,0.3); }
+
+/* Selector Global de Vista — Más discreto y premium */
+.view-toggle-global {
+  display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+  padding: 0.4rem 1.5rem;
+  background: var(--cream);
+  border-top: 1px solid rgba(0,0,0,0.03);
+}
+.vtoggle {
+  background: none; border: none; padding: 0.4rem;
+  font-size: 1.1rem; color: var(--text-soft);
+  opacity: 0.5; transition: all 0.2s;
+}
+.vtoggle.active { opacity: 1; color: var(--lila-dark); }
+.vtoggle:active { transform: scale(0.9); }
 
 /* ══════════════════════════════
    SECCIÓN PRODUCTOS
@@ -1404,10 +1421,38 @@ footer { background:var(--text); color:white; padding:5rem 1.5rem 3rem; }
 .list-item-name { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.15rem; }
 .list-item-desc { font-size: 0.75rem; color: var(--text-soft); margin-bottom: 0.25rem; }
 .list-item-price { font-size: 0.85rem; font-weight: 700; color: var(--lila-dark); }
-.list-item-actions {
-  display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;
+/* ══════════════════════════════
+   SHARE UI — Refined Action Row
+══════════════════════════════ */
+.ramo-share {
+  margin-top: 1.5rem; padding-top: 1.5rem;
+  border-top: 1px solid var(--border-dark);
+  display: flex; flex-direction: column; gap: 1rem;
 }
-.list-arrow { font-size: 1.2rem; color: var(--text-soft); }
+.ramo-share-label {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-soft);
+}
+.ramo-share-row {
+  display: flex; align-items: center; gap: 1rem;
+}
+.ramo-share-btn {
+  width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; transition: all 0.25s;
+  border: 1px solid var(--border-dark); background: white;
+  color: var(--text);
+}
+.ramo-share-btn:active { transform: scale(0.9); }
+.share-copy:active { background: var(--text); color: white; }
+.share-wa:active { background: #25d366; color: white; border-color: #25d366; }
+.share-fb:active { background: #3b5998; color: white; border-color: #3b5998; }
+
+.ramo-copy-msg {
+  font-size: 0.75rem; font-weight: 600; color: var(--mint-dark);
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.ramo-copy-msg.show { opacity: 1; }
 
 /* ══════════════════════════════
    MODAL TOP ROW
@@ -1447,10 +1492,10 @@ footer { background:var(--text); color:white; padding:5rem 1.5rem 3rem; }
 }
 @media (max-width: 768px) {
   .wa-float {
-    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)); /* Sube para no tapar la barra inferior */
+    bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)); /* Sube más para liberar la Tab Bar */
     width: 50px; height: 50px;
     font-size: 1.4rem;
-    right: 1rem;
+    right: 1.2rem;
   }
 }
 .wa-float:hover {

@@ -215,11 +215,19 @@ const productSchema = {
       </div>
 
       <div class="ramo-share">
-        <span class="ramo-share-label">Compartir:</span>
-        <button class="ramo-share-btn" onclick="copyLink()"><i class="ri-link"></i></button>
-        <a class="ramo-share-btn" href={`https://wa.me/?text=${encodeURIComponent(product.name + '\n' + pageUrl)}`} target="_blank" rel="noopener"><i class="ri-whatsapp-line"></i></a>
-        <a class="ramo-share-btn" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`} target="_blank" rel="noopener"><i class="ri-facebook-line"></i></a>
-        <span class="ramo-copy-msg" id="copyMsg">¡Enlace copiado!</span>
+        <span class="ramo-share-label">Compartir Producto:</span>
+        <div class="ramo-share-row">
+          <button class="ramo-share-btn share-copy" onclick="copyLink()" aria-label="Copiar link">
+            <i class="ri-links-line"></i>
+          </button>
+          <a class="ramo-share-btn share-wa" href={`https://wa.me/?text=${encodeURIComponent(product.name + '\n' + pageUrl)}`} target="_blank" rel="noopener" aria-label="WhatsApp">
+            <i class="ri-whatsapp-line"></i>
+          </a>
+          <a class="ramo-share-btn share-fb" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`} target="_blank" rel="noopener" aria-label="Facebook">
+            <i class="ri-facebook-fill"></i>
+          </a>
+        </div>
+        <span class="ramo-copy-msg" id="copyMsg">¡Enlace copiado correctamente! 📋</span>
       </div>
     </div>
   </section>
