@@ -282,5 +282,5 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2') || {
     </div>
   </section>
 
-  <script is:inline set:html={`window.NUDITOS_LIVE_PRODUCTS = ${JSON.stringify(safeProducts)}; window.NUDITOS_CATEGORIES = ${JSON.stringify(safeCategories)};`} />
+  <script is:inline set:html={`window.NUDITOS_LIVE_PRODUCTS = ${JSON.stringify(safeProducts)}; window.NUDITOS_CATEGORIES = ${JSON.stringify(safeCategories)}; window.NUDITOS_LIVE_CONFIG = ${JSON.stringify(liveConfig)}; `} />
 </Layout>

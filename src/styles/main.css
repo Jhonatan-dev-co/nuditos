@@ -269,7 +269,11 @@ nav {
 /* ══════════════════════════════
    HERO — FOTO FULLSCREEN
 ══════════════════════════════ */
-.hero-swiper { width:100%; overflow:hidden; max-width:100vw; }
+/* Estilos iniciales (esqueleto) para evitar CLS mientras carga Swiper JS/CSS */
+.hero-swiper { width:100%; overflow:hidden; max-width:100vw; display:block; position:relative; }
+.swiper-wrapper { display:flex; flex-direction:row; width:100%; height:100%; z-index:1; }
+.swiper-slide { flex-shrink:0; width:100%; height:100%; position:relative; }
+
 .hero-slide {
   height:calc(100svh - var(--nav-h));
   min-height:480px; max-height:760px;
@@ -2139,3 +2143,27 @@ footer { background:var(--text); color:white; padding:5rem 1.5rem 3rem; }
   letter-spacing: 0.5px;
 }
 
+/* ══════════════════════════════
+   VIEW TRANSITIONS — Animación fluida entre páginas
+══════════════════════════════ */
+::view-transition-old(root) {
+  animation: fadeSlideOut 0.2s ease-in forwards;
+}
+::view-transition-new(root) {
+  animation: fadeSlideIn 0.25s ease-out forwards;
+}
+
+@keyframes fadeSlideOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Evitar que la navbar y el bottom nav participen en la animación */
+::view-transition-group(nav-wrap),
+::view-transition-group(mobile-bottom-nav) {
+  animation: none;
+}

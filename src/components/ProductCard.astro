@@ -36,7 +36,7 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
     
     {allImgs.length > 1 ? (
       <div 
-        class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none h-full w-full touch-pan-x"
+        class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none h-full w-full"
         id={`carousel-${p.id}`}
       >
         {allImgs.map((img, i) => (

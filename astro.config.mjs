@@ -8,6 +8,10 @@ export default defineConfig({
   site: 'https://nuditos.com.co',
   output: 'hybrid',
   adapter: netlify(),
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
   integrations: [sitemap({
     changefreq: 'weekly',
     priority: 0.7,

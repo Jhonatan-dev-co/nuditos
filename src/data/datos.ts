@@ -91,12 +91,18 @@ export const slugify = (text: string) => {
 
 export function clUrl(url: string, width: number = 480) {
   if (!url || !url.includes('res.cloudinary.com')) return url;
-  if (url.includes('upload/v')) {
-    return url.replace('upload/v', `upload/q_auto,f_auto,w_${width}/v`);
+  
+  // Limpiamos la URL de basuras previas almacenadas en la base de datos (ej: w_1200,c_scale/)
+  // que sobrescriben nuestras configuraciones de calidad dinámica.
+  let cleanUrl = url.replace(/w_\d+,(c_[a-z]+)?\//ig, '');
+  cleanUrl = cleanUrl.replace(/q_auto,f_auto,w_\d+\//ig, '');
+
+  if (cleanUrl.includes('upload/v')) {
+    return cleanUrl.replace('upload/v', `upload/q_auto,f_auto,w_${width}/v`);
   }
-  if (!url.includes('upload/q_auto')) {
-     return url.replace('upload/', `upload/q_auto,f_auto,w_${width}/`);
+  if (!cleanUrl.includes('upload/q_auto')) {
+     return cleanUrl.replace('upload/', `upload/q_auto,f_auto,w_${width}/`);
   }
-  return url;
+  return cleanUrl;
 }
 

@@ -31,6 +31,13 @@ let _sbCategories = null;
 
 
 async function loadStoreData() {
+  if (window.NUDITOS_LIVE_PRODUCTS) {
+    _sbProducts = window.NUDITOS_LIVE_PRODUCTS;
+    if (window.NUDITOS_CATEGORIES) _sbCategories = window.NUDITOS_CATEGORIES;
+    if (window.NUDITOS_LIVE_CONFIG) _sbConfig = window.NUDITOS_LIVE_CONFIG;
+    return; // Evasión de latencia crítica: usamos la data compilada por Astro
+  }
+
   const CACHE_KEY = 'nuditos_sb_data';
   const CACHE_TS  = 'nuditos_sb_ts';
   const TTL = 30 * 60 * 1000;

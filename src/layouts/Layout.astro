@@ -105,13 +105,11 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <!-- Preconexiones críticas para acelerar terceros y base de datos -->
   <link rel="preconnect" href="https://fpyhkxikxdwjhukltmqf.supabase.co" crossorigin />
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <!-- Fuentes (Carga diferida y optimizada) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap"
-    rel="stylesheet"
-  />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" /></noscript>
 
   <!-- Iconos (Carga diferida para no bloquear renderizado inicial) -->
   <link rel="preload" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
@@ -217,7 +215,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     }
   }
 </style>
-  <div class="nav-wrap">
+  <div class="nav-wrap" transition:persist>
     <nav>
       <div class="nav-left">
         <button class="nav-icon-btn nav-hamburger" onclick="toggleMenu()" aria-label="Menú">
@@ -301,7 +299,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <slot />
 
   <!-- ════════ MOBILE BOTTOM NAV ════════ -->
-  <nav class="mobile-bottom-nav">
+  <nav class="mobile-bottom-nav" transition:persist>
     <a href="/catalogo" class="mb-nav-item" id="nav-catalogo" aria-label="Ir al Catálogo">
       <i class="ri-store-2-line"></i>
       <span>Catálogo</span>
