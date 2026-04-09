@@ -5,9 +5,11 @@ interface Props {
   p: any;
   catName?: string;
   class?: string;
+  parentView?: 'carousel' | 'grid' | 'list';
 }
 
-const { p, catName = 'Nuditos', class: className } = Astro.props;
+const { p, catName = 'Nuditos', class: className, parentView = 'grid' } = Astro.props;
+const isAutoSliding = parentView === 'carousel';
 
 function badgeIcon(badge: string) {
   if (badge === 'Nuevo')    return '<i class="ri-sparkling-line"></i>';
@@ -36,8 +38,13 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
     
     {allImgs.length > 1 ? (
       <div 
-        class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none h-full w-full"
+        class:list={[
+          "flex scrollbar-none h-full w-full transition-transform duration-500",
+          !isAutoSliding ? "overflow-x-auto snap-x snap-mandatory" : "overflow-hidden"
+        ]}
         id={`carousel-${p.id}`}
+        data-auto-slide={isAutoSliding ? "true" : "false"}
+        data-imgs-count={allImgs.length}
       >
         {allImgs.map((img, i) => (
           <a 
@@ -164,8 +171,43 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
   </div>
 </article>
 
+<script is:inline>
+  (function() {
+    // Solo inicializar si hay múltiples imágenes y está en modo auto-slide
+    const carousels = document.querySelectorAll('[data-auto-slide="true"]');
+    
+    carousels.forEach(car => {
+      const count = parseInt(car.dataset.imgsCount);
+      if (count <= 1) return;
+      
+      let current = 0;
+      const dots = car.parentElement.querySelectorAll('[data-idx]');
+      
+      setInterval(() => {
+        current = (current + 1) % count;
+        // Mover el contenedor flex
+        car.scrollTo({
+          left: car.offsetWidth * current,
+          behavior: 'smooth'
+        });
+        
+        // Actualizar dots
+        dots.forEach((dot, i) => {
+          dot.style.opacity = i === current ? '1' : '0.4';
+          dot.style.transform = i === current ? 'scale(1.5)' : 'scale(1)';
+        });
+      }, 3000 + (Math.random() * 2000)); // Intervalos ligeramente distintos para que no se muevan todos a la vez
+    });
+  })();
+</script>
+
 <style>
   .scrollbar-none::-webkit-scrollbar { display: none; }
   .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  
+  /* Ajuste de dots para que se vean bien con el auto-slide */
+  [data-idx] {
+    transition: all 0.5s ease;
+  }
 </style>
 
