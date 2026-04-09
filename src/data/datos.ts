@@ -89,7 +89,7 @@ export const slugify = (text: string) => {
     .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
 };
 
-export function clUrl(url: string, width: number = 600) {
+export function clUrl(url: string, width: number = 480) {
   if (!url || !url.includes('res.cloudinary.com')) return url;
   if (url.includes('upload/v')) {
     return url.replace('upload/v', `upload/q_auto,f_auto,w_${width}/v`);

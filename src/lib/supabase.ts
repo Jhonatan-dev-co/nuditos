@@ -3,10 +3,23 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 
 import { slugify, type Product, products as fallbackProducts } from '../data/datos';
 
+async function fetchWithTimeout(url: string, options: any, timeout = 4000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
+  } catch (e) {
+    clearTimeout(id);
+    throw e;
+  }
+}
+
 export async function getLiveProducts(): Promise<Product[]> {
   try {
     const columns = 'id,nombre,precio,precio_original,descripcion,categoria,emoji,img,imgs,stock,badge,badge_class,oferta,envio_gratis,destacado,activo';
-    const res = await fetch(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc&select=${columns}`, {
+    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc&select=${columns}`, {
       headers: { 
         apikey: SB_ANON, 
         Authorization: `Bearer ${SB_ANON}` 
@@ -53,7 +66,7 @@ export async function getLiveProducts(): Promise<Product[]> {
 
 export async function getLiveCategories(): Promise<any[]> {
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/categorias?order=orden.asc`, {
+    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/categorias?order=orden.asc`, {
       headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
     });
     if (!res.ok) return [];
@@ -77,7 +90,7 @@ export async function getLiveCategories(): Promise<any[]> {
 
 export async function getLiveBanners(): Promise<any[]> {
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/banners?order=orden.asc`, {
+    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/banners?order=orden.asc`, {
       headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
     });
     if (!res.ok) return [];
@@ -100,7 +113,7 @@ export async function getLiveBanners(): Promise<any[]> {
 export async function getLiveConfig() {
   if (!SB_URL || !SB_ANON) return null;
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/config?select=clave,valor`, {
+    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/config?select=clave,valor`, {
       headers: { 
         apikey: SB_ANON, 
         Authorization: `Bearer ${SB_ANON}` 
@@ -146,7 +159,7 @@ export async function getLiveProductBySlug(slug: string) {
 
 export async function getLivePosts(): Promise<any[]> {
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/posts?order=created_at.desc`, {
+    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/posts?order=created_at.desc`, {
       headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
     });
     if (!res.ok) return [];

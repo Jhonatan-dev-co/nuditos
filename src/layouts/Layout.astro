@@ -1,4 +1,5 @@
 ---
+import '../styles/main.css';
 import SearchOverlay from '../components/SearchOverlay.astro';
 import { ViewTransitions } from 'astro:transitions';
 import { categories } from '../data/datos';
@@ -101,17 +102,23 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     </script>
   )}
 
+  <!-- Preconexiones críticas para acelerar terceros y base de datos -->
+  <link rel="preconnect" href="https://fpyhkxikxdwjhukltmqf.supabase.co" crossorigin />
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap"
     rel="stylesheet"
   />
 
-  <!-- Iconos -->
-  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet" />
+  <!-- Iconos (Carga diferida para no bloquear renderizado inicial) -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet" /></noscript>
 
-  <!-- CSS global -->
-  <link rel="stylesheet" href="/styles/main.css" />
-
+  <!-- CSS global gestionado por Astro -->
+  
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="manifest" href="/manifest.json" />
@@ -244,7 +251,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <div class="menu-panel" id="menuPanel">
     <div class="menu-head">
       <span class="menu-logo">NUDITOS<em>.</em></span>
-      <button class="menu-close" onclick="toggleMenu()">
+      <button class="menu-close" onclick="toggleMenu()" aria-label="Cerrar menú">
         <i class="ri-close-line"></i>
       </button>
     </div>
@@ -432,7 +439,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <div class="cart-panel fixed top-0 right-0 w-full max-w-[100vw] md:max-w-md bg-white/70 backdrop-blur-2xl border-l border-white/50 z-[201] translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col shadow-2xl" id="cartPanel">
     <div class="p-4 md:p-6 border-b border-stone-200/60 flex items-center justify-center shrink-0 relative z-10 min-h-[60px] md:min-h-[80px]">
       <span class="font-sans text-xl md:text-2xl font-bold tracking-[0.1em] text-stone-800 uppercase">Carrito</span>
-      <button class="absolute right-4 md:right-6 w-10 h-10 rounded-2xl border border-stone-200/60 bg-white/40 shadow-sm flex items-center justify-center hover:bg-white transition-colors" onclick="toggleCart()">
+      <button class="absolute right-4 md:right-6 w-10 h-10 rounded-2xl border border-stone-200/60 bg-white/40 shadow-sm flex items-center justify-center hover:bg-white transition-colors" onclick="toggleCart()" aria-label="Cerrar carrito">
         <i class="ri-close-line text-lg flex"></i>
       </button>
     </div>
@@ -497,7 +504,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <div class="modal-panel" id="modalPanel">
     <div class="modal-handle"></div>
     <div class="modal-head">
-      <button class="modal-close" onclick="closeModal()"><i class="ri-close-line"></i></button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar ventana"><i class="ri-close-line"></i></button>
     </div>
     <div class="modal-body" id="modalBody"></div>
   </div>
@@ -520,11 +527,14 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <div class="toast" id="toast"></div>
 
 
-  <!-- ════════ SCRIPTS ════════ -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" is:inline></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js" is:inline></script>
+  <!-- ════════ SCRIPTS (Diferidos) ════════ -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" /></noscript>
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.css" /></noscript>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js" defer></script>
 
   <!-- Scripts propios -->
   <script src="/scripts/datos.js" is:inline></script>
