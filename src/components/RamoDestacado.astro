@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import { products as fallbackProducts, CONFIG_DEFAULT, slugify, clUrl } from '../data/datos';
 
 const { p: propProduct } = Astro.props;
@@ -23,14 +22,18 @@ const isReal = !!p;
         <div class="w-full lg:w-1/2 relative group">
           <div class="relative z-10 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] aspect-square md:aspect-[4/5] lg:aspect-[3/4]">
             {p.img ? (
-              <Image 
-                src={clUrl(p.img, 1000)} 
-                alt={p.name} 
-                width={1000} 
-                height={1200} 
-                loading="lazy"
-                class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-              />
+              <picture>
+                <source media="(max-width: 768px)" srcset={clUrl(p.img, 480)} />
+                <img 
+                  src={clUrl(p.img, 1000)} 
+                  alt={p.name} 
+                  width="1000" 
+                  height="1200" 
+                  loading="lazy"
+                  decoding="async"
+                  class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                />
+              </picture>
             ) : (
               <div class="w-full h-full flex items-center justify-center bg-stone-100 text-9xl">
                 {p.emoji}

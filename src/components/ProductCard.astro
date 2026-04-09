@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import { slugify, clUrl } from '../data/datos';
 
 interface Props {
@@ -46,12 +45,13 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
             class="flex-shrink-0 w-full h-full snap-center relative block"
             aria-label={`Ver ${p.name} - Imagen ${i + 1}`}
           >
-            <Image 
-              src={clUrl(img, 600)} 
+            <img 
+              src={clUrl(img, 480)} 
               alt={`${p.name} - Vista ${i + 1}`} 
-              width={600}
-              height={750}
-              loading="lazy" 
+              width="480"
+              height="600"
+              loading="lazy"
+              decoding="async" 
               class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           </a>
@@ -60,12 +60,13 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
     ) : (
       <a href={`/ramo/${productSlug}`} class="block h-full w-full relative">
         {p.img ? (
-          <Image 
-            src={clUrl(p.img, 600)} 
+          <img 
+            src={clUrl(p.img, 480)} 
             alt={`${p.name} - Ramo tejido a mano`} 
-            width={600}
-            height={750}
-            loading="lazy" 
+            width="480"
+            height="600"
+            loading="lazy"
+            decoding="async" 
             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (

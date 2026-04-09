@@ -13,6 +13,9 @@ export default defineConfig({
     priority: 0.7,
     filter: (page) => !page.includes('/admin'),
   }), tailwind()],
+  build: {
+    inlineStylesheets: 'always',
+  },
   image: {
     remotePatterns: [
       {
