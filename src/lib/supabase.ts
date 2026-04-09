@@ -144,3 +144,15 @@ export async function getLiveProductBySlug(slug: string) {
   return all.find(p => slugify(p.name) === slug) || null;
 }
 
+export async function getLivePosts(): Promise<any[]> {
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/posts?order=created_at.desc`, {
+      headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
