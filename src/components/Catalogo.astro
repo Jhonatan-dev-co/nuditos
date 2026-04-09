@@ -21,6 +21,9 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
   return { cat, items };
 }).filter(c => c.items.length > 0);
 
+// Índice global para los primeros productos (carga eager para evitar blank en primera visita)
+let globalIdx = 0;
+
 ---
 
 {catsToRender.map(({ cat, items }) => {
@@ -47,7 +50,7 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
           
           <!-- View: Grid (Mosaic) -->
           <div class="view-content view-grid hidden grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            {items.map(p => <ProductCard p={p} parentView="grid" />)}
+            {items.map(p => <ProductCard p={p} parentView="grid" eager={globalIdx++ < 6} />)}
           </div>
           
           <!-- View: Carousel -->
@@ -56,7 +59,7 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
               <div class="swiper-wrapper">
                 {items.map(p => (
                   <div class="swiper-slide h-auto pb-4">
-                    <ProductCard p={p} parentView="carousel" />
+                    <ProductCard p={p} parentView="carousel" eager={globalIdx++ < 6} />
                   </div>
                 ))}
               </div>
@@ -136,6 +139,21 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
       if (view === 'carousel') {
         setTimeout(initSwipers, 10);
       }
+
+      // CRÍTICO: forzar carga de imágenes lazy que estaban en display:none
+      // El navegador no descarga imágenes lazy dentro de elementos ocultos
+      requestAnimationFrame(() => {
+        document.querySelectorAll('#catalogRows img[loading="lazy"]').forEach(img => {
+          if (!img.src && img.dataset.src) {
+            img.src = img.dataset.src;
+          } else if (img.src) {
+            // Forzar re-evaluación del IntersectionObserver
+            const src = img.src;
+            img.src = '';
+            img.src = src;
+          }
+        });
+      });
     }
     
     toggles.forEach(btn => {
@@ -145,6 +163,40 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
         applyView(view);
       });
     });
+
+    /* ── Auto-Slide Funcionalidad sin Conflicto ── */
+    // Limpiamos intervalos anteriores si existe alguno (por ViewTransitions)
+    if (window.nuditosAutoSlideTimers) {
+      window.nuditosAutoSlideTimers.forEach(clearInterval);
+    }
+    window.nuditosAutoSlideTimers = [];
+
+    const autoCarousels = document.querySelectorAll('[data-auto-slide="true"]');
+    autoCarousels.forEach(car => {
+      const count = parseInt(car.dataset.imgsCount);
+      if (count <= 1) return;
+      
+      let current = 0;
+      const dots = car.parentElement.querySelectorAll('[data-idx]');
+      
+      const timerId = setInterval(() => {
+        current = (current + 1) % count;
+        // Movemos la imagen usando scrollTo para que sea nativo y suave
+        car.scrollTo({
+          left: car.clientWidth * current,
+          behavior: 'smooth'
+        });
+        
+        // Actualizamos dots
+        dots.forEach((dot, i) => {
+          dot.style.opacity = i === current ? '1' : '0.4';
+          dot.style.transform = i === current ? 'scale(1.5)' : 'scale(1)';
+        });
+      }, 3000 + (Math.random() * 2000));
+      
+      window.nuditosAutoSlideTimers.push(timerId);
+    });
+
   });
 </script>
 

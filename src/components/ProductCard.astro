@@ -6,10 +6,12 @@ interface Props {
   catName?: string;
   class?: string;
   parentView?: 'carousel' | 'grid' | 'list';
+  eager?: boolean;
 }
 
-const { p, catName = 'Nuditos', class: className, parentView = 'grid' } = Astro.props;
+const { p, catName = 'Nuditos', class: className, parentView = 'grid', eager = false } = Astro.props;
 const isAutoSliding = parentView === 'carousel';
+const imgLoading = eager ? 'eager' : 'lazy';
 
 function badgeIcon(badge: string) {
   if (badge === 'Nuevo')    return '<i class="ri-sparkling-line"></i>';
@@ -57,8 +59,8 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
               alt={`${p.name} - Vista ${i + 1}`} 
               width="480"
               height="600"
-              loading="lazy"
-              decoding="async" 
+              loading={i === 0 ? imgLoading : 'lazy'}
+              decoding={eager ? 'sync' : 'async'} 
               class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           </a>
@@ -72,8 +74,8 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
             alt={`${p.name} - Ramo tejido a mano`} 
             width="480"
             height="600"
-            loading="lazy"
-            decoding="async" 
+            loading={imgLoading}
+            decoding={eager ? 'sync' : 'async'} 
             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (
@@ -171,35 +173,6 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
   </div>
 </article>
 
-<script is:inline>
-  (function() {
-    // Solo inicializar si hay múltiples imágenes y está en modo auto-slide
-    const carousels = document.querySelectorAll('[data-auto-slide="true"]');
-    
-    carousels.forEach(car => {
-      const count = parseInt(car.dataset.imgsCount);
-      if (count <= 1) return;
-      
-      let current = 0;
-      const dots = car.parentElement.querySelectorAll('[data-idx]');
-      
-      setInterval(() => {
-        current = (current + 1) % count;
-        // Mover el contenedor flex
-        car.scrollTo({
-          left: car.offsetWidth * current,
-          behavior: 'smooth'
-        });
-        
-        // Actualizar dots
-        dots.forEach((dot, i) => {
-          dot.style.opacity = i === current ? '1' : '0.4';
-          dot.style.transform = i === current ? 'scale(1.5)' : 'scale(1)';
-        });
-      }, 3000 + (Math.random() * 2000)); // Intervalos ligeramente distintos para que no se muevan todos a la vez
-    });
-  })();
-</script>
 
 <style>
   .scrollbar-none::-webkit-scrollbar { display: none; }
