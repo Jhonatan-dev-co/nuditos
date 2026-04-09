@@ -149,9 +149,13 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
 </script>
 
 <style>
-  /* Lógica de visibilidad restaurada */
-  .view-content { display: none !important; }
+  /* Visibilidad mejorada: Mostrar carrusel por defecto mientras carga el JS */
+  .view-content { display: none; }
+  .view-carousel { display: block; } /* Visible por defecto */
+  
   .cat-section[data-view="carousel"] .view-carousel { display: block !important; }
   .cat-section[data-view="grid"]     .view-grid     { display: grid !important; }
+  .cat-section[data-view="grid"]     .view-carousel { display: none !important; }
   .cat-section[data-view="list"]     .view-list     { display: grid !important; }
+  .cat-section[data-view="list"]     .view-carousel { display: none !important; }
 </style>

@@ -47,7 +47,36 @@ export const categories: Category[] = [
   { id: 'amigurumis', name: 'Amigurumis',       icon: '🧸' },
 ];
 
-export const products: Product[] = [];
+export const products: Product[] = [
+  {
+    id: 17,
+    name: 'Ramo Sueño de Van Gogh',
+    desc: 'Un tributo tejido a la Noche Estrellada con girasoles y rosas azules.',
+    price: 85000,
+    emoji: '🌻',
+    img: 'https://images.unsplash.com/photo-1599307767316-776533da941c?q=80&w=800',
+    imgs: [],
+    cat: 'noche',
+    badge: 'Popular',
+    badgeClass: 'especial',
+    activo: true,
+    oferta: true,
+    precioOriginal: 95000
+  },
+  {
+    id: 55,
+    name: 'Ramo Rosas Eternas',
+    desc: 'Rosas que nunca se marchitan, símbolo de amor infinito.',
+    price: 65000,
+    emoji: '🌹',
+    img: 'https://images.unsplash.com/photo-1583209814683-c023dd293cc6?q=80&w=800',
+    imgs: [],
+    cat: 'rosas',
+    badge: 'Nuevo',
+    badgeClass: 'nuevo',
+    activo: true
+  }
+];
 
 export const getEditorialBanners = () => {
   return [];

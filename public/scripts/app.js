@@ -198,8 +198,10 @@ function renderBanner(cfg) {
   const discountBanner = document.getElementById('discountBanner');
   if (!bannerText || !discountBanner) return;
   
-  bannerText.innerHTML = `${cfg.descuentoTexto} — código <strong>${cfg.descuentoCodigo}</strong>`;
-  discountBanner.classList.add('visible');
+  try {
+    bannerText.innerHTML = `${cfg.descuentoTexto} — código <strong>${cfg.descuentoCodigo}</strong>`;
+    discountBanner.classList.add('visible');
+  } catch (e) { console.error("Error al renderizar banner:", e); }
 }
 
 
@@ -262,27 +264,31 @@ function heroTitle(p) {
    RAMO DEL MOMENTO
 ════════════════════════════ */
 function renderMomento(cfg) {
-  const p = getProducts().find(x => x.id === cfg.ramoDestacado);
   const target = document.getElementById('ramoMomento');
-  if (!p || !target) return;
-  const vis = p.img ? `<img src="${p.img}" alt="${p.name}">` : `<span class="momento-emoji">${p.emoji}</span>`;
-  target.innerHTML = `
+  if (!target) return;
+  
+  const p = getProducts().find(x => x.id === cfg.ramoDestacado);
+  if (!p) return;
 
-    <div class="momento-img">${vis}</div>
-    <div class="momento-info">
-      <div class="momento-eyebrow"><i class="ri-fire-line"></i> Ramo del momento</div>
-      <div class="momento-name">${p.name}</div>
-      <div class="momento-desc">${p.desc}</div>
-    </div>
-    <div class="momento-actions">
-      <div class="momento-price">
-        ${p.price > 0 ? `$${p.price.toLocaleString('es-CO')}<span> COP</span>` : `Consultar`}
+  try {
+    const vis = p.img ? `<img src="${p.img}" alt="${p.name}">` : `<span class="momento-emoji">${p.emoji}</span>`;
+    target.innerHTML = `
+      <div class="momento-img">${vis}</div>
+      <div class="momento-info">
+        <div class="momento-eyebrow"><i class="ri-fire-line"></i> Ramo del momento</div>
+        <div class="momento-name">${p.name}</div>
+        <div class="momento-desc">${p.desc}</div>
       </div>
-      ${p.price > 0 ? `<button class="btn-momento" onclick="addToCart(${p.id})"><i class="ri-shopping-bag-line"></i> Agregar</button>` : ''}
-      <a href="/ramo/${slugify(p.name)}" class="btn-momento-ghost">
-        <i class="ri-eye-line"></i> Ver detalle
-      </a>
-    </div>`;
+      <div class="momento-actions">
+        <div class="momento-price">
+          ${p.price > 0 ? `$${p.price.toLocaleString('es-CO')}<span> COP</span>` : `Consultar`}
+        </div>
+        ${p.price > 0 ? `<button class="btn-momento" onclick="addToCart(${p.id})"><i class="ri-shopping-bag-line"></i> Agregar</button>` : ''}
+        <a href="/ramo/${slugify(p.name)}" class="btn-momento-ghost">
+          <i class="ri-eye-line"></i> Ver detalle
+        </a>
+      </div>`;
+  } catch (e) { console.error("Error al renderizar momento:", e); }
 }
 
 /* ════════════════════════════
@@ -327,54 +333,56 @@ function getCatView(catId) {
 ════════════════════════════ */
 function renderCatalog() {
   const rows = document.getElementById('catalogRows');
+  if (!rows) return;
+  
   const filtered = document.getElementById('filteredView');
-  if (!rows || !filtered) return;
+  if (filtered) filtered.style.display = 'none';
 
   rows.style.display = 'block';
-  filtered.style.display = 'none';
 
   Object.values(catSwipers).forEach(s => { try { s.destroy(true, true); } catch {} });
   catSwipers = {};
 
-  const container = document.getElementById('catalogRows');
-  container.innerHTML = '';
+  try {
+    rows.innerHTML = '';
 
-  getCategories().filter(c => c.id !== 'todos').forEach(cat => {
-    const items = activeProducts().filter(p => p.cat?.toLowerCase() === cat.id?.toLowerCase());
-    if (!items.length) return;
-    const view = getCatView(cat.id);
+    getCategories().filter(c => c.id !== 'todos').forEach(cat => {
+      const items = activeProducts().filter(p => p.cat?.toLowerCase() === cat.id?.toLowerCase());
+      if (!items.length) return;
+      const view = getCatView(cat.id);
 
-    const section = document.createElement('div');
-    section.className = 'cat-section';
-    section.innerHTML = `
-      <div class="cat-section-header">
-        <span class="cat-section-title">${cat.icon} ${cat.name}</span>
-        <a href="#" class="cat-ver-todo" onclick="filterCatByName('${cat.id}');return false;">
-          Ver todo <i class="ri-arrow-right-line"></i>
-        </a>
-      </div>
-      ${buildCatContent(items, cat.id, view)}`;
-    container.appendChild(section);
+      const section = document.createElement('div');
+      section.className = 'cat-section';
+      section.innerHTML = `
+        <div class="cat-section-header">
+          <span class="cat-section-title">${cat.icon} ${cat.name}</span>
+          <a href="#" class="cat-ver-todo" onclick="filterCatByName('${cat.id}');return false;">
+            Ver todo <i class="ri-arrow-right-line"></i>
+          </a>
+        </div>
+        ${buildCatContent(items, cat.id, view)}`;
+      rows.appendChild(section);
 
-    if (view === 'carousel') initCatSwiper(cat.id);
+      if (view === 'carousel') initCatSwiper(cat.id);
 
-    const banners = getEditorialBanners().filter(b => b.afterCat === cat.id);
-    banners.forEach(banner => {
-      const b = document.createElement('div');
-      b.className = 'editorial-banner';
-      if (banner.imgUrl) {
-        b.style.backgroundImage = `url(${banner.imgUrl})`;
-        b.style.backgroundSize = 'cover';
-        b.style.backgroundPosition = 'center';
-      }
-      b.innerHTML = `
-        ${!banner.imgUrl ? `<div class="editorial-banner-bg">${banner.emoji||'🌸'}</div>` : ''}
-        <div class="editorial-banner-overlay">
-          <div class="editorial-banner-title">${banner.title||''}</div>
-        </div>`;
-      container.appendChild(b);
+      const banners = getEditorialBanners().filter(b => b.afterCat === cat.id);
+      banners.forEach(banner => {
+        const b = document.createElement('div');
+        b.className = 'editorial-banner';
+        if (banner.imgUrl) {
+          b.style.backgroundImage = `url(${banner.imgUrl})`;
+          b.style.backgroundSize = 'cover';
+          b.style.backgroundPosition = 'center';
+        }
+        b.innerHTML = `
+          ${!banner.imgUrl ? `<div class="editorial-banner-bg">${banner.emoji||'🌸'}</div>` : ''}
+          <div class="editorial-banner-overlay">
+            <div class="editorial-banner-title">${banner.title||''}</div>
+          </div>`;
+        rows.appendChild(b);
+      });
     });
-  });
+  } catch (e) { console.error("Error al renderizar catálogo:", e); }
 }
 
 function buildCatContent(items, catId, view) {
@@ -587,10 +595,16 @@ function clearFilter() {
 /* renderSearchResults eliminada */
 
 function toggleSearch() {
-  document.getElementById('searchOverlay').classList.add('open');
+  const overlay = document.getElementById('searchOverlay');
+  if (!overlay) return;
+  overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-  setTimeout(() => document.getElementById('searchInput').focus(), 100);
+  setTimeout(() => {
+    const input = document.getElementById('searchInput');
+    if (input) input.focus();
+  }, 100);
 }
+
 function closeSearch() {
   const overlay = document.getElementById('searchOverlay');
   if (overlay) overlay.classList.remove('open');
@@ -634,9 +648,13 @@ function updateModalBtn(id) {
 /* Funciones de renderizado y lógica de negocio portadas a Nanostores */
 
 function toggleCart() {
-  document.getElementById('cartOverlay').classList.toggle('open');
-  document.getElementById('cartPanel').classList.toggle('open');
-  const isOpen = document.getElementById('cartPanel').classList.contains('open');
+  const overlay = document.getElementById('cartOverlay');
+  const panel = document.getElementById('cartPanel');
+  if (!overlay || !panel) return;
+  
+  overlay.classList.toggle('open');
+  panel.classList.toggle('open');
+  const isOpen = panel.classList.contains('open');
   document.body.style.overflow = isOpen ? 'hidden' : '';
 }
 
@@ -646,9 +664,13 @@ function toggleCart() {
    MENÚ / FOOTER / TOAST / ESC
 ════════════════════════════ */
 function toggleMenu() {
-  document.getElementById('menuOverlay').classList.toggle('open');
-  document.getElementById('menuPanel').classList.toggle('open');
-  const isOpen = document.getElementById('menuPanel').classList.contains('open');
+  const overlay = document.getElementById('menuOverlay');
+  const panel = document.getElementById('menuPanel');
+  if (!overlay || !panel) return;
+
+  overlay.classList.toggle('open');
+  panel.classList.toggle('open');
+  const isOpen = panel.classList.contains('open');
   document.body.style.overflow = isOpen ? 'hidden' : '';
 }
 
