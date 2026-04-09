@@ -2,32 +2,42 @@
 import { slugify, clUrl } from '../data/datos';
 const { p } = Astro.props;
 ---
-<a class="product-list-item" href={`/ramo/${slugify(p.name)}`} style="text-decoration:none;color:inherit;display:flex">
-  <div class="list-item-img">
+<a class="group flex items-center bg-white rounded-2xl overflow-hidden border border-stone-100 hover:shadow-lg transition-all duration-300 p-2 gap-4" href={`/ramo/${slugify(p.name)}`} aria-label={`Ver detalles de ${p.name}`}>
+  <div class="w-20 h-20 flex-shrink-0 bg-stone-50 rounded-xl overflow-hidden">
     {p.img ? (
-      <img src={clUrl(p.img, 200)} alt={p.name} loading="lazy" />
+      <img src={clUrl(p.img, 200)} alt={p.name} loading="lazy" class="w-full h-full object-cover transition-transform group-hover:scale-110" />
     ) : (
-      <span>{p.emoji}</span>
+      <div class="w-full h-full flex items-center justify-center text-3xl opacity-80 group-hover:scale-110 transition-transform">
+        {p.emoji}
+      </div>
     )}
-
   </div>
-  <div class="list-item-info">
-    <div class="list-item-name">{p.name}</div>
-    <div class="list-item-desc">{p.desc}</div>
-    <div class="list-item-price">
-      {p.price > 0 ? `$${p.price.toLocaleString('es-CO')} COP` : 'Consultar'}
+  <div class="flex-1 min-w-0 py-1">
+    <div class="text-sm font-bold text-stone-800 line-clamp-1 mb-0.5 group-hover:text-violet-700 transition-colors">{p.name}</div>
+    <div class="text-[11px] text-stone-500 line-clamp-1 mb-2">{p.desc}</div>
+    <div class="text-sm font-semibold text-stone-700">
+      {p.price > 0 ? `$${p.price.toLocaleString('es-CO')}` : <span class="text-[10px] uppercase font-bold text-violet-600">Consultar</span>}
     </div>
   </div>
-  <div class="list-item-actions">
+  <div class="flex flex-col items-center gap-2 pr-2">
     {p.price > 0 ? (
-      <button class="p-add-btn" id={`padd-${p.id}`} onclick={`event.preventDefault(); event.stopPropagation(); addToCart(${p.id})`}>
+      <button 
+        class="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center text-stone-600 hover:bg-violet-600 hover:text-white transition-all shadow-sm"
+        id={`padd-${p.id}`} 
+        onclick={`event.preventDefault(); event.stopPropagation(); addToCart(${p.id})`}
+      >
         <i class="ri-shopping-bag-line"></i>
       </button>
     ) : (
-      <a class="p-add-btn p-wa-btn" href={`https://wa.me/573144931525?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}`} target="_blank" onclick="event.stopPropagation()">
+      <a 
+        class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white hover:bg-green-600 transition-all shadow-sm"
+        href={`https://wa.me/573144931525?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}`} 
+        target="_blank" 
+        onclick="event.stopPropagation()"
+      >
         <i class="ri-whatsapp-line"></i>
       </a>
     )}
-    <i class="ri-arrow-right-s-line list-arrow"></i>
+    <i class="ri-arrow-right-s-line text-stone-300 text-lg group-hover:text-violet-400 transform transition-transform group-hover:translate-x-1"></i>
   </div>
 </a>

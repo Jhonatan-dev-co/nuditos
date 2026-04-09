@@ -29,52 +29,58 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
   
   return (
     <>
-      <div class="cat-section" id={`section-${cat.id}`} data-view="carousel">
-        <div class="cat-section-header">
-          <h3 class="cat-section-title">{cat.icon} {cat.name}</h3>
-          <a href="#" class="cat-ver-todo" onclick={`filterCatByName('${cat.id}');return false;`}>
-            Ver todo <i class="ri-arrow-right-line"></i>
+      <div class="cat-section pb-4 pt-6 px-6 border-b border-stone-100 last:border-0" id={`cat-${cat.id}`} data-view={view}>
+        <div class="max-w-[1200px] mx-auto flex items-center justify-between mb-0">
+          <h3 class="font-sans text-xs font-bold tracking-[0.4em] text-stone-400 uppercase flex items-center gap-2">
+            <span class="text-xs leading-none opacity-60">{cat.icon}</span> {cat.name}
+          </h3>
+          <a href="#" class="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-500 hover:text-stone-800 transition-all flex items-center gap-1.5" onclick={`filterCatByName('${cat.id}');return false;`}>
+            VER TODO <i class="ri-arrow-right-s-line"></i>
           </a>
         </div>
         
-        <!-- View: List -->
-        <div class="view-content view-list">
-          <div class="products-list">
+        <div class="max-w-[1200px] mx-auto">
+          <!-- View: List -->
+          <div class="view-content view-list hidden grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
             {items.map(p => <ProductListItem p={p} />)}
           </div>
-        </div>
-        
-        <!-- View: Grid (Mosaic) -->
-        <div class="view-content view-grid">
-          <div class="products-grid">
+          
+          <!-- View: Grid (Mosaic) -->
+          <div class="view-content view-grid hidden grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
             {items.map(p => <ProductCard p={p} />)}
           </div>
-        </div>
-        
-        <!-- View: Carousel -->
-        <div class="view-content view-carousel">
-          <div class="swiper cat-swiper" id={`catSwiper-${cat.id}`}>
-            <div class="swiper-wrapper">
-              {items.map(p => (
-                <div class="swiper-slide cat-slide">
-                  <ProductCard p={p} />
-                </div>
-              ))}
+          
+          <!-- View: Carousel -->
+          <div class="view-content view-carousel hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div class="swiper cat-swiper !overflow-visible" id={`catSwiper-${cat.id}`}>
+              <div class="swiper-wrapper">
+                {items.map(p => (
+                  <div class="swiper-slide h-auto pb-4">
+                    <ProductCard p={p} />
+                  </div>
+                ))}
+              </div>
+              <div class="swiper-pagination !-bottom-2" id={`catPag-${cat.id}`}></div>
             </div>
-            <div class="swiper-pagination cat-pagination" id={`catPag-${cat.id}`}></div>
           </div>
         </div>
       </div>
 
       {catBanners.map(banner => (
-        <div class="editorial-banner" style={(banner as any).imgUrl ? `background-image: url(${(banner as any).imgUrl}); background-size: cover; background-position: center;` : ''}>
-          {!(banner as any).imgUrl && <div class="editorial-banner-bg">{banner.emoji || '🌸'}</div>}
-          <div class="editorial-banner-overlay">
-            <div class="editorial-banner-title" set:html={banner.title || ''}></div>
+        <div class="relative overflow-hidden my-4 md:my-6 rounded-[2.5rem] mx-4 md:mx-8 group shadow-xl">
+          <div class="absolute inset-0 bg-stone-100 transition-transform duration-1000 group-hover:scale-105" style={(banner as any).imgUrl ? `background-image: url(${(banner as any).imgUrl}); background-size: cover; background-position: center;` : ''}>
+            {!(banner as any).imgUrl && <div class="w-full h-full flex items-center justify-center text-8xl opacity-10">{banner.emoji || '🌸'}</div>}
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent"></div>
+          <div class="relative z-10 py-6 md:py-10 px-8 md:px-16 max-w-2xl">
+            <div class="text-[10px] uppercase font-bold tracking-[0.4em] text-white/70 mb-4">Colección Especial</div>
+            <div class="text-white text-3xl md:text-5xl font-serif leading-tight mb-6" set:html={banner.title || ''}></div>
+            <a href="/catalogo" class="inline-flex items-center gap-2 text-white text-[10px] uppercase font-bold tracking-widest border-b border-white/30 pb-1 hover:border-white transition-all">
+              Explorar ahora <i class="ri-arrow-right-line"></i>
+            </a>
           </div>
         </div>
       ))}
-      <div class="cat-section-end"></div>
     </>
   );
 })}
@@ -92,22 +98,17 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
         
         new Swiper(`#catSwiper-${id}`, {
           slidesPerView: 1.3,
-          spaceBetween: 14,
-          slidesOffsetBefore: 24,
-          slidesOffsetAfter: 24,
+          spaceBetween: 16,
+          slidesOffsetBefore: 0,
+          slidesOffsetAfter: 0,
           grabCursor: true,
-          freeMode: { enabled: true, momentum: true, momentumRatio: 0.8, momentumVelocityRatio: 0.8 },
+          freeMode: { enabled: true, momentum: true, momentumRatio: 0.8 },
           touchStartPreventDefault: false,
           touchMoveStopPropagation: false,
           passiveListeners: true,
-          touchRatio: 1.2,
-          threshold: 5,
-          touchAngle: 45,
-          resistance: true,
-          resistanceRatio: 0.85,
           pagination: { el: `#catPag-${id}`, clickable: true, dynamicBullets: true },
           breakpoints: {
-            480:  { slidesPerView: 2.2, spaceBetween: 16, slidesOffsetBefore: 0, slidesOffsetAfter: 0 },
+            480:  { slidesPerView: 2.2, spaceBetween: 16 },
             768:  { slidesPerView: 3.2, spaceBetween: 20 },
             1024: { slidesPerView: 4.2, spaceBetween: 22 },
             1280: { slidesPerView: 5,   spaceBetween: 24, freeMode: { enabled: false } },
@@ -119,11 +120,9 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
     window.initCatSwipersGlobal = initSwipers;
     initSwipers();
 
-    /* ── Global View Toggle logic ── */
     const toggles = document.querySelectorAll('.vtoggle');
     const sections = document.querySelectorAll('.cat-section');
     
-    // Load preference
     const savedView = localStorage.getItem('nuditos_cat_view') || 'carousel';
     applyView(savedView);
     
@@ -134,7 +133,6 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
         t.classList.toggle('active', isActive);
       });
       
-      // If we switch back to carousel, we might need a swiper update
       if (view === 'carousel') {
         setTimeout(initSwipers, 10);
       }
@@ -151,51 +149,9 @@ const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
 </script>
 
 <style>
-  /* Base content hiding */
-  .view-content { display: none; }
-  
-  .cat-section[data-view="carousel"] .view-carousel { display: block; animation: viewIn 0.3s ease; }
-  .cat-section[data-view="grid"]     .view-grid     { display: block; animation: viewIn 0.3s ease; }
-  .cat-section[data-view="list"]     .view-list     { display: block; animation: viewIn 0.3s ease; }
-  
-  @keyframes viewIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Global Toggle CSS (can also move to main.css if preferred) */
-  :global(.view-toggle-global) {
-    display: flex;
-    gap: 0.35rem;
-    padding: 0.3rem;
-    background: rgba(0,0,0,0.04);
-    border-radius: 50px;
-    margin-left: auto;
-  }
-  :global(.vtoggle) {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    color: var(--text-soft);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.95rem;
-  }
-  :global(.vtoggle:hover) {
-    color: var(--lila-dark);
-    background: rgba(0,0,0,0.03);
-  }
-  :global(.vtoggle.active) {
-    background: white;
-    color: var(--lila-dark);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
-
-  /* Force swiper visibility on mobile now that carousel is default */
-  .cat-swiper { display: block !important; }
+  /* Lógica de visibilidad restaurada */
+  .view-content { display: none !important; }
+  .cat-section[data-view="carousel"] .view-carousel { display: block !important; }
+  .cat-section[data-view="grid"]     .view-grid     { display: grid !important; }
+  .cat-section[data-view="list"]     .view-list     { display: grid !important; }
 </style>

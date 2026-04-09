@@ -1,7 +1,14 @@
 ---
-import { categories, slugify, clUrl } from '../data/datos';
+import { Image } from 'astro:assets';
+import { slugify, clUrl } from '../data/datos';
 
-const { p } = Astro.props;
+interface Props {
+  p: any;
+  catName?: string;
+  class?: string;
+}
+
+const { p, catName = 'Nuditos', class: className } = Astro.props;
 
 function badgeIcon(badge: string) {
   if (badge === 'Nuevo')    return '<i class="ri-sparkling-line"></i>';
@@ -10,60 +17,154 @@ function badgeIcon(badge: string) {
   return '';
 }
 
-const cat = categories.find(c => c.id === p.cat);
 const productSlug = slugify(p.name);
----
-<a class="product-card" href={`/ramo/${productSlug}`} style="text-decoration:none;color:inherit;display:block">
-  <div class="product-img-wrap">
-    {p.badge ? (
-      <div class={`p-badge ${p.badgeClass || ''} ${p.badge === 'Nuevo' ? 'badge-pulse' : ''}`}>
-        <span set:html={badgeIcon(p.badge)}></span> {p.badge}
-      </div>
-    ) : p.oferta ? (
-      <div class="p-badge p-badge-oferta"><i class="ri-price-tag-3-fill"></i> Oferta</div>
-    ) : null}
+const allImgs = [p.img, ...(p.imgs || [])].filter((u, i, arr) => u && arr.indexOf(u) === i);
 
-    {p.img ? (
-      <img src={clUrl(p.img, 500)} alt={`${p.name} - Ramo tejido a mano`} loading="lazy" />
-    ) : (
-      <span class="card-emoji">{p.emoji}</span>
-    )}
+// String pre-compilado para la máxima velocidad de búsqueda en el cliente
+const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replace(/<[^>]*>?/gm, '').toLowerCase();
+---
+<article 
+  class:list={[
+    "group relative bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-stone-100/50 flex flex-col",
+    className
+  ]}
+  data-cat={p.cat}
+  data-price={p.price}
+  data-search={searchStr}
+>
+  <!-- CONTENEDOR DE IMAGEN / CARRUSEL -->
+  <div class="relative aspect-[4/5] overflow-hidden bg-stone-50">
     
-    <div class="card-overlay">
-      <span class="card-overlay-btn">
-        <i class="ri-eye-line"></i> Ver detalle
-      </span>
-    </div>
-    
-    {p.price > 0 ? (
-      <button class="p-add-btn" id={`padd-${p.id}`} onclick={`event.preventDefault(); event.stopPropagation(); addToCart(${p.id})`} aria-label="Agregar al carrito">
-        <i class="ri-shopping-bag-3-line"></i>
-      </button>
+    {allImgs.length > 1 ? (
+      <div 
+        class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none h-full w-full touch-pan-x"
+        id={`carousel-${p.id}`}
+      >
+        {allImgs.map((img, i) => (
+          <a 
+            href={`/ramo/${productSlug}`}
+            class="flex-shrink-0 w-full h-full snap-center relative block"
+            aria-label={`Ver ${p.name} - Imagen ${i + 1}`}
+          >
+            <Image 
+              src={clUrl(img, 600)} 
+              alt={`${p.name} - Vista ${i + 1}`} 
+              width={600}
+              height={750}
+              loading="lazy" 
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          </a>
+        ))}
+      </div>
     ) : (
-      <a class="p-add-btn p-wa-btn" href={`https://wa.me/573144931525?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}`} target="_blank" onclick="event.stopPropagation()" aria-label="Consultar por WhatsApp">
-        <i class="ri-whatsapp-line"></i>
+      <a href={`/ramo/${productSlug}`} class="block h-full w-full relative">
+        {p.img ? (
+          <Image 
+            src={clUrl(p.img, 600)} 
+            alt={`${p.name} - Ramo tejido a mano`} 
+            width={600}
+            height={750}
+            loading="lazy" 
+            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        ) : (
+          <div class="w-full h-full flex items-center justify-center text-6xl opacity-20">
+            {p.emoji}
+          </div>
+        )}
       </a>
     )}
-  </div>
-  
-  <div class="p-info">
-    <div class="p-category"><i class="ri-price-tag-3-line"></i> {cat ? cat.name : ''}</div>
-    <div class="p-name">{p.name}</div>
-    
-    <div class="p-price-row">
-      <div class="p-price">
-       {p.price > 0 ? (
-          p.oferta && p.precioOriginal && p.precioOriginal > 0 ? (
-            <><span class="p-price-original">${p.precioOriginal.toLocaleString('es-CO')}</span> ${p.price.toLocaleString('es-CO')}</>
-          ) : (
-            <>${p.price.toLocaleString('es-CO')}</>
-          )
-        ) : (
-          <span class="price-consultar">Consultar</span>
-        )}
+
+    <!-- Indicador de carrusel Dots -->
+    {allImgs.length > 1 && (
+      <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-20 pointer-events-none">
+        {allImgs.map((_, i) => (
+          <div class="w-1 h-1 rounded-full bg-white/40 shadow-sm transition-all duration-300" data-idx={i}></div>
+        ))}
       </div>
-      {p.envioGratis && <div class="p-envio-gratis-icon" title="Envío gratis"><i class="ri-truck-line"></i></div>}
+    )}
+
+    <!-- Badges -->
+    <div class="absolute top-4 left-4 z-20 pointer-events-none flex flex-col gap-2">
+      {p.badge && (
+        <div class={`rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-sm backdrop-blur-md border ${
+          p.badge.toLowerCase() === 'nuevo' ? 'bg-emerald-50/90 text-emerald-700 border-emerald-100' : 
+          p.badge.toLowerCase() === 'popular' ? 'bg-orange-50/90 text-orange-700 border-orange-100' :
+          'bg-violet-50/90 text-violet-700 border-violet-100'
+        }`}>
+          <span set:html={badgeIcon(p.badge)}></span> {p.badge}
+        </div>
+      )}
+      {p.oferta && (
+        <div class="bg-rose-50/90 text-rose-700 border border-rose-100 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-sm backdrop-blur-md self-start">
+          <i class="ri-price-tag-3-fill"></i> Oferta
+        </div>
+      )}
+    </div>
+
+    <!-- Botón de Acción Rápida (Hover en desktop, siempre visible en móvil) -->
+    <div class="absolute bottom-4 right-4 z-30 md:opacity-0 md:group-hover:opacity-100 md:translate-y-2 md:group-hover:translate-y-0 transition-all duration-300">
+      {p.price > 0 ? (
+        <button 
+          class="w-11 h-11 md:w-12 md:h-12 bg-stone-900/90 backdrop-blur-sm text-white rounded-2xl flex items-center justify-center shadow-xl hover:bg-violet-600 hover:scale-110 active:scale-95 transition-all duration-300"
+          onclick={`event.preventDefault(); event.stopPropagation(); addToCart(${p.id})`} 
+          aria-label="Agregar al carrito"
+          id={`padd-${p.id}`}
+        >
+          <i class="ri-shopping-bag-3-fill text-lg md:text-xl"></i>
+        </button>
+      ) : (
+        <a 
+          class="w-11 h-11 md:w-12 md:h-12 bg-green-500/90 backdrop-blur-sm text-white rounded-2xl flex items-center justify-center shadow-xl hover:bg-green-600 hover:scale-110 active:scale-95 transition-all duration-300"
+          href={`https://wa.me/573144931525?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}`} 
+          target="_blank" 
+          onclick="event.stopPropagation()" 
+          aria-label="Consultar por WhatsApp"
+        >
+          <i class="ri-whatsapp-line text-xl md:text-2xl"></i>
+        </a>
+      )}
     </div>
   </div>
-</a>
+  
+  <!-- INFO DEL PRODUCTO -->
+  <div class="p-5 flex flex-col gap-1.5 bg-white flex-1 relative z-10">
+    <div class="text-[9px] font-bold uppercase tracking-[0.4em] text-stone-400">
+      {catName}
+    </div>
+    
+    <a href={`/ramo/${productSlug}`} class="block group/link">
+      <h3 class="font-serif text-base md:text-lg font-light text-stone-800 leading-tight group-hover/link:text-violet-700 transition-colors tracking-tight">
+        {p.name}
+      </h3>
+    </a>
+    
+    <div class="flex items-center justify-between mt-auto pt-2">
+      <div class="font-sans text-sm md:text-base font-bold text-stone-700 flex items-center gap-2">
+       {p.price > 0 ? (
+          <>
+            <span class="text-violet-700">${p.price.toLocaleString('es-CO')}</span>
+            {p.oferta && p.precioOriginal > p.price && (
+              <span class="text-[11px] text-stone-300 line-through font-normal">${p.precioOriginal.toLocaleString('es-CO')}</span>
+            )}
+          </>
+        ) : (
+          <span class="text-[10px] uppercase tracking-widest text-violet-500 font-bold">Solicitar Precio</span>
+        )}
+      </div>
+
+      {p.envioGratis && (
+        <div class="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+          <i class="ri-truck-line"></i> Gratis
+        </div>
+      )}
+    </div>
+  </div>
+</article>
+
+<style>
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
 

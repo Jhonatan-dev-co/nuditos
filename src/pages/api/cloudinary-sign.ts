@@ -1,3 +1,4 @@
+export const prerender = false;
 import crypto from 'node:crypto';
 import type { APIRoute } from 'astro';
 

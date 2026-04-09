@@ -1,0 +1,207 @@
+<div id="tab-seo" class="tab-content" style="padding:1.5rem">
+  <div class="editor-header" style="margin-bottom:2rem">
+    <h2 style="font-size:1.5rem;font-weight:700;color:var(--negro)">🔍 Optimización SEO</h2>
+    <p style="color:var(--soft);font-size:.875rem">Configura cómo aparece tu tienda en Google, redes sociales y WhatsApp.</p>
+  </div>
+
+  <div class="admin-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:1.5rem">
+    
+    <!-- GOOGLE PREVIEW & SETTINGS -->
+    <div class="admin-card" style="background:#fff;padding:1.5rem;border-radius:12px;border:1px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,0.02)">
+      <h3 style="font-size:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+        <i class="ri-google-line" style="color:#4285F4"></i> Configuración de Google
+      </h3>
+      
+      <div class="field" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Título del Sitio (Meta Title)</label>
+        <input type="text" id="seoTitle" placeholder="Nuditos — Ramos de Crochet y Flores Eternas" 
+          style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem"
+          oninput="updateSEOPreview()">
+        <small style="color:#999;font-size:.7rem">Máximo 60 caracteres recomendado.</small>
+      </div>
+
+      <div class="field" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Meta Descripción</label>
+        <textarea id="seoDescription" rows="3" placeholder="Encuentra los mejores regalos personalizados y flores que nunca se marchitan..." 
+          style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem;resize:none"
+          oninput="updateSEOPreview()"></textarea>
+        <small style="color:#999;font-size:.7rem">Máximo 160 caracteres recomendado.</small>
+      </div>
+
+      <!-- GOOGLE PREVIEW -->
+      <div class="google-preview" style="background:#f9f9f9;padding:1rem;border-radius:8px;margin-top:1rem;border:1px solid #eee">
+        <div style="color:#1a0dab;font-size:1.1rem;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="preSEOTitle">Título de tu tienda</div>
+        <div style="color:#006621;font-size:.85rem;margin-bottom:.3rem">https://nuditos.com</div>
+        <div style="color:#545454;font-size:.8rem;line-height:1.4" id="preSEODesc">Aquí aparecerá la descripción que escribas arriba...</div>
+      </div>
+    </div>
+
+    <!-- SOCIAL MEDIA & SHARING -->
+    <div class="admin-card" style="background:#fff;padding:1.5rem;border-radius:12px;border:1px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,0.02)">
+      <h3 style="font-size:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+        <i class="ri-share-line" style="color:var(--lila)"></i> Redes Sociales y Compartir
+      </h3>
+
+      <div class="field" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Imagen para compartir (OG Image)</label>
+        <div style="display:flex;gap:.5rem">
+          <input type="text" id="seoOgImage" placeholder="URL de la imagen (1200x630)" 
+            style="flex:1;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+          <button onclick="document.getElementById('seoOgFileInput').click()" style="background:#f0f0f0;border:none;padding:0 1rem;border-radius:8px;cursor:pointer">
+            <i class="ri-upload-2-line"></i>
+          </button>
+          <input type="file" id="seoOgFileInput" style="display:none" onchange="handleOgUpload(this.files)">
+        </div>
+        <small style="color:#999;font-size:.7rem">Imagen que aparece en WhatsApp, Facebook e Instagram.</small>
+      </div>
+
+      <div class="field" style="margin-bottom:1rem">
+        <label style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;margin-bottom:.4rem">
+          <i class="ri-instagram-line"></i> Instagram URL
+        </label>
+        <input type="text" id="socialInsta" placeholder="https://instagram.com/nuditos" 
+          style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+      </div>
+
+      <div class="field" style="margin-bottom:1rem">
+        <label style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;margin-bottom:.4rem">
+          <i class="ri-whatsapp-line"></i> WhatsApp (Número)
+        </label>
+        <input type="text" id="socialWhasapp" placeholder="573144931525" 
+          style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+      </div>
+    </div>
+
+    <!-- TRACKING & ANALYTICS -->
+    <div class="admin-card" style="background:#fff;padding:1.5rem;border-radius:12px;border:1px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,0.02);grid-column: span 1">
+      <h3 style="font-size:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+        <i class="ri-line-chart-line" style="color:#ff9800"></i> Medición y Tracking
+      </h3>
+
+      <div class="field" style="margin-bottom:1.5rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+          <label style="font-size:.75rem;font-weight:600">Facebook Pixel (Meta Pixel)</label>
+          <div class="toggle-btn" id="toggleMetaPixelSEO" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <input type="text" id="seoMetaPixelId" placeholder="ID del Píxel" 
+          style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+      </div>
+
+      <div class="field" style="margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+          <label style="font-size:.75rem;font-weight:600">Google Analytics ID</label>
+          <div class="toggle-btn" id="toggleGASEO" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <input type="text" id="seoGAId" placeholder="G-XXXXXXXXXX" 
+          style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:2rem;display:flex;justify-content:flex-end">
+     <button class="btn-save" onclick="saveSEOConfig()" style="background:var(--lila);color:#fff;padding:.8rem 2rem;border:none;border-radius:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.5rem">
+       <i class="ri-save-line"></i> Guardar Todo el SEO
+     </button>
+  </div>
+</div>
+
+<style>
+  .admin-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .admin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.05) !important;
+  }
+  .field input:focus, .field textarea:focus {
+    border-color: var(--lila) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  }
+  .toggle-btn {
+    width: 40px;
+    height: 22px;
+    background: #e5e7eb;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .toggle-btn::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .post-item-admin:hover { 
+    background: #fdfaff; 
+    border-left: 3px solid var(--lila);
+  }
+  .post-item-admin.active {
+    background: #f5eeff;
+    border-left: 3px solid var(--lila);
+  }
+  #postContent:focus {
+    border-color: var(--lila) !important;
+    outline: none;
+  }
+  .toggle-btn.on { background: #6d28d9; }
+  .toggle-btn.on::after { left: 20px; }
+
+  .google-preview {
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+  .google-preview:hover {
+    background: #fff !important;
+    border-color: var(--lila) !important;
+  }
+</style>
+
+<script is:inline>
+  function updateSEOPreview() {
+    const title = document.getElementById('seoTitle').value || 'Nuditos — Ramos de Crochet y Flores Eternas';
+    const desc = document.getElementById('seoDescription').value || 'Encuentra los mejores regalos personalizados y flores que nunca se marchitan...';
+    document.getElementById('preSEOTitle').textContent = title;
+    document.getElementById('preSEODesc').textContent = desc;
+  }
+
+  async function handleOgUpload(files) {
+    if(!files.length) return;
+    const url = await uploadToCloudinary(files[0]);
+    if(url) {
+      document.getElementById('seoOgImage').value = url;
+      showToast('✓ Imagen OG subida');
+    }
+  }
+
+  async function saveSEOConfig() {
+    const data = {
+      seo_title: document.getElementById('seoTitle').value.trim(),
+      seo_description: document.getElementById('seoDescription').value.trim(),
+      seo_og_image: document.getElementById('seoOgImage').value.trim(),
+      social_instagram: document.getElementById('socialInsta').value.trim(),
+      social_whatsapp: document.getElementById('socialWhasapp').value.trim(),
+      meta_pixel_id: document.getElementById('seoMetaPixelId').value.trim(),
+      meta_pixel_active: document.getElementById('toggleMetaPixelSEO').classList.contains('on'),
+      ga_id: document.getElementById('seoGAId').value.trim(),
+      ga_active: document.getElementById('toggleGASEO').classList.contains('on')
+    };
+    
+    showToast('⏳ Guardando SEO...');
+    try {
+      await sbAdminSaveConfig(data);
+      showToast('✅ SEO actualizado correctamente');
+      addToHistory('🔍 SEO Global actualizado');
+    } catch(e) {
+      showToast('❌ Error al guardar SEO');
+    }
+  }
+</script>

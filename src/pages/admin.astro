@@ -17,6 +17,8 @@ import CategoriesTab from '../components/admin/CategoriesTab.astro';
 import VitrinaTab from '../components/admin/VitrinaTab.astro';
 import BannersTab from '../components/admin/BannersTab.astro';
 import DiscountsTab from '../components/admin/DiscountsTab.astro';
+import BlogTab from '../components/admin/BlogTab.astro';
+import SEOTab from '../components/admin/SEOTab.astro';
 import SettingsTab from '../components/admin/SettingsTab.astro';
 import Modals from '../components/admin/Modals.astro';
 
@@ -54,6 +56,8 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         <VitrinaTab />
         <BannersTab />
         <DiscountsTab />
+        <BlogTab />
+        <SEOTab />
         <SettingsTab />
       </div>
     </div>
@@ -134,6 +138,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       if(btn)btn.classList.add('active');
       if(name==='dashboard')renderDashboard();
       if(name==='pedidos')renderPedidosList();
+      if(name==='blog')loadPosts();
     }
 
     /* ── CLOUDINARY ── */
@@ -152,7 +157,10 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       showUploadProgress(0);
       try{
         const signRes=await fetch('/api/cloudinary-sign',{method:'POST'});
-        if(!signRes.ok)throw new Error('No se pudo obtener la firma');
+        if(!signRes.ok) {
+           const err = await signRes.json();
+           throw new Error(err.error || 'Fallo en la firma del servidor');
+        }
         const{signature,timestamp,apiKey,cloudName,uploadPreset,folder}=await signRes.json();
         const fd=new FormData();
         fd.append('file',file);fd.append('upload_preset',uploadPreset);
@@ -160,13 +168,21 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         fd.append('api_key',apiKey);fd.append('signature',signature);
         showUploadProgress(30);
         const res=await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,{method:'POST',body:fd});
-        if(!res.ok)throw new Error('Error al subir');
+        if(!res.ok) {
+          const cloudErr = await res.json();
+          throw new Error(cloudErr.error?.message || 'Error en Cloudinary');
+        }
         const data=await res.json();
         const url=data.secure_url.replace('/upload/','/upload/w_1200,q_auto,f_auto/');
         showUploadProgress(100);setTimeout(()=>hideUploadProgress(),800);
         addToHistory(`📸 Foto subida: ${data.original_filename||'imagen'}`);
         return url;
-      }catch(e){hideUploadProgress();showToast('❌ Error subiendo imagen');return null;}
+      }catch(e){
+        hideUploadProgress();
+        showToast(`❌ ${e.message}`);
+        console.error('[Cloudinary Upload Error]', e);
+        return null;
+      }
     }
     function showUploadProgress(pct){const p=document.getElementById('uploadProgress');const b=document.getElementById('uploadProgressBar');if(p)p.style.display='block';if(b)b.style.width=pct+'%';}
     function hideUploadProgress(){const p=document.getElementById('uploadProgress');if(p)p.style.display='none';}
@@ -183,11 +199,22 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           for(const p of adminProducts){try{await sbAdminSaveProduct({...p,_isNew:true});}catch(e){}}
         }
         const sbCfg=await sbAdminGetConfig_();adminCfg=sbCfg||{...CONFIG_DEFAULT};
-        try{const rows=await sbAdminGetBanners_();editorialBannersAdmin=rows&&rows.length?rows:[
-          {id:1,afterCat:'rosas',emoji:'🌸',title:'Flores que <em>jamás se marchitan</em>',imgUrl:''},
-          {id:2,afterCat:'noche',emoji:'🌙',title:'Arte tejido <em>puntada a puntada</em>',imgUrl:''},
-          {id:3,afterCat:'especial',emoji:'✨',title:'Regalos que <em>dejan huella</em>',imgUrl:''},
-        ];}catch{editorialBannersAdmin=[];}
+        try{
+          const rows=await sbAdminGetBanners_();
+          const defaults = [
+            {afterCat:'home1',title:'Pétalos que <em>guardan</em> historias',subtitle:'Creamos ramos que no se marchitan para momentos que deben durar por siempre.',imgUrl:'https://images.unsplash.com/photo-1583209814683-c023dd293cc6',ctaText:'Ver Colección',ctaUrl:'/catalogo'},
+            {afterCat:'home2',title:'Regala un <em>pedacito</em> de arte',subtitle:'Cada puntada es un detalle pensado en la persona que amas.',imgUrl:'https://images.unsplash.com/photo-1599307767316-776533da941c',ctaText:'Personalizar',ctaUrl:'/#personalizado'}
+          ];
+          
+          editorialBannersAdmin = rows && rows.length ? rows : [...defaults];
+          
+          // Aseguramos que HOME1 y HOME2 siempre existan en la lista
+          defaults.forEach(def => {
+            if(!editorialBannersAdmin.find(b => b.afterCat === def.afterCat)) {
+              editorialBannersAdmin.push(def);
+            }
+          });
+        }catch{editorialBannersAdmin=[];}
         try{pedidos=await sbAdminGetPedidos();}catch{pedidos=[];}
         try{adminCategories=await sbAdminGetCategories();if(!adminCategories.length)adminCategories=[...categories];}catch{adminCategories=[...categories];}
         try{const sh=localStorage.getItem('nuditos_history');changeHistory=sh?JSON.parse(sh):[];}catch{changeHistory=[];}
@@ -206,6 +233,18 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       if(adminCfg.metaPixelActivo)document.getElementById('toggleMetaPixel').classList.add('on');
       if(adminCfg.metaPixelId)document.getElementById('metaPixelId').value=adminCfg.metaPixelId;
       
+      // SEO Fields initialization
+      if(adminCfg.seoTitle) document.getElementById('seoTitle').value = adminCfg.seoTitle;
+      if(adminCfg.seoDescription) document.getElementById('seoDescription').value = adminCfg.seoDescription;
+      if(adminCfg.seoOgImage) document.getElementById('seoOgImage').value = adminCfg.seoOgImage;
+      if(adminCfg.socialInstagram) document.getElementById('socialInsta').value = adminCfg.socialInstagram;
+      if(adminCfg.socialWhatsapp) document.getElementById('socialWhasapp').value = adminCfg.socialWhatsapp;
+      if(adminCfg.gaId) document.getElementById('seoGAId').value = adminCfg.gaId;
+      if(adminCfg.gaActive) document.getElementById('toggleGASEO').classList.add('on');
+      if(adminCfg.metaPixelId) document.getElementById('seoMetaPixelId').value = adminCfg.metaPixelId;
+      if(adminCfg.metaPixelActivo) document.getElementById('toggleMetaPixelSEO').classList.add('on');
+      if(typeof updateSEOPreview === 'function') updateSEOPreview();
+
       const cc=getCloudinaryConfig();
       if(cc.cloudName)document.getElementById('ccCloudName').value=cc.cloudName;
       if(cc.preset)document.getElementById('ccPreset').value=cc.preset;
@@ -558,9 +597,61 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     function renderHeroSlots(){ document.getElementById('heroSlots').innerHTML=heroSelection.map(id=>{ const p=adminProducts.find(x=>x.id===id); return `<div class="hero-slot filled">${p?.name.slice(0,10)}</div>`; }).join(''); }
     function renderHeroList(list){ document.getElementById('heroList').innerHTML=list.slice(0,10).map(p=>`<div class="v-prod-row"><div class="v-info">${p.name}</div><button class="btn-select" onclick="toggleHero(${p.id})">+ Agregar</button></div>`).join(''); }
     function toggleHero(id){ if(!heroSelection.includes(id))heroSelection.push(id); renderHeroSlots(); }
-    function renderBannerList(){ document.getElementById('bannerList').innerHTML=editorialBannersAdmin.map((b,i)=>`<div class="banner-item">${b.afterCat}: ${b.title} <button onclick="removeBanner(${i})">✕</button></div>`).join(''); }
-    function updateBanner(i,key,val){ editorialBannersAdmin[i][key]=val; }
-    function removeBanner(i){ editorialBannersAdmin.splice(i,1); renderBannerList(); }
+    function renderBannerList(){ 
+      const editorialList = editorialBannersAdmin.filter(b => b.afterCat === 'home1' || b.afterCat === 'home2');
+      const collectionsList = editorialBannersAdmin.filter(b => b.afterCat !== 'home1' && b.afterCat !== 'home2');
+
+      const buildCard = (b, i) => {
+        // Encontrar el índice real en el array original
+        const realIdx = editorialBannersAdmin.findIndex(x => x === b);
+        return `
+          <div class="banner-admin-card" style="margin-bottom: 1rem; border: 1px solid #eee; padding: 1.2rem; border-radius: 1.2rem; background: #fff;">
+            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+               <h4 style="margin:0; font-family:serif; font-size: 1rem; color: var(--lila-dark)">${b.afterCat.startsWith('home') ? 'Banner Inicio ' + b.afterCat.slice(-1) : 'Categoría: ' + b.afterCat}</h4>
+               <button onclick="removeBanner(${realIdx})" style="background: none; color: #ef4444; border:none; padding: 5px; cursor:pointer; font-size: 1.1rem;"><i class="ri-delete-bin-line"></i></button>
+            </div>
+            
+            <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+              <div class="field"><label>Título (Usa &lt;em&gt; para cursiva)</label><input type="text" value="${b.title||''}" oninput="updateBanner(${realIdx},'title',this.value)"></div>
+              <div class="field"><label>Aparecer después de (id o home1/2)</label><input type="text" value="${b.afterCat||''}" oninput="updateBanner(${realIdx},'afterCat',this.value)"></div>
+              <div class="field field-full"><label>Subtítulo / Descripción</label><textarea style="width:100%; border-radius:10px; border:1px solid #ddd; padding:8px; font-size:0.8rem" oninput="updateBanner(${realIdx},'subtitle',this.value)">${b.subtitle||''}</textarea></div>
+              <div class="field"><label>Texto del botón</label><input type="text" value="${b.ctaText||'Ver más'}" oninput="updateBanner(${realIdx},'ctaText',this.value)"></div>
+              <div class="field"><label>URL del botón</label><input type="text" value="${b.ctaUrl||'/catalogo'}" oninput="updateBanner(${realIdx},'ctaUrl',this.value)"></div>
+              <div class="field field-full"><label>Imagen URL o Subir</label>
+                <div style="display:flex; gap: 5px;">
+                  <input type="text" id="bImg-${realIdx}" value="${b.imgUrl||''}" style="flex:1; font-size: 0.7rem;" oninput="updateBanner(${realIdx},'imgUrl',this.value)">
+                  <button onclick="document.getElementById('bFile-${realIdx}').click()" style="background:var(--lila); color:white; border:none; padding: 0 12px; border-radius: 10px; cursor:pointer; font-size: 0.7rem;">📸</button>
+                  <input type="file" id="bFile-${realIdx}" style="display:none" onchange="uploadBannerImg(${realIdx}, this.files)">
+                </div>
+              </div>
+            </div>
+            ${b.imgUrl ? `<img src="${b.imgUrl}" style="width:100%; height: 80px; object-fit: cover; border-radius: 0.8rem; margin-top: 0.8rem; border: 1px solid #eee;">` : ''}
+          </div>
+        `;
+      };
+
+      document.getElementById('editorialBannersList').innerHTML = editorialList.map(b => buildCard(b)).join('') || '<div style="padding:1rem; text-align:center; color:#999; font-size: 0.8rem;">No hay banners de inicio</div>';
+      document.getElementById('bannerList').innerHTML = collectionsList.map(b => buildCard(b)).join('') || '<div style="padding:1rem; text-align:center; color:#999; font-size: 0.8rem;">No hay banners de categoría</div>';
+    }
+    window.updateBanner = function(i,key,val){ 
+      editorialBannersAdmin[i][key]=val; 
+    };
+    window.removeBanner = function(i){ 
+      editorialBannersAdmin.splice(i,1); 
+      renderBannerList(); 
+    };
+    window.uploadBannerImg = async function(i, files) {
+      if(!files.length) return;
+      const url = await uploadToCloudinary(files[0]);
+      if(url) {
+        editorialBannersAdmin[i].imgUrl = url;
+        renderBannerList();
+      }
+    };
+    window.addNewBanner = function() {
+      editorialBannersAdmin.push({ title: 'Nuevo Banner', afterCat: '', imgUrl: '', subtitle: '', ctaText: 'Ver más', ctaUrl: '/catalogo' });
+      renderBannerList();
+    };
     function renderCatViewsList(){ document.getElementById('catViewsList').innerHTML=categories.filter(c=>c.id!=='todos').map(c=>`<div>${c.name}</div>`).join(''); }
 
     async function saveConfig(){

@@ -1,0 +1,58 @@
+---
+import { clUrl } from '../data/datos';
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  img: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  reverse?: boolean;
+}
+
+const { title, subtitle, img, ctaText, ctaUrl, reverse = false } = Astro.props;
+---
+
+<section class="relative w-full overflow-hidden my-4 md:my-8 group">
+  <div class="max-w-[1400px] mx-auto px-4 md:px-8">
+    <div class={`flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-8 md:gap-16`}>
+      
+      <div class="w-full md:w-3/5 overflow-hidden rounded-[2.5rem] shadow-2xl shadow-stone-200/50 relative aspect-[4/3] md:aspect-video bg-stone-100">
+        <img 
+          src={img.includes('unsplash.com') ? img : clUrl(img, 1200)} 
+          alt={title.replace(/<[^>]*>?/gm, '')} 
+          width="1200"
+          height="800"
+          loading="lazy"
+          decoding="async"
+          class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+      </div>
+
+      <!-- Lado Texto -->
+      <div class="w-full md:w-2/5 text-center md:text-left py-4">
+        <div class="text-[10px] tracking-[0.3em] uppercase text-violet-600 font-bold mb-2">
+          Nuditos Experience
+        </div>
+        <h2 class="font-serif text-4xl md:text-6xl font-light text-stone-800 leading-[1.1] mb-4 tracking-tight" set:html={title}>
+        </h2>
+        {subtitle && (
+          <p class="text-stone-500 text-base md:text-lg leading-snug mb-6 max-w-md mx-auto md:mx-0">
+            {subtitle}
+          </p>
+        )}
+        
+        {ctaText && ctaUrl && (
+          <a 
+            href={ctaUrl} 
+            class="inline-flex items-center gap-3 bg-stone-900 text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:bg-violet-700 hover:-translate-y-1 transition-all uppercase text-[10px] tracking-widest"
+          >
+            {ctaText} <i class="ri-arrow-right-line"></i>
+          </a>
+        )}
+      </div>
+
+    </div>
+  </div>
+</section>

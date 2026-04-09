@@ -7,6 +7,8 @@
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { Image } from 'astro:assets';
 import { getLiveProductBySlug, getLiveProducts, getLiveCategories } from '../../lib/supabase';
 import { slugify, clUrl } from '../../data/datos';
 
@@ -112,442 +114,367 @@ const productSchema = {
     <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
     {showPrice > 0 && <meta property="product:price:amount"   content={String(showPrice)} />}
     {showPrice > 0 && <meta property="product:price:currency" content="COP" />}
-    
-    <script is:inline define:vars={{ 
-      liveProducts: allProducts.map(p => ({ id: p.id, name: p.name, price: p.price, emoji: p.emoji, img: p.img, cat: p.cat, desc: p.desc })),
-      liveCategories: categories
-    }}>
-      window.NUDITOS_LIVE_PRODUCTS = liveProducts;
-      window.NUDITOS_CATEGORIES = liveCategories;
-    </script>
   </Fragment>
 
 
-  <!-- BREADCRUMB -->
-  <nav class="ramo-breadcrumb" aria-label="Breadcrumb">
-    <a href="/">Inicio</a>
-    <span>›</span>
-    <a href={`/#${product.cat}`}>{cat.icon} {cat.name}</a>
-    <span>›</span>
-    <span class="bc-current">{product.name}</span>
+  <!-- BREADCRUMB - MOSTRADOS SOLO EN DESKTOP (En móvil se integran en la imagen) -->
+  <nav class="hidden md:flex max-w-[1200px] mx-auto px-6 pt-4 pb-2 md:py-8 items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-stone-400 font-medium" aria-label="Breadcrumb">
+    <a href="/" class="hover:text-stone-800 transition-colors">Inicio</a>
+    <span class="opacity-30">/</span>
+    <a href={`/catalogo?categoria=${product.cat}`} class="hover:text-stone-800 transition-colors">{cat.name}</a>
+    <span class="opacity-30">/</span>
+    <span class="text-stone-600 font-bold tracking-normal normal-case text-[11px]">{product.name}</span>
   </nav>
 
-  <!-- PRODUCTO -->
-  <section class="ramo-section">
+  <!-- SECCIÓN DE PRODUCTO - EDGE-TO-EDGE EN MÓVIL -->
+  <section class="max-w-[1200px] mx-auto px-0 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-20 items-start pb-4 overflow-x-hidden">
 
-    <!-- GALERÍA -->
-    <div class="ramo-gallery">
-      <div class="ramo-main-img" id="ramoMainWrap" onclick="openLightbox(currentImg)">
-        <img 
-          id="ramoMainImg" 
-          src={mainImg ? clUrl(mainImg, 800) : ''} 
-          alt={product.name} 
-          class={!mainImg ? 'hidden' : ''} 
-        />
-        {!mainImg && <div class="ramo-emoji-ph">{product.emoji}</div>}
+    <!-- GALERÍA (Lado Izquierdo) - INSTAGRAM STYLE CAROUSEL -->
+    <div class="px-4 pt-4 md:px-0 md:pt-0">
+      <div 
+        class="swiper product-gallery-swiper relative w-full aspect-[4/5] rounded-[2.2rem] overflow-hidden bg-stone-50 shadow-sm border border-stone-100"
+        id="ramoMainWrap"
+      >
+        <div class="swiper-wrapper">
+          {allImgs.map((img: string, i: number) => (
+            <div class="swiper-slide cursor-zoom-in" onclick={`openLightbox('${img}', ${i})`}>
+              <img
+                src={clUrl(img, 1000)} 
+                alt={`${product.name} - Imagen ${i + 1}`}
+                width="1000"
+                height="1250"
+                class="w-full h-full object-cover"
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding={i === 0 ? "sync" : "async"}
+                fetchpriority={i === 0 ? "high" : "low"}
+                id={i === 0 ? "ramoMainImg" : undefined}
+              />
+            </div>
+          ))}
+        </div>
+
+
+
+        <!-- Paginación estilo Instagram dots (Solo móvil) -->
+        <div class="swiper-pagination md:hidden !bottom-4"></div>
 
         {product.badge && (
-          <div class={`ramo-badge ramo-badge-${product.badge.toLowerCase()}`}>
-            {product.badge === 'Nuevo'    && <i class="ri-sparkling-line"></i>}
-            {product.badge === 'Popular'  && <i class="ri-fire-line"></i>}
-            {product.badge === 'Especial' && <i class="ri-award-line"></i>}
-            {product.badge}
+          <div class="absolute top-6 left-6 z-10 hidden md:flex bg-white/90 backdrop-blur-md border border-stone-100 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider items-center gap-2 shadow-sm">
+             {product.badge === 'Nuevo'    && <i class="ri-sparkling-line text-emerald-500"></i>}
+             {product.badge === 'Popular'  && <i class="ri-fire-line text-rose-500"></i>}
+             {product.badge === 'Especial' && <i class="ri-award-line text-violet-500"></i>}
+             {product.badge}
           </div>
         )}
-        {!inStock && (
-          <div class="ramo-agotado-overlay"><span>Agotado</span></div>
-        )}
-        <div class="ramo-zoom-hint"><i class="ri-zoom-in-line"></i></div>
+        
+        {!inStock && <div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center font-serif text-2xl uppercase tracking-widest text-stone-800 z-10">Agotado</div>}
       </div>
 
+      <!-- Miniaturas en Desktop (Ocultas en Móvil) -->
       {allImgs.length > 1 && (
-        <div class="ramo-thumbs">
+        <div class="hidden md:flex gap-3 overflow-x-auto pb-2 scrollbar-none mt-4">
           {allImgs.map((url: string, i: number) => (
-            <button class={`ramo-thumb ${i === 0 ? 'active' : ''}`} onclick={`switchImg(${i})`}>
-              <img src={clUrl(url, 200)} alt={`${product.name} ${i + 1}`} loading="lazy" />
+            <button 
+              class={`ramo-thumb w-20 aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${i === 0 ? 'border-violet-300' : 'border-transparent opacity-60 hover:opacity-100'}`}
+              onclick={`gallerySwiper.slideTo(${i})`}
+              data-thumb={i}
+            >
+              <img src={clUrl(url, 200)} alt={`${product.name} thumbnail`} width="80" height="100" loading="lazy" decoding="async" class="w-full h-full object-cover" />
             </button>
           ))}
         </div>
       )}
     </div>
 
-    <!-- INFO -->
-    <div class="ramo-info">
-      <a class="ramo-cat" href={`/#${product.cat}`}>{cat.icon} {cat.name}</a>
+    <!-- INFO (Lado Derecho) - PADDING EN MÓVIL -->
+    <div class="px-4 pt-4 md:px-0 md:pt-0">
+      <div class="space-y-0.5 md:space-y-4">
+        <!-- Label minimalista -->
+        <div class="text-[9px] md:text-[10px] font-bold tracking-[0.4em] uppercase text-stone-400 flex items-center gap-2">
+          <span class="opacity-40 hidden md:inline">{cat.icon}</span> {cat.name}
+        </div>
+        
+        <h1 class="font-serif text-2xl md:text-5xl font-light text-stone-800 leading-tight">
+          {product.name}
+        </h1>
 
-      <h1 class="ramo-name">{product.name}</h1>
-
-      <div class="ramo-price-block">
-        {showPrice > 0 ? (
-          <>
-            {origPrice && <span class="ramo-price-orig">${origPrice.toLocaleString('es-CO')}</span>}
-            <span class="ramo-price-main">${showPrice.toLocaleString('es-CO')} COP</span>
-            {origPrice && <span class="ramo-discount-badge">-{discount}%</span>}
-          </>
-        ) : (
-          <span class="ramo-price-consultar"><i class="ri-whatsapp-line"></i> Precio a consultar</span>
-        )}
+        <div class="flex items-baseline gap-3">
+          {showPrice > 0 ? (
+            <>
+              <span class="font-sans text-xl md:text-3xl font-bold text-violet-700 tracking-tight">
+                ${showPrice.toLocaleString('es-CO')} <span class="text-[9px] font-sans text-stone-400 font-medium tracking-normal">COP</span>
+              </span>
+              {origPrice && (
+                <span class="text-sm md:text-lg text-stone-300 line-through font-light decoration-stone-200">
+                  ${origPrice.toLocaleString('es-CO')}
+                </span>
+              )}
+            </>
+          ) : (
+             <span class="text-violet-600 font-bold uppercase tracking-widest text-[9px] italic">Precio a consultar</span>
+          )}
+        </div>
       </div>
 
-      {product.desc && <p class="ramo-desc">{product.desc}</p>}
-
-      <div class="ramo-tags">
-        {product.envioGratis && <span class="ramo-tag ramo-tag-envio"><i class="ri-truck-line"></i> Envío gratis</span>}
-        {inStock
-          ? <span class="ramo-tag ramo-tag-stock"><i class="ri-checkbox-circle-line"></i> Disponible</span>
-          : <span class="ramo-tag ramo-tag-agotado"><i class="ri-close-circle-line"></i> Agotado</span>
-        }
-        <span class="ramo-tag ramo-tag-hecho"><i class="ri-scissors-cut-line"></i> Hecho a mano</span>
-      </div>
-
-      <div class="ramo-divider"></div>
-
-      <div class="ramo-actions">
+      <!-- BOTONES DE ACCIÓN (SUBIDOS EN LA JERARQUÍA PARA MÓVIL) -->
+      <div class="flex flex-col gap-2 pt-1 order-3 md:order-none">
         {inStock && showPrice > 0 && (
-          <button class="ramo-btn-cart" onclick={`addToCartFromPage(${product.id})`} id="ramoCartBtn">
-            <i class="ri-shopping-bag-line"></i> Agregar al carrito
+          <button 
+            class="w-full h-[3.25rem] bg-stone-900 text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 hover:bg-violet-700 transition-all active:scale-95 shadow-md"
+            onclick={`addToCartFromPage(${product.id})`} 
+            id="ramoCartBtn"
+          >
+            <i class="ri-shopping-bag-3-line text-xl leading-none"></i> Agregar al Carrito
           </button>
         )}
-        <a class="ramo-btn-wa" href={`https://wa.me/${WA_NUMBER}?text=${waMsg}`} target="_blank" rel="noopener">
-          <i class="ri-whatsapp-line"></i>
-          {inStock ? 'Pedir por WhatsApp' : 'Consultar disponibilidad'}
+        <a 
+          href={`https://wa.me/${WA_NUMBER}?text=${waMsg}`} 
+          target="_blank" 
+          class="w-full h-[3.25rem] bg-[#25d366] text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 hover:bg-[#1da851] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md"
+        >
+          <i class="ri-whatsapp-line text-xl leading-none"></i> {inStock ? 'Comprar por WhatsApp' : 'Consultar disponibilidad'}
         </a>
       </div>
 
-      <div class="ramo-share">
-        <span class="ramo-share-label">Compartir Producto:</span>
-        <div class="ramo-share-row">
-          <button class="ramo-share-btn share-copy" onclick="copyLink()" aria-label="Copiar link">
-            <i class="ri-links-line"></i>
-          </button>
-          <a class="ramo-share-btn share-wa" href={`https://wa.me/?text=${encodeURIComponent(product.name + '\n' + pageUrl)}`} target="_blank" rel="noopener" aria-label="WhatsApp">
-            <i class="ri-whatsapp-line"></i>
-          </a>
-          <a class="ramo-share-btn share-fb" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`} target="_blank" rel="noopener" aria-label="Facebook">
-            <i class="ri-facebook-fill"></i>
-          </a>
+      {product.desc && (
+        <p class="text-stone-500 leading-relaxed text-xs md:text-base max-w-lg order-4 md:order-none">
+          {product.desc}
+        </p>
+      )}
+
+      <div class="flex flex-wrap gap-1.5 order-5 md:order-none">
+
+        <span class={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5 border ${inStock ? 'bg-stone-50 text-stone-500 border-stone-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+          <i class={inStock ? 'ri-checkbox-circle-line' : 'ri-close-circle-line'}></i>
+          {inStock ? 'Disponible' : 'Bajo Pedido'}
+        </span>
+      </div>
+
+      <div class="h-px bg-stone-100 w-full mt-2 hidden md:block"></div>
+
+      <!-- COMPROMISO NUDITOS - LISTA DETALLADA DE BENEFICIOS -->
+      <div class="flex flex-col gap-4 mt-4 border-t border-stone-100 pt-6 order-6 md:order-none pb-0">
+        
+        <!-- Envíos -->
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
+            <i class="ri-truck-line text-lg"></i>
+          </div>
+          <div class="space-y-0.5">
+            <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Envíos Nacionales</div>
+            <p class="text-[11px] text-stone-400 font-medium">Enviamos con amor a toda Colombia.</p>
+          </div>
         </div>
-        <span class="ramo-copy-msg" id="copyMsg">¡Enlace copiado correctamente! 📋</span>
+
+        <!-- Tiempo de Entrega -->
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
+            <i class="ri-history-line text-lg"></i>
+          </div>
+          <div class="space-y-0.5">
+            <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Te llega pronto</div>
+            <p class="text-[11px] text-stone-400 font-medium">Cada ramo se teje especialmente para ti.</p>
+          </div>
+        </div>
+
+        <!-- Calidad Premium -->
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
+            <i class="ri-plant-line text-lg"></i>
+          </div>
+          <div class="space-y-0.5">
+            <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Calidad Artesanal</div>
+            <p class="text-[11px] text-stone-400 font-medium">Hilazas premium que no pierden su color.</p>
+          </div>
+        </div>
+
+        <!-- Métodos de Pago -->
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
+            <i class="ri-bank-card-line text-lg"></i>
+          </div>
+          <div class="space-y-0.5">
+            <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Pagos Seguros</div>
+            <p class="text-[11px] text-stone-400 font-medium">Nequi, Daviplata, PSE y tarjetas de crédito.</p>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- RELACIONADOS -->
+  <!-- SECCIÓN: PRODUCTOS RELACIONADOS (COMPACTA) -->
   {related.length > 0 && (
-    <section class="ramo-related">
-      <h2 class="ramo-related-title">🌸 También te puede gustar</h2>
-      <div class="ramo-related-grid">
+    <section class="border-t border-stone-100 pt-6 pb-12">
+      <div class="max-w-[1200px] mx-auto px-6">
+        <div class="text-center mb-8">
+          <h2 class="font-serif text-xl md:text-3xl font-light text-stone-800 uppercase tracking-[0.2em]">
+            Más para enamorar
+          </h2>
+          <div class="h-px w-10 bg-violet-100 mx-auto mt-2"></div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
         {related.map((p: any) => (
-          <a class="ramo-rel-card" href={`/ramo/${slugify(p.name)}`}>
-            <div class="ramo-rel-img">
-              {p.img 
-                ? <img src={p.img} alt={p.name} loading="lazy" />
-                : <span>{p.emoji}</span>
-              }
-            </div>
-
-            <div class="ramo-rel-body">
-              <div class="ramo-rel-name">{p.name}</div>
-              <div class="ramo-rel-price">{p.price > 0 ? `$${p.price.toLocaleString('es-CO')} COP` : 'Consultar'}</div>
-            </div>
-          </a>
+          <ProductCard p={p} />
         ))}
       </div>
     </section>
   )}
 
   <!-- LIGHTBOX -->
-  <div class="ramo-lightbox" id="ramoLightbox" onclick="closeLightbox()">
-    <button class="lb-close" onclick="closeLightbox()"><i class="ri-close-line"></i></button>
-    <button class="lb-prev" onclick="lbNav(-1,event)"><i class="ri-arrow-left-s-line"></i></button>
-    <img id="lbImg" src="" alt={product.name} />
-    <button class="lb-next" onclick="lbNav(1,event)"><i class="ri-arrow-right-s-line"></i></button>
+  <div 
+    class="fixed inset-0 bg-stone-950/95 z-[1000] opacity-0 pointer-events-none transition-all duration-300 backdrop-blur-xl flex items-center justify-center p-6" 
+    id="ramoLightbox" 
+    onclick="closeLightbox()"
+  >
+    <button class="absolute top-8 right-8 text-white/40 hover:text-white transition-colors text-4xl" onclick="closeLightbox()"><i class="ri-close-line"></i></button>
+    <button class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-5xl hidden md:block" onclick="lbNav(-1,event)"><i class="ri-arrow-left-s-line"></i></button>
+    
+    <div class="relative max-w-full max-h-full">
+      <img id="lbImg" src="" alt={product.name} class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl" />
+    </div>
+
+    <button class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-5xl hidden md:block" onclick="lbNav(1,event)"><i class="ri-arrow-right-s-line"></i></button>
   </div>
 
 </Layout>
 
 <style is:global>
-  .ramo-breadcrumb {
-    max-width: 1100px; margin: 0 auto;
-    padding: 1.2rem 1.5rem;
-    font-size: 0.72rem; color: var(--text-soft);
-    display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
-    text-transform: uppercase; letter-spacing: 1px;
-  }
-  .ramo-breadcrumb a { transition: color 0.2s; }
-  .ramo-breadcrumb a:hover { color: var(--lila-dark); }
-  .bc-current { color: var(--text); font-weight: 700; }
+  @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
-  .ramo-section {
-    max-width: 1100px; margin: 0 auto;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem;
-    padding: 1rem 1.5rem 4rem;
-  }
+  #ramoLightbox.open { opacity: 1; pointer-events: auto; }
+  #ramoLightbox.open img { transform: scale(1); }
+  #ramoLightbox img { transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
 
-  .ramo-gallery { display: flex; flex-direction: column; gap: 1rem; }
-  .ramo-main-img {
-    aspect-ratio: 3/4; border-radius: 28px; overflow: hidden;
-    background: var(--lila-xlight); position: relative;
-    cursor: zoom-in; box-shadow: var(--shadow-lg);
-  }
-  .ramo-main-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-  .ramo-main-img:hover img { transform: scale(1.04); }
-  .ramo-emoji-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 8rem; }
-  
-  .ramo-badge {
-    position: absolute; top: 1.2rem; left: 1.2rem;
-    padding: 0.35rem 0.9rem; border-radius: 50px;
-    font-size: 0.65rem; font-weight: 700;
-    display: flex; align-items: center; gap: 0.4rem;
-    text-transform: uppercase; letter-spacing: 1px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-  .ramo-badge-nuevo { background: var(--mint-dark); color: #fff; }
-  .ramo-badge-popular { background: #ef4444; color: #fff; }
-  .ramo-badge-especial { background: var(--lila-dark); color: #fff; }
-
-  .ramo-thumbs { display: flex; gap: 0.75rem; overflow-x: auto; padding: 0.5rem 0.2rem; scrollbar-width: none; }
-  .ramo-thumbs::-webkit-scrollbar { display: none; }
-  .ramo-thumb {
-    width: 80px; height: 80px; flex-shrink: 0;
-    border-radius: 16px; overflow: hidden;
-    border: 2px solid transparent; cursor: pointer;
-    transition: all 0.3s; background: var(--white); padding: 0;
-    box-shadow: var(--shadow-sm);
-  }
-  .ramo-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: opacity 0.3s; }
-  .ramo-thumb.active { border-color: var(--lila-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-  .ramo-thumb.active img { opacity: 1; }
-
-  .ramo-info { display: flex; flex-direction: column; gap: 1.4rem; }
-  .ramo-cat {
-    font-size: 0.75rem; color: var(--text-soft);
-    text-transform: uppercase; letter-spacing: 2px;
-    display: flex; align-items: center; gap: 0.5rem;
-    width: fit-content; font-weight: 600;
-  }
-  .ramo-name { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 600; line-height: 1.1; color: var(--text); }
-  
-  .ramo-price-block { display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap; }
-  .ramo-price-main { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 600; color: var(--lila-dark); }
-  .ramo-price-orig { font-size: 1.2rem; color: var(--text-soft); text-decoration: line-through; opacity: 0.6; }
-  .ramo-discount-badge { background: #fee2e2; color: #dc2626; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 50px; }
-
-  .ramo-desc {
-    font-size: 0.95rem; color: var(--text-mid); line-height: 1.8;
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    border-radius: 20px; padding: 1.5rem;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .ramo-tags { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-  .ramo-tag { font-size: 0.68rem; font-weight: 700; padding: 0.4rem 1rem; border-radius: 50px; display: flex; align-items: center; gap: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid var(--border); }
-  .ramo-tag-envio { background: var(--mint-light); color: var(--mint-dark); border-color: var(--mint); }
-  .ramo-tag-stock { background: #f0fdf4; color: #16a34a; border-color: #86efac; }
-  .ramo-tag-hecho { background: var(--lila-light); color: var(--lila-dark); border-color: var(--lila); }
-
-  .ramo-actions { display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; }
-  .ramo-btn-cart {
-    height: 54px; display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-    background: var(--text); color: #fff; border: none;
-    border-radius: 50px; font-size: 0.9rem; font-weight: 700;
-    cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    letter-spacing: 1px; text-transform: uppercase;
-  }
-  .ramo-btn-cart:hover { background: var(--lila-dark); transform: translateY(-3px); box-shadow: var(--shadow-md); }
-  .ramo-btn-cart.added { background: var(--mint-dark); }
-
-  .ramo-btn-wa {
-    height: 54px; display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-    background: #25D366; color: #fff; border: none;
-    border-radius: 50px; font-size: 0.9rem; font-weight: 700;
-    cursor: pointer; transition: all 0.3s;
-    text-decoration: none; box-shadow: 0 8px 20px rgba(37,211,102,0.25);
-    letter-spacing: 1px; text-transform: uppercase;
-  }
-  .ramo-btn-wa:hover { background: #1da851; transform: translateY(-3px); box-shadow: 0 12px 30px rgba(37,211,102,0.4); }
-
-  .ramo-related { max-width: 1100px; margin: 0 auto 6rem; padding: 0 1.5rem; }
-  .ramo-related-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 600; margin-bottom: 2rem; text-align: center; }
-  .ramo-related-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
-  
-  .ramo-rel-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border-radius: 24px; overflow: hidden;
-    border: 1px solid var(--glass-border);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: var(--shadow-sm);
-  }
-  .ramo-rel-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); border-color: var(--lila); }
-  .ramo-rel-img { aspect-ratio: 3/4; background: var(--lila-xlight); display: flex; align-items: center; justify-content: center; font-size: 4rem; overflow: hidden; position: relative; }
-  .ramo-rel-img img { width: 100%; height: 100%; object-fit: cover; }
-  .ramo-rel-body { padding: 1.2rem; }
-  .ramo-rel-name { font-size: 0.85rem; font-weight: 700; line-height: 1.3; margin-bottom: 0.4rem; color: var(--text); }
-  .ramo-rel-price { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--lila-dark); font-weight: 700; }
-
-  @media(max-width: 900px) {
-    .ramo-section { grid-template-columns: 1fr; gap: 2.5rem; padding: 1rem 1.2rem 3rem; }
-    .ramo-name { font-size: 2.2rem; }
-    .ramo-related-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-  }
-  @media(max-width: 480px) {
-    .ramo-name { font-size: 1.8rem; }
-    .ramo-section { gap: 2rem; }
-  }
-
-  /* ════════ LIGHTBOX ════════ */
-  .ramo-lightbox {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95); z-index: 10000;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s;
-    backdrop-filter: blur(10px);
-  }
-  .ramo-lightbox.open { opacity: 1; pointer-events: auto; }
-  
-  .lb-content { max-width: 90%; max-height: 85vh; position: relative; }
-  .lb-content img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-  
-  .lb-close {
-    position: absolute; top: 2rem; right: 2rem; background: none; border: none;
-    color: #fff; font-size: 2.5rem; cursor: pointer; z-index: 2;
-    transition: transform 0.3s;
-  }
-  .lb-close:hover { transform: rotate(90deg); color: var(--lila-light); }
-  
-  .lb-nav {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(255,255,255,0.1); border: none; color: #fff;
-    width: 60px; height: 60px; border-radius: 50%; cursor: pointer;
-    font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s; z-index: 2; backdrop-filter: blur(5px);
-  }
-  .lb-nav:hover { background: #fff; color: #000; }
-  .lb-prev { left: 2rem; }
-  .lb-next { right: 2rem; }
-
-  @media (max-width: 768px) {
-    .lb-nav { width: 50px; height: 50px; }
-    .lb-prev { left: 1rem; }
-    .lb-next { right: 1rem; }
-    .lb-close { top: 1.5rem; right: 1.5rem; }
-  }
+  .product-gallery-swiper .swiper-pagination-bullet { background: white !important; opacity: 0.5; width: 6px !important; height: 6px !important; transition: all 0.3s ease; }
+  .product-gallery-swiper .swiper-pagination-bullet-active { opacity: 1; transform: scale(1.3); }
 </style>
 
-
-
-<script define:vars={{ allImgs, pageUrl, productId: product.id }}>
-  /**
-   * Astro empaqueta este script como módulo: las funciones no existen en window.
-   * Los atributos onclick="" del HTML solo ven window.* → exponemos todo aquí.
-   */
+<script define:vars={{ allImgs, clUrl, product, showPrice, mainImg }}>
   let currentImg = 0;
   const imgs = allImgs;
+  window.gallerySwiper = null;
 
-  const clUrlForJS = (url, w) => {
+  // Cloudinary Helper Dinámico
+  const clImg = (url, w) => {
     if (!url || !url.includes('res.cloudinary.com')) return url;
-    if (url.includes('upload/v')) return url.replace('upload/v', `upload/q_auto,f_auto,w_${w}/v`);
-    if (!url.includes('upload/q_auto')) return url.replace('upload/', `upload/q_auto,f_auto,w_${w}/`);
-    return url;
+    const suffix = url.includes('upload/v') ? 'upload/v' : 'upload/';
+    const param = `upload/q_auto,f_auto,w_${w}/v`;
+    const simpleParam = `upload/q_auto,f_auto,w_${w}/`;
+    return url.replace(suffix, url.includes('upload/v') ? param : simpleParam);
   };
 
-  const imgEl  = document.getElementById('ramoMainImg');
-  const lbImg  = document.getElementById('lbImg');
-  const thumbs = document.querySelectorAll('.ramo-thumb');
+  function initGallerySwiper() {
+    if (!window.Swiper) return;
+    window.gallerySwiper = new window.Swiper('.product-gallery-swiper', {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      pagination: { el: '.swiper-pagination', clickable: true, dynamicBullets: true },
+      on: {
+        slideChange: function() {
+          currentImg = this.activeIndex;
+          updateThumbs(this.activeIndex);
+        }
+      }
+    });
+  }
 
-  window.switchImg = function(idx) {
-    if(!imgs[idx]) return;
-    currentImg = idx;
-    if (imgEl) {
-      imgEl.src = clUrlForJS(imgs[idx], 800);
-      imgEl.classList.remove('hidden');
-      const emojiPh = document.querySelector('.ramo-emoji-ph');
-      if (emojiPh) emojiPh.style.display = 'none';
-      imgEl.style.animation = 'none';
-      imgEl.offsetHeight; 
-      imgEl.style.animation = 'fade 0.5s ease';
-    }
-    thumbs.forEach((t, i) => t.classList.toggle('active', i === idx));
-  };
+  function updateThumbs(idx) {
+    document.querySelectorAll('.ramo-thumb').forEach((t, i) => {
+      const isActive = i === idx;
+      t.classList.toggle('border-violet-300', isActive);
+      t.classList.toggle('border-transparent', !isActive);
+      t.classList.toggle('opacity-60', !isActive);
+      t.classList.toggle('opacity-100', isActive);
+    });
+  }
 
   window.openLightbox = function(i) {
     if (!imgs.length) return;
-    const idx = typeof i === 'number' && !Number.isNaN(i) ? i : currentImg;
-    currentImg = idx;
+    currentImg = typeof i === 'number' ? i : currentImg;
+    const lbImg = document.getElementById('lbImg');
     const box = document.getElementById('ramoLightbox');
-    if (lbImg) lbImg.src = clUrlForJS(imgs[idx], 1200);
+    if (lbImg) lbImg.src = clImg(imgs[currentImg], 1200);
     if (box) {
       box.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
   };
 
-  function closeLightbox() {
+  window.closeLightbox = function() {
     const box = document.getElementById('ramoLightbox');
     if (box) box.classList.remove('open');
     document.body.style.overflow = '';
-  }
+  };
 
-  function lbNav(dir, e) {
-    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+  window.lbNav = function(dir, e) {
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!imgs.length) return;
     currentImg = (currentImg + dir + imgs.length) % imgs.length;
-    window.currentImg = currentImg;
-    const lb = document.getElementById('lbImg');
-    if (lb) lb.src = imgs[currentImg];
-  }
+    const lbImg = document.getElementById('lbImg');
+    if (lbImg) lbImg.src = clImg(imgs[currentImg], 1200);
+  };
 
-  document.addEventListener('keydown', e => {
-    const lb = document.getElementById('ramoLightbox');
-    if (!lb?.classList.contains('open')) return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowRight') lbNav(1, { stopPropagation() {} });
-    if (e.key === 'ArrowLeft') lbNav(-1, { stopPropagation() {} });
-  });
+  // Hacer el producto actual 'conocido' por el carrito
+  const currentProduct = {
+    id: Number(product.id),
+    name: product.name,
+    price: Number(showPrice),
+    img: mainImg,
+    emoji: product.emoji || '🌸'
+  };
+  window.NUDITOS_LIVE_PRODUCTS = [currentProduct, ...(window.NUDITOS_LIVE_PRODUCTS || [])];
 
-  function addToCartFromPage(id) {
-    if (typeof addToCart !== 'function') {
-      console.warn('[ramo] addToCart no está disponible aún');
-      return;
-    }
+  window.addToCartFromPage = function(id) {
+    if (typeof addToCart !== 'function') return;
     addToCart(id);
     const btn = document.getElementById('ramoCartBtn');
     if (btn) {
+      const original = btn.innerHTML;
       btn.innerHTML = '<i class="ri-check-line"></i> ¡Agregado!';
-      btn.classList.add('added');
+      btn.classList.add('bg-emerald-600');
       setTimeout(() => {
-        btn.innerHTML = '<i class="ri-shopping-bag-line"></i> Agregar al carrito';
-        btn.classList.remove('added');
-      }, 1800);
+        btn.innerHTML = original;
+        btn.classList.remove('bg-emerald-600');
+      }, 2000);
     }
-  }
+  };
 
-
-  async function copyLink() {
+  window.copyLink = async function() {
     try {
-      await navigator.clipboard.writeText(pageUrl);
-    } catch {
-      const el = Object.assign(document.createElement('textarea'), { value: pageUrl });
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-    }
-    const msg = document.getElementById('copyMsg');
-    if (msg) {
-      msg.classList.add('show');
-      setTimeout(() => msg.classList.remove('show'), 2000);
-    }
-  }
+      await navigator.clipboard.writeText(window.location.href);
+      const msg = document.getElementById('copyMsg');
+      if (msg) {
+        msg.classList.add('show');
+        setTimeout(() => msg.classList.remove('show'), 2000);
+      }
+    } catch (e) { console.error('Error al copiar', e); }
+  };
 
-  window.currentImg = 0;
-  window.switchImg = switchImg;
-  window.openLightbox = openLightbox;
-  window.closeLightbox = closeLightbox;
-  window.lbNav = lbNav;
-  window.addToCartFromPage = addToCartFromPage;
-  window.copyLink = copyLink;
+  document.addEventListener('astro:page-load', initGallerySwiper);
+  if (document.readyState === 'complete') initGallerySwiper();
+
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('ramoLightbox')?.classList.contains('open')) return;
+    if (e.key === 'Escape') window.closeLightbox();
+    if (e.key === 'ArrowRight') window.lbNav(1);
+    if (e.key === 'ArrowLeft') window.lbNav(-1);
+  });
 </script>
+
+<style is:global>
+  /* Puntos estilo Instagram */
+  .product-gallery-swiper .swiper-pagination-bullet {
+    background: white !important;
+    opacity: 0.5;
+    width: 6px !important;
+    height: 6px !important;
+    transition: all 0.3s ease;
+  }
+  .product-gallery-swiper .swiper-pagination-bullet-active {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+</style>

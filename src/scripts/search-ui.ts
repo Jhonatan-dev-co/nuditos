@@ -40,7 +40,10 @@ document.addEventListener('astro:page-load', () => {
     }
 
     results.innerHTML = found.map((p: any) => {
-      const thumb = p.img ? `<img src="${p.img}" alt="${p.name}">` : `<span>${p.emoji || '🌸'}</span>`;
+      // Optimización de imagen de búsqueda a 80px
+      const thumbUrl = p.img && p.img.includes('res.cloudinary.com') 
+        ? p.img.replace(/upload\/v?/, 'upload/q_auto,f_auto,w_80/') : p.img;
+      const thumb = p.img ? `<img src="${thumbUrl}" alt="${p.name}" width="40" height="40">` : `<span>${p.emoji || '🌸'}</span>`;
       const priceText = p.price > 0 ? `$${p.price.toLocaleString('es-CO')} COP` : 'Consultar';
       return `
         <a class="search-item" href="/ramo/${slugify(p.name)}" style="text-decoration:none;color:inherit">
@@ -56,6 +59,11 @@ document.addEventListener('astro:page-load', () => {
     document.querySelectorAll('.search-item').forEach(el => {
         el.addEventListener('click', closeSearch);
     });
+  });
+
+  // Cerrar con tecla ESC
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeSearch();
   });
 
   (window as any).toggleSearch = () => {

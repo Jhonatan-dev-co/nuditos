@@ -5,7 +5,8 @@ import { slugify, type Product, products as fallbackProducts } from '../data/dat
 
 export async function getLiveProducts(): Promise<Product[]> {
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc`, {
+    const columns = 'id,nombre,precio,precio_original,descripcion,categoria,emoji,img,imgs,stock,badge,badge_class,oferta,envio_gratis,destacado,activo';
+    const res = await fetch(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc&select=${columns}`, {
       headers: { 
         apikey: SB_ANON, 
         Authorization: `Bearer ${SB_ANON}` 
@@ -23,7 +24,6 @@ export async function getLiveProducts(): Promise<Product[]> {
       } else if (typeof p.imgs === 'string' && p.imgs.trim()) {
         imgsArr = p.imgs.split(',').map((s: string) => s.trim());
       }
-
 
       return {
         id:             p.id,
@@ -47,7 +47,7 @@ export async function getLiveProducts(): Promise<Product[]> {
 
   } catch (e) {
     console.error('[supabase-fetcher]', e);
-    return fallbackProducts; // Retorna fallbacks si falla
+    return fallbackProducts;
   }
 }
 
@@ -88,6 +88,9 @@ export async function getLiveBanners(): Promise<any[]> {
       emoji:    b.emoji     || '🌸',
       title:    b.title     || '',
       imgUrl:   b.img_url   || '',
+      subtitle: b.subtitle  || '',
+      ctaText:  b.cta_text  || '',
+      ctaUrl:   b.cta_url   || '',
     }));
   } catch {
     return [];
@@ -122,6 +125,13 @@ export async function getLiveConfig() {
       catViews:             JSON.parse(m.cat_views || '{}'),
       metaPixelActivo:      m.meta_pixel_activo === 'true',
       metaPixelId:          m.meta_pixel_id || '',
+      seoTitle:             m.seo_title || '',
+      seoDescription:       m.seo_description || '',
+      seoOgImage:           m.seo_og_image || '',
+      socialInstagram:      m.social_instagram || '',
+      socialWhatsapp:       m.social_whatsapp || '',
+      gaId:                 m.ga_id || '',
+      gaActive:             m.ga_active === 'true',
     };
   } catch (e) {
     console.error('[supabase-config]', e);

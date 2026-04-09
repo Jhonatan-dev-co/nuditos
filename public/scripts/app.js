@@ -163,7 +163,7 @@ document.addEventListener('astro:page-load', async () => {
   renderCatPills();
   // renderCatalog(); // Ahora renderizado estáticamente por Astro
   // renderCart(); // Ahora en Nanostores (cart-ui.ts)
-  initSearch();
+  // initSearch(); // Eliminado: ahora manejado por SearchOverlay.astro y search-ui.ts
 
   // Burbuja de WhatsApp después de 5s
   setTimeout(() => {
@@ -582,52 +582,9 @@ function clearFilter() {
 /* ════════════════════════════
    BÚSQUEDA — con links
 ════════════════════════════ */
-function initSearch() {
-  const overlay = document.createElement('div');
-  overlay.id = 'searchOverlay';
-  overlay.className = 'search-overlay';
-  overlay.innerHTML = `
-    <div class="search-box">
-      <div class="search-input-wrap">
-        <i class="ri-search-line"></i>
-        <input type="text" id="searchInput" placeholder="Buscar ramos, amigurumis..." autocomplete="off">
-        <button onclick="closeSearch()"><i class="ri-close-line"></i></button>
-      </div>
-      <div class="search-results" id="searchResults"></div>
-    </div>`;
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeSearch(); });
-  document.body.appendChild(overlay);
-  document.getElementById('searchInput').addEventListener('input', e => {
-    const q = e.target.value.trim().toLowerCase();
-    if (q.length < 2) { document.getElementById('searchResults').innerHTML = ''; return; }
-    const found = activeProducts().filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      p.desc.toLowerCase().includes(q) ||
-      (categories.find(c => c.id === p.cat)?.name.toLowerCase().includes(q))
-    );
-    renderSearchResults(found, q);
-  });
-}
+/* initSearch eliminada para evitar duplicados con SearchOverlay.astro */
 
-function renderSearchResults(items, q) {
-  const el = document.getElementById('searchResults');
-  if (!items.length) {
-    el.innerHTML = `<div class="search-empty"><i class="ri-search-eye-line"></i><p>No encontramos "${q}"</p><small>Escríbenos por WhatsApp 🌸</small></div>`;
-    return;
-  }
-  el.innerHTML = items.map(p => {
-    const thumb = p.img ? `<img src="${p.img}" alt="${p.name}">` : `<span>${p.emoji}</span>`;
-    return `
-      <a class="search-item" href="/ramo/${slugify(p.name)}" onclick="closeSearch()" style="text-decoration:none;color:inherit">
-        <div class="search-item-img">${thumb}</div>
-        <div class="search-item-info">
-          <div class="search-item-name">${p.name}</div>
-          <div class="search-item-price">${p.price > 0 ? `$${p.price.toLocaleString('es-CO')} COP` : 'Consultar'}</div>
-        </div>
-        <i class="ri-arrow-right-s-line"></i>
-      </a>`;
-  }).join('');
-}
+/* renderSearchResults eliminada */
 
 function toggleSearch() {
   document.getElementById('searchOverlay').classList.add('open');
@@ -635,9 +592,12 @@ function toggleSearch() {
   setTimeout(() => document.getElementById('searchInput').focus(), 100);
 }
 function closeSearch() {
-  document.getElementById('searchOverlay').classList.remove('open');
-  document.getElementById('searchInput').value = '';
-  document.getElementById('searchResults').innerHTML = '';
+  const overlay = document.getElementById('searchOverlay');
+  if (overlay) overlay.classList.remove('open');
+  const input = document.getElementById('searchInput');
+  if (input) input.value = '';
+  const results = document.getElementById('searchResults');
+  if (results) results.innerHTML = '';
   document.body.style.overflow = '';
 }
 

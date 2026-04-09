@@ -2,6 +2,16 @@
 import SearchOverlay from '../components/SearchOverlay.astro';
 import { ViewTransitions } from 'astro:transitions';
 import { categories } from '../data/datos';
+import { getLiveConfig } from '../lib/supabase';
+
+// Fetch live configuration for SEO and Social
+const config = await getLiveConfig();
+const siteTitle = config?.seoTitle || 'Nuditos Tejidos — Ramos de Crochet y Flores Eternas';
+const siteDesc = config?.seoDescription || 'Ramos de crochet hechos a mano en El Dorado, Meta. Flores eternas tejidas con amor. Envíos a todo Colombia.';
+const siteOgImg = config?.seoOgImage || 'https://nuditos.com.co/og-default.jpg';
+const instaUrl = config?.socialInstagram || 'https://www.instagram.com/nuditos_tejidos/';
+const whatsappNum = config?.socialWhatsapp || '573144931525';
+const whatsappLink = `https://wa.me/${whatsappNum}`;
 
 /**
  * Layout base de Nuditos Tejidos
@@ -19,12 +29,15 @@ interface Props {
 
 const {
   title,
-  description = 'Nuditos Tejidos — Ramos de crochet hechos a mano en El Dorado, Meta. Flores eternas tejidas con amor. Envíos a todo Colombia.',
-  ogImage = 'https://nuditos.com.co/og-default.jpg',
+  description = siteDesc,
+  ogImage = siteOgImg,
   ogType = 'website',
   canonical,
   noIndex = false,
 } = Astro.props;
+
+// Combinar título de la página con el título del sitio
+const fullTitle = title === 'Nuditos' ? siteTitle : `${title} | Nuditos`;
 
 const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 ---
@@ -36,14 +49,14 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- SEO básico -->
-  <title>{title}</title>
+  <title>{fullTitle}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonicalURL} />
   {noIndex && <meta name="robots" content="noindex, nofollow" />}
   {!noIndex && <meta name="robots" content="index, follow" />}
 
   <!-- Open Graph -->
-  <meta property="og:title" content={title} />
+  <meta property="og:title" content={fullTitle} />
   <meta property="og:description" content={description} />
   <meta property="og:image" content={ogImage} />
   <meta property="og:image:width" content="1200" />
@@ -53,27 +66,43 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <meta property="og:locale" content="es_CO" />
   <meta property="og:site_name" content="Nuditos Tejidos" />
 
-  {ogType === 'product' && (
-    <>
-      <meta property="product:brand" content="Nuditos Tejidos" />
-      <meta property="product:availability" content="in stock" />
-      <meta property="product:condition" content="new" />
-    </>
-  )}
-
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@nuditos_tejidos" />
   <meta name="twitter:creator" content="@nuditos_tejidos" />
-  <meta name="twitter:title" content={title} />
+  <meta name="twitter:title" content={fullTitle} />
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={ogImage} />
 
-  <!-- Fuentes -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Facebook Pixel (Meta Pixel) -->
+  {config?.metaPixelActivo && config?.metaPixelId && (
+    <script is:inline define:vars={{ id: config.metaPixelId }}>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+        if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+        n.queue = []; t = b.createElement(e); t.async = !0; t.src = v;
+        s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', id);
+      fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none" src={`https://www.facebook.com/tr?id=${config.metaPixelId}&ev=PageView&noscript=1`} /></noscript>
+  )}
+
+  <!-- Google Analytics -->
+  {config?.gaActive && config?.gaId && (
+    <script async src={`https://www.googletagmanager.com/gtag/js?id=${config.gaId}`}></script>
+    <script is:inline define:vars={{ id: config.gaId }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', id);
+    </script>
+  )}
+
   <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap"
     rel="stylesheet"
   />
 
@@ -130,6 +159,57 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 <body>
 
   <!-- ════════ NAVBAR ════════ -->
+<style is:global>
+  :root {
+    --nav-h:       64px;
+    --nav-h-mob:   56px;
+    --glass-bg:    rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --font-serif:  'Outfit', sans-serif;
+    --font-sans:   'Inter', sans-serif;
+  }
+  body {
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+  }
+  .nav-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid transparent;
+  }
+  .nav-wrap.nav-scrolled {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 2px 0;
+  }
+  .nav-wrap.nav-hidden {
+    transform: translateY(-100%);
+  }
+  @media (max-width: 768px) {
+    .nav-center .logo {
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+    }
+    .nav-wrap nav {
+      padding: 0 0.75rem;
+    }
+    .nav-icon-btn {
+      width: 40px;
+      height: 40px;
+      font-size: 1.1rem;
+    }
+  }
+</style>
   <div class="nav-wrap">
     <nav>
       <div class="nav-left">
@@ -199,7 +279,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       <a class="menu-nav-item" href="/preguntas-frecuentes">
         Preguntas frecuentes <i class="ri-arrow-right-line"></i>
       </a>
-      <a class="menu-nav-item wa-item" href="https://wa.me/573144931525" target="_blank">
+      <a class="menu-nav-item wa-item" href={whatsappLink} target="_blank">
         WhatsApp <i class="ri-whatsapp-line"></i>
       </a>
     </div>
@@ -215,19 +295,19 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <!-- ════════ MOBILE BOTTOM NAV ════════ -->
   <nav class="mobile-bottom-nav">
-    <a href="/catalogo" class="mb-nav-item">
+    <a href="/catalogo" class="mb-nav-item" id="nav-catalogo" aria-label="Ir al Catálogo">
       <i class="ri-store-2-line"></i>
       <span>Catálogo</span>
     </a>
-    <button class="mb-nav-item" onclick="toggleSearch()">
+    <button class="mb-nav-item" onclick="toggleSearch()" aria-label="Buscar productos">
       <i class="ri-search-line"></i>
       <span>Buscar</span>
     </button>
-    <a href="/#personalizado" class="mb-nav-item">
+    <a href="/#personalizado" class="mb-nav-item" id="nav-personalizado" aria-label="Ramos Personalizados">
       <i class="ri-magic-line"></i>
       <span>Ramos</span>
     </a>
-    <button class="mb-nav-item" onclick="toggleCart()">
+    <button class="mb-nav-item" onclick="toggleCart()" aria-label="Ver carrito de compras">
       <div class="mb-cart-icon-wrap">
         <i class="ri-shopping-bag-3-line"></i>
         <span class="mb-cart-badge hidden" id="mbCartCount">0</span>
@@ -236,17 +316,75 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     </button>
   </nav>
 
+  <script is:inline>
+    // Lógica Simple de Active State para Mobile Nav
+    function updateActiveNav() {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      const navCatalogo = document.getElementById('nav-catalogo');
+      const navPersonalizado = document.getElementById('nav-personalizado');
+
+      if (!navCatalogo || !navPersonalizado) return;
+
+      navCatalogo.classList.remove('active');
+      navPersonalizado.classList.remove('active');
+
+      if (path.includes('/catalogo')) {
+        navCatalogo.classList.add('active');
+      } else if (hash === '#personalizado') {
+        navPersonalizado.classList.add('active');
+      }
+    }
+
+    // Lógica de Cabecera Inteligente
+    (function() {
+      let lastScroll = window.pageYOffset;
+
+      function handleSmartHeader() {
+        const nav = document.querySelector('.nav-wrap');
+        if (!nav) return;
+        
+        const currentScroll = window.pageYOffset;
+
+        if (currentScroll <= 15) {
+          nav.classList.remove('nav-hidden');
+          nav.classList.remove('nav-scrolled');
+          lastScroll = currentScroll;
+          return;
+        }
+
+        nav.classList.add('nav-scrolled');
+
+        if (currentScroll > lastScroll) {
+          if (currentScroll > 80) nav.classList.add('nav-hidden');
+        } else {
+          nav.classList.remove('nav-hidden');
+        }
+        
+        lastScroll = currentScroll;
+      }
+
+      document.addEventListener('astro:page-load', () => {
+        updateActiveNav();
+        // Resetear scroll al cambiar de página
+        lastScroll = window.pageYOffset;
+        window.addEventListener('scroll', handleSmartHeader, { passive: true });
+      });
+      window.addEventListener('hashchange', updateActiveNav);
+    })();
+  </script>
+
   <!-- ════════ FOOTER ════════ -->
 
   <footer>
     <div class="footer-logo-wrap">
       <div class="footer-logo">NUDITOS<em>.</em></div>
       <div class="footer-social">
-        <a href="https://www.instagram.com/nuditos_tejidos/" target="_blank" aria-label="Instagram">
+        <a href={instaUrl} target="_blank" aria-label="Instagram">
           <i class="ri-instagram-line"></i>
         </a>
         <a href="#" aria-label="TikTok"><i class="ri-tiktok-line"></i></a>
-        <a href="https://wa.me/573144931525" aria-label="WhatsApp">
+        <a href={whatsappLink} aria-label="WhatsApp">
           <i class="ri-whatsapp-line"></i>
         </a>
         <a href="#" aria-label="Facebook"><i class="ri-facebook-line"></i></a>
@@ -269,8 +407,8 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
           Contacto <i class="ri-add-line"></i>
         </button>
         <div class="footer-acc-content">
-          <a class="footer-acc-link" href="https://wa.me/573144931525" target="_blank">WhatsApp</a>
-          <a class="footer-acc-link" href="https://www.instagram.com/nuditos_tejidos/" target="_blank">Instagram</a>
+          <a class="footer-acc-link" href={whatsappLink} target="_blank">WhatsApp</a>
+          <a class="footer-acc-link" href={instaUrl} target="_blank">Instagram</a>
         </div>
       </div>
       <div class="footer-acc-item">
@@ -289,40 +427,70 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     </div>
   </footer>
 
-  <!-- ════════ CARRITO ════════ -->
-  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-  <div class="cart-panel" id="cartPanel">
-    <div class="cart-head">
-      <span class="cart-title">Bolsa de compras</span>
-      <button class="close-cart" onclick="toggleCart()"><i class="ri-close-line"></i></button>
+  <!-- ════════ CARRITO PREMIUM GLASS ════════ -->
+  <div class="cart-overlay fixed inset-0 z-[200] bg-stone-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" id="cartOverlay" onclick="toggleCart()"></div>
+  <div class="cart-panel fixed top-0 right-0 w-full max-w-[100vw] md:max-w-md bg-white/70 backdrop-blur-2xl border-l border-white/50 z-[201] translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col shadow-2xl" id="cartPanel">
+    <div class="p-4 md:p-6 border-b border-stone-200/60 flex items-center justify-center shrink-0 relative z-10 min-h-[60px] md:min-h-[80px]">
+      <span class="font-sans text-xl md:text-2xl font-bold tracking-[0.1em] text-stone-800 uppercase">Carrito</span>
+      <button class="absolute right-4 md:right-6 w-10 h-10 rounded-2xl border border-stone-200/60 bg-white/40 shadow-sm flex items-center justify-center hover:bg-white transition-colors" onclick="toggleCart()">
+        <i class="ri-close-line text-lg flex"></i>
+      </button>
     </div>
-    <div class="cart-body" id="cartBody"></div>
-    <div class="cart-foot" id="cartFoot" style="display:none">
-      <div class="discount-row">
-        <input class="discount-input" id="discountInput" placeholder="Código de descuento" maxlength="20" />
-        <button class="discount-apply" onclick="applyDiscount()">Aplicar</button>
-      </div>
-      <div class="discount-msg" id="discountMsg"></div>
-      <div class="disc-saved" id="discSaved">
-        <span>Descuento:</span><span id="discAmount"></span>
-      </div>
-      <div class="total-row">
-        <span class="total-label">Total</span>
-        <span class="total-price" id="cartTotal">$0</span>
-      </div>
-      <div class="checkout-btns">
-        <button class="wa-checkout" onclick="checkoutWA()">
-          <i class="ri-whatsapp-line"></i> Confirmar por WhatsApp
+    
+    <div class="flex-1 overflow-y-auto w-full pb-4" id="cartBody"></div>
+    
+    <div class="p-6 md:p-8 bg-white/40 border-t border-stone-200/50 shrink-0 hidden relative z-10" id="cartFoot">
+      <div class="flex flex-col gap-2 mb-6" id="discountWrapper">
+        <button class="text-[10px] uppercase tracking-widest text-stone-500 font-bold self-start hover:text-violet-600 transition-colors pb-1 border-b border-dotted border-stone-300/50" onclick="document.getElementById('discountInputContainer').classList.toggle('hidden');">
+          ¿Tienes código de descuento?
         </button>
-        <button class="wompi-checkout" onclick="checkoutWompi()">
-          <i class="ri-bank-card-line"></i> Pagar con tarjeta / PSE
-        </button>
+        <div class="hidden flex gap-2 w-full mt-2" id="discountInputContainer">
+          <input class="flex-1 bg-white/70 border border-stone-200/60 rounded-2xl px-4 py-3 text-[11px] font-bold focus:border-violet-500 focus:bg-white focus:outline-none uppercase transition-all shadow-sm" id="discountInput" placeholder="INGRESAR CÓDIGO" maxlength="20" />
+          <button class="bg-stone-900 text-white px-5 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-violet-600 transition-all shadow-md active:scale-95" onclick="applyDiscount()">Aplicar</button>
+        </div>
+        <div class="text-[10px] uppercase font-bold tracking-widest hidden mt-1" id="discountMsg"></div>
       </div>
-      <div class="checkout-note">
-        Pago seguro con <strong>Wompi</strong> · PSE · Tarjetas · Nequi
+      
+      <div class="hidden flex justify-between text-[11px] font-bold tracking-widest uppercase text-emerald-600 mb-2" id="discSaved">
+        <span>Descuento aplicado:</span><span id="discAmount"></span>
+      </div>
+      
+      <div class="flex justify-between items-baseline mb-6">
+        <span class="text-[10px] uppercase tracking-[0.2em] font-bold text-stone-500">Total a pagar</span>
+        <span class="font-serif text-3xl font-medium text-stone-900" id="cartTotal">$0</span>
+      </div>
+      
+      <div class="flex flex-col gap-3">
+        <button class="w-full bg-[#25d366] text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-[#1da851] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="checkoutWA()">
+          <i class="ri-whatsapp-line text-xl leading-none"></i>
+          <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Comprar por WhatsApp</span>
+        </button>
+        <button class="w-full bg-stone-900 text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="checkoutWompi()">
+          <i class="ri-bank-card-line text-lg leading-none"></i>
+          <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Pagar con Tarjeta / PSE</span>
+        </button>
       </div>
     </div>
+    
+    <!-- Grabber móvil invisible en la cabecera -->
+    <div class="absolute top-0 left-0 w-full h-10 z-[202] md:hidden" id="cartHeaderDrag" style="touch-action: none;"></div>
   </div>
+
+  <style>
+    .cart-overlay.open { opacity: 1; pointer-events: auto; }
+    .cart-panel.open { transform: translateX(0); }
+    .cart-panel { height: calc(100dvh - 68px - env(safe-area-inset-bottom, 0px)); }
+    @media (min-width: 768px) { .cart-panel { height: 100dvh; } }
+
+    @keyframes cart-item-in {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-cart-item {
+      animation: cart-item-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0; /* starts hidden */
+    }
+  </style>
 
   <!-- ════════ MODAL PRODUCTO ════════ -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
@@ -340,7 +508,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <div class="wa-float-wrap">
     <div class="wa-bubble" id="waBubble">¿Tienes dudas? ¡Escríbenos! 🌸</div>
     <a
-      href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸"
+      href={`${whatsappLink}?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸`}
       class="wa-float"
       target="_blank"
       aria-label="WhatsApp"
@@ -365,8 +533,54 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <script src="/scripts/app.js" is:inline></script>
   <script src="../scripts/cart-ui.ts"></script>
 
+  <!-- Lógica de Swipe Down para el carrito en Mobile -->
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cartDrag = document.getElementById('cartHeaderDrag');
+      const cartPanel = document.getElementById('cartPanel');
+      if (!cartDrag || !cartPanel) return;
+
+      let startY = 0;
+      let currentY = 0;
+      let isDragging = false;
+
+      cartDrag.addEventListener('touchstart', (e) => {
+        if (window.innerWidth >= 768) return; // Solo móvil
+        startY = e.touches[0].clientY;
+        isDragging = true;
+        cartPanel.style.transition = 'none'; // Quitar transición durante arrastre
+      }, {passive: true});
+
+      cartDrag.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        currentY = Math.max(0, e.touches[0].clientY - startY); // Solo arrastre hacia abajo
+        cartPanel.style.transform = `translateY(${currentY}px)`;
+        e.preventDefault();
+      }, {passive: false});
+
+      cartDrag.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        cartPanel.style.transition = ''; // Restaurar transición CSS
+
+        if (currentY > 80) { // Umbral para cerrar
+          // Resetear translateY y cerrar normalmente
+          cartPanel.style.transform = ''; 
+          if(typeof toggleCart === 'function') toggleCart();
+        } else {
+          // Rebotar a posición original
+          cartPanel.style.transform = '';
+        }
+        currentY = 0;
+      });
+    });
+  </script>
+
   <!-- Slot para scripts extra de cada página -->
   <slot name="scripts" />
 
+  <script is:inline define:vars={{ liveConfig: config }}>
+    window.NUDITOS_CONFIG = liveConfig;
+  </script>
 </body>
 </html>

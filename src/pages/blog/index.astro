@@ -1,25 +1,24 @@
----
 import Layout from '../../layouts/Layout.astro';
 import { clUrl } from '../../data/datos';
+import { getLivePosts } from '../../lib/supabase';
 
-const posts = [
+// Fetch live posts from Supabase or fallback to mock data
+const livePosts = await getLivePosts();
+const posts = livePosts.length > 0 ? livePosts : [
   {
     title: 'Cómo cuidar tus flores de crochet para que duren años',
-    date: '31 de Marzo, 2026',
+    created_at: '2026-03-31',
     excerpt: 'Descubre los secretos para mantener tus ramos de crochet tan frescos como el primer día. Limpieza, luz y almacenamiento.',
     category: 'Cuidados',
     slug: 'cuidados-ramos-crochet',
-    img: 'https://images.unsplash.com/photo-1544833058-e70f9ca2bf2e?q=80&w=2000&auto=format&fit=crop'
-  },
-  {
-    title: 'El lenguaje de las flores eternas: ¿Qué significa cada color?',
-    date: '25 de Marzo, 2026',
-    excerpt: '¿Rojo, amarillo o lila? Te contamos el significado detrás de cada tono en nuestros ramos tejidos.',
-    category: 'Regalos',
-    slug: 'significado-colores-crochet',
-    img: 'https://images.unsplash.com/photo-1490750967868-88aa3386c946?q=80&w=2000&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1544833058-e70f9ca2bf2e?q=80&w=1200'
   }
 ];
+
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+}
 ---
 
 <Layout
@@ -68,14 +67,20 @@ const posts = [
       {posts.map(post => (
         <a href={`/blog/${post.slug}`} class="blog-card">
           <div class="blog-img-wrap">
-            <img src={post.img} alt={post.title} loading="lazy" />
+            <img 
+              src={clUrl(post.image || post.img, 800)} 
+              alt={post.title} 
+              width="800"
+              height="450"
+              loading="lazy" 
+            />
           </div>
           <div class="blog-content">
             <div class="blog-meta">
-              {post.category} <span>•</span> {post.date}
+              {post.category || 'Nuditos'} <span>•</span> {formatDate(post.created_at)}
             </div>
             <h2 class="blog-title">{post.title}</h2>
-            <p class="blog-excerpt">{post.excerpt}</p>
+            <p class="blog-excerpt">{post.excerpt || post.content?.substring(0, 150) + '...'}</p>
             <div class="blog-footer">
               Leer artículo <i class="ri-arrow-right-line"></i>
             </div>

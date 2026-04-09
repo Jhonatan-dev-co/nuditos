@@ -1,41 +1,126 @@
 ---
+import { Image } from 'astro:assets';
 import { products as fallbackProducts, CONFIG_DEFAULT, slugify, clUrl } from '../data/datos';
 
 const { p: propProduct } = Astro.props;
 
 const ramoId = CONFIG_DEFAULT.ramoDestacado;
 const p = propProduct || fallbackProducts.find(x => x.id === ramoId);
+
+// Definir si es un producto real o un placeholder
+const isReal = !!p;
 ---
+
 {p && (
-  <div class="momento-card" id="ramoMomento">
-    <div class="momento-img">
-      {p.img ? (
-        <img src={clUrl(p.img, 600)} alt={p.name} loading="lazy" />
-      ) : (
-        <span class="momento-emoji">{p.emoji}</span>
-      )}
-    </div>
-    <div class="momento-info">
-      <div class="momento-eyebrow"><i class="ri-fire-line"></i> Ramo del momento</div>
-      <div class="momento-name">{p.name}</div>
-      <div class="momento-desc">{p.desc}</div>
-    </div>
-    <div class="momento-actions">
-      <div class="momento-price">
-        {p.price > 0 ? (
-          <>${p.price.toLocaleString('es-CO')}<span> COP</span></>
-        ) : (
-          <span>Consultar</span>
-        )}
+  <section class="w-full bg-stone-50 py-6 md:py-10 overflow-hidden relative">
+    <!-- Decoración de fondo -->
+    <div class="absolute top-0 right-0 w-1/3 h-full bg-violet-100/30 -skew-x-12 translate-x-20 hidden lg:block"></div>
+    
+    <div class="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10">
+      <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+        
+        <!-- Lado Visual: La "Estrella" -->
+        <div class="w-full lg:w-1/2 relative group">
+          <div class="relative z-10 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] aspect-square md:aspect-[4/5] lg:aspect-[3/4]">
+            {p.img ? (
+              <Image 
+                src={clUrl(p.img, 1000)} 
+                alt={p.name} 
+                width={1000} 
+                height={1200} 
+                loading="lazy"
+                class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+              />
+            ) : (
+              <div class="w-full h-full flex items-center justify-center bg-stone-100 text-9xl">
+                {p.emoji}
+              </div>
+            )}
+            
+            <!-- Badge Flotante -->
+            <div class="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl flex items-center gap-2 border border-white/50 animate-bounce [animation-duration:4s]">
+              <i class="ri-fire-line text-rose-500 text-xl"></i>
+              <span class="text-[11px] font-bold uppercase tracking-widest text-stone-800">El más amado</span>
+            </div>
+          </div>
+          
+          <!-- Elementos decorativos tras la imagen -->
+          <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-violet-200/50 rounded-full blur-2xl -z-10"></div>
+          <div class="absolute -top-6 -left-6 w-48 h-48 bg-emerald-100/40 rounded-full blur-3xl -z-10"></div>
+        </div>
+
+        <!-- Lado Info: Elegancia y CTA -->
+        <div class="w-full lg:w-1/2 text-center lg:text-left">
+          <div class="flex items-center justify-center lg:justify-start gap-4 mb-3">
+             <span class="h-px w-8 bg-stone-300"></span>
+             <span class="text-[10px] uppercase font-bold tracking-[0.4em] text-stone-400">Ramo del momento</span>
+          </div>
+
+          <h2 class="font-serif text-5xl md:text-7xl font-light text-stone-800 leading-[1] mb-3 tracking-tighter">
+            {p.name}
+          </h2>
+          
+          <p class="text-stone-500 text-lg md:text-xl leading-snug mb-6 max-w-xl mx-auto lg:mx-0">
+            {p.desc || "Una pieza maestra tejida con amor infinito. Flores que guardan momentos y sentimientos para siempre."}
+          </p>
+
+          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 sm:gap-10 mb-8">
+            <div class="flex flex-col">
+              <span class="text-[10px] uppercase font-bold text-stone-300 tracking-[0.2em] mb-1">Precio especial</span>
+              <div class="text-4xl font-serif text-violet-700 font-bold">
+                {p.price > 0 ? (
+                  <>${p.price.toLocaleString('es-CO')}<span class="text-sm font-sans font-normal text-stone-400 ml-1">COP</span></>
+                ) : (
+                  "Consultar"
+                )}
+              </div>
+            </div>
+            
+            <div class="h-10 w-px bg-stone-200 hidden sm:block"></div>
+
+            <div class="flex flex-col items-center sm:items-start text-[10px] uppercase font-bold text-emerald-600 tracking-widest gap-1">
+               <i class="ri-truck-line text-lg"></i>
+               Envío prioritario
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <button 
+              class="group relative bg-stone-900 text-white px-10 py-5 rounded-2xl font-bold shadow-2xl hover:bg-violet-700 hover:-translate-y-1 transition-all overflow-hidden"
+              onclick={`addToCart(${p.id})`}
+            >
+              <span class="relative z-10 flex items-center justify-center gap-2 uppercase text-xs tracking-[0.2em]">
+                <i class="ri-shopping-bag-3-line text-lg"></i> Agregar al carrito
+              </span>
+            </button>
+            
+            <a 
+              href={`/ramo/${slugify(p.name)}`} 
+              class="px-10 py-5 rounded-2xl font-bold border border-stone-200 text-stone-600 hover:bg-white hover:shadow-lg transition-all uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-2"
+            >
+              Ver detalle <i class="ri-arrow-right-up-line"></i>
+            </a>
+          </div>
+        </div>
+
       </div>
-      {p.price > 0 && (
-        <button class="btn-momento" onclick={`addToCart(${p.id})`}>
-          <i class="ri-shopping-bag-line"></i> Agregar
-        </button>
-      )}
-      <a href={`/ramo/${slugify(p.name)}`} class="btn-momento-ghost">
-        <i class="ri-eye-line"></i> Ver detalle
-      </a>
     </div>
-  </div>
+  </section>
 )}
+
+<style>
+  /* Animación suave para el fondo del botón al pasar */
+  button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: 0.5s;
+  }
+  button:hover::before {
+    left: 100%;
+  }
+</style>

@@ -6,6 +6,7 @@
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import RamoDestacado from '../components/RamoDestacado.astro';
+import EditorialBanner from '../components/EditorialBanner.astro';
 import Catalogo from '../components/Catalogo.astro';
 
 import { getLiveProducts, getLiveConfig, getLiveCategories, getLiveBanners } from '../lib/supabase';
@@ -26,37 +27,64 @@ const heroProducts = heroIds.map(id => liveProducts.find(p => p.id === id)).filt
 
 // Ramo destacado
 const ramoDestacado = liveProducts.find(p => p.id === liveConfig.ramoDestacado);
----
 
+// Preparar datos seguros para el cliente (serialización limpia)
+const safeProducts = liveProducts.map(p => ({
+  id: p.id,
+  name: p.name,
+  price: p.price,
+  emoji: p.emoji || '🌸',
+  img: p.img || '',
+  cat: p.cat || '',
+  desc: p.desc || ''
+}));
+
+const safeCategories = liveCategories || [];
+
+// Banners Editoriales Dinámicos
+const homeBanner1 = liveBanners.find(b => b.afterCat === 'home1') || {
+  title: "Pétalos que <em>guardan</em> historias",
+  subtitle: "Creamos ramos que no se marchitan para momentos que deben durar por siempre. Hecho 100% a mano con hilos de la mejor calidad.",
+  imgUrl: "https://images.unsplash.com/photo-1583209814683-c023dd293cc6?q=80&w=1200",
+  ctaText: "Ver Colección",
+  ctaUrl: "/catalogo"
+};
+
+const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2') || {
+  title: "Regala un <em>pedacito</em> de arte",
+  subtitle: "Cada puntada es un detalle pensado en la persona que amas. Personaliza tus colores y crea el regalo perfecto.",
+  imgUrl: "https://images.unsplash.com/photo-1599307767316-776533da941c?q=80&w=1200",
+  ctaText: "Personalizar",
+  ctaUrl: "/#personalizado"
+};
+---
 
 <Layout
   title="Nuditos Tejidos — Ramos de Crochet hechos a mano | Colombia"
   description="Ramos de crochet únicos e irrepetibles. Flores que nunca se marchitan. Envíos a todo Colombia desde El Dorado, Meta."
   ogType="website"
 >
-  <script is:inline define:vars={{ 
-    liveProducts: liveProducts.map(p => ({ id: p.id, name: p.name, price: p.price, emoji: p.emoji, img: p.img, cat: p.cat, desc: p.desc })),
-    liveCategories: liveCategories
-  }}>
-    window.NUDITOS_LIVE_PRODUCTS = liveProducts;
-    window.NUDITOS_CATEGORIES = liveCategories;
-  </script>
-  
   <h1 class="sr-only">Nuditos Tejidos — Ramos y Flores Eternas de Crochet en Colombia</h1>
 
-
   <!-- ════════ BANNER DESCUENTO ════════ -->
-  <div id="discountBanner">
+  <div id="discountBanner" class="bg-rose-50 text-rose-950 text-center py-2.5 tracking-widest text-[10px] uppercase font-medium border-b border-rose-100/50">
     🎁 <span id="bannerText"></span>
   </div>
 
   <!-- ════════ HERO SWIPER ════════ -->
   <Hero heroProducts={heroProducts} />
 
+  <!-- ════════ BANNER EDITORIAL 1 ════════ -->
+  <EditorialBanner 
+    title={homeBanner1.title} 
+    subtitle={homeBanner1.subtitle}
+    img={homeBanner1.imgUrl || homeBanner1.img}
+    ctaText={homeBanner1.ctaText}
+    ctaUrl={homeBanner1.ctaUrl}
+  />
+
   <!-- ════════ RAMO DEL MOMENTO ════════ -->
-  <div class="momento-wrap">
-    <RamoDestacado p={ramoDestacado} />
-  </div>
+  <RamoDestacado p={ramoDestacado} />
 
   <!-- ════════ CATEGORÍAS STICKY ════════ -->
   <div class="cat-sticky" id="catalogSection">
@@ -87,47 +115,79 @@ const ramoDestacado = liveProducts.find(p => p.id === liveConfig.ramoDestacado);
   <div id="filteredView">
     <div class="filtered-header">
       <h2 class="filtered-title" id="filteredTitle"></h2>
-      <button class="clear-filter" onclick="clearFilter()">← Ver todo</button>
+      <button class="clear-filter rounded-2xl" onclick="clearFilter()">← Ver todo</button>
     </div>
     <div class="filtered-grid" id="filteredGrid"></div>
   </div>
 
+  <!-- ════════ BANNER EDITORIAL 2 ════════ -->
+  <EditorialBanner 
+    title={homeBanner2.title} 
+    subtitle={homeBanner2.subtitle}
+    img={homeBanner2.imgUrl || homeBanner2.img}
+    ctaText={homeBanner2.ctaText}
+    ctaUrl={homeBanner2.ctaUrl}
+    reverse={true}
+  />
+
   <!-- ════════ RESEÑAS ════════ -->
-  <section class="reviews-section" id="resenas">
-    <div class="reviews-inner">
-      <div class="reviews-eyebrow">Lo que dicen nuestras clientas</div>
-      <h2 class="reviews-title">Amor tejido, <em>amor recibido</em></h2>
-      <div class="reviews-grid">
-        <div class="review-card">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text">"Me llegó súper bien empacado y la calidad es increíble. Mi mamá lloró cuando lo vio 🌸 definitivamente vuelvo a pedir."</p>
-          <div class="review-author">
-            <div class="review-avatar">S</div>
+  <section class="bg-stone-50 py-14 px-6 overflow-hidden" id="resenas">
+    <div class="max-w-[1200px] mx-auto">
+      <div class="text-[10px] tracking-[3px] uppercase text-[#4fa876] flex items-center gap-3 justify-center mb-3 before:content-[''] before:flex-1 before:h-[1px] before:bg-[#4fa876]/25 before:max-w-[50px] after:content-[''] after:flex-1 after:h-[1px] after:bg-[#4fa876]/25 after:max-w-[50px]">
+        Lo que dicen nuestras clientas
+      </div>
+      <h2 class="font-serif text-[clamp(1.75rem,4vw,2.75rem)] font-light text-center text-[#1a1220] mb-6 leading-[1.15]">
+        Amor tejido, <em class="italic text-[#8c5fad] font-normal not-italic tracking-tight">amor recibido</em>
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Reseña 1 -->
+        <div class="bg-white rounded-[2rem] p-7 shadow-sm border border-[#b496cc]/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-md relative before:content-['\201C'] before:absolute before:top-3 before:right-5 before:font-serif before:text-6xl before:text-[#f3edf9] before:leading-none">
+          <div class="text-amber-400 text-[13px] tracking-[2px] mb-3">★★★★★</div>
+          <p class="text-[13.5px] text-[#4a3d52] leading-[1.75] mb-5 italic">
+            "Me llegó súper bien empacado y la calidad es increíble. Mi mamá lloró cuando lo vio 🌸 definitivamente vuelvo a pedir."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-[13px] flex-shrink-0">
+              S
+            </div>
             <div>
-              <div class="review-name">Sara M.</div>
-              <div class="review-loc">Bogotá</div>
+              <div class="text-[13px] font-semibold text-[#1a1220]">Sara M.</div>
+              <div class="text-[11px] text-[#8a7592]">Bogotá</div>
             </div>
           </div>
         </div>
-        <div class="review-card">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text">"Lo pedí para el grado de mi hija y quedó hermoso. Exactamente como en las fotos y llegó rapidísimo. 100% recomendado."</p>
-          <div class="review-author">
-            <div class="review-avatar">L</div>
+
+        <!-- Reseña 2 -->
+        <div class="bg-white rounded-[2rem] p-7 shadow-sm border border-[#b496cc]/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-md relative before:content-['\201C'] before:absolute before:top-3 before:right-5 before:font-serif before:text-6xl before:text-[#f3edf9] before:leading-none">
+          <div class="text-amber-400 text-[13px] tracking-[2px] mb-3">★★★★★</div>
+          <p class="text-[13.5px] text-[#4a3d52] leading-[1.75] mb-5 italic">
+            "Lo pedí para el grado de mi hija y quedó hermoso. Exactamente como en las fotos y llegó rapidísimo. 100% recomendado."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-[13px] flex-shrink-0">
+              L
+            </div>
             <div>
-              <div class="review-name">Lucía R.</div>
-              <div class="review-loc">Medellín</div>
+              <div class="text-[13px] font-semibold text-[#1a1220]">Lucía R.</div>
+              <div class="text-[11px] text-[#8a7592]">Medellín</div>
             </div>
           </div>
         </div>
-        <div class="review-card">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text">"Pedí un ramo personalizado con los colores favoritos de mi novia y quedó perfecto. El servicio fue muy atento y el envío llegó a tiempo."</p>
-          <div class="review-author">
-            <div class="review-avatar">C</div>
+
+        <!-- Reseña 3 -->
+        <div class="bg-white rounded-[2rem] p-7 shadow-sm border border-[#b496cc]/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-md relative before:content-['\201C'] before:absolute before:top-3 before:right-5 before:font-serif before:text-6xl before:text-[#f3edf9] before:leading-none">
+          <div class="text-amber-400 text-[13px] tracking-[2px] mb-3">★★★★★</div>
+          <p class="text-[13.5px] text-[#4a3d52] leading-[1.75] mb-5 italic">
+            "Pedí un ramo personalizado con los colores favoritos de mi novia y quedó perfecto. El servicio fue muy atento y el envío llegó a tiempo."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[13px] flex-shrink-0">
+              C
+            </div>
             <div>
-              <div class="review-name">Carlos V.</div>
-              <div class="review-loc">Cali</div>
+              <div class="text-[13px] font-semibold text-[#1a1220]">Carlos V.</div>
+              <div class="text-[11px] text-[#8a7592]">Cali</div>
             </div>
           </div>
         </div>
@@ -136,44 +196,91 @@ const ramoDestacado = liveProducts.find(p => p.id === liveConfig.ramoDestacado);
   </section>
 
   <!-- ════════ PERSONALIZADO ════════ -->
-  <section class="custom-section" id="personalizado">
-    <div class="custom-inner">
-      <div class="custom-eyebrow">Hecho para ti</div>
-      <h2>¿Quieres algo <em>único?</em></h2>
-      <p>Cuéntame tus colores, la ocasión especial o el personaje que amas. Creo tu ramo exactamente como lo imaginas, puntada a puntada.</p>
-      <div class="custom-chips">
-        <button class="chip">🎂 Cumpleaños</button>
-        <button class="chip">💍 Bodas</button>
-        <button class="chip">💝 Aniversario</button>
-        <button class="chip">🎓 Grado</button>
-        <button class="chip">🎁 Regalo especial</button>
-        <button class="chip">🐱 Tu Michi</button>
+  <section class="bg-white py-14 px-6 relative overflow-hidden" id="personalizado">
+    <div class="max-w-xl mx-auto text-center relative z-10">
+      <div class="text-[10px] tracking-[3px] uppercase text-violet-600 font-bold mb-4 flex items-center justify-center gap-3 before:h-px before:w-8 before:bg-violet-200 after:h-px after:w-8 after:bg-violet-200">
+        Hecho para ti
       </div>
+      <h2 class="font-serif text-3xl md:text-5xl font-light text-slate-800 mb-4 leading-tight">
+        ¿Quieres algo <em class="italic text-violet-600 font-normal not-italic tracking-tight">único?</em>
+      </h2>
+      <p class="text-slate-600 leading-relaxed mb-10 text-sm md:text-base">
+        Cuéntame tus colores, la ocasión especial o el personaje que amas. Creo tu ramo exactamente como lo imaginas, puntada a puntada.
+      </p>
+      
+      <div class="flex flex-wrap justify-center gap-3 mb-12">
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20un%20ramo%20personalizado%20para%20un%20Cumpleaños%20🎂" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">🎂 Cumpleaños</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20un%20ramo%20personalizado%20para%20una%20Boda%20💍" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">💍 Bodas</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20un%20ramo%20personalizado%20por%20mi%20Aniversario%20💝" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">💝 Aniversario</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20un%20ramo%20personalizado%20para%20un%20Grado%20🎓" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">🎓 Grado</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20mandar%20a%20hacer%20un%20Regalo%20especial%20🎁" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">🎁 Regalo especial</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20un%20ramo%20personalizado%20de%20mi%20Michi%20🐱" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">🐱 Tu Michi</a>
+      </div>
+
       <a
         href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20personalizado%20🌸"
-        class="wa-btn"
+        class="inline-flex items-center gap-3 bg-green-500 text-white px-10 py-4 rounded-2xl font-bold shadow-xl shadow-green-200 hover:bg-green-600 hover:-translate-y-1 transition-all uppercase text-xs tracking-widest"
         target="_blank"
       >
-        <i class="ri-whatsapp-line"></i> Escribir por WhatsApp
+        <i class="ri-whatsapp-line text-lg"></i> Escribir por WhatsApp
       </a>
     </div>
+
+    <!-- Decoración fondo -->
+    <div class="absolute -top-24 -right-24 w-64 h-64 bg-violet-200/20 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-rose-200/20 rounded-full blur-3xl"></div>
   </section>
 
   <!-- ════════ NOSOTROS ════════ -->
-  <section class="about-section" id="nosotros">
-    <div class="about-visual"><span>🧶</span></div>
-    <div class="about-content">
-      <div class="about-eyebrow">Nuestra historia</div>
-      <h2>Amor tejido <em>puntada a puntada</em></h2>
-      <p>Nuditos nació de la pasión por el crochet y el deseo de crear flores que jamás se marchiten. Cada ramo lleva horas de dedicación y mucho amor.</p>
-      <p>Trabajamos con hilos de alta calidad para garantizar colores vivos y durabilidad. Desde Colombia, llevamos flores eternas a todo el país.</p>
-      <div class="about-features">
-        <div class="about-feat"><i class="ri-plant-line"></i><span>Hilos premium</span></div>
-        <div class="about-feat"><i class="ri-hand-heart-line"></i><span>100% hecho a mano</span></div>
-        <div class="about-feat"><i class="ri-heart-3-line"></i><span>Con mucho amor</span></div>
-        <div class="about-feat"><i class="ri-truck-line"></i><span>Envío a Colombia</span></div>
+  <section class="bg-stone-50 py-14 px-6 overflow-hidden" id="nosotros">
+    <div class="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      
+      <!-- Visual (Imagen/Icono) -->
+      <div class="flex justify-center">
+        <div class="w-64 h-64 md:w-80 md:h-80 bg-stone-100 rounded-full flex items-center justify-center relative group">
+          <span class="text-7xl md:text-9xl animate-bounce [animation-duration:3s] drop-shadow-2xl">🧶</span>
+          <!-- Efecto de sombra dinámico -->
+          <div class="absolute bottom-12 w-32 h-4 bg-black/5 rounded-[100%] blur-md animate-pulse"></div>
+        </div>
+      </div>
+
+      <!-- Contenido de Texto -->
+      <div class="text-center lg:text-left">
+        <div class="text-[10px] tracking-[3px] uppercase text-emerald-600 font-bold mb-4 flex items-center justify-center lg:justify-start gap-3">
+          <span class="h-px w-8 bg-emerald-200"></span> Nuestra historia
+        </div>
+        <h2 class="font-serif text-3xl md:text-5xl font-light text-slate-800 mb-4 leading-tight">
+          Amor tejido <em class="italic text-violet-600 font-normal not-italic">puntada a puntada</em>
+        </h2>
+        <p class="text-slate-600 leading-relaxed mb-4 text-sm md:text-base">
+          Nuditos nació de la pasión por el crochet y el deseo de crear flores que jamás se marchiten. Cada ramo lleva horas de dedicación y mucho amor.
+        </p>
+        <p class="text-slate-600 leading-relaxed mb-8 text-sm md:text-base">
+          Trabajamos con hilos de alta calidad para garantizar colores vivos y durabilidad. Desde Colombia, llevamos flores eternas a todo el país.
+        </p>
+
+        <!-- Tarjetas de Beneficios -->
+        <div class="grid grid-cols-2 gap-4 max-w-md mx-auto lg:mx-0">
+          <div class="flex items-center gap-3 p-4 bg-stone-50 rounded-2xl border border-stone-100/50 hover:shadow-md transition-all">
+            <i class="ri-plant-line text-emerald-500 text-lg"></i>
+            <span class="text-[11px] font-bold text-slate-700 uppercase tracking-tight">Hilos premium</span>
+          </div>
+          <div class="flex items-center gap-3 p-4 bg-stone-50 rounded-2xl border border-stone-100/50 hover:shadow-md transition-all">
+            <i class="ri-hand-heart-line text-rose-500 text-lg"></i>
+            <span class="text-[11px] font-bold text-slate-700 uppercase tracking-tight">100% manual</span>
+          </div>
+          <div class="flex items-center gap-3 p-4 bg-stone-50 rounded-2xl border border-stone-100/50 hover:shadow-md transition-all">
+            <i class="ri-heart-3-line text-violet-500 text-lg"></i>
+            <span class="text-[11px] font-bold text-slate-700 uppercase tracking-tight">Mucho amor</span>
+          </div>
+          <div class="flex items-center gap-3 p-4 bg-stone-50 rounded-2xl border border-stone-100/50 hover:shadow-md transition-all">
+            <i class="ri-truck-line text-blue-500 text-lg"></i>
+            <span class="text-[11px] font-bold text-slate-700 uppercase tracking-tight">Envíos COP</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
+  <script is:inline set:html={`window.NUDITOS_LIVE_PRODUCTS = ${JSON.stringify(safeProducts)}; window.NUDITOS_CATEGORIES = ${JSON.stringify(safeCategories)};`} />
 </Layout>

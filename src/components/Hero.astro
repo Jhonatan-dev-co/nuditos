@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { products as fallbackProducts, CONFIG_DEFAULT, slugify, clUrl } from '../data/datos';
 
 const { heroProducts: propProducts, config: propConfig } = Astro.props;
@@ -23,11 +24,19 @@ function heroTitle(p: any) {
 <!-- ════════ HERO SWIPER ════════ -->
 <div class="swiper hero-swiper" id="heroSwiper">
   <div class="swiper-wrapper" id="heroSlides">
-    {heroProducts.map((p) => (
+    {heroProducts.map((p, index) => (
       <div class="swiper-slide hero-slide">
         {p.img ? (
           <div class="hero-slide-bg">
-            <img src={clUrl(p.img, 800)} alt={p.name} loading="lazy" />
+            <Image 
+              src={clUrl(p.img, 1200)} 
+              alt={p.name} 
+              width={1200}
+              height={800}
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchpriority={index === 0 ? "high" : "auto"}
+              class="w-full h-full object-cover"
+            />
           </div>
         ) : (
           <div class="hero-slide-bg hero-slide-emoji">{p.emoji}</div>
@@ -45,8 +54,8 @@ function heroTitle(p: any) {
             )}
           </div>
           <div class="hero-ctas">
-            <a href={`/ramo/${slugify(p.name)}`} class="btn-hero"><i class="ri-eye-line"></i> Ver producto</a>
-            <a href="/catalogo" class="btn-hero-ghost"><i class="ri-grid-line"></i> Ver catálogo</a>
+            <a href={`/ramo/${slugify(p.name)}`} class="btn-hero rounded-2xl"><i class="ri-eye-line"></i> Ver producto</a>
+            <a href="/catalogo" class="btn-hero-ghost rounded-2xl"><i class="ri-grid-line"></i> Ver catálogo</a>
           </div>
         </div>
       </div>

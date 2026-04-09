@@ -1,11 +1,20 @@
 <!-- BANNERS -->
 <div class="tab-content" id="tab-banners">
+  <!-- Banners de Inicio (Editorial) -->
+  <div class="t-card" style="margin-bottom: 2rem;">
+    <div class="t-title">🚀 Banners de Impacto (Pestaña Inicio)</div>
+    <div class="t-sub">Son los banners principales con títulos en cursiva (Ej: Pétalos que guardan historias).</div>
+    <p style="font-size: 0.75rem; color: #666; margin: 0.5rem 0;">* Usa <b>home1</b> o <b>home2</b> en la categoría para fijarlos en la página principal.</p>
+    <div id="editorialBannersList"></div>
+  </div>
+
+  <!-- Banners de Categoría -->
   <div class="t-card">
-    <div class="t-title">🖼️ Banners entre categorías</div>
-    <div class="t-sub">Aparecen entre secciones del catálogo.</div>
+    <div class="t-title">🖼️ Banners de Colección (Entre Categorías)</div>
+    <div class="t-sub">Aparecen cuando el usuario navega por las categorías del catálogo.</div>
     <div id="bannerList"></div>
-    <button class="btn-add-banner" onclick="addBanner()" style="margin-top:.65rem">
-      <i class="ri-add-line"></i> Agregar banner
+    <button class="btn-add-banner" onclick="addNewBanner()" style="margin-top: 1rem; background: var(--lila); color: white; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%;">
+      <i class="ri-add-line"></i> Agregar nuevo banner
     </button>
   </div>
 </div>

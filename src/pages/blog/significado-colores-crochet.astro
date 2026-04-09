@@ -1,0 +1,79 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { clUrl } from '../../data/datos';
+
+const post = {
+  title: 'El lenguaje de las flores eternas: ¿Qué significa cada color?',
+  date: '25 de Marzo, 2026',
+  category: 'Regalos',
+  author: 'Nuditos Team',
+  img: 'https://images.unsplash.com/photo-1490750967868-88aa3386c946?q=80&w=2000&auto=format&fit=crop',
+  content: `
+    <p>Regalar flores es una tradición milenaria, pero regalar flores eternas de crochet tiene un significado aún más profundo: <strong>un sentimiento que no se marchita</strong>.</p>
+    
+    <p>Cada color que elegimos para nuestros ramos cuenta una historia diferente. Si estás pensando en un regalo personalizado, conocer el lenguaje de los colores te ayudará a dar en el clavo:</p>
+
+    <h3>🌸 El Rosa: Gratitud y Cariño</h3>
+    <p>Es el color más popular en Nuditos. Representa la ternura, la bondad y la gratitud. Es perfecto para regalar a una madre, una amiga o para celebrar un nacimiento.</p>
+
+    <h3>💜 El Lila: Magia y Admiración</h3>
+    <p>Nuestro color insignia. El lila simboliza la creatividad, el misterio y la admiración profunda. Un ramo lila dice: "Eres una persona especial y única para mí".</p>
+
+    <h3>💛 El Amarillo: Alegría y Amistad</h3>
+    <p>Nada ilumina más un espacio que nuestras flores amarillas. Son el símbolo de la amistad verdadera, la energía positiva y el deseo de éxito. Ideales para grados o para animar a alguien que está pasando por un momento difícil.</p>
+
+    <h3>❤️ El Rojo: Pasión Eterna</h3>
+    <p>A diferencia de las rosas naturales que mueren en días, una rosa roja tejida representa un amor que perdura a través del tiempo. Es el regalo definitivo para aniversarios.</p>
+
+    <h3>🤍 El Blanco: Pureza y Nuevos Comienzos</h3>
+    <p>Muy solicitado para bodas y bautizos. El blanco representa la paz, la inocencia y la honestidad.</p>
+
+    <div class="note">
+      <strong>¿Quieres combinar colores?</strong> ¡Podemos hacerlo! En Nuditos personalizamos cada pétalo para que tu mensaje sea perfecto.
+    </div>
+  `
+};
+---
+
+<Layout
+  title={`${post.title} | Blog Nuditos`}
+  description={post.date + " — " + "Descubre el significado detrás de los colores de nuestros ramos de crochet."}
+>
+  <style>
+    .article-hero { position: relative; height: 50vh; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
+    .hero-content { position: relative; z-index: 10; text-align: center; color: white; padding: 1.5rem; max-width: 800px; }
+    .post-category { display: inline-block; background: var(--lila-dark); color: white; padding: 0.4rem 1.2rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.5rem; }
+    .hero-content h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 8vw, 4rem); line-height: 1.1; margin-bottom: 1rem; }
+    .post-meta { font-size: 0.9rem; opacity: 0.8; font-weight: 500; }
+
+    .article-body { max-width: 740px; margin: -50px auto 100px; position: relative; z-index: 20; background: white; padding: 4rem 3rem; border-radius: 40px; border: 1px solid var(--border); box-shadow: var(--shadow-xl); }
+    .content-inner { line-height: 1.85; color: var(--text-soft); font-size: 1.1rem; }
+    .content-inner h3 { color: var(--text); margin: 2.5rem 0 1rem; font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; }
+    .content-inner p { margin-bottom: 1.5rem; }
+    .note { background: var(--lila-xlight); padding: 2rem; border-radius: 20px; border-left: 4px solid var(--lila-dark); color: var(--text); margin-top: 3rem; font-style: italic; }
+
+    .back-btn { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--lila-dark); font-weight: 700; text-decoration: none; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 2rem; transition: transform 0.2s; }
+    .back-btn:hover { transform: translateX(-5px); }
+
+    @media (max-width: 768px) {
+      .article-body { margin-top: 0; border-radius: 0; border: none; padding: 3rem 1.5rem; }
+      .article-hero { height: 40vh; }
+    }
+  </style>
+
+  <section class="article-hero">
+    <img src={post.img} class="hero-img" alt={post.title} />
+    <div class="hero-content">
+      <span class="post-category">{post.category}</span>
+      <h1>{post.title}</h1>
+      <div class="post-meta">{post.date} · Por {post.author}</div>
+    </div>
+  </section>
+
+  <article class="article-body">
+    <a href="/blog" class="back-btn"><i class="ri-arrow-left-line"></i> Volver al blog</a>
+    <div class="content-inner" set:html={post.content}>
+    </div>
+  </article>
+</Layout>

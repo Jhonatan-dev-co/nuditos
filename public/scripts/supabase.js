@@ -168,6 +168,13 @@ function sbToConfig(rows) {
     catViews:             JSON.parse(m.cat_views || '{}'),
     metaPixelActivo:      m.meta_pixel_activo === 'true',
     metaPixelId:          m.meta_pixel_id || '',
+    seoTitle:             m.seo_title || '',
+    seoDescription:       m.seo_description || '',
+    seoOgImage:           m.seo_og_image || '',
+    socialInstagram:      m.social_instagram || '',
+    socialWhatsapp:       m.social_whatsapp || '',
+    gaId:                 m.ga_id || '',
+    gaActive:             m.ga_active === 'true',
   };
 }
 
@@ -178,6 +185,9 @@ function sbToBanner(b) {
     emoji:    b.emoji     || '🌸',
     title:    b.title     || '',
     imgUrl:   b.img_url   || '',
+    subtitle: b.subtitle  || '',
+    ctaText:  b.cta_text  || '',
+    ctaUrl:   b.cta_url   || '',
   };
 }
 
@@ -263,6 +273,36 @@ async function sbInsertPedido(data) {
   } catch { return null; }
 }
 
+async function sbUpsertCarrito(sessionId, items, total, estado = 'activo') {
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/carritos?on_conflict=session_id`, {
+      method: 'POST',
+      headers: {
+        ..._h(false),
+        'Prefer': 'resolution=merge-duplicates,return=minimal'
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        items,
+        total,
+        estado
+      })
+    });
+    return res.ok;
+  } catch { return false; }
+}
+
+async function sbTrackCartEvent(sessionId, eventName, data = {}) {
+  try {
+    const payload = {
+      session_id: sessionId,
+      event: eventName,
+      ...data
+    };
+    await _post('cart_events', payload, false, 'return=minimal');
+  } catch { /* ignore errors in tracking */ }
+}
+
 /* ════════════════════════════
    API ADMIN (requiere auth)
 ════════════════════════════ */
@@ -308,7 +348,7 @@ async function sbAdminSaveProduct(p) {
     // ── Tiene id pero es "nuevo" (migración desde datos.js) → UPSERT
     // Usamos resolution=merge-duplicates para no lanzar 409 si ya existe
     const result = await _post(
-      'productos',
+      'productos?on_conflict=id',
       { id: p.id, ...data },
       true,
       'resolution=merge-duplicates,return=representation'
@@ -339,8 +379,37 @@ async function sbAdminSaveConfig(cfg) {
     { clave: 'cat_views',            valor: JSON.stringify(cfg.catViews || {}) },
     { clave: 'meta_pixel_activo',    valor: String(!!cfg.metaPixelActivo) },
     { clave: 'meta_pixel_id',        valor: cfg.metaPixelId || '' },
+    { clave: 'seo_title',           valor: cfg.seoTitle || '' },
+    { clave: 'seo_description',     valor: cfg.seoDescription || '' },
+    { clave: 'seo_og_image',        valor: cfg.seoOgImage || '' },
+    { clave: 'social_instagram',    valor: cfg.socialInstagram || '' },
+    { clave: 'social_whatsapp',     valor: cfg.socialWhatsapp || '' },
+    { clave: 'ga_id',               valor: cfg.gaId || '' },
+    { clave: 'ga_active',           valor: String(!!cfg.gaActive) },
   ];
-  return _post('config', updates, true, 'resolution=merge-duplicates');
+  return _post('config?on_conflict=clave', updates, true, 'resolution=merge-duplicates');
+}
+
+/* ── BLOG ── */
+async function sbAdminGetPosts() {
+  try {
+    return await _get('posts', 'order=created_at.desc', true);
+  } catch(e) { 
+    console.error('Error al cargar posts:', e);
+    return []; 
+  }
+}
+
+async function sbAdminSavePost(data, isNew) {
+  if (isNew) {
+    return await _post('posts', data, true);
+  } else {
+    return await _patch('posts', `id=eq.${data.id}`, data, true);
+  }
+}
+
+async function sbAdminDeletePost(id) {
+  return await _del('posts', `id=eq.${id}`, true);
 }
 
 async function sbAdminSaveBanners(banners) {
@@ -351,6 +420,9 @@ async function sbAdminSaveBanners(banners) {
     emoji:     b.emoji    || '🌸',
     title:     b.title    || '',
     img_url:   b.imgUrl   || '',
+    subtitle:  b.subtitle || '',
+    cta_text:  b.ctaText  || '',
+    cta_url:   b.ctaUrl   || '',
     orden:     i + 1,
   }));
   return _post('banners', data, true, 'return=minimal');
