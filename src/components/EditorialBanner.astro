@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import { clUrl } from '../data/datos';
 
 interface Props {
@@ -51,7 +52,7 @@ const { title, subtitle, img, ctaText, ctaUrl, reverse = false } = Astro.props;
             href={ctaUrl} 
             class="inline-flex items-center gap-3 bg-stone-900 text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:bg-violet-700 hover:-translate-y-1 transition-all uppercase text-[10px] tracking-widest"
           >
-            {ctaText} <i class="ri-arrow-right-line"></i>
+            {ctaText} <Icon name="arrow-right"  />
           </a>
         )}
       </div>

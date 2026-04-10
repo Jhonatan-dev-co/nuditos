@@ -1,4 +1,5 @@
 ---
+import Icon from '../components/Icon.astro';
 /**
  * Panel de administración — Nuditos Tejidos v2 (Refactored)
  * URL: /admin
@@ -66,7 +67,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     <div class="save-bar">
       <div class="save-bar-msg">Recuerda <strong style="color:var(--lila)">guardar cambios</strong> para aplicarlos en la tienda</div>
       <button class="btn-save" id="globalSaveBtn" onclick="saveConfig()">
-        <i class="ri-save-line"></i> Guardar cambios
+        <Icon name="save"  /> Guardar cambios
       </button>
     </div>
   </div>
@@ -410,7 +411,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           </div>
           <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem">
             <button class="btn-save" id="saveProdBtn" onclick="saveProduct()">
-              <i class="ri-save-line"></i> <span>${isNew?'Crear producto':'Guardar cambios'}</span>
+              <Icon name="save"  /> <span>${isNew?'Crear producto':'Guardar cambios'}</span>
             </button>
             <button class="btn-cancel" onclick="showEditorEmpty()">Cancelar</button>
           </div>
@@ -570,7 +571,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         <div class="cat-admin-card">
           <div class="ca-icon">${c.icon}</div>
           <div class="ca-info"><div class="ca-name">${c.nombre}</div><div class="ca-slug">ID: ${c.id}</div></div>
-          <div class="ca-actions"><button class="ca-btn" onclick="editCategory('${c.id}')"><i class="ri-edit-line"></i></button></div>
+          <div class="ca-actions"><button class="ca-btn" onclick="editCategory('${c.id}')"><Icon name="edit"  /></button></div>
         </div>`).join('') : '';
     }
     function newCategory() { document.getElementById('catModalTitle').textContent = 'Nueva categoría'; document.getElementById('catEditId').value = ''; document.getElementById('catId').value = ''; document.getElementById('catId').disabled = false; document.getElementById('catNombre').value = ''; document.getElementById('catIcon').value = '🌸'; document.getElementById('catModal').classList.add('open'); }
@@ -608,7 +609,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           <div class="banner-admin-card" style="margin-bottom: 1rem; border: 1px solid #eee; padding: 1.2rem; border-radius: 1.2rem; background: #fff;">
             <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
                <h4 style="margin:0; font-family:serif; font-size: 1rem; color: var(--lila-dark)">${b.afterCat.startsWith('home') ? 'Banner Inicio ' + b.afterCat.slice(-1) : 'Categoría: ' + b.afterCat}</h4>
-               <button onclick="removeBanner(${realIdx})" style="background: none; color: #ef4444; border:none; padding: 5px; cursor:pointer; font-size: 1.1rem;"><i class="ri-delete-bin-line"></i></button>
+               <button onclick="removeBanner(${realIdx})" style="background: none; color: #ef4444; border:none; padding: 5px; cursor:pointer; font-size: 1.1rem;"><Icon name="delete-bin"  /></button>
             </div>
             
             <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">

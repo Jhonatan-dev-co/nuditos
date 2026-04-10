@@ -1,5 +1,6 @@
 import { $cart, addToCart, changeQty, getCartTotal, $discount } from '../store/cart';
 import { products } from '../data/datos';
+import { getIconSvg } from '../lib/icons';
 
 // ─── Sesión persistente del visitante ────────────────────────────────────────
 function getOrCreateSessionId(): string {
@@ -69,7 +70,7 @@ function updateCartUI(cart: readonly any[]) {
             <!-- Base roja oculta (Swipe Delete a la DERECHA) -->
             <div class="absolute inset-y-0 left-0 w-24 bg-rose-500 flex items-center justify-center cursor-pointer hover:bg-rose-600 transition-colors" onclick="changeQtyWithAnim(${item.id}, -999, this)">
               <div class="flex flex-col items-center gap-1">
-                <i class="ri-delete-bin-line text-white text-xl"></i>
+                ${getIconSvg('delete-bin', 'text-white text-xl')}
                 <span class="text-white text-[9px] uppercase font-bold tracking-widest">Borrar</span>
               </div>
             </div>
@@ -87,9 +88,9 @@ function updateCartUI(cart: readonly any[]) {
                 </div>
               </div>
               <div class="flex items-center gap-2 shrink-0 bg-stone-50 rounded-2xl px-1.5 py-1.5 border border-stone-200/50 cursor-pointer pointer-events-auto" onclick="event.stopPropagation()">
-                <button class="w-7 h-7 rounded-xl flex items-center justify-center bg-white text-stone-500 shadow-sm hover:bg-stone-900 hover:text-white transition-all active:scale-90" onclick="changeQtyWithAnim(${item.id}, -1, this)"><i class="ri-subtract-line text-sm flex"></i></button>
+                <button class="w-7 h-7 rounded-xl flex items-center justify-center bg-white text-stone-500 shadow-sm hover:bg-stone-900 hover:text-white transition-all active:scale-90" onclick="changeQtyWithAnim(${item.id}, -1, this)">${getIconSvg('subtract', 'text-sm flex')}</button>
                 <span class="text-xs font-bold w-4 text-center text-stone-800">${item.qty}</span>
-                <button class="w-7 h-7 rounded-xl flex items-center justify-center bg-white text-stone-500 shadow-sm hover:bg-stone-900 hover:text-white transition-all active:scale-90" onclick="changeQtyWithAnim(${item.id}, 1, this)"><i class="ri-add-line text-sm flex"></i></button>
+                <button class="w-7 h-7 rounded-xl flex items-center justify-center bg-white text-stone-500 shadow-sm hover:bg-stone-900 hover:text-white transition-all active:scale-90" onclick="changeQtyWithAnim(${item.id}, 1, this)">${getIconSvg('add', 'text-sm flex')}</button>
               </div>
             </div>
           </div>`;
@@ -163,7 +164,7 @@ document.addEventListener('astro:page-load', () => {
 
   if (p && p.price > 0) {
     addToCart(p);
-    showToast(`<i class="ri-check-line"></i> ${p.name} agregado`);
+    showToast(`${getIconSvg('check')} ${p.name} agregado`);
     
     const fn = (window as any).sbTrackCartEvent;
     if (fn) fn(getOrCreateSessionId(), 'add_to_cart', { product_id: id, product_name: p.name, quantity: 1, cart_total: getCartTotal() });
@@ -171,7 +172,7 @@ document.addEventListener('astro:page-load', () => {
     document.querySelectorAll(`#padd-${id}`).forEach(btn => {
       btn.classList.add('added');
       const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<i class="ri-check-line"></i>';
+      btn.innerHTML = getIconSvg('check');
       setTimeout(() => { 
         btn.classList.remove('added'); 
         btn.innerHTML = originalHTML; 
@@ -366,7 +367,7 @@ document.addEventListener('astro:page-load', () => {
 
   const startDrag = (e: PointerEvent | TouchEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest('button') || target.closest('.ri-add-line') || target.closest('.ri-subtract-line')) return;
+      if (target.closest('button') || target.closest('.svg-subtract') || target.closest('.svg-add')) return;
       
       const front = target.closest('.cart-item-front') as HTMLElement;
       if (!front) return;

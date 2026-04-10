@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 /**
  * Nuditos — Página de producto individual
  * URL: /ramo/[slug]
@@ -11,6 +12,9 @@ import ProductCard from '../../components/ProductCard.astro';
 import { Image } from 'astro:assets';
 import { getLiveProductBySlug, getLiveProducts, getLiveCategories } from '../../lib/supabase';
 import { slugify, clUrl } from '../../data/datos';
+import { getIconSvg } from '../../lib/icons';
+
+const checkIconSvg = getIconSvg('check');
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/');
@@ -160,9 +164,9 @@ const productSchema = {
 
         {product.badge && (
           <div class="absolute top-6 left-6 z-10 hidden md:flex bg-white/90 backdrop-blur-md border border-stone-100 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider items-center gap-2 shadow-sm">
-             {product.badge === 'Nuevo'    && <i class="ri-sparkling-line text-emerald-500"></i>}
-             {product.badge === 'Popular'  && <i class="ri-fire-line text-rose-500"></i>}
-             {product.badge === 'Especial' && <i class="ri-award-line text-violet-500"></i>}
+             {product.badge === 'Nuevo'    && <Icon name="sparkling" class="text-emerald-500" />}
+             {product.badge === 'Popular'  && <Icon name="fire" class="text-rose-500" />}
+             {product.badge === 'Especial' && <Icon name="award" class="text-violet-500" />}
              {product.badge}
           </div>
         )}
@@ -224,7 +228,7 @@ const productSchema = {
             onclick={`addToCartFromPage(${product.id})`} 
             id="ramoCartBtn"
           >
-            <i class="ri-shopping-bag-3-line text-xl leading-none"></i> Agregar al Carrito
+            <Icon name="shopping-bag-3" class="text-xl leading-none" /> Agregar al Carrito
           </button>
         )}
         <a 
@@ -232,7 +236,7 @@ const productSchema = {
           target="_blank" 
           class="w-full h-[3.25rem] bg-[#25d366] text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 hover:bg-[#1da851] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md"
         >
-          <i class="ri-whatsapp-line text-xl leading-none"></i> {inStock ? 'Comprar por WhatsApp' : 'Consultar disponibilidad'}
+          <Icon name="whatsapp" class="text-xl leading-none" /> {inStock ? 'Comprar por WhatsApp' : 'Consultar disponibilidad'}
         </a>
       </div>
 
@@ -245,7 +249,7 @@ const productSchema = {
       <div class="flex flex-wrap gap-1.5 order-5 md:order-none">
 
         <span class={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5 border ${inStock ? 'bg-stone-50 text-stone-500 border-stone-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
-          <i class={inStock ? 'ri-checkbox-circle-line' : 'ri-close-circle-line'}></i>
+          <Icon name={inStock ? 'checkbox-circle' : 'close-circle'} />
           {inStock ? 'Disponible' : 'Bajo Pedido'}
         </span>
       </div>
@@ -258,7 +262,7 @@ const productSchema = {
         <!-- Envíos -->
         <div class="flex items-start gap-4">
           <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
-            <i class="ri-truck-line text-lg"></i>
+            <Icon name="truck" class="text-lg" />
           </div>
           <div class="space-y-0.5">
             <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Envíos Nacionales</div>
@@ -269,7 +273,7 @@ const productSchema = {
         <!-- Tiempo de Entrega -->
         <div class="flex items-start gap-4">
           <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
-            <i class="ri-history-line text-lg"></i>
+            <Icon name="history" class="text-lg" />
           </div>
           <div class="space-y-0.5">
             <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Te llega pronto</div>
@@ -280,7 +284,7 @@ const productSchema = {
         <!-- Calidad Premium -->
         <div class="flex items-start gap-4">
           <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
-            <i class="ri-plant-line text-lg"></i>
+            <Icon name="plant" class="text-lg" />
           </div>
           <div class="space-y-0.5">
             <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Calidad Artesanal</div>
@@ -291,7 +295,7 @@ const productSchema = {
         <!-- Métodos de Pago -->
         <div class="flex items-start gap-4">
           <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
-            <i class="ri-bank-card-line text-lg"></i>
+            <Icon name="bank-card" class="text-lg" />
           </div>
           <div class="space-y-0.5">
             <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Pagos Seguros</div>
@@ -327,14 +331,14 @@ const productSchema = {
     id="ramoLightbox" 
     onclick="closeLightbox()"
   >
-    <button class="absolute top-8 right-8 text-white/40 hover:text-white transition-colors text-4xl" onclick="closeLightbox()"><i class="ri-close-line"></i></button>
-    <button class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-5xl hidden md:block" onclick="lbNav(-1,event)"><i class="ri-arrow-left-s-line"></i></button>
+    <button class="absolute top-8 right-8 text-white/40 hover:text-white transition-colors text-4xl" onclick="closeLightbox()"><Icon name="close"  /></button>
+    <button class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-5xl hidden md:block" onclick="lbNav(-1,event)"><Icon name="arrow-left-s"  /></button>
     
     <div class="relative max-w-full max-h-full">
       <img id="lbImg" src="" alt={product.name} class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl" />
     </div>
 
-    <button class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-5xl hidden md:block" onclick="lbNav(1,event)"><i class="ri-arrow-right-s-line"></i></button>
+    <button class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-5xl hidden md:block" onclick="lbNav(1,event)"><Icon name="arrow-right-s"  /></button>
   </div>
 
 </Layout>
@@ -433,7 +437,8 @@ const productSchema = {
     const btn = document.getElementById('ramoCartBtn');
     if (btn) {
       const original = btn.innerHTML;
-      btn.innerHTML = '<i class="ri-check-line"></i> ¡Agregado!';
+      const checkIconSvg = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"/></svg>';
+      btn.innerHTML = `${checkIconSvg} ¡Agregado!`;
       btn.classList.add('bg-emerald-600');
       setTimeout(() => {
         btn.innerHTML = original;

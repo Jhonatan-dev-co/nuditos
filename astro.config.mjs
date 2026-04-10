@@ -1,5 +1,5 @@
 import { defineConfig } from 'astro/config';
-import netlify from '@astrojs/netlify';
+import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 
 import tailwind from '@astrojs/tailwind';
@@ -7,7 +7,9 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
   site: 'https://nuditos.com.co',
   output: 'hybrid',
-  adapter: netlify(),
+  adapter: cloudflare({
+    mode: 'directory'
+  }),
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'viewport',

@@ -3,7 +3,7 @@
    js/emails.js
    ══════════════════════════════════════════ */
 
-const EMAILS_ENDPOINT = '/.netlify/functions/send-email';
+const EMAILS_ENDPOINT = '/api/send-email';
 
 /* ════════════════════════════
    ENVIAR CORREO (función base)

@@ -1,4 +1,5 @@
 ---
+import Icon from '../components/Icon.astro';
 import '../styles/main.css';
 import SearchOverlay from '../components/SearchOverlay.astro';
 import { ViewTransitions } from 'astro:transitions';
@@ -126,9 +127,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" /></noscript>
 
-  <!-- Iconos (Carga diferida y CDN con mejor caché TTL) -->
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css" rel="stylesheet" /></noscript>
+
 
   <!-- CSS global gestionado por Astro -->
   
@@ -234,7 +233,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     <nav>
       <div class="nav-left">
         <button class="nav-icon-btn nav-hamburger" onclick="toggleMenu()" aria-label="Menú">
-          <i class="ri-menu-line"></i>
+          <Icon name="menu"  />
         </button>
         <ul class="nav-desktop-links">
           <li><a href="/catalogo">Catálogo</a></li>
@@ -249,10 +248,10 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       </div>
       <div class="nav-right hide-mobile">
         <button class="nav-icon-btn" onclick="toggleSearch()" aria-label="Buscar">
-          <i class="ri-search-line"></i>
+          <Icon name="search"  />
         </button>
         <button class="nav-icon-btn" onclick="toggleCart()" aria-label="Carrito">
-          <i class="ri-shopping-bag-line"></i>
+          <Icon name="shopping-bag"  />
           <span class="cart-badge hidden" id="cartCount">0</span>
         </button>
       </div>
@@ -265,24 +264,24 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     <div class="menu-head">
       <span class="menu-logo">NUDITOS<em>.</em></span>
       <button class="menu-close" onclick="toggleMenu()" aria-label="Cerrar menú">
-        <i class="ri-close-line"></i>
+        <Icon name="close"  />
       </button>
     </div>
     <div class="menu-nav">
       <a class="menu-nav-item" href="/catalogo" onclick="toggleMenu()">
-        Catálogo <i class="ri-arrow-right-line"></i>
+        Catálogo <Icon name="arrow-right"  />
       </a>
       <a class="menu-nav-item" href="/#personalizado" onclick="toggleMenu()">
-        Personalizado <i class="ri-arrow-right-line"></i>
+        Personalizado <Icon name="arrow-right"  />
       </a>
       <a class="menu-nav-item" href="/sobre-nosotros" onclick="toggleMenu()">
-        Nosotros <i class="ri-arrow-right-line"></i>
+        Nosotros <Icon name="arrow-right"  />
       </a>
       <a class="menu-nav-item" href="/blog" onclick="toggleMenu()">
-        Blog <i class="ri-arrow-right-line"></i>
+        Blog <Icon name="arrow-right"  />
       </a>
       <a class="menu-nav-item" href="/#resenas" onclick="toggleMenu()">
-        Reseñas <i class="ri-arrow-right-line"></i>
+        Reseñas <Icon name="arrow-right"  />
       </a>
 
       <!-- Submenu Categorías -->
@@ -297,10 +296,10 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
       <div class="menu-divider">Ayuda</div>
       <a class="menu-nav-item" href="/preguntas-frecuentes">
-        Preguntas frecuentes <i class="ri-arrow-right-line"></i>
+        Preguntas frecuentes <Icon name="arrow-right"  />
       </a>
       <a class="menu-nav-item wa-item" href={whatsappLink} target="_blank">
-        WhatsApp <i class="ri-whatsapp-line"></i>
+        WhatsApp <Icon name="whatsapp"  />
       </a>
     </div>
     <div class="menu-footer">
@@ -316,20 +315,20 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <!-- ════════ MOBILE BOTTOM NAV ════════ -->
   <nav class="mobile-bottom-nav" transition:persist>
     <a href="/catalogo" class="mb-nav-item" id="nav-catalogo" aria-label="Ir al Catálogo">
-      <i class="ri-store-2-line"></i>
+      <Icon name="store-2"  />
       <span>Catálogo</span>
     </a>
     <button class="mb-nav-item" onclick="toggleSearch()" aria-label="Buscar productos">
-      <i class="ri-search-line"></i>
+      <Icon name="search"  />
       <span>Buscar</span>
     </button>
     <a href="/#personalizado" class="mb-nav-item" id="nav-personalizado" aria-label="Ramos Personalizados">
-      <i class="ri-magic-line"></i>
+      <Icon name="magic"  />
       <span>Ramos</span>
     </a>
     <button class="mb-nav-item" onclick="toggleCart()" aria-label="Ver carrito de compras">
       <div class="mb-cart-icon-wrap">
-        <i class="ri-shopping-bag-3-line"></i>
+        <Icon name="shopping-bag-3"  />
         <span class="mb-cart-badge hidden" id="mbCartCount">0</span>
       </div>
       <span>Carrito</span>
@@ -401,19 +400,19 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       <div class="footer-logo">NUDITOS<em>.</em></div>
       <div class="footer-social">
         <a href={instaUrl} target="_blank" aria-label="Instagram">
-          <i class="ri-instagram-line"></i>
+          <Icon name="instagram"  />
         </a>
-        <a href="#" aria-label="TikTok"><i class="ri-tiktok-line"></i></a>
+        <a href="#" aria-label="TikTok"><Icon name="tiktok"  /></a>
         <a href={whatsappLink} aria-label="WhatsApp">
-          <i class="ri-whatsapp-line"></i>
+          <Icon name="whatsapp"  />
         </a>
-        <a href="#" aria-label="Facebook"><i class="ri-facebook-line"></i></a>
+        <a href="#" aria-label="Facebook"><Icon name="facebook"  /></a>
       </div>
     </div>
     <div class="footer-accordion">
       <div class="footer-acc-item">
         <button class="footer-acc-btn" onclick="toggleAcc(this)">
-          Sobre la marca <i class="ri-add-line"></i>
+          Sobre la marca <Icon name="add"  />
         </button>
         <div class="footer-acc-content">
           <a class="footer-acc-link" href="/sobre-nosotros">Nuestra historia</a>
@@ -424,7 +423,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       </div>
       <div class="footer-acc-item">
         <button class="footer-acc-btn" onclick="toggleAcc(this)">
-          Contacto <i class="ri-add-line"></i>
+          Contacto <Icon name="add"  />
         </button>
         <div class="footer-acc-content">
           <a class="footer-acc-link" href={whatsappLink} target="_blank">WhatsApp</a>
@@ -433,7 +432,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       </div>
       <div class="footer-acc-item">
         <button class="footer-acc-btn" onclick="toggleAcc(this)">
-          Ayuda <i class="ri-add-line"></i>
+          Ayuda <Icon name="add"  />
         </button>
         <div class="footer-acc-content">
           <a class="footer-acc-link" href="/politicas">Envíos y entregas</a>
@@ -453,7 +452,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     <div class="p-4 md:p-6 border-b border-stone-200/60 flex items-center justify-center shrink-0 relative z-10 min-h-[60px] md:min-h-[80px]">
       <span class="font-sans text-xl md:text-2xl font-bold tracking-[0.1em] text-stone-800 uppercase">Carrito</span>
       <button class="absolute right-4 md:right-6 w-10 h-10 rounded-2xl border border-stone-200/60 bg-white/40 shadow-sm flex items-center justify-center hover:bg-white transition-colors" onclick="toggleCart()" aria-label="Cerrar carrito">
-        <i class="ri-close-line text-lg flex"></i>
+        <Icon name="close" class="text-lg flex" />
       </button>
     </div>
     
@@ -482,11 +481,11 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       
       <div class="flex flex-col gap-3">
         <button class="w-full bg-[#25d366] text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-[#1da851] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="checkoutWA()">
-          <i class="ri-whatsapp-line text-xl leading-none"></i>
+          <Icon name="whatsapp" class="text-xl leading-none" />
           <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Comprar por WhatsApp</span>
         </button>
         <button class="w-full bg-stone-900 text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="checkoutWompi()">
-          <i class="ri-bank-card-line text-lg leading-none"></i>
+          <Icon name="bank-card" class="text-lg leading-none" />
           <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Pagar con Tarjeta / PSE</span>
         </button>
       </div>
@@ -517,7 +516,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <div class="modal-panel" id="modalPanel">
     <div class="modal-handle"></div>
     <div class="modal-head">
-      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar ventana"><i class="ri-close-line"></i></button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar ventana"><Icon name="close"  /></button>
     </div>
     <div class="modal-body" id="modalBody"></div>
   </div>
@@ -533,7 +532,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       target="_blank"
       aria-label="WhatsApp"
     >
-      <i class="ri-whatsapp-line"></i>
+      <Icon name="whatsapp"  />
     </a>
   </div>
 

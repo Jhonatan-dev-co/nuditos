@@ -1,6 +1,9 @@
+---
+import Icon from '../Icon.astro';
+---
 <nav class="admin-nav">
   <button class="nav-hamburger" id="navHamburger" onclick="toggleSidebar()">
-    <i class="ri-menu-line"></i>
+    <Icon name="menu"  />
   </button>
   <div class="admin-logo">Nuditos <span>Admin</span></div>
   <div class="admin-tabs">
@@ -16,7 +19,7 @@
   </div>
   <div class="nav-right-actions">
     <button class="preview-btn" onclick="window.open('/','_blank')">
-      <i class="ri-eye-line"></i> <span class="hide-xs">Ver tienda</span>
+      <Icon name="eye"  /> <span class="hide-xs">Ver tienda</span>
     </button>
     <button class="logout-btn" onclick="doLogout()">Salir</button>
   </div>

@@ -1,4 +1,5 @@
 ---
+import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 ---
 
@@ -41,49 +42,49 @@ import Layout from '../layouts/Layout.astro';
 
   <div class="faq-wrap">
     <div class="faq-category">
-      <div class="faq-cat-title"><i class="ri-leaf-line"></i> Sobre los productos</div>
+      <div class="faq-cat-title"><Icon name="leaf"  /> Sobre los productos</div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿De qué están hechos los ramos? <i class="ri-add-line"></i></button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿De qué están hechos los ramos? <Icon name="add"  /></button>
         <div class="faq-a">Todos nuestros ramos están tejidos con <strong>hilos de alta calidad</strong> en técnica crochet. Las flores no se marchitan, no necesitan agua y pueden durar años.</div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto tiempo dura un ramo de crochet? <i class="ri-add-line"></i></button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto tiempo dura un ramo de crochet? <Icon name="add"  /></button>
         <div class="faq-a">Con los cuidados básicos, un ramo de crochet puede durar <strong>muchos años</strong>. Mantenlo alejado de la humedad y la luz solar directa prolongada.</div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Los colores son exactamente como en las fotos? <i class="ri-add-line"></i></button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Los colores son exactamente como en las fotos? <Icon name="add"  /></button>
         <div class="faq-a">Hacemos todo lo posible para que las fotos representen fielmente los colores reales. Si tienes dudas escríbenos por <a href="https://wa.me/573144931525">WhatsApp</a>.</div>
       </div>
     </div>
 
     <div class="faq-category">
-      <div class="faq-cat-title"><i class="ri-shopping-bag-line"></i> Pedidos y pagos</div>
+      <div class="faq-cat-title"><Icon name="shopping-bag"  /> Pedidos y pagos</div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo hago un pedido? <i class="ri-add-line"></i></button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo hago un pedido? <Icon name="add"  /></button>
         <div class="faq-a">Agrega el producto al carrito y paga directo, o escríbenos por <a href="https://wa.me/573144931525" target="_blank">WhatsApp</a>.</div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Qué métodos de pago aceptan? <i class="ri-add-line"></i></button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Qué métodos de pago aceptan? <Icon name="add"  /></button>
         <div class="faq-a">Aceptamos <strong>Wompi</strong> — tarjetas de crédito/débito, PSE, Nequi, Daviplata.</div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto tiempo tarda en elaborarse mi pedido? <i class="ri-add-line"></i></button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto tiempo tarda en elaborarse mi pedido? <Icon name="add"  /></button>
         <div class="faq-a"><strong>1 a 3 días hábiles</strong> de elaboración. Luego se despacha ese mismo día o al siguiente día hábil.</div>
       </div>
     </div>
 
     <div class="faq-category">
-      <div class="faq-cat-title"><i class="ri-truck-line"></i> Envíos y entregas</div>
+      <div class="faq-cat-title"><Icon name="truck"  /> Envíos y entregas</div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿A dónde hacen envíos? <i class="ri-add-line"></i></button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿A dónde hacen envíos? <Icon name="add"  /></button>
         <div class="faq-a">Hacemos envíos a <strong>todo Colombia</strong> desde El Dorado, Meta.</div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto cuesta el envío? <i class="ri-add-line"></i></button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto cuesta el envío? <Icon name="add"  /></button>
         <div class="faq-a">Desde <strong>$17.000</strong> hasta <strong>gratis</strong> en pedidos de mayor valor. El costo exacto se muestra al finalizar tu compra.</div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto tarda en llegar? <i class="ri-add-line"></i></button>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto tarda en llegar? <Icon name="add"  /></button>
         <div class="faq-a">Al tiempo de elaboración (1–3 días) se suman <strong>2 a 5 días hábiles</strong> de envío según tu ciudad.</div>
       </div>
     </div>
@@ -92,7 +93,7 @@ import Layout from '../layouts/Layout.astro';
       <h3>¿Tu pregunta no está <em>aquí?</em></h3>
       <p>Escríbenos por WhatsApp y te respondemos lo antes posible.</p>
       <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸" class="faq-wa" target="_blank">
-        <i class="ri-whatsapp-line"></i> Escribir por WhatsApp
+        <Icon name="whatsapp"  /> Escribir por WhatsApp
       </a>
     </div>
   </div>

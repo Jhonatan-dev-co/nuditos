@@ -1,3 +1,6 @@
+---
+import Icon from '../Icon.astro';
+---
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <!-- SIDEBAR -->
@@ -9,7 +12,7 @@
   </div>
   <div class="left-stats" id="sideStats"></div>
   <button class="btn-add-prod" onclick="newProduct()">
-    <i class="ri-add-line"></i> Agregar ramo nuevo
+    <Icon name="add"  /> Agregar ramo nuevo
   </button>
   <div class="prod-list-scroll" id="sideList"></div>
 </div>

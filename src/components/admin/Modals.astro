@@ -1,3 +1,6 @@
+---
+import Icon from '../Icon.astro';
+---
 <!-- ════════ MODALS & FEEDBACK ════════ -->
 
 <!-- CONFIRM DELETE -->
@@ -34,7 +37,7 @@
     <div class="modal-field"><label>Notas</label><textarea id="pNotas" placeholder="Dirección de entrega, color preferido, etc."></textarea></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closePedidoModal()">Cancelar</button>
-      <button class="btn-save" onclick="savePedido()"><i class="ri-save-line"></i> Guardar</button>
+      <button class="btn-save" onclick="savePedido()"><Icon name="save"  /> Guardar</button>
     </div>
   </div>
 </div>
@@ -50,7 +53,7 @@
     <div class="modal-field"><label>Orden (1, 2, 3...)</label><input type="number" id="catOrden" placeholder="1"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeCatModal()">Cancelar</button>
-      <button class="btn-save" onclick="saveCategory()"><i class="ri-save-line"></i> Guardar</button>
+      <button class="btn-save" onclick="saveCategory()"><Icon name="save"  /> Guardar</button>
     </div>
   </div>
 </div>

@@ -1,0 +1,26 @@
+---
+import { ICONS } from '../lib/icons';
+
+export interface Props {
+  name: string;
+  class?: string;
+  id?: string;
+}
+
+const { name, class: className = '', id } = Astro.props;
+const content = ICONS[name];
+
+if (!content) {
+  console.warn(`Icon "${name}" not found in ICONS.`);
+}
+---
+<svg 
+  xmlns="http://www.w3.org/2000/svg" 
+  viewBox="0 0 24 24" 
+  width="24" 
+  height="24" 
+  class={className} 
+  id={id}
+  fill="currentColor" 
+  set:html={content || ''} 
+/>

@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 import Layout from '../../layouts/Layout.astro';
 import { clUrl } from '../../data/datos';
 
@@ -72,7 +73,7 @@ const post = {
   </section>
 
   <article class="article-body">
-    <a href="/blog" class="back-btn"><i class="ri-arrow-left-line"></i> Volver al blog</a>
+    <a href="/blog" class="back-btn"><Icon name="arrow-left"  /> Volver al blog</a>
     <div class="content-inner" set:html={post.content}>
     </div>
   </article>

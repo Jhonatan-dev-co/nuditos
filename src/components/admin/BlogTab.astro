@@ -1,3 +1,6 @@
+---
+import Icon from '../Icon.astro';
+---
 <div id="tab-blog" class="tab-content" style="padding:1.5rem">
   <div class="editor-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem">
     <div>
@@ -5,7 +8,7 @@
       <p style="color:var(--soft);font-size:.875rem">Escribe artículos para atraer tráfico orgánico desde Google.</p>
     </div>
     <button class="btn-save" onclick="newPost()" style="background:var(--lila);border:none;color:#fff;padding:.7rem 1.2rem;border-radius:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.5rem">
-      <i class="ri-add-line"></i> Nuevo Artículo
+      <Icon name="add"  /> Nuevo Artículo
     </button>
   </div>
 
@@ -41,7 +44,7 @@
         <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Imagen Principal</label>
         <div style="display:flex;gap:.5rem">
           <input type="text" id="postImg" placeholder="URL de la imagen" style="flex:1;padding:.6rem;border:1.5px solid #eee;border-radius:8px">
-          <button onclick="document.getElementById('postImgInput').click()" style="background:#f0f0f0;border:none;padding:0 1rem;border-radius:8px;cursor:pointer"><i class="ri-upload-2-line"></i></button>
+          <button onclick="document.getElementById('postImgInput').click()" style="background:#f0f0f0;border:none;padding:0 1rem;border-radius:8px;cursor:pointer"><Icon name="upload-2"  /></button>
           <input type="file" id="postImgInput" style="display:none" onchange="handlePostImgUpload(this.files)">
         </div>
       </div>

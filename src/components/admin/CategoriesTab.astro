@@ -1,3 +1,6 @@
+---
+import Icon from '../Icon.astro';
+---
 <!-- CATEGORÍAS -->
 <div class="tab-content" id="tab-categorias">
   <div class="t-card">
@@ -7,7 +10,7 @@
         <div class="t-sub">Controla las secciones del catálogo, sus iconos y el orden.</div>
       </div>
       <button class="btn-add-prod" onclick="newCategory()" style="margin:0;width:auto;padding:.5rem 1rem">
-        <i class="ri-add-line"></i> Nueva categoría
+        <Icon name="add"  /> Nueva categoría
       </button>
     </div>
     <div id="catAdminList" class="cat-admin-grid"></div>

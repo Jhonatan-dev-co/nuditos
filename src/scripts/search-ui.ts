@@ -1,4 +1,5 @@
 import { slugify, categories } from '../data/datos';
+import { getIconSvg } from '../lib/icons';
 
 document.addEventListener('astro:page-load', () => {
   const overlay = document.getElementById('searchOverlay');
@@ -35,7 +36,7 @@ document.addEventListener('astro:page-load', () => {
     );
 
     if (!found.length) {
-      results.innerHTML = `<div class="search-empty"><i class="ri-search-eye-line"></i><p>No encontramos "${q}"</p><small>Escríbenos por WhatsApp 🌸</small></div>`;
+      results.innerHTML = `<div class="search-empty">${getIconSvg('search-eye')}<p>No encontramos "${q}"</p><small>Escríbenos por WhatsApp 🌸</small></div>`;
       return;
     }
 
@@ -52,7 +53,7 @@ document.addEventListener('astro:page-load', () => {
             <div class="search-item-name">${p.name}</div>
             <div class="search-item-price">${priceText}</div>
           </div>
-          <i class="ri-arrow-right-s-line"></i>
+          ${getIconSvg('arrow-right-s')}
         </a>`;
     }).join('');
 

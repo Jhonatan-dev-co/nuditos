@@ -1,11 +1,15 @@
 export const prerender = false;
-import crypto from 'node:crypto';
 import type { APIRoute } from 'astro';
 
-function signParams(params: Record<string, string | number>, apiSecret: string) {
+async function signParams(params: Record<string, string | number>, apiSecret: string) {
   const sortedKeys = Object.keys(params).sort();
-  const stringToSign = sortedKeys.map((k) => `${k}=${params[k]}`).join('&');
-  return crypto.createHash('sha1').update(stringToSign + apiSecret).digest('hex');
+  const stringToSign = sortedKeys.map((k) => `${k}=${params[k]}`).join('&') + apiSecret;
+  
+  const encoder = new TextEncoder();
+  const data = encoder.encode(stringToSign);
+  const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 export const POST: APIRoute = async () => {
@@ -18,7 +22,7 @@ export const POST: APIRoute = async () => {
   if (!apiSecret || !apiKey) {
     return new Response(
       JSON.stringify({
-        error: 'Configura CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET en Netlify',
+        error: 'Configura CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET en Cloudflare',
       }),
       {
         status: 500,
@@ -28,7 +32,7 @@ export const POST: APIRoute = async () => {
   }
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const signature = signParams(
+  const signature = await signParams(
     {
       folder,
       timestamp,

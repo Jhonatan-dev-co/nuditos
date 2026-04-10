@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import { Image } from 'astro:assets';
 import { products as fallbackProducts, CONFIG_DEFAULT, slugify, clUrl } from '../data/datos';
 
@@ -46,9 +47,9 @@ function heroTitle(p: any) {
           <div class="hero-slide-bg hero-slide-emoji">{p.emoji}</div>
         )}
         <div class="hero-overlay"></div>
-        <div class="hero-label"><i class="ri-scissors-cut-line"></i> Nueva colección</div>
+        <div class="hero-label"><Icon name="scissors-cut"  /> Nueva colección</div>
         <div class="hero-content">
-          <div class="hero-eyebrow"><i class="ri-map-pin-line"></i> Hecho a mano · Colombia</div>
+          <div class="hero-eyebrow"><Icon name="map-pin"  /> Hecho a mano · Colombia</div>
           <h2 set:html={heroTitle(p)}></h2>
           <div class="hero-price-tag">
             {p.price > 0 ? (
@@ -58,8 +59,8 @@ function heroTitle(p: any) {
             )}
           </div>
           <div class="hero-ctas">
-            <a href={`/ramo/${slugify(p.name)}`} class="btn-hero rounded-2xl"><i class="ri-eye-line"></i> Ver producto</a>
-            <a href="/catalogo" class="btn-hero-ghost rounded-2xl"><i class="ri-grid-line"></i> Ver catálogo</a>
+            <a href={`/ramo/${slugify(p.name)}`} class="btn-hero rounded-2xl"><Icon name="eye"  /> Ver producto</a>
+            <a href="/catalogo" class="btn-hero-ghost rounded-2xl"><Icon name="grid"  /> Ver catálogo</a>
           </div>
         </div>
       </div>

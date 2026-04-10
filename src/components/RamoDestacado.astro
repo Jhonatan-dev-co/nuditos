@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import { products as fallbackProducts, CONFIG_DEFAULT, slugify, clUrl } from '../data/datos';
 
 const { p: propProduct } = Astro.props;
@@ -42,7 +43,7 @@ const isReal = !!p;
             
             <!-- Badge Flotante -->
             <div class="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl flex items-center gap-2 border border-white/50 animate-bounce [animation-duration:4s]">
-              <i class="ri-fire-line text-rose-500 text-xl"></i>
+              <Icon name="fire" class="text-rose-500 text-xl" />
               <span class="text-[11px] font-bold uppercase tracking-widest text-stone-800">El más amado</span>
             </div>
           </div>
@@ -82,7 +83,7 @@ const isReal = !!p;
             <div class="h-10 w-px bg-stone-200 hidden sm:block"></div>
 
             <div class="flex flex-col items-center sm:items-start text-[10px] uppercase font-bold text-emerald-600 tracking-widest gap-1">
-               <i class="ri-truck-line text-lg"></i>
+               <Icon name="truck" class="text-lg" />
                Envío prioritario
             </div>
           </div>
@@ -93,7 +94,7 @@ const isReal = !!p;
               onclick={`addToCart(${p.id})`}
             >
               <span class="relative z-10 flex items-center justify-center gap-2 uppercase text-xs tracking-[0.2em]">
-                <i class="ri-shopping-bag-3-line text-lg"></i> Agregar al carrito
+                <Icon name="shopping-bag-3" class="text-lg" /> Agregar al carrito
               </span>
             </button>
             
@@ -101,7 +102,7 @@ const isReal = !!p;
               href={`/ramo/${slugify(p.name)}`} 
               class="px-10 py-5 rounded-2xl font-bold border border-stone-200 text-stone-600 hover:bg-white hover:shadow-lg transition-all uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-2"
             >
-              Ver detalle <i class="ri-arrow-right-up-line"></i>
+              Ver detalle <Icon name="arrow-right-up"  />
             </a>
           </div>
         </div>

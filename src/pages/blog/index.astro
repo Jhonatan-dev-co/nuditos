@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 import Layout from '../../layouts/Layout.astro';
 import { clUrl } from '../../data/datos';
 import { getLivePosts } from '../../lib/supabase';
@@ -83,7 +84,7 @@ function formatDate(dateStr: string) {
             <h2 class="blog-title">{post.title}</h2>
             <p class="blog-excerpt">{post.excerpt || post.content?.substring(0, 150) + '...'}</p>
             <div class="blog-footer">
-              Leer artículo <i class="ri-arrow-right-line"></i>
+              Leer artículo <Icon name="arrow-right"  />
             </div>
           </div>
         </a>

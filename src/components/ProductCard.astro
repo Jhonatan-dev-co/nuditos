@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import { slugify, clUrl } from '../data/datos';
 
 interface Props {
@@ -13,9 +14,9 @@ const { p, catName = 'Nuditos', class: className, parentView = 'grid', eager = f
 const imgLoading = eager ? 'eager' : 'lazy';
 
 function badgeIcon(badge: string) {
-  if (badge === 'Nuevo')    return '<i class="ri-sparkling-line"></i>';
-  if (badge === 'Popular')  return '<i class="ri-fire-line"></i>';
-  if (badge === 'Especial') return '<i class="ri-award-line"></i>';
+  if (badge === 'Nuevo')    return '<Icon name="sparkling"  />';
+  if (badge === 'Popular')  return '<Icon name="fire"  />';
+  if (badge === 'Especial') return '<Icon name="award"  />';
   return '';
 }
 
@@ -105,7 +106,7 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
       )}
       {p.oferta && (
         <div class="bg-rose-50/90 text-rose-700 border border-rose-100 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-sm backdrop-blur-md self-start">
-          <i class="ri-price-tag-3-fill"></i> Oferta
+          <Icon name="price-tag-3"  /> Oferta
         </div>
       )}
     </div>
@@ -119,7 +120,7 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
           aria-label="Agregar al carrito"
           id={`padd-${p.id}`}
         >
-          <i class="ri-shopping-bag-3-fill text-lg md:text-xl"></i>
+          <Icon name="shopping-bag-3" class="text-lg md:text-xl" />
         </button>
       ) : (
         <a 
@@ -129,7 +130,7 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
           onclick="event.stopPropagation()" 
           aria-label="Consultar por WhatsApp"
         >
-          <i class="ri-whatsapp-line text-xl md:text-2xl"></i>
+          <Icon name="whatsapp" class="text-xl md:text-2xl" />
         </a>
       )}
     </div>
@@ -163,7 +164,7 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
 
       {p.envioGratis && (
         <div class="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-          <i class="ri-truck-line"></i> Gratis
+          <Icon name="truck"  /> Gratis
         </div>
       )}
     </div>
