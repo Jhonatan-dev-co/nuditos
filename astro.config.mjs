@@ -7,9 +7,7 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
   site: 'https://nuditos.com.co',
   output: 'hybrid',
-  adapter: cloudflare({
-    mode: 'directory'
-  }),
+  adapter: cloudflare(),
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'viewport',
