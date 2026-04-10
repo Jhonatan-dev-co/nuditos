@@ -26,6 +26,9 @@ const liveBanners = await getLiveBanners();
 const heroIds = liveConfig.carruselHero || [];
 const heroProducts = heroIds.map(id => liveProducts.find(p => p.id === id)).filter(p => p !== undefined);
 
+// Imagen crítica para precarga (LCP)
+const firstHeroImg = heroProducts[0]?.img || null;
+
 // Ramo destacado
 const ramoDestacado = liveProducts.find(p => p.id === liveConfig.ramoDestacado);
 
@@ -64,6 +67,7 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2') || {
   title="Nuditos Tejidos — Ramos de Crochet hechos a mano | Colombia"
   description="Ramos de crochet únicos e irrepetibles. Flores que nunca se marchitan. Envíos a todo Colombia desde El Dorado, Meta."
   ogType="website"
+  preloadImage={firstHeroImg}
 >
   <h1 class="sr-only">Nuditos Tejidos — Ramos y Flores Eternas de Crochet en Colombia</h1>
 

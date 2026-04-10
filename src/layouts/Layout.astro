@@ -2,7 +2,7 @@
 import '../styles/main.css';
 import SearchOverlay from '../components/SearchOverlay.astro';
 import { ViewTransitions } from 'astro:transitions';
-import { categories } from '../data/datos';
+import { categories, clUrl } from '../data/datos';
 import { getLiveConfig } from '../lib/supabase';
 
 // Fetch live configuration for SEO and Social
@@ -26,6 +26,7 @@ interface Props {
   ogType?: string;
   canonical?: string;
   noIndex?: boolean;
+  preloadImage?: string;
 }
 
 const {
@@ -35,6 +36,7 @@ const {
   ogType = 'website',
   canonical,
   noIndex = false,
+  preloadImage
 } = Astro.props;
 
 // Combinar título de la página con el título del sitio
@@ -102,9 +104,25 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     </script>
   )}
 
+  <!-- Preconexiones críticas para acelerar terceros y base de datos -->
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
-  <!-- Fuentes (Carga diferida y optimizada) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  
+  {preloadImage && preloadImage.includes('res.cloudinary.com') ? (
+    <link 
+      rel="preload" 
+      as="image" 
+      imagesrcset={`${clUrl(preloadImage, 480)} 480w, ${clUrl(preloadImage, 1200)} 1200w`}
+      imagesizes="(max-width: 768px) 480px, 1200px"
+      fetchpriority="high" 
+    />
+  ) : preloadImage && (
+    <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />
+  )}
+
+  <!-- Fuentes (Precarga de CSS crítica) -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" /></noscript>
 
