@@ -270,7 +270,10 @@ nav {
    HERO — FOTO FULLSCREEN
 ══════════════════════════════ */
 /* Estilos iniciales (esqueleto) para evitar CLS mientras carga Swiper JS/CSS */
-.hero-swiper { width:100%; overflow:hidden; max-width:100vw; display:block; position:relative; }
+.hero-swiper { 
+  width:100%; overflow:hidden; max-width:100vw; display:block; position:relative;
+  min-height: calc(100svh - var(--nav-h)); /* Reserva espacio para evitar CLS */
+}
 .swiper-wrapper { display:flex; flex-direction:row; width:100%; height:100%; z-index:1; }
 .swiper-slide { flex-shrink:0; width:100%; height:100%; position:relative; }
 
@@ -278,6 +281,7 @@ nav {
   height:calc(100svh - var(--nav-h));
   min-height:480px; max-height:760px;
   position:relative; overflow:hidden;
+  will-change: transform; /* Hint de optimización */
 }
 .hero-slide-bg {
   width:100%; height:100%;
@@ -286,6 +290,11 @@ nav {
   background:linear-gradient(135deg, var(--lila-xlight) 0%, var(--mint-light) 100%);
 }
 .hero-slide-bg img { width:100%; height:100%; object-fit:cover; object-position:center; }
+/* Reserva de espacio para botones de navegación para evitar CLS */
+.hero-swiper .swiper-button-prev, .hero-swiper .swiper-button-next {
+  width: 44px; height: 44px; /* Medidas estándar de Swiper */
+}
+
 .hero-overlay {
   position:absolute; inset:0;
   background:linear-gradient(to top, rgba(26,18,32,0.6) 0%, rgba(26,18,32,0.1) 50%, transparent 100%);

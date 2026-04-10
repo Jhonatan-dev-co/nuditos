@@ -137,7 +137,8 @@ let globalIdx = 0;
       });
       
       if (view === 'carousel') {
-        setTimeout(initSwipers, 10);
+        // Diferir init para evitar reflow forzado en el hilo principal
+        setTimeout(initSwipers, 60);
       }
 
       // CRÍTICO: forzar carga de imágenes lazy que estaban en display:none

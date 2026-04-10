@@ -74,16 +74,19 @@ function heroTitle(p: any) {
   document.addEventListener('astro:page-load', () => {
     // Inicializar swiper cuando el script global de CDN ya esté listo
     if (typeof Swiper !== 'undefined') {
-      new Swiper('#heroSwiper', {
-        loop: true,
-        autoplay: { delay: 5000, disableOnInteraction: false },
-        pagination: { el: '.swiper-pagination', clickable: true },
-        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-        effect: 'fade', fadeEffect: { crossFade: true }, speed: 900,
-        preventClicks: false,
-        preventClicksPropagation: false,
-        touchStartPreventDefault: false,
-      });
+      // Diferir inicialización para evitar el 'Reprocesamiento Forzado' detectado por Lighthouse
+      setTimeout(() => {
+        new Swiper('#heroSwiper', {
+          loop: true,
+          autoplay: { delay: 5000, disableOnInteraction: false },
+          pagination: { el: '.swiper-pagination', clickable: true },
+          navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+          effect: 'fade', fadeEffect: { crossFade: true }, speed: 900,
+          preventClicks: false,
+          preventClicksPropagation: false,
+          touchStartPreventDefault: false,
+        });
+      }, 50);
     }
   });
 </script>
