@@ -102,18 +102,15 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     </script>
   )}
 
-  <!-- Preconexiones críticas para acelerar terceros y base de datos -->
-  <link rel="preconnect" href="https://fpyhkxikxdwjhukltmqf.supabase.co" crossorigin />
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
   <!-- Fuentes (Carga diferida y optimizada) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" /></noscript>
 
-  <!-- Iconos (Carga diferida para no bloquear renderizado inicial) -->
-  <link rel="preload" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet" /></noscript>
+  <!-- Iconos (Carga diferida y CDN con mejor caché TTL) -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css" rel="stylesheet" /></noscript>
 
   <!-- CSS global gestionado por Astro -->
   
@@ -534,11 +531,11 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js" defer></script>
 
-  <!-- Scripts propios -->
-  <script src="/scripts/datos.js" is:inline></script>
-  <script src="/scripts/supabase.js" is:inline></script>
-  <script src="/scripts/emails.js" is:inline></script>
-  <script src="/scripts/app.js" is:inline></script>
+  <!-- Scripts propios con defer para evitar bloqueo de renderizado -->
+  <script src="/scripts/datos.js" defer is:inline></script>
+  <script src="/scripts/supabase.js" defer is:inline></script>
+  <script src="/scripts/emails.js" defer is:inline></script>
+  <script src="/scripts/app.js" defer is:inline></script>
   <script src="../scripts/cart-ui.ts"></script>
 
   <!-- Lógica de Swipe Down para el carrito en Mobile -->

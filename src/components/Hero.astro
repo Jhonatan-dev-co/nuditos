@@ -28,7 +28,7 @@ function heroTitle(p: any) {
       <div class="swiper-slide hero-slide">
         {p.img ? (
           <div class="hero-slide-bg">
-            <picture>
+            <picture style="display: contents;">
               <source media="(max-width: 768px)" srcset={clUrl(p.img, 480)} />
               <img 
                 src={clUrl(p.img, 1200)} 

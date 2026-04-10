@@ -159,7 +159,12 @@ function scrollToCatalog() {
 }
 
 document.addEventListener('astro:page-load', async () => {
-  if (typeof AOS !== 'undefined') AOS.init({ duration: 700, once: true, offset: 30, easing: 'ease-out-cubic' });
+  // Evitar reflow forzado inmediatamente tras la carga de la página
+  if (typeof AOS !== 'undefined') {
+    setTimeout(() => {
+      AOS.init({ duration: 700, once: true, offset: 30, easing: 'ease-out-cubic' });
+    }, 50);
+  }
   // renderSkeletons(); // Ya no es necesario con el render estático
   await loadStoreData();
   const cfg = getConfig();

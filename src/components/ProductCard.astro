@@ -10,7 +10,6 @@ interface Props {
 }
 
 const { p, catName = 'Nuditos', class: className, parentView = 'grid', eager = false } = Astro.props;
-const isAutoSliding = parentView === 'carousel';
 const imgLoading = eager ? 'eager' : 'lazy';
 
 function badgeIcon(badge: string) {
@@ -21,7 +20,10 @@ function badgeIcon(badge: string) {
 }
 
 const productSlug = slugify(p.name);
-const allImgs = [p.img, ...(p.imgs || [])].filter((u, i, arr) => u && arr.indexOf(u) === i);
+const allImgsRaw = [p.img, ...(p.imgs || [])].filter((u, i, arr) => u && arr.indexOf(u) === i);
+// Si la tarjeta está dentro del carrusel principal, mostramos solo 1 foto para evitar conflictos de gestos.
+// Si está en modo grilla/lista, mostramos todas con el scroll manual normal.
+const allImgs = parentView === 'carousel' ? [allImgsRaw[0]] : allImgsRaw;
 
 // String pre-compilado para la máxima velocidad de búsqueda en el cliente
 const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replace(/<[^>]*>?/gm, '').toLowerCase();
@@ -40,13 +42,8 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
     
     {allImgs.length > 1 ? (
       <div 
-        class:list={[
-          "flex scrollbar-none h-full w-full transition-transform duration-500",
-          !isAutoSliding ? "overflow-x-auto snap-x snap-mandatory" : "overflow-hidden"
-        ]}
+        class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none h-full w-full"
         id={`carousel-${p.id}`}
-        data-auto-slide={isAutoSliding ? "true" : "false"}
-        data-imgs-count={allImgs.length}
       >
         {allImgs.map((img, i) => (
           <a 

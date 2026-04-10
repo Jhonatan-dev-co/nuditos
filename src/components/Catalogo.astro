@@ -164,38 +164,7 @@ let globalIdx = 0;
       });
     });
 
-    /* ── Auto-Slide Funcionalidad sin Conflicto ── */
-    // Limpiamos intervalos anteriores si existe alguno (por ViewTransitions)
-    if (window.nuditosAutoSlideTimers) {
-      window.nuditosAutoSlideTimers.forEach(clearInterval);
-    }
-    window.nuditosAutoSlideTimers = [];
 
-    const autoCarousels = document.querySelectorAll('[data-auto-slide="true"]');
-    autoCarousels.forEach(car => {
-      const count = parseInt(car.dataset.imgsCount);
-      if (count <= 1) return;
-      
-      let current = 0;
-      const dots = car.parentElement.querySelectorAll('[data-idx]');
-      
-      const timerId = setInterval(() => {
-        current = (current + 1) % count;
-        // Movemos la imagen usando scrollTo para que sea nativo y suave
-        car.scrollTo({
-          left: car.clientWidth * current,
-          behavior: 'smooth'
-        });
-        
-        // Actualizamos dots
-        dots.forEach((dot, i) => {
-          dot.style.opacity = i === current ? '1' : '0.4';
-          dot.style.transform = i === current ? 'scale(1.5)' : 'scale(1)';
-        });
-      }, 3000 + (Math.random() * 2000));
-      
-      window.nuditosAutoSlideTimers.push(timerId);
-    });
 
   });
 </script>
