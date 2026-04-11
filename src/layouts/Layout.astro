@@ -28,6 +28,8 @@ interface Props {
   canonical?: string;
   noIndex?: boolean;
   preloadImage?: string;
+  hideNav?: boolean;
+  hideFooter?: boolean;
 }
 
 const {
@@ -37,7 +39,9 @@ const {
   ogType = 'website',
   canonical,
   noIndex = false,
-  preloadImage
+  preloadImage,
+  hideNav = false,
+  hideFooter = false
 } = Astro.props;
 
 // Combinar título de la página con el título del sitio
@@ -229,7 +233,9 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     }
   }
 </style>
-  <div class="nav-wrap" transition:persist>
+
+  {!hideNav && (
+    <div class="nav-wrap" transition:persist>
     <nav>
       <div class="nav-left">
         <button class="nav-icon-btn nav-hamburger" onclick="toggleMenu()" aria-label="Menú">
@@ -256,9 +262,11 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
         </button>
       </div>
     </nav>
-  </div>
+    </div>
+  )}
 
-  <!-- ════════ MENÚ LATERAL ════════ -->
+  {!hideNav && (
+    <!-- ════════ MENÚ LATERAL ════════ -->
   <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
   <div class="menu-panel" id="menuPanel">
     <div class="menu-head">
@@ -307,13 +315,15 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       <a class="menu-footer-link" href="/politicas">Políticas</a>
       <a class="menu-footer-link" href="https://wa.me/573144931525" target="_blank">Contacto</a>
     </div>
-  </div>
+    </div>
+  )}
 
   <!-- ════════ CONTENIDO DE CADA PÁGINA ════════ -->
   <slot />
 
-  <!-- ════════ MOBILE BOTTOM NAV ════════ -->
-  <nav class="mobile-bottom-nav" transition:persist>
+  {!hideNav && (
+    <!-- ════════ MOBILE BOTTOM NAV ════════ -->
+    <nav class="mobile-bottom-nav" transition:persist>
     <a href="/catalogo" class="mb-nav-item" id="nav-catalogo" aria-label="Ir al Catálogo">
       <Icon name="store-2"  />
       <span>Catálogo</span>
@@ -334,6 +344,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       <span>Carrito</span>
     </button>
   </nav>
+  )}
 
   <script is:inline>
     // Lógica Simple de Active State para Mobile Nav
@@ -395,7 +406,8 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <!-- ════════ FOOTER ════════ -->
 
-  <footer>
+  {!hideFooter && (
+    <footer>
     <div class="footer-logo-wrap">
       <div class="footer-logo">NUDITOS<em>.</em></div>
       <div class="footer-social">
@@ -444,7 +456,8 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     <div class="footer-bottom">
       <div class="footer-copy">© 2025 Nuditos Tejidos · Hecho con 💜 en El Dorado, Meta 🇨🇴</div>
     </div>
-  </footer>
+    </footer>
+  )}
 
   <!-- ════════ CARRITO PREMIUM GLASS ════════ -->
   <div class="cart-overlay fixed inset-0 z-[200] bg-stone-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" id="cartOverlay" onclick="toggleCart()"></div>
@@ -484,10 +497,10 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
           <Icon name="whatsapp" class="text-xl leading-none" />
           <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Comprar por WhatsApp</span>
         </button>
-        <button class="w-full bg-stone-900 text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="checkoutWompi()">
+        <a href="/checkout" class="w-full bg-stone-900 text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="toggleCart()">
           <Icon name="bank-card" class="text-lg leading-none" />
-          <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Pagar con Tarjeta / PSE</span>
-        </button>
+          <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Ir a Pagar</span>
+        </a>
       </div>
     </div>
     

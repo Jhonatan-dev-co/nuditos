@@ -1,4 +1,5 @@
 import { persistentAtom } from '@nanostores/persistent';
+import { slugify } from '../data/datos';
 
 export interface CartItem {
   id: number;
@@ -7,6 +8,7 @@ export interface CartItem {
   qty: number;
   img?: string;
   emoji?: string;
+  slug?: string;
 }
 
 export interface Discount {
@@ -41,7 +43,8 @@ export function addToCart(product: any) {
       price: product.price, 
       qty: 1, 
       img: product.img, 
-      emoji: product.emoji 
+      emoji: product.emoji,
+      slug: product.slug || slugify(product.name)
     }]);
   }
 }

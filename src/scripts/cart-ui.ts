@@ -137,7 +137,7 @@ function syncCartToSupabase(cart: readonly any[], estado = 'activo') {
     if (!fn) return;
     const sessionId = getOrCreateSessionId();
     const total = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
-    const items = cart.map(({ id, name, price, qty, img }) => ({ id, name, price, qty, img }));
+    const items = cart.map(({ id, name, price, qty, img, slug }) => ({ id, name, price, qty, img, slug }));
     await fn(sessionId, items, total, estado);
   }, 1500);
 }

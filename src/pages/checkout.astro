@@ -1,0 +1,707 @@
+---
+export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import '../styles/checkout.css';
+import { getLiveConfig } from '../lib/supabase';
+import { COLOMBIA_DATA } from '../data/colombia';
+
+const config = await getLiveConfig();
+const wompiKey = config?.wompiKey || 'pub_test_XXXXXXXXXXXXXXXX';
+const wompiActivo = config?.wompiActivo || false;
+---
+
+<Layout
+  title="Checkout — Finalizar Pedido"
+  description="Completa tu pedido de Nuditos Tejidos de forma segura."
+  noIndex={true}
+  hideNav={true}
+  hideFooter={true}
+>
+  <div class="checkout-page">
+
+    <!-- ════ HEADER ════ -->
+    <header class="co-header">
+      <div class="co-header-left"></div>
+      <a href="/" class="logo logo-centered">NUDITOS<em>.</em></a>
+      <div class="co-header-right">
+        <div class="co-secure">
+          <Icon name="shield-user" class="co-secure-icon" />
+          <span>COMPRA 100% SEGURA</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ════ HEADER CHECKOUT TITLE ════ -->
+    <div class="co-page-title-wrap">
+      <h1 class="co-page-title">CHECKOUT</h1>
+    </div>
+
+
+    <!-- ════ CUERPO ════ -->
+    <div class="co-body">
+      
+      <!-- ──── COLUMNA IZQUIERDA: Acordeón ──── -->
+      <div class="co-accordion">
+          
+          <div class="co-acc-item active" id="acc-item-1">
+            <div class="co-acc-header" onclick="window.toggleStep(1)">
+              <div class="co-acc-title">
+                <span class="co-acc-check" id="acc-check-1"><Icon name="check" class="co-check-icon" /></span>
+                IDENTIFICACIÓN
+              </div>
+              <div class="co-acc-status">
+                <span id="acc-status-1">1 de 2</span>
+                <div class="co-acc-icon-wrap">
+                  <Icon name="add" class="icon-plus" />
+                  <Icon name="subtract" class="icon-minus" />
+                </div>
+              </div>
+            </div>
+            <div class="co-acc-mini-summary" id="ms-1"></div>
+            <div class="co-acc-content" id="co-step-1">
+              <div class="co-field">
+                <p class="co-form-instruction">Ingresa tu correo</p>
+                <input class="co-input" type="email" id="co-email" name="email" placeholder="Email" autocomplete="email" />
+                <div class="co-field-error">Este campo es obligatorio.</div>
+              </div>
+              
+              <div class="co-field">
+                <p class="co-form-instruction">Nombre</p>
+                <input class="co-input" type="text" id="co-nombre" name="nombre" placeholder="Nombres" autocomplete="given-name" />
+                <div class="co-field-error">Obligatorio.</div>
+              </div>
+              
+              <div class="co-field">
+                <p class="co-form-instruction">Apellido</p>
+                <input class="co-input" type="text" id="co-apellido" name="apellido" placeholder="Apellidos" autocomplete="family-name" />
+                <div class="co-field-error">Obligatorio.</div>
+              </div>
+              
+              <div class="co-field">
+                <p class="co-form-instruction">Celular</p>
+                <input class="co-input" type="tel" id="co-phone" name="phone" placeholder="Celular" autocomplete="tel" />
+                <div class="co-field-error">Número requerido.</div>
+              </div>
+              
+              <div class="co-field">
+                <p class="co-form-instruction">Tipo de documento</p>
+                <select class="co-input" id="co-doc-type" name="doc_type">
+                  <option value="">Eliga un tipo de documento...</option>
+                  <option value="CC">Cédula de Ciudadanía</option>
+                  <option value="CE">Cédula de Extranjería</option>
+                  <option value="NIT">NIT</option>
+                </select>
+              </div>
+              
+              <div class="co-field">
+                <p class="co-form-instruction">Número de documento</p>
+                <input class="co-input" type="text" id="co-doc" name="doc" placeholder="N° de Documento" />
+              </div>
+
+              <div class="co-btn-wrap">
+                <button class="co-btn-primary" onclick="window.goToStep(2)">
+                  CONTINUAR
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="co-acc-item" id="acc-item-2">
+            <div class="co-acc-header" onclick="window.toggleStep(2)">
+              <div class="co-acc-title">
+                <span class="co-acc-check" id="acc-check-2"><Icon name="check" class="co-check-icon" /></span>
+                ENVÍO
+              </div>
+              <div class="co-acc-status">
+                <span id="acc-status-2">2 de 2</span>
+                <div class="co-acc-icon-wrap">
+                  <Icon name="add" class="icon-plus" />
+                  <Icon name="subtract" class="icon-minus" />
+                </div>
+              </div>
+            </div>
+            <div class="co-acc-mini-summary" id="ms-2"></div>
+            <div class="co-acc-content" id="co-step-2">
+              <div class="co-field">
+                <p class="co-form-instruction">Departamento</p>
+                <select class="co-input" id="co-departamento" name="departamento">
+                  <option value="">Selecciona departamento</option>
+                </select>
+                <div class="co-field-error">Selecciona un departamento</div>
+              </div>
+              
+              <div class="co-field">
+                <p class="co-form-instruction">Ciudad / Municipio</p>
+                <select id="co-ciudad" class="co-input">
+                  <option value="">Selecciona departamento primero</option>
+                </select>
+                <span class="co-field-error">Selecciona tu ciudad</span>
+              </div>
+              
+              <div class="co-field">
+                <p class="co-form-instruction">Dirección</p>
+                <input class="co-input" type="text" id="co-direccion" name="direccion" placeholder="Dirección completa" autocomplete="street-address" />
+                <div class="co-field-error">Ingresa tu dirección</div>
+              </div>
+              
+              <div class="co-field">
+                <p class="co-form-instruction">Barrio</p>
+                <input class="co-input" type="text" id="co-barrio" name="barrio" placeholder="Barrio" />
+                <div class="co-field-error">Ingresa tu barrio</div>
+              </div>
+              
+              <div class="co-field">
+                <p class="co-form-instruction">Código Postal</p>
+                <input class="co-input" type="text" id="co-codigo-postal" name="codigo_postal" placeholder="Opcional" />
+              </div>
+              
+              <div class="co-field">
+                <p class="co-form-instruction">Notas (Opcional)</p>
+                <textarea class="co-input" id="co-notas" name="notas" placeholder="Indicaciones adicionales" rows="2" style="resize:none;"></textarea>
+              </div>
+
+              <div class="co-btn-wrap">
+                <button class="co-btn-primary" onclick="window.validateAndPay()">
+                  CONFIRMAR DATOS
+                </button>
+              </div>
+            </div>
+          </div>
+        </div> <!-- Close co-accordion -->
+
+      <!-- ──── COLUMNA DERECHA: Resumen ──── -->
+      <div class="co-summary">
+        <div class="co-summary-panel">
+          <div class="co-summary-head">
+            RESUMEN DE COMPRA
+            <span class="co-summary-count" id="co-summary-count">0 productos</span>
+          </div>
+          <div class="co-summary-items" id="co-summary-items">
+            <!-- Items rendered by JS -->
+          </div>
+          
+          <div class="co-summary-discount">
+            <input type="text" id="co-discount-code" placeholder="CÓDIGO DE DESCUENTO" class="co-discount-input" />
+            <button class="co-discount-btn" onclick="window.applyDiscount()">
+              <Icon name="arrow-right" class="co-discount-icon" />
+            </button>
+          </div>
+          <div id="co-discount-msg" style="font-size: 0.7rem; color: #e05252; display: none;"></div>
+
+          <div class="co-summary-totals" style="padding-top: 0.5rem;">
+            <div class="co-total-line">
+              <span>SUBTOTAL</span>
+              <span id="co-subtotal">$0</span>
+            </div>
+            <div class="co-total-line">
+              <span>GASTOS DEL ENVÍO</span>
+              <span style="color:var(--text-mid);font-weight:700;">GRATIS</span>
+            </div>
+            <div class="co-total-line discount" id="co-discount-row" style="display:none;">
+              <span id="co-discount-label">DESCUENTO</span>
+              <span id="co-discount-amount">-$0</span>
+            </div>
+            <div class="co-total-line grand" style="margin-top: 0.2rem; padding-top: 0.5rem;">
+              <span>TOTAL</span>
+              <span id="co-total">$0</span>
+            </div>
+            
+            <div style="margin-top: 1rem;">
+              <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.75rem; color: var(--text-soft); cursor: pointer; margin-bottom: 1.2rem;">
+                <input type="checkbox" id="co-terms" checked style="margin-top: 0.2rem;" /> 
+                <span>Leí y acepto los <a href="#" style="color: var(--text); text-decoration: underline;">Términos y Condiciones</a></span>
+              </label>
+
+              <!-- Botones rectangulares y compactos apilados -->
+              <a href="/catalogo" class="co-btn-outline" style="margin-bottom: 0.5rem;">
+                VOLVER A LA BOLSA
+              </a>
+
+              <button class="co-btn-pay-premium" id="btn-pay-wompi" onclick="window.finalizarPedido()" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 1rem;">
+                <Icon name="shield-user" style="color: white; width: 14px; height: 14px;" /> PAGO SEGURO
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div> <!-- Final co-summary -->
+    </div> <!-- Final co-body (GRID) -->
+
+    <div class="co-highlights">
+      <div class="co-hi-inner">
+        <div class="co-hi-item">
+          <Icon name="refresh" class="co-hi-icon" />
+          <div class="co-hi-text">
+            <strong>DEVOLUCIONES GRATIS</strong>
+            <span>Aplica para productos sin descuento.</span>
+          </div>
+        </div>
+        <div class="co-hi-item">
+          <Icon name="bank-card" class="co-hi-icon" />
+          <div class="co-hi-text">
+            <strong>MÉTODOS DE PAGO</strong>
+            <span>Tarjeta de crédito, Nequi y PSE.</span>
+          </div>
+        </div>
+        <div class="co-hi-item">
+          <Icon name="truck" class="co-hi-icon" />
+          <div class="co-hi-text">
+            <strong>ENVÍOS GRATIS</strong>
+            <span>En compras mayores a $150.000.</span>
+          </div>
+        </div>
+        <div class="co-hi-item">
+          <Icon name="history" class="co-hi-icon" />
+          <div class="co-hi-text">
+            <strong>TE LLEGA PRONTO</strong>
+            <span>Envíos seguros a todo Colombia.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ SDK de Wompi para Widget nativo (Abre pasarela por encima sin salir de página) -->
+  <script src="https://checkout.wompi.co/widget.js" is:inline></script>
+
+  <!-- ════ LOGICA CHECKOUT ════ -->
+  <script is:inline define:vars={{ wompiKey, wompiActivo, COLOMBIA_DATA }}>
+    let _cart = [];
+    let _discount = null;
+
+    function slugify(text) {
+      if (!text) return 'error';
+      return text.toString().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+    }
+
+    // ── Leer cart del localStorage ──
+    function loadCartFromStorage() {
+      try {
+        const raw = localStorage.getItem('nuditos_cart') || '[]';
+        _cart = JSON.parse(raw);
+        if (!Array.isArray(_cart)) _cart = [];
+      } catch(e) { _cart = []; }
+      try {
+        const dr = localStorage.getItem('nuditos_discount') || 'null';
+        _discount = JSON.parse(dr);
+      } catch(e) { _discount = null; }
+    }
+
+    function getTotal() {
+      const subtotal = _cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+      if (_discount && _discount.pct) return subtotal - Math.round(subtotal * _discount.pct / 100);
+      return subtotal;
+    }
+    function getSubtotal() { return _cart.reduce((acc, i) => acc + (i.price * i.qty), 0); }
+    function fmt(n) { return '$' + n.toLocaleString('es-CO') + ' COP'; }
+
+    function updateMiniSummaries() {
+      const ms1 = document.getElementById('ms-1');
+      const ms2 = document.getElementById('ms-2');
+      if (ms1) {
+        const email = getFieldVal('co-email');
+        const name = `${getFieldVal('co-nombre')} ${getFieldVal('co-apellido')}`.trim();
+        const phone = getFieldVal('co-phone');
+        ms1.innerHTML = `<div>${email}</div><div>${name}</div><div>${phone}</div>`;
+      }
+      if (ms2) {
+        const city = getFieldVal('co-ciudad');
+        const dept = getFieldVal('co-departamento');
+        const addr = getFieldVal('co-direccion');
+        ms2.innerHTML = `<div>${city}${city && dept ? ', ' : ''}${dept}</div><div>${addr}</div>`;
+      }
+    }
+
+    // ── Lógica de Municipios Dependientes ──
+    function initLocations() {
+      const deptoSelect = document.getElementById('co-departamento');
+      const ciudadSelect = document.getElementById('co-ciudad');
+      if (!deptoSelect || !ciudadSelect) return;
+
+      // Poblar Departamentos
+      const deptos = Object.keys(COLOMBIA_DATA).sort();
+      deptoSelect.innerHTML = '<option value="">Selecciona Departamento</option>';
+      deptos.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d; opt.textContent = d;
+        deptoSelect.appendChild(opt);
+      });
+
+      deptoSelect.onchange = () => {
+        const depto = deptoSelect.value;
+        ciudadSelect.innerHTML = '<option value="">Selecciona Municipio</option>';
+        if (depto && COLOMBIA_DATA[depto]) {
+          COLOMBIA_DATA[depto].forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m; opt.textContent = m;
+            ciudadSelect.appendChild(opt);
+          });
+        }
+      };
+    }
+
+    // ── Renderizar Summary ──
+    function renderSummary() {
+      const summaryEl = document.getElementById('co-summary-items');
+      const subtotalEl = document.getElementById('co-subtotal');
+      const totalEl = document.getElementById('co-total');
+      const mobileTotal = document.getElementById('mobileTotalDisplay');
+      const discRow = document.getElementById('co-discount-row');
+      const discLabel = document.getElementById('co-discount-label');
+      const discAmount = document.getElementById('co-discount-amount');
+      const summaryCount = document.getElementById('co-summary-count');
+      if (!summaryEl) return;
+
+      if (_cart.length === 0) {
+        summaryEl.innerHTML = `<div style="text-align:center;padding:2.5rem 1.5rem;color:var(--text-soft);">
+            <div style="font-size:2.5rem;margin-bottom:0.8rem;opacity:0.25;">🛍️</div>
+            <p style="font-size:0.78rem;margin-bottom:0.5rem;">Tu carrito está vacío.</p>
+            <a href="/" style="color:var(--lila-dark);font-size:0.72rem;font-weight:600;text-decoration:underline;">← Volver al catálogo</a>
+          </div>`;
+        if (summaryCount) summaryCount.textContent = '0 productos';
+        return;
+      }
+
+      if (summaryCount) {
+        const totalItems = _cart.reduce((acc, i) => acc + i.qty, 0);
+        summaryCount.textContent = `${totalItems} productos`;
+      }
+
+      summaryEl.innerHTML = _cart.map(item => {
+        const isUrl = item.img && item.img.startsWith('http');
+        const imgUrl = isUrl ? item.img.replace('/upload/', '/upload/w_120,q_auto,f_auto/') : item.img;
+        const thumb = item.img
+          ? `<img src="${imgUrl}" alt="${item.name}" />`
+          : `<span style="font-size:1.5rem;">${item.emoji || '🌸'}</span>`;
+        
+        const itemSlug = item.slug || slugify(item.name);
+        
+        return `<a href="/ramo/${itemSlug}" class="co-s-item">
+            <div class="co-s-img">${thumb}</div>
+            <div class="co-s-info">
+              <div class="co-s-name">${item.name}</div>
+              <div class="co-s-price">$${item.price.toLocaleString('es-CO')}</div>
+              <div class="co-s-qty">CANTIDAD: ${item.qty}</div>
+            </div>
+          </a>`;
+      }).join('');
+
+      const sub = getSubtotal();
+      const total = getTotal();
+      if (subtotalEl) subtotalEl.textContent = fmt(sub);
+      if (totalEl) totalEl.textContent = fmt(total);
+      if (mobileTotal) mobileTotal.textContent = fmt(total);
+
+      if (_discount && _discount.pct && discRow && discLabel && discAmount) {
+        const saved = Math.round(sub * _discount.pct / 100);
+        discRow.style.display = 'flex';
+        discLabel.textContent = `Descuento (${_discount.pct}%)`;
+        discAmount.textContent = `-$${saved.toLocaleString('es-CO')}`;
+      } else if (discRow) { discRow.style.display = 'none'; }
+    }
+
+    function getCurrentStep() {
+      for (let i = 1; i <= 2; i++) {
+        const item = document.getElementById(`acc-item-${i}`);
+        if (item && item.classList.contains('active')) return i;
+      }
+      return 1;
+    }
+
+    function validateField(id, fn) {
+      const el = document.getElementById(id);
+      if (!el) return true;
+      const ok = fn(el.value);
+      const wrap = el.closest('.co-field');
+      if (wrap) wrap.classList.toggle('has-error', !ok);
+      el.classList.toggle('error', !ok);
+      return ok;
+    }
+
+    function validateStep(step) {
+      let valid = true;
+      if (step === 1) {
+        valid = validateField('co-nombre', v => v.trim().length >= 2) && valid;
+        valid = validateField('co-apellido', v => v.trim().length >= 2) && valid;
+        valid = validateField('co-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) && valid;
+        valid = validateField('co-phone', v => v.replace(/\D/g,'').length >= 7) && valid;
+      }
+      if (step === 2) {
+        valid = validateField('co-departamento', v => v !== '') && valid;
+        valid = validateField('co-ciudad', v => v !== '') && valid;
+        valid = validateField('co-direccion', v => v.trim().length >= 5) && valid;
+        valid = validateField('co-barrio', v => v.trim().length >= 2) && valid;
+      }
+      return valid;
+    }
+
+    function saveFormData() {
+      const fields = ['co-nombre','co-apellido','co-email','co-phone','co-doc',
+                      'co-departamento','co-ciudad','co-direccion','co-barrio','co-codigo-postal','co-notas'];
+      const data = {};
+      fields.forEach(f => { const el = document.getElementById(f); if (el) data[f] = el.value; });
+      sessionStorage.setItem('nuditos_checkout_data', JSON.stringify(data));
+    }
+
+    function restoreFormData() {
+      try {
+        const data = JSON.parse(sessionStorage.getItem('nuditos_checkout_data') || '{}');
+        Object.entries(data).forEach(([id, val]) => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.value = val;
+            if (id === 'co-departamento') el.dispatchEvent(new Event('change'));
+            if (id === 'co-ciudad') el.value = val;
+          }
+        });
+      } catch(e) {}
+    }
+
+    function getFieldVal(id) {
+      const el = document.getElementById(id);
+      return el ? el.value : '';
+    }
+
+    function buildOrderData() {
+      const fullname = `${getFieldVal('co-nombre')} ${getFieldVal('co-apellido')}`.trim();
+      return {
+        fullname: fullname,
+        email: getFieldVal('co-email'),
+        phone: getFieldVal('co-phone'),
+        doc: getFieldVal('co-doc'),
+        departamento: getFieldVal('co-departamento'),
+        ciudad: getFieldVal('co-ciudad'),
+        direccion: getFieldVal('co-direccion'),
+        barrio: getFieldVal('co-barrio'),
+        codigoPostal: getFieldVal('co-codigo-postal'),
+        notas: getFieldVal('co-notas'),
+        cart: _cart,
+        subtotal: getSubtotal(),
+        total: getTotal(),
+        discount: _discount,
+      };
+    }
+
+    // ══ Exponer al window para onclick="" ══
+
+    window.toggleStep = function(n) {
+      const item = document.getElementById(`acc-item-${n}`);
+      if (!item) return;
+
+      const wasActive = item.classList.contains('active');
+      
+      // Si ya estaba activo, AHORA LO CERRAMOS (Para facilitar la visualización en móvil)
+      if (wasActive) {
+        item.classList.remove('active');
+        return;
+      }
+
+      // Abrimos este y cerramos los demás
+      for (let i = 1; i <= 2; i++) {
+        const el = document.getElementById(`acc-item-${i}`);
+        if (el) el.classList.remove('active');
+      }
+      item.classList.add('active');
+      
+      updateMiniSummaries();
+
+      // Scroll suave al inicio si es necesario
+      if (window.innerWidth < 960) {
+        item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
+    window.validateAndPay = function() {
+      if (!validateStep(1) || !validateStep(2)) {
+        alert('Por favor verifica que todos los campos obligatorios estén rellenados correctamente.');
+        return;
+      }
+      saveFormData();
+      updateMiniSummaries();
+      // Si la validación es correcta, marcamos como terminado y hacemos focus en el botón principal
+      const item2 = document.getElementById('acc-item-2');
+      if (item2) {
+        item2.classList.add('done');
+        item2.classList.remove('active');
+      }
+      
+      const btn = document.getElementById('btn-pay-wompi');
+      if (btn) {
+        btn.focus();
+        btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Ligera animación para llamar la atención
+        btn.style.transform = 'scale(1.05)';
+        setTimeout(() => btn.style.transform = 'scale(1)', 300);
+      }
+    };
+
+    window.goToStep = function(targetStep) {
+      const currentStep = getCurrentStep();
+      
+      if (targetStep > currentStep && !validateStep(currentStep)) return;
+      
+      saveFormData();
+
+      for (let i = 1; i <= 2; i++) {
+        const item = document.getElementById(`acc-item-${i}`);
+        if (!item) continue;
+
+        item.classList.remove('active', 'done');
+        
+        if (i < targetStep) {
+          item.classList.add('done');
+        } else if (i === targetStep) {
+          item.classList.add('active');
+        }
+      }
+
+      updateMiniSummaries();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.applyDiscount = function() {
+      const codeInput = document.getElementById('co-discount-code');
+      const msg = document.getElementById('co-discount-msg');
+      if (!codeInput || !msg) return;
+      
+      const code = codeInput.value.trim().toUpperCase();
+      if (!code) return;
+
+      // Mock discount validation
+      if (code === 'NUDITOS10') {
+        _discount = { code: 'NUDITOS10', pct: 10 };
+        if (window.$discount) window.$discount.set(_discount);
+        else localStorage.setItem('nuditos_discount', JSON.stringify(_discount));
+        msg.style.display = 'block';
+        msg.style.color = 'var(--mint-dark)';
+        msg.textContent = 'Descuento aplicado con éxito.';
+      } else {
+        _discount = null;
+        if (window.$discount) window.$discount.set(null);
+        else localStorage.removeItem('nuditos_discount');
+        msg.style.display = 'block';
+        msg.style.color = '#e05252';
+        msg.textContent = 'El código ingresado no es válido.';
+      }
+      renderSummary();
+    };
+
+
+    // ── Guardar pedido en Supabase ──
+    async function savePedidoToSupabase(orderData) {
+      try {
+        const SB_URL = 'https://fpyhkxikxdwjhukltmqf.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweWhreGlreGR3amh1a2x0bXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzE1OTIsImV4cCI6MjA4ODI0NzU5Mn0.U1fHtV23e3uTlaH9qoeibzbm1d6MEcUaFE7rDhnokgM';
+
+        const payload = {
+          cliente_nombre: orderData.fullname,
+          cliente_email: orderData.email,
+          cliente_telefono: orderData.phone,
+          items: JSON.stringify(orderData.cart.map(i => `${i.qty}x ${i.name}`).join(', ')),
+          total: orderData.total,
+          estado: 'pendiente',
+          notas: `${orderData.direccion}, ${orderData.barrio}, ${orderData.ciudad}, ${orderData.departamento}${orderData.codigoPostal ? ' CP:' + orderData.codigoPostal : ''}${orderData.notas ? ' | ' + orderData.notas : ''}`,
+        };
+
+        const res = await fetch(`${SB_URL}/rest/v1/pedidos`, {
+          method: 'POST',
+          headers: {
+            'apikey': SB_KEY,
+            'Authorization': `Bearer ${SB_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          const rows = await res.json();
+          return rows && rows[0] ? rows[0] : null;
+        }
+        return null;
+      } catch(e) {
+        console.warn('Error guardando pedido:', e);
+        return null;
+      }
+    }
+
+    // ── Finalizar: guardar en Supabase → abrir Wompi ──
+    window.finalizarPedido = function() {
+      if (_cart.length === 0) {
+        alert('Tu carrito está vacío. Agrega productos antes de continuar.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-pay-wompi');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="co-spinner"></span> Procesando...';
+      }
+
+      const o = buildOrderData();
+      const isPlaceholder = !wompiKey || wompiKey.includes('XXXX') || wompiKey === '';
+      const finalWompiKey = isPlaceholder ? 'pub_test_Q5yDA9xoKdePzhS8qn96X697697' : wompiKey;
+
+      // Guardar en Supabase y luego abrir Widget de Wompi
+      savePedidoToSupabase(o).then(pedido => {
+        const ref = pedido && pedido.id ? `NUDITOS-${pedido.id}` : `NUDITOS-${Date.now()}`;
+        const amountCents = o.total * 100;
+
+        // Iniciar Widget de Wompi
+        if (window.WidgetCheckout) {
+          const checkout = new window.WidgetCheckout({
+            currency: 'COP',
+            amountInCents: amountCents,
+            reference: ref,
+            publicKey: finalWompiKey,
+            redirectUrl: window.location.origin + '/gracias'
+          });
+
+          checkout.open(function ( result ) {
+            const transaction = result.transaction;
+            if (transaction.status === 'APPROVED') {
+              window.location.href = '/gracias?ref=' + transaction.id;
+            }
+          });
+          
+          // Restaurar botón después de abrir el widget
+          setTimeout(() => {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = 'FINALIZAR COMPRA';
+            }
+          }, 2000);
+
+        } else {
+          // Fallback a redirección si el script no cargó
+          const wompiUrl = `https://checkout.wompi.co/l/?public-key=${finalWompiKey}&currency=COP&amount-in-cents=${amountCents}&reference=${ref}&redirect-url=${encodeURIComponent(window.location.origin + '/')}`;
+          window.location.href = wompiUrl;
+        }
+      }).catch(err => {
+        console.error('Error al procesar pedido:', err);
+        const ref = `NUDITOS-${Date.now()}`;
+        const amountCents = o.total * 100;
+        window.location.href = `https://checkout.wompi.co/l/?public-key=${finalWompiKey}&currency=COP&amount-in-cents=${amountCents}&reference=${ref}`;
+      });
+    };
+
+    // ── Init ──
+    function init() {
+      if (window.$cart) { _cart = window.$cart.get() || []; }
+      else { loadCartFromStorage(); }
+      if (window.$discount) { _discount = window.$discount.get() || null; }
+      initLocations();
+      renderSummary();
+      restoreFormData();
+      updateMiniSummaries();
+    }
+
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</Layout>
