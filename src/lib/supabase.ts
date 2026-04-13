@@ -18,7 +18,7 @@ async function fetchWithTimeout(url: string, options: any, timeout = 4000) {
 
 export async function getLiveProducts(): Promise<Product[]> {
   try {
-    const columns = 'id,nombre,precio,precio_original,descripcion,categoria,emoji,img,imgs,stock,badge,badge_class,oferta,envio_gratis,destacado,activo';
+    const columns = 'id,nombre,precio,precio_original,descripcion,categoria,emoji,img,imgs,stock,badge,badge_class,oferta,envio_gratis,destacado,activo,meta_title,meta_description,alt_text,seo_keywords';
     const res = await fetchWithTimeout(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc&select=${columns}`, {
       headers: { 
         apikey: SB_ANON, 
@@ -54,19 +54,24 @@ export async function getLiveProducts(): Promise<Product[]> {
         oferta:         p.oferta          || false,
         envioGratis:    p.envio_gratis    || false,
         destacado:      p.destacado       || false,
-        activo:         p.activo          !== false
+        activo:         p.activo          !== false,
+        metaTitle:      p.meta_title      || null,
+        metaDescription:p.meta_description || null,
+        altText:        p.alt_text        || null,
+        seoKeywords:    p.seo_keywords    || null
       };
     });
 
   } catch (e) {
-    console.error('[supabase-fetcher]', e);
-    return fallbackProducts;
+    console.error('[supabase-fetcher] Error conectando a Supabase:', e.message || e);
+    return [];
   }
 }
 
 export async function getLiveCategories(): Promise<any[]> {
   try {
-    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/categorias?order=orden.asc`, {
+    const columns = 'id,nombre,icon,emoji,orden,meta_title,meta_description,descripcion_seo';
+    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/categorias?order=orden.asc&select=${columns}`, {
       headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
     });
     if (!res.ok) return [];
@@ -81,7 +86,15 @@ export async function getLiveCategories(): Promise<any[]> {
         name = name.replace(/lindsas/gi, 'lindas');
       }
 
-      return { ...c, icon, name: name, nombre: name };
+      return { 
+        ...c, 
+        icon, 
+        name, 
+        nombre: name,
+        metaTitle:       c.meta_title       || null,
+        metaDescription: c.meta_description || null,
+        descripcionSeo:  c.descripcion_seo  || null
+      };
     });
   } catch {
     return [];
@@ -135,6 +148,8 @@ export async function getLiveConfig() {
       ramoDestacado:        parseInt(m.ramo_destacado)  || 0,
       wompiActivo:          m.wompi_activo        === 'true',
       wompiKey:             m.wompi_key           || '',
+      wompiIntegrity:       m.wompi_integrity_secret || '',
+      wompiEvents:          m.wompi_events_secret || '',
       catViews:             JSON.parse(m.cat_views || '{}'),
       metaPixelActivo:      m.meta_pixel_activo === 'true',
       metaPixelId:          m.meta_pixel_id || '',

@@ -144,6 +144,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <!-- Global Structured Data -->
   {Astro.url.pathname === '/' && (
+    <>
     <script type="application/ld+json" is:inline set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Organization",
@@ -164,6 +165,37 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     })} />
     <script type="application/ld+json" is:inline set:html={JSON.stringify({
       "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Nuditos Tejidos",
+      "image": "https://nuditos.com.co/og-default.jpg",
+      "url": "https://nuditos.com.co",
+      "telephone": "+573144931525",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "El Dorado",
+        "addressLocality": "El Dorado",
+        "addressRegion": "Meta",
+        "postalCode": "500010",
+        "addressCountry": "CO"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 4.1900,
+        "longitude": -73.5400
+      },
+      "priceRange": "$$",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+        "opens": "08:00",
+        "closes": "20:00"
+      },
+      "sameAs": [
+        "https://www.instagram.com/nuditos_tejidos/"
+      ]
+    })} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      "@context": "https://schema.org",
       "@type": "WebSite",
       "url": "https://nuditos.com.co",
       "name": "Nuditos Tejidos",
@@ -173,6 +205,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
         "query-input": "required name=search_term_string"
       }
     })} />
+    </>
   )}
 
   <!-- Slot para head extra (meta producto, schema.org, etc.) -->
@@ -186,10 +219,12 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   :root {
     --nav-h:       64px;
     --nav-h-mob:   56px;
-    --glass-bg:    rgba(255, 255, 255, 0.72);
+    --glass-bg:    rgba(255, 255, 255, 0.65);
     --glass-border: rgba(255, 255, 255, 0.4);
-    --font-serif:  'Outfit', sans-serif;
-    --font-sans:   'Inter', sans-serif;
+    --glass-blur:  40px;
+    --glass-saturate: 180%;
+    --font-serif:  'Jost', sans-serif;
+    --font-sans:   'Jost', sans-serif;
   }
   body {
     font-family: var(--font-sans);
@@ -208,11 +243,11 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     border-bottom: 1px solid transparent;
   }
   .nav-wrap.nav-scrolled {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid var(--glass-border);
     padding: 2px 0;
   }
   .nav-wrap.nav-hidden {
@@ -268,7 +303,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   {!hideNav && (
     <!-- ════════ MENÚ LATERAL ════════ -->
   <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
-  <div class="menu-panel" id="menuPanel">
+  <div class="menu-panel" id="menuPanel" style="background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));">
     <div class="menu-head">
       <span class="menu-logo">NUDITOS<em>.</em></span>
       <button class="menu-close" onclick="toggleMenu()" aria-label="Cerrar menú">
@@ -461,10 +496,10 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <!-- ════════ CARRITO PREMIUM GLASS ════════ -->
   <div class="cart-overlay fixed inset-0 z-[200] bg-stone-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" id="cartOverlay" onclick="toggleCart()"></div>
-  <div class="cart-panel fixed top-0 right-0 w-full max-w-[100vw] md:max-w-md bg-white/70 backdrop-blur-2xl border-l border-white/50 z-[201] translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col shadow-2xl" id="cartPanel">
+  <div class="cart-panel fixed top-0 right-0 w-full max-w-[100vw] md:max-w-md border-l border-white/50 z-[201] translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col shadow-2xl" id="cartPanel" style="background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));">
     <div class="p-4 md:p-6 border-b border-stone-200/60 flex items-center justify-center shrink-0 relative z-10 min-h-[60px] md:min-h-[80px]">
       <span class="font-sans text-xl md:text-2xl font-bold tracking-[0.1em] text-stone-800 uppercase">Carrito</span>
-      <button class="absolute right-4 md:right-6 w-10 h-10 rounded-2xl border border-stone-200/60 bg-white/40 shadow-sm flex items-center justify-center hover:bg-white transition-colors" onclick="toggleCart()" aria-label="Cerrar carrito">
+      <button class="absolute right-4 md:right-6 w-10 h-10 rounded-2xl border border-stone-200/60 bg-white/40 shadow-sm flex items-center justify-center hover:bg-white transition-colors z-[203]" onclick="toggleCart()" aria-label="Cerrar carrito">
         <Icon name="close" class="text-lg flex" />
       </button>
     </div>
@@ -504,8 +539,8 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       </div>
     </div>
     
-    <!-- Grabber móvil invisible en la cabecera -->
-    <div class="absolute top-0 left-0 w-full h-10 z-[202] md:hidden" id="cartHeaderDrag" style="touch-action: none;"></div>
+    <!-- Grabber móvil invisible: ancho ajustado para NO tapar el botón X de cierre -->
+    <div class="absolute top-0 left-0 w-[calc(100%-60px)] h-12 z-[202] md:hidden" id="cartHeaderDrag" style="touch-action: none;"></div>
   </div>
 
   <style>
@@ -526,7 +561,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <!-- ════════ MODAL PRODUCTO ════════ -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
-  <div class="modal-panel" id="modalPanel">
+  <div class="modal-panel" id="modalPanel" style="background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));">
     <div class="modal-handle"></div>
     <div class="modal-head">
       <button class="modal-close" onclick="closeModal()" aria-label="Cerrar ventana"><Icon name="close"  /></button>
@@ -538,7 +573,6 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <!-- ════════ WHATSAPP FLOTANTE ════════ -->
   <div class="wa-float-wrap">
-    <div class="wa-bubble" id="waBubble">¿Tienes dudas? ¡Escríbenos! 🌸</div>
     <a
       href={`${whatsappLink}?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸`}
       class="wa-float"

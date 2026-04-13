@@ -1,12 +1,50 @@
 ---
 import Icon from '../../components/Icon.astro';
 import Layout from '../../layouts/Layout.astro';
+
+const post = {
+  title: 'Cómo cuidar tus flores de crochet para que duren años',
+  slug: 'cuidados-ramos-crochet',
+  datePublished: '2026-03-31T08:00:00Z',
+  img: 'https://images.unsplash.com/photo-1544833058-e70f9ca2bf2e?q=80&w=2000&auto=format&fit=crop',
+  desc: 'Guía completa para que tus ramos de crochet duren años. Limpieza, ubicación y consejos útiles.'
+};
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": post.title,
+  "image": post.img,
+  "author": {
+    "@type": "Organization",
+    "name": "Nuditos Tejidos"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Nuditos Tejidos",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://nuditos.com.co/favicon.svg"
+    }
+  },
+  "datePublished": post.datePublished,
+  "dateModified": post.datePublished,
+  "description": post.desc,
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": `https://nuditos.com.co/blog/${post.slug}`
+  }
+};
 ---
 
 <Layout
-  title="Cómo cuidar tus flores de crochet — Blog Nuditos"
-  description="Guía completa para que tus ramos de crochet duren años. Limpieza, ubicación y consejos útiles."
+  title={`${post.title} | Blog Nuditos`}
+  description={post.desc}
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema)} />
+  </Fragment>
+
   <style>
     .post-hero { background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%); padding: 6rem 1.5rem 5rem; text-align: center; }
     .post-meta { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--lila-dark); letter-spacing: 2px; margin-bottom: 1rem; }
@@ -40,7 +78,7 @@ import Layout from '../../layouts/Layout.astro';
   </div>
 
   <div class="post-img">
-    <img src="https://images.unsplash.com/photo-1544833058-e70f9ca2bf2e?q=80&w=2000&auto=format&fit=crop" alt="Flores de crochet tejidas a mano" />
+    <img src={post.img} alt="Flores de crochet tejidas a mano" />
   </div>
 
   <article class="post-content">

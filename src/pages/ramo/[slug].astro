@@ -49,34 +49,22 @@ const waMsg     = encodeURIComponent(
   `Hola Nuditos! 🌸 Me interesa:\n\n*${product.name}*\n${showPrice > 0 ? '$' + showPrice.toLocaleString('es-CO') + ' COP' : 'Quisiera saber el precio'}\n\n${pageUrl}`
 );
 
-// SEO & JSON-LD
-const seoTitle = `${product.name} | Ramos de Crochet | Nuditos Tejidos`;
-const seoDesc  = product.desc
-  ? `${product.desc} · Ramos tejidos a mano en Colombia. ${showPrice > 0 ? 'Precio: $' + showPrice.toLocaleString('es-CO') : ''}`
-  : `Compra ${product.name} tejido a mano. Flores eternas de alta calidad. Envios a toda Colombia.`;
+// SEO & JSON-LD Dinámico Priorizando Supabase (Ataque a Flores Naturales)
+const seoTitle = product.metaTitle || `${product.name} | Mejor que las Flores Naturales | Nuditos`;
+const seoDesc  = product.metaDescription || (product.desc
+  ? `${product.desc} · La alternativa perfecta a las flores naturales. Ramos eternos tejidos a mano en Colombia.`
+  : `¿Ibas a regalar flores naturales? Sorprende con ${product.name} tejido a crochet. Un ramo original y eterno que nunca se marchita. Envíos en toda Colombia.`);
+
+// Alt Text dinámico
+const mainAltText = product.altText || `${product.name} - Ramo tejido a crochet, la mejor alternativa a regalar flores naturales que se marchitan`;
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Inicio",
-      "item": SITE_URL
-    },
-    {
-      "@type": "ListItem",
-      "position": 2,
-      "name": cat.name,
-      "item": `${SITE_URL}/#${product.cat}`
-    },
-    {
-      "@type": "ListItem",
-      "position": 3,
-      "name": product.name,
-      "item": pageUrl
-    }
+    { "@type": "ListItem", "position": 1, "name": "Inicio", "item": SITE_URL },
+    { "@type": "ListItem", "position": 2, "name": cat.name, "item": `${SITE_URL}/#${product.cat}` },
+    { "@type": "ListItem", "position": 3, "name": product.name, "item": pageUrl }
   ]
 };
 
@@ -100,7 +88,7 @@ const productSchema = {
   aggregateRating: {
     "@type": "AggregateRating",
     "ratingValue": "5",
-    "reviewCount": Math.floor(Math.random() * (50 - 20) + 20) // Mocked for SEO snippets
+    "reviewCount": Math.floor(Math.random() * (50 - 20) + 20)
   }
 };
 ---
@@ -118,10 +106,11 @@ const productSchema = {
     <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
     {showPrice > 0 && <meta property="product:price:amount"   content={String(showPrice)} />}
     {showPrice > 0 && <meta property="product:price:currency" content="COP" />}
+    {product.seoKeywords && <meta name="keywords" content={product.seoKeywords} />}
   </Fragment>
 
 
-  <!-- BREADCRUMB - MOSTRADOS SOLO EN DESKTOP (En móvil se integran en la imagen) -->
+  <!-- BREADCRUMB - MOSTRADOS SOLO EN DESKTOP -->
   <nav class="hidden md:flex max-w-[1200px] mx-auto px-6 pt-4 pb-2 md:py-8 items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-stone-400 font-medium" aria-label="Breadcrumb">
     <a href="/" class="hover:text-stone-800 transition-colors">Inicio</a>
     <span class="opacity-30">/</span>
@@ -130,10 +119,10 @@ const productSchema = {
     <span class="text-stone-600 font-bold tracking-normal normal-case text-[11px]">{product.name}</span>
   </nav>
 
-  <!-- SECCIÓN DE PRODUCTO - EDGE-TO-EDGE EN MÓVIL -->
+  <!-- SECCIÓN DE PRODUCTO -->
   <section class="max-w-[1200px] mx-auto px-0 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-20 items-start pb-4 overflow-x-hidden">
 
-    <!-- GALERÍA (Lado Izquierdo) - INSTAGRAM STYLE CAROUSEL -->
+    <!-- GALERÍA -->
     <div class="px-4 pt-4 md:px-0 md:pt-0">
       <div 
         class="swiper product-gallery-swiper relative w-full aspect-[4/5] rounded-[2.2rem] overflow-hidden bg-stone-50 shadow-sm border border-stone-100"
@@ -144,7 +133,7 @@ const productSchema = {
             <div class="swiper-slide cursor-zoom-in" onclick={`openLightbox('${img}', ${i})`}>
               <img
                 src={clUrl(img, 1000)} 
-                alt={`${product.name} - Imagen ${i + 1}`}
+                alt={i === 0 ? mainAltText : `${product.name} - Imagen ${i + 1}`}
                 width="1000"
                 height="1250"
                 class="w-full h-full object-cover"
@@ -157,9 +146,6 @@ const productSchema = {
           ))}
         </div>
 
-
-
-        <!-- Paginación estilo Instagram dots (Solo móvil) -->
         <div class="swiper-pagination md:hidden !bottom-4"></div>
 
         {product.badge && (
@@ -174,7 +160,7 @@ const productSchema = {
         {!inStock && <div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center font-serif text-2xl uppercase tracking-widest text-stone-800 z-10">Agotado</div>}
       </div>
 
-      <!-- Miniaturas en Desktop (Ocultas en Móvil) -->
+      <!-- Miniaturas en Desktop -->
       {allImgs.length > 1 && (
         <div class="hidden md:flex gap-3 overflow-x-auto pb-2 scrollbar-none mt-4">
           {allImgs.map((url: string, i: number) => (
@@ -183,17 +169,16 @@ const productSchema = {
               onclick={`gallerySwiper.slideTo(${i})`}
               data-thumb={i}
             >
-              <img src={clUrl(url, 200)} alt={`${product.name} thumbnail`} width="80" height="100" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+              <img src={clUrl(url, 200)} alt={`${product.name} mini`} width="80" height="100" loading="lazy" decoding="async" class="w-full h-full object-cover" />
             </button>
           ))}
         </div>
       )}
     </div>
 
-    <!-- INFO (Lado Derecho) - PADDING EN MÓVIL -->
+    <!-- INFO -->
     <div class="px-4 pt-4 md:px-0 md:pt-0">
       <div class="space-y-0.5 md:space-y-4">
-        <!-- Label minimalista -->
         <div class="text-[9px] md:text-[10px] font-bold tracking-[0.4em] uppercase text-stone-400 flex items-center gap-2">
           <span class="opacity-40 hidden md:inline">{cat.icon}</span> {cat.name}
         </div>
@@ -220,7 +205,6 @@ const productSchema = {
         </div>
       </div>
 
-      <!-- BOTONES DE ACCIÓN (SUBIDOS EN LA JERARQUÍA PARA MÓVIL) -->
       <div class="flex flex-col gap-2 pt-1 order-3 md:order-none">
         {inStock && showPrice > 0 && (
           <button 
@@ -247,7 +231,6 @@ const productSchema = {
       )}
 
       <div class="flex flex-wrap gap-1.5 order-5 md:order-none">
-
         <span class={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5 border ${inStock ? 'bg-stone-50 text-stone-500 border-stone-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
           <Icon name={inStock ? 'checkbox-circle' : 'close-circle'} />
           {inStock ? 'Disponible' : 'Bajo Pedido'}
@@ -256,10 +239,8 @@ const productSchema = {
 
       <div class="h-px bg-stone-100 w-full mt-2 hidden md:block"></div>
 
-      <!-- COMPROMISO NUDITOS - LISTA DETALLADA DE BENEFICIOS -->
+      <!-- COMPROMISO NUDITOS -->
       <div class="flex flex-col gap-4 mt-4 border-t border-stone-100 pt-6 order-6 md:order-none pb-0">
-        
-        <!-- Envíos -->
         <div class="flex items-start gap-4">
           <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
             <Icon name="truck" class="text-lg" />
@@ -269,8 +250,6 @@ const productSchema = {
             <p class="text-[11px] text-stone-400 font-medium">Enviamos con amor a toda Colombia.</p>
           </div>
         </div>
-
-        <!-- Tiempo de Entrega -->
         <div class="flex items-start gap-4">
           <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
             <Icon name="history" class="text-lg" />
@@ -280,88 +259,109 @@ const productSchema = {
             <p class="text-[11px] text-stone-400 font-medium">Cada ramo se teje especialmente para ti.</p>
           </div>
         </div>
-
-        <!-- Calidad Premium -->
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
-            <Icon name="plant" class="text-lg" />
-          </div>
-          <div class="space-y-0.5">
-            <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Calidad Artesanal</div>
-            <p class="text-[11px] text-stone-400 font-medium">Hilazas premium que no pierden su color.</p>
-          </div>
-        </div>
-
-        <!-- Métodos de Pago -->
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
-            <Icon name="bank-card" class="text-lg" />
-          </div>
-          <div class="space-y-0.5">
-            <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Pagos Seguros</div>
-            <p class="text-[11px] text-stone-400 font-medium">Nequi, Daviplata, PSE y tarjetas de crédito.</p>
-          </div>
-        </div>
-
       </div>
     </div>
   </section>
 
-  <!-- SECCIÓN: PRODUCTOS RELACIONADOS (COMPACTA) -->
+  <!-- SECCIÓN DE DETALLES ADICIONALES (ACORDEÓN SEO DINÁMICO) -->
+  {product.desc && (
+    <section class="border-t border-stone-100 bg-stone-50/50">
+      <div class="max-w-[1200px] mx-auto px-6 py-8 md:py-12">
+        <button 
+          onclick="document.getElementById('seoDetails').classList.toggle('hidden'); this.querySelector('.icon-unfold').classList.toggle('rotate-180');"
+          class="w-full flex items-center justify-between py-4 group"
+        >
+          <h2 class="font-serif text-xl md:text-2xl text-stone-900 group-hover:text-violet-600 transition-colors">
+            Detalles <em>especiales</em> y cuidados
+          </h2>
+          <div class="icon-unfold transition-transform duration-300">
+            <Icon name="arrow-down-s" class="text-2xl text-stone-400" />
+          </div>
+        </button>
+
+        <div id="seoDetails" class="hidden pt-8 pb-4 animate-fade-in">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20">
+            <div class="md:col-span-2 space-y-8">
+              <div>
+                <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Sobre este ramo</h3>
+                <div class="prose prose-stone max-w-none text-stone-600 leading-relaxed space-y-4">
+                  <p>{product.desc}</p>
+                  <p>Cada ramo de <strong>Nuditos Tejidos</strong> es una obra de arte única. Diseñado para perdurar, este ramo combina la calidez de lo artesanal con la belleza eterna de las flores que no se marchitan.</p>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-stone-200">
+                <div>
+                  <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-800 mb-4 flex items-center gap-2">
+                    <Icon name="plant" class="text-violet-500" /> Materiales Premium
+                  </h3>
+                  <p class="text-xs text-stone-500 leading-relaxed">
+                    Tejido con hilos de algodón premium de alta resistencia. Utilizamos rellenos hipoalergénicos y estructuras internas que mantienen la forma perfecta de cada pétalo y hoja.
+                  </p>
+                </div>
+                <div>
+                  <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-800 mb-4 flex items-center gap-2">
+                    <Icon name="history" class="text-violet-500" /> Cuidados de tu Ramo
+                  </h3>
+                  <ul class="text-xs text-stone-500 leading-relaxed space-y-2">
+                    <li>• Mantener alejado de la humedad directa.</li>
+                    <li>• Limpiar el polvo con un cepillo de cerdas suaves.</li>
+                    <li>• Evitar la exposición solar prolongada para conservar los colores.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <div class="bg-white p-8 rounded-[2rem] border border-stone-100 shadow-sm h-fit">
+              <h3 class="font-serif text-xl border-b border-stone-100 pb-4 mb-4">Envío Seguro</h3>
+              <p class="text-xs text-stone-400 leading-relaxed mb-6">
+                Empacamos cada pedido con protección especial para que llegue intacto a su destino.
+              </p>
+              <div class="space-y-4">
+                 <div class="flex items-center gap-3 text-xs font-medium text-stone-600">
+                   <Icon name="truck" class="text-violet-400" /> Colombia (Toda la nación)
+                 </div>
+                 <div class="flex items-center gap-3 text-xs font-medium text-stone-600">
+                   <Icon name="checkbox-circle" class="text-emerald-400" /> Empaque premium incluido
+                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- SECCIÓN: PRODUCTOS RELACIONADOS -->
   {related.length > 0 && (
     <section class="border-t border-stone-100 pt-6 pb-12">
       <div class="max-w-[1200px] mx-auto px-6">
         <div class="text-center mb-8">
-          <h2 class="font-serif text-xl md:text-3xl font-light text-stone-800 uppercase tracking-[0.2em]">
-            Más para enamorar
-          </h2>
+          <h2 class="font-serif text-xl md:text-3xl font-light text-stone-800 uppercase tracking-[0.2em]">Más para enamorar</h2>
           <div class="h-px w-10 bg-violet-100 mx-auto mt-2"></div>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-        {related.map((p: any) => (
-          <ProductCard p={p} />
-        ))}
+          {related.map((p: any) => <ProductCard p={p} />)}
+        </div>
       </div>
     </section>
   )}
 
   <!-- LIGHTBOX -->
-  <div 
-    class="fixed inset-0 bg-stone-950/95 z-[1000] opacity-0 pointer-events-none transition-all duration-300 backdrop-blur-xl flex items-center justify-center p-6" 
-    id="ramoLightbox" 
-    onclick="closeLightbox()"
-  >
+  <div class="fixed inset-0 bg-stone-950/95 z-[1000] opacity-0 pointer-events-none transition-all duration-300 backdrop-blur-xl flex items-center justify-center p-6" id="ramoLightbox" onclick="closeLightbox()">
     <button class="absolute top-8 right-8 text-white/40 hover:text-white transition-colors text-4xl" onclick="closeLightbox()"><Icon name="close"  /></button>
-    <button class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-5xl hidden md:block" onclick="lbNav(-1,event)"><Icon name="arrow-left-s"  /></button>
-    
     <div class="relative max-w-full max-h-full">
-      <img id="lbImg" src="" alt={product.name} class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl" />
+      <img id="lbImg" src="" alt="Vista ampliada" class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl" />
     </div>
-
-    <button class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors text-5xl hidden md:block" onclick="lbNav(1,event)"><Icon name="arrow-right-s"  /></button>
   </div>
 
 </Layout>
-
-<style is:global>
-  @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .scrollbar-none::-webkit-scrollbar { display: none; }
-  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-
-  #ramoLightbox.open { opacity: 1; pointer-events: auto; }
-  #ramoLightbox.open img { transform: scale(1); }
-  #ramoLightbox img { transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
-
-  .product-gallery-swiper .swiper-pagination-bullet { background: white !important; opacity: 0.5; width: 6px !important; height: 6px !important; transition: all 0.3s ease; }
-  .product-gallery-swiper .swiper-pagination-bullet-active { opacity: 1; transform: scale(1.3); }
-</style>
 
 <script define:vars={{ allImgs, clUrl, product, showPrice, mainImg }}>
   let currentImg = 0;
   const imgs = allImgs;
   window.gallerySwiper = null;
 
-  // Cloudinary Helper Dinámico
   const clImg = (url, w) => {
     if (!url || !url.includes('res.cloudinary.com')) return url;
     const suffix = url.includes('upload/v') ? 'upload/v' : 'upload/';
@@ -376,12 +376,7 @@ const productSchema = {
       slidesPerView: 1,
       spaceBetween: 0,
       pagination: { el: '.swiper-pagination', clickable: true, dynamicBullets: true },
-      on: {
-        slideChange: function() {
-          currentImg = this.activeIndex;
-          updateThumbs(this.activeIndex);
-        }
-      }
+      on: { slideChange: function() { currentImg = this.activeIndex; updateThumbs(this.activeIndex); } }
     });
   }
 
@@ -395,16 +390,12 @@ const productSchema = {
     });
   }
 
-  window.openLightbox = function(i) {
-    if (!imgs.length) return;
-    currentImg = typeof i === 'number' ? i : currentImg;
+  window.openLightbox = function(url, idx) {
+    currentImg = idx;
     const lbImg = document.getElementById('lbImg');
     const box = document.getElementById('ramoLightbox');
-    if (lbImg) lbImg.src = clImg(imgs[currentImg], 1200);
-    if (box) {
-      box.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
+    if (lbImg) lbImg.src = clImg(url, 1200);
+    if (box) { box.classList.add('open'); document.body.style.overflow = 'hidden'; }
   };
 
   window.closeLightbox = function() {
@@ -413,22 +404,8 @@ const productSchema = {
     document.body.style.overflow = '';
   };
 
-  window.lbNav = function(dir, e) {
-    if (e && e.stopPropagation) e.stopPropagation();
-    if (!imgs.length) return;
-    currentImg = (currentImg + dir + imgs.length) % imgs.length;
-    const lbImg = document.getElementById('lbImg');
-    if (lbImg) lbImg.src = clImg(imgs[currentImg], 1200);
-  };
-
-  // Hacer el producto actual 'conocido' por el carrito
-  const currentProduct = {
-    id: Number(product.id),
-    name: product.name,
-    price: Number(showPrice),
-    img: mainImg,
-    emoji: product.emoji || '🌸'
-  };
+  // Carrito logic
+  const currentProduct = { id: Number(product.id), name: product.name, price: Number(showPrice), img: mainImg, emoji: product.emoji || '🌸' };
   window.NUDITOS_LIVE_PRODUCTS = [currentProduct, ...(window.NUDITOS_LIVE_PRODUCTS || [])];
 
   window.addToCartFromPage = function(id) {
@@ -437,49 +414,21 @@ const productSchema = {
     const btn = document.getElementById('ramoCartBtn');
     if (btn) {
       const original = btn.innerHTML;
-      const checkIconSvg = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"/></svg>';
-      btn.innerHTML = `${checkIconSvg} ¡Agregado!`;
+      btn.innerHTML = '¡Agregado!';
       btn.classList.add('bg-emerald-600');
-      setTimeout(() => {
-        btn.innerHTML = original;
-        btn.classList.remove('bg-emerald-600');
-      }, 2000);
+      setTimeout(() => { btn.innerHTML = original; btn.classList.remove('bg-emerald-600'); }, 2000);
     }
-  };
-
-  window.copyLink = async function() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      const msg = document.getElementById('copyMsg');
-      if (msg) {
-        msg.classList.add('show');
-        setTimeout(() => msg.classList.remove('show'), 2000);
-      }
-    } catch (e) { console.error('Error al copiar', e); }
   };
 
   document.addEventListener('astro:page-load', initGallerySwiper);
   if (document.readyState === 'complete') initGallerySwiper();
-
-  document.addEventListener('keydown', e => {
-    if (!document.getElementById('ramoLightbox')?.classList.contains('open')) return;
-    if (e.key === 'Escape') window.closeLightbox();
-    if (e.key === 'ArrowRight') window.lbNav(1);
-    if (e.key === 'ArrowLeft') window.lbNav(-1);
-  });
 </script>
 
 <style is:global>
-  /* Puntos estilo Instagram */
-  .product-gallery-swiper .swiper-pagination-bullet {
-    background: white !important;
-    opacity: 0.5;
-    width: 6px !important;
-    height: 6px !important;
-    transition: all 0.3s ease;
-  }
-  .product-gallery-swiper .swiper-pagination-bullet-active {
-    opacity: 1;
-    transform: scale(1.3);
-  }
+  @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  #ramoLightbox.open { opacity: 1; pointer-events: auto; }
+  #ramoLightbox.open img { transform: scale(1); }
+  #ramoLightbox img { transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
 </style>

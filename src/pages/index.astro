@@ -20,7 +20,7 @@ const liveConfig = liveConfigRaw ? { ...FALLBACK_CONFIG, ...liveConfigRaw } : FA
 
 // Categorías y Banners dinámicos
 const sbCategories = await getLiveCategories();
-const liveCategories = sbCategories.length > 0 ? sbCategories : FALLBACK_CATEGORIES;
+const liveCategories = sbCategories;
 const liveBanners = await getLiveBanners();
 
 // Preparar hero products

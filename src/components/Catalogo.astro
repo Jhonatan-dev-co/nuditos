@@ -101,21 +101,26 @@ let globalIdx = 0;
         if (el.swiper) el.swiper.destroy(true, true);
         
         new Swiper(`#catSwiper-${id}`, {
-          slidesPerView: 1.3,
+          slidesPerView: 'auto', // Cambiado de 1.3 fijo para mejor adaptabilidad
           spaceBetween: 16,
-          slidesOffsetBefore: 0,
-          slidesOffsetAfter: 0,
+          slidesOffsetBefore: 24, // Espacio boutique al inicio
+          slidesOffsetAfter: 24,
           grabCursor: true,
-          freeMode: { enabled: true, momentum: true, momentumRatio: 0.8 },
+          freeMode: { 
+            enabled: true, 
+            momentum: true, 
+            momentumRatio: 1.2, // Más elástico
+            momentumVelocityRatio: 1.2
+          },
           touchStartPreventDefault: false,
           touchMoveStopPropagation: false,
           passiveListeners: true,
           pagination: { el: `#catPag-${id}`, clickable: true, dynamicBullets: true },
           breakpoints: {
-            480:  { slidesPerView: 2.2, spaceBetween: 16 },
-            768:  { slidesPerView: 3.2, spaceBetween: 20 },
-            1024: { slidesPerView: 4.2, spaceBetween: 22 },
-            1280: { slidesPerView: 5,   spaceBetween: 24, freeMode: { enabled: false } },
+            480:  { slidesPerView: 2.3, spaceBetween: 16 },
+            768:  { slidesPerView: 3.3, spaceBetween: 20 },
+            1024: { slidesPerView: 4.3, spaceBetween: 22 },
+            1280: { slidesPerView: 5.2, spaceBetween: 24 },
           },
         });
       });
@@ -176,6 +181,10 @@ let globalIdx = 0;
   .view-content { display: none; }
   .view-carousel { display: block; } /* Visible por defecto */
   
+  .cat-swiper {
+    touch-action: pan-y !important; /* Vital para fluidez en Android/Chrome */
+  }
+
   .cat-section[data-view="carousel"] .view-carousel { display: block !important; }
   .cat-section[data-view="grid"]     .view-grid     { display: grid !important; }
   .cat-section[data-view="grid"]     .view-carousel { display: none !important; }

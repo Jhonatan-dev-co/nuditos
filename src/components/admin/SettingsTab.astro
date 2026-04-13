@@ -15,6 +15,7 @@ import Icon from '../Icon.astro';
       <button class="cc-save" onclick="saveCloudinaryConfig()"><Icon name="save"  /> Guardar configuración</button>
     </div>
   </div>
+
   <div class="t-card">
     <div class="t-title">💳 Wompi — Pasarela de pago</div>
     <div class="t-sub">Activa el botón de pago con tarjeta y PSE en el carrito.</div>
@@ -25,11 +26,21 @@ import Icon from '../Icon.astro';
       </div>
       <button class="toggle" id="toggleWompi" onclick="this.classList.toggle('on')"></button>
     </div>
+    
     <div class="t-field" style="margin-top:.9rem">
       <label>Llave pública Wompi</label>
       <input type="text" id="wompiKey" placeholder="pub_prod_xxxxxxxxxxxx">
     </div>
+    <div class="t-field" style="margin-top:.9rem">
+      <label>Secret de Integridad (Opcional - para firmas)</label>
+      <input type="password" id="wompiIntegrity" placeholder="prod_integrity_xxxxxxxxxxxx">
+    </div>
+    <div class="t-field" style="margin-top:.9rem">
+      <label>Secret de Eventos (Para Webhooks)</label>
+      <input type="password" id="wompiEvents" placeholder="ev_prod_xxxxxxxxxxxx">
+    </div>
   </div>
+
   <div class="t-card">
     <div class="t-title">📊 Meta Pixel</div>
     <div class="t-sub">Activa el seguimiento para medir tus anuncios.</div>
@@ -45,11 +56,13 @@ import Icon from '../Icon.astro';
       <input type="text" id="metaPixelId" placeholder="123456789012345">
     </div>
   </div>
+
   <div class="t-card">
     <div class="t-title">🖼️ Vista por categoría</div>
     <div class="t-sub">Elige cómo se muestran los productos de cada categoría.</div>
     <div id="catViewsList"></div>
   </div>
+
   <div class="t-card">
     <div class="t-title">🗄️ Supabase</div>
     <div id="sbStatus" style="background:var(--mint-light);border-radius:10px;padding:.75rem 1rem;font-size:.78rem;color:#065f46;display:flex;align-items:center;gap:.5rem">
@@ -57,6 +70,7 @@ import Icon from '../Icon.astro';
       <span>Conectado · Los cambios se guardan automáticamente</span>
     </div>
   </div>
+
   <div class="t-card">
     <div class="t-title">📤 Exportar datos.js</div>
     <div class="t-sub">Descarga el archivo actualizado como respaldo.</div>

@@ -14,7 +14,7 @@ import AdminSidebar from '../components/admin/AdminSidebar.astro';
 import ProductsTab from '../components/admin/ProductsTab.astro';
 import DashboardTab from '../components/admin/DashboardTab.astro';
 import OrdersTab from '../components/admin/OrdersTab.astro';
-import CategoriesTab from '../components/admin/CategoriesTab.astro';
+// import CategoriesTab from '../components/admin/CategoriesTab.astro'; // Eliminado, ahora embebido en productos
 import VitrinaTab from '../components/admin/VitrinaTab.astro';
 import BannersTab from '../components/admin/BannersTab.astro';
 import DiscountsTab from '../components/admin/DiscountsTab.astro';
@@ -53,7 +53,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         <ProductsTab />
         <DashboardTab />
         <OrdersTab />
-        <CategoriesTab />
+        <!-- <CategoriesTab /> -->
         <VitrinaTab />
         <BannersTab />
         <DiscountsTab />
@@ -86,6 +86,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     let adminCategories=[];
     let uploadedImgs=[], currentEditingImgs=[];
     let changeHistory=[];
+    let selectedProducts = new Set(); // Para selección múltiple
 
     /* ── AUTH / LOGIN ── */
     async function doLogin(){
@@ -154,19 +155,52 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       localStorage.setItem('nuditos_cloudinary',JSON.stringify(cfg));
       showToast('✓ Cloudinary configurado');
     }
-    async function uploadToCloudinary(file){
+
+    function slugifyClient(text){
+      return (text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim() || 'nuditos-foto';
+    }
+
+    async function uploadToCloudinary(file, baseNameOverride = null, idx = 0){
       showUploadProgress(0);
       try{
-        const signRes=await fetch('/api/cloudinary-sign',{method:'POST'});
+        // Renombre Dinámico para SEO con inyección de palabras clave avanzadas
+        const nombreInput = document.getElementById('fNombre');
+        const metaTitleInput = document.getElementById('fMetaTitle');
+        const keywordsInput = document.getElementById('fSeoKeywords');
+        
+        let baseText = (metaTitleInput && metaTitleInput.value.trim()) ? metaTitleInput.value : (nombreInput ? nombreInput.value : '');
+        if (keywordsInput && keywordsInput.value.trim()) {
+          // Extraemos las primeras palabras clave para no hacer el nombre de archivo excesivamente largo
+          const kws = keywordsInput.value.split(',').map(s=>s.trim()).slice(0,3).join('-');
+          baseText += '-' + kws;
+        }
+        
+        const defaultBaseName = slugifyClient(baseText);
+        const baseName = baseNameOverride ? slugifyClient(baseNameOverride) : defaultBaseName;
+        
+        // Agregamos palabras clave universales a la URL de la foto automáticamente
+        const seoSuffix = 'ramo-tejido-crochet';
+        const randomId = Math.random().toString(36).substring(2, 6);
+        
+        // Limitar tamaño final del publicId para evitar errores en SO
+        let publicId = `${baseName}-${seoSuffix}-${randomId}${idx > 0 ? ('-'+idx) : ''}`;
+        if (publicId.length > 200) publicId = publicId.substring(0, 200);
+
+        const signRes=await fetch('/api/cloudinary-sign',{
+          method:'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ public_id: publicId })
+        });
         if(!signRes.ok) {
            const err = await signRes.json();
            throw new Error(err.error || 'Fallo en la firma del servidor');
         }
-        const{signature,timestamp,apiKey,cloudName,uploadPreset,folder}=await signRes.json();
+        const{signature,timestamp,apiKey,cloudName,uploadPreset,folder,publicId:signedPublicId}=await signRes.json();
         const fd=new FormData();
         fd.append('file',file);fd.append('upload_preset',uploadPreset);
         fd.append('folder',folder);fd.append('timestamp',timestamp);
         fd.append('api_key',apiKey);fd.append('signature',signature);
+        if(signedPublicId) fd.append('public_id', signedPublicId);
         showUploadProgress(30);
         const res=await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,{method:'POST',body:fd});
         if(!res.ok) {
@@ -193,12 +227,8 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       showToast('⏳ Cargando datos...');
       try{
         const sbProds=await sbAdminGetProducts();
-        if(sbProds&&sbProds.length>0){adminProducts=sbProds;}
-        else{
-          adminProducts=products.map(p=>({...p}));
-          showToast('⬆️ Subiendo productos a Supabase...');
-          for(const p of adminProducts){try{await sbAdminSaveProduct({...p,_isNew:true});}catch(e){}}
-        }
+        adminProducts = sbProds || [];
+        
         const sbCfg=await sbAdminGetConfig_();adminCfg=sbCfg||{...CONFIG_DEFAULT};
         try{
           const rows=await sbAdminGetBanners_();
@@ -217,7 +247,14 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           });
         }catch{editorialBannersAdmin=[];}
         try{pedidos=await sbAdminGetPedidos();}catch{pedidos=[];}
-        try{adminCategories=await sbAdminGetCategories();if(!adminCategories.length)adminCategories=[...categories];}catch{adminCategories=[...categories];}
+        try{
+          adminCategories=await sbAdminGetCategories();
+          window._isLiveMode = true; 
+        }catch(e){
+          console.warn('Usando categorías locales (error conexión)');
+          adminCategories=[...categories];
+          window._isLiveMode = false;
+        }
         try{const sh=localStorage.getItem('nuditos_history');changeHistory=sh?JSON.parse(sh):[];}catch{changeHistory=[];}
       }catch(e){
         showToast('⚠️ Error de conexión — usando datos locales');
@@ -231,6 +268,8 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       if(adminCfg.descuentoActivo)document.getElementById('toggleDescuento').classList.add('on');
       if(adminCfg.wompiActivo)document.getElementById('toggleWompi').classList.add('on');
       if(adminCfg.wompiKey)document.getElementById('wompiKey').value=adminCfg.wompiKey;
+      if(adminCfg.wompiIntegrity)document.getElementById('wompiIntegrity').value=adminCfg.wompiIntegrity;
+      if(adminCfg.wompiEvents)document.getElementById('wompiEvents').value=adminCfg.wompiEvents;
       if(adminCfg.metaPixelActivo)document.getElementById('toggleMetaPixel').classList.add('on');
       if(adminCfg.metaPixelId)document.getElementById('metaPixelId').value=adminCfg.metaPixelId;
       
@@ -253,7 +292,10 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       buildSideFilters();renderSidebar();renderStats();showEditorEmpty();renderCategoriasList();
       renderHeroSlots();renderMomentoSelected();renderMomentoList(adminProducts);renderHeroList(adminProducts);
       renderCatViewsList();renderBannerList();
-      showToast('✅ Todo cargado');
+      
+      const statusLabel = window._isLiveMode ? '✅ Conectado a Supabase' : '⚠️ Usando datos locales (Fallback)';
+      showToast(statusLabel);
+      console.log(`[Admin] Modo: ${window._isLiveMode ? 'LIVE' : 'FALLBACK'}`);
     }
 
     async function sbAdminGetConfig_(){
@@ -266,12 +308,20 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     }
 
     function buildSideFilters(){
-      const opts=[{id:'',name:'Todos',icon:'🌸'},...categories.filter(c=>c.id!=='todos')];
+      const src = adminCategories.length ? adminCategories : categories.filter(c=>c.id!=='todos');
+      const opts=[{id:'',name:'Todos',icon:'🌸'},...src.filter(c=>c.id!=='todos')];
       document.getElementById('sideFilters').innerHTML=opts.map(c=>
-        `<span class="lf-chip ${sideFilterCat===c.id?'active':''}" onclick="setSideFilter('${c.id}',this)">${c.icon} ${c.name}</span>`
+        `<span class="lf-chip ${sideFilterCat===c.id?'active':''}" onclick="setSideFilter('${c.id}',this)">${c.icon} ${c.nombre||c.name}</span>`
       ).join('');
     }
-    function setSideFilter(id,el){sideFilterCat=id;document.querySelectorAll('.lf-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderSidebar();}
+    function setSideFilter(id,el){
+      sideFilterCat=id;
+      selectedProducts.clear();
+      document.querySelectorAll('.lf-chip').forEach(c=>c.classList.remove('active'));
+      el.classList.add('active');
+      renderSidebar();
+      updateBulkBar();
+    }
 
     function renderStats(){
       const t=adminProducts.length,v=adminProducts.filter(p=>p.activo!==false).length;
@@ -286,33 +336,135 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     function renderSidebar(){
       const q=document.getElementById('sideSearch').value.toLowerCase();
       let list=adminProducts.filter(p=>{
-        const mQ=!q||p.name.toLowerCase().includes(q)||(categories.find(c=>c.id===p.cat)?.name.toLowerCase().includes(q));
-        const mC=!sideFilterCat||p.cat===sideFilterCat;return mQ&&mC;
+        const mQ=!q||p.name.toLowerCase().includes(q)||(adminCategories.find(c=>c.id===p.cat)?.nombre?.toLowerCase().includes(q));
+        const mC=!sideFilterCat||p.cat===sideFilterCat; return mQ&&mC;
       });
       const groups={};list.forEach(p=>{if(!groups[p.cat])groups[p.cat]=[];groups[p.cat].push(p);});
       let html='';
       Object.entries(groups).forEach(([catId,items])=>{
-        if(!sideFilterCat){const cat=categories.find(c=>c.id===catId);html+=`<div class="cat-group-label">${cat?.icon||''} ${cat?.name||catId}</div>`;}
+          const cat=adminCategories.find(c=>c.id===catId);
+          const count = items.length;
+          html+=`<div class="cat-group-label">
+            <span>${cat?.icon||'📁'} ${cat?.nombre||cat?.name||catId} <strong style="opacity:0.6;font-size:0.7rem;margin-left:4px">(${count})</strong></span>
+            <button class="cat-group-del" onclick="deleteCategoryFromSidebar('${catId}')" title="Eliminar esta categoría y sus productos">🗑️</button>
+          </div>`;
         items.forEach(p=>{
           const isActive=p.activo!==false;
+          const isSel=selectedProducts.has(p.id);
           const tags=[];
           if(!isActive)tags.push(`<span class="pi-tag pit-oculto">Oculto</span>`);
           if(p.badge)tags.push(`<span class="pi-tag pit-badge">${p.badge}</span>`);
           if(p.oferta)tags.push(`<span class="pi-tag pit-oferta">Oferta</span>`);
           if(p.envioGratis)tags.push(`<span class="pi-tag pit-envio">Envío</span>`);
           html+=`
-            <div class="prod-item ${selectedId===p.id?'selected':''} ${isActive?'':'inactive'}" onclick="selectProduct(${p.id})">
-              <div class="pi-thumb">${p.img?`<img src="${p.img}" onerror="this.parentNode.innerHTML='${p.emoji}'">`:p.emoji}</div>
-              <div class="pi-info">
+            <div class="prod-item ${selectedId===p.id?'selected':''} ${isActive?'':'inactive'} ${isSel?'bulk-selected':''}">
+              <input type="checkbox" class="prod-check" ${isSel?'checked':''}
+                onclick="event.stopPropagation();toggleProductSelection(${p.id},this.checked)"
+                title="Seleccionar">
+              <div class="pi-thumb" onclick="selectProduct(${p.id})">${p.img?`<img src="${p.img}" onerror="this.parentNode.innerHTML='${p.emoji}'">`:(p.emoji||'🌸')}</div>
+              <div class="pi-info" onclick="selectProduct(${p.id})">
                 <div class="pi-name">${p.name}</div>
                 <div class="pi-meta">${p.price>0?'$'+p.price.toLocaleString('es-CO')+' COP':'Consultar'}</div>
                 ${tags.length?`<div class="pi-tags">${tags.join('')}</div>`:''}
               </div>
-              <div class="pi-dot ${isActive?'on':'off'}"></div>
+              <div class="pi-dot ${isActive?'on':'off'}" onclick="event.stopPropagation();quickToggleVis(${p.id})" title="${isActive?'Ocultar':'Mostrar'}"></div>
             </div>`;
         });
       });
       document.getElementById('sideList').innerHTML=html||`<div style="padding:1.5rem;text-align:center;color:rgba(255,255,255,.3);font-size:.76rem">No hay ramos</div>`;
+    }
+
+    // ── SELECCIÓN MÚLTIPLE (Bulk) ──
+    function toggleProductSelection(id, checked){
+      if(checked) selectedProducts.add(id); else selectedProducts.delete(id);
+      updateBulkBar();
+      renderSidebar();
+    }
+    function toggleSelectAll(checked){
+      const q=document.getElementById('sideSearch').value.toLowerCase();
+      const visible=adminProducts.filter(p=>{
+        const mQ=!q||p.name.toLowerCase().includes(q);
+        const mC=!sideFilterCat||p.cat===sideFilterCat; return mQ&&mC;
+      });
+      visible.forEach(p=>{ if(checked) selectedProducts.add(p.id); else selectedProducts.delete(p.id); });
+      updateBulkBar();
+      renderSidebar();
+    }
+    function updateBulkBar(){
+      const n=selectedProducts.size;
+      const bar=document.getElementById('bulkBar');
+      const cnt=document.getElementById('bulkCount');
+      if(n>0){ bar.classList.add('active'); cnt.textContent=`${n} seleccionado${n>1?'s':''}`; }
+      else { bar.classList.remove('active'); }
+      const allCheck=document.getElementById('selectAllCheck');
+      if(allCheck){ const visible=adminProducts.filter(p=>!sideFilterCat||p.cat===sideFilterCat); allCheck.checked=visible.length>0&&visible.every(p=>selectedProducts.has(p.id)); }
+    }
+    async function bulkDeleteProducts(){
+      if(!selectedProducts.size) return;
+      const n=selectedProducts.size;
+      if(!confirm(`¿Eliminar definitivamente ${n} ramo${n>1?'s':''}? Esta acción no se puede deshacer.`)) return;
+      const btn=document.querySelector('.bulk-delete'); if(btn){btn.disabled=true;btn.textContent='⏳ Eliminando...';}
+      const ids=[...selectedProducts];
+      let ok=0,err=0;
+      for(const id of ids){
+        try{ await sbAdminDeleteProduct(id); adminProducts=adminProducts.filter(p=>p.id!==id); ok++; }
+        catch{ err++; }
+      }
+      selectedProducts.clear();
+      if(selectedId&&!adminProducts.find(p=>p.id===selectedId)){ selectedId=null; showEditorEmpty(); }
+      renderSidebar(); renderStats(); updateBulkBar();
+      if(btn){btn.disabled=false;btn.textContent='🗑️ Eliminar';}
+      showToast(err?`✓ ${ok} eliminados, ${err} errores`:`🗑️ ${ok} eliminado${ok>1?'s':''}`);
+      addToHistory(`🗑️ Eliminados: ${ok} ramos`);
+    }
+    async function bulkToggleVisibility(makeVisible){
+      if(!selectedProducts.size) return;
+      const ids=[...selectedProducts];
+      const label=makeVisible?'visibles':'ocultos';
+      showToast(`⏳ Procesando ${ids.length} productos...`);
+      for(const id of ids){
+        const idx=adminProducts.findIndex(p=>p.id===id); if(idx===-1) continue;
+        try{ adminProducts[idx].activo=makeVisible; await sbAdminSaveProduct({...adminProducts[idx],_isNew:false}); }
+        catch{}
+      }
+      selectedProducts.clear();
+      renderSidebar(); renderStats(); updateBulkBar();
+      showToast(`✓ ${ids.length} ramos ${label}`);
+      addToHistory(`👁 ${ids.length} ramos ${label}`);
+    }
+
+    function openBulkMoveModal() {
+      if(!selectedProducts.size) return;
+      const moves = adminCategories.filter(c=>c.id!=='todos').map(c=>`
+        <button class="move-cat-option" onclick="bulkMoveTo('${c.id}')">
+          <span class="mco-icon">${c.icon||'🌸'}</span>
+          <span class="mco-name">${c.nombre||c.name}</span>
+        </button>
+      `).join('');
+      document.getElementById('moveOptionsList').innerHTML=moves;
+      document.getElementById('moveModal').classList.add('open');
+    }
+
+    async function bulkMoveTo(catId) {
+      if(!selectedProducts.size) return;
+      const ids=[...selectedProducts];
+      const cat = adminCategories.find(c=>c.id===catId);
+      const catLabel = cat?.nombre || cat?.name || catId;
+      
+      document.getElementById('moveModal').classList.remove('open');
+      showToast(`🚚 Moviendo ${ids.length} ramos a ${catLabel}...`);
+      
+      for(const id of ids){
+        const idx=adminProducts.findIndex(p=>p.id===id); if(idx===-1) continue;
+        try{ 
+          adminProducts[idx].cat=catId; 
+          await sbAdminSaveProduct({...adminProducts[idx],_isNew:false}); 
+        } catch{}
+      }
+      selectedProducts.clear();
+      renderSidebar(); renderStats(); updateBulkBar();
+      showToast(`✓ Movid@s a ${catLabel}`);
+      addToHistory(`📂 ${ids.length} ramos movidos a ${catLabel}`);
     }
 
     function selectProduct(id){
@@ -340,7 +492,8 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
 
     function buildEditorHTML(p){
       const isNew=!p;
-      const cats=categories.filter(c=>c.id!=='todos').map(c=>`<option value="${c.id}" ${p?.cat===c.id?'selected':''}>${c.icon} ${c.name}</option>`).join('');
+      const catSource = adminCategories.length ? adminCategories : categories.filter(c=>c.id!=='todos');
+      const cats=catSource.filter(c=>c.id!=='todos').map(c=>`<option value="${c.id}" ${p?.cat===c.id?'selected':''}>${c.icon||'🌸'} ${c.nombre||c.name}</option>`).join('');
       return `
         <input type="hidden" id="editingId" value="${p?.id||''}">
         <div class="editor-card">
@@ -361,7 +514,19 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
             <div class="field"><label>Precio (COP)</label><input type="number" id="fPrecio" value="${p?.price||0}" oninput="updatePreview()" min="0"></div>
             <div class="field"><label>Categoría *</label><select id="fCat" onchange="updatePreview()">${cats}</select></div>
             <div class="field"><label>Emoji (si no hay foto)</label><input type="text" id="fEmoji" value="${p?.emoji||'🌸'}" oninput="updatePreview()"></div>
-            <div class="field field-full"><label>Descripción / detalles</label><textarea id="fDesc" oninput="updatePreview()" rows="2" placeholder="Envío gratis · 3 rosas + margaritas">${p?.desc||''}</textarea></div>
+            <div class="field field-full">
+              <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: .3rem">
+                <label style="margin-bottom:0">Descripción / detalles</label>
+                <select id="descTemplate" onchange="if(this.value){ document.getElementById('fDesc').value=getDescTemplate(this.value); updatePreview(); this.value=''; }" style="width:auto; padding:.25rem .5rem; font-size:.65rem; border-radius:6px; border:1px solid var(--lila-light); background:var(--lila-xlight); color:var(--lila-dark); cursor:pointer; font-weight:600">
+                  <option value="">✨ Plantillas rápidas...</option>
+                  <option value="ramo">💐 Ramo clásico</option>
+                  <option value="amigurumi">🧸 Amigurumi / Personaje</option>
+                  <option value="maceta">🪴 Maceta</option>
+                  <option value="especial">✨ Edición Especial</option>
+                </select>
+              </div>
+              <textarea id="fDesc" oninput="updatePreview()" rows="3" placeholder="Escribe aquí o elige una plantilla arriba...">${p?.desc||''}</textarea>
+            </div>
             <div class="field field-full"><label>Estado</label>
               <select id="fActivo" onchange="updatePreview()">
                 <option value="true" ${p?.activo!==false?'selected':''}>✅ Visible en tienda</option>
@@ -371,11 +536,15 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           </div>
           <div class="img-upload-section">
             <div class="img-upload-header"><span class="img-upload-title">📸 Fotos del producto</span></div>
-            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-              <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(this.files)">
+            <div class="upload-zone" 
+                 onclick="document.getElementById('fileInput').click()"
+                 ondragover="event.preventDefault(); this.classList.add('dragover')"
+                 ondragleave="event.preventDefault(); this.classList.remove('dragover')"
+                 ondrop="event.preventDefault(); this.classList.remove('dragover'); if(event.dataTransfer.files.length) handleFileUpload(event.dataTransfer.files)">
+              <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleFileUpload(this.files)">
               <div class="upload-zone-icon">📤</div>
-              <div class="upload-zone-text">Clic para subir foto</div>
-              <div class="upload-zone-sub">JPG, PNG, WEBP · Se optimiza automáticamente</div>
+              <div class="upload-zone-text">Arrastra fotos aquí o haz clic para subir</div>
+              <div class="upload-zone-sub">JPG, PNG, WEBP · Se renombran y optimizan automáticamente para SEO</div>
             </div>
             <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
             <div class="img-preview-row" id="imgPreviewRow"></div>
@@ -405,13 +574,22 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
               <div class="field"><label>Precio con oferta</label><input type="number" id="fPrecioOferta" value="${p?.precioOferta||0}" min="0"></div>
             </div>
           </div>
+          <details class="t-card" style="padding:1rem; margin-top: 1rem; margin-bottom: 0; border:1px solid var(--border); box-shadow:none;">
+            <summary style="font-weight:700; font-size:0.75rem; cursor:pointer; color:var(--lila-dark); display:flex; align-items:center; gap:.4rem">🔍 Ajustes Avanzados de Búsqueda (SEO Google)</summary>
+            <div class="form-grid" style="margin-top:0.8rem;">
+              <div class="field field-full"><label>Título en Google (Meta Title)</label><input type="text" id="fMetaTitle" value="${p?.metaTitle||''}" placeholder="Ej: Ramo de Girasoles a Crochet - Sueño de Van Gogh"></div>
+              <div class="field field-full"><label>Palabras clave (Keywords)</label><input type="text" id="fSeoKeywords" value="${p?.seoKeywords||''}" placeholder="Ej: girasoles amarillos, regalo novia, flores tejidas"></div>
+              <div class="field field-full"><label>Descripción para Google</label><textarea id="fMetaDesc" rows="2" placeholder="Dejar vacío para que Google use la descripción principal...">${p?.metaDescription||''}</textarea></div>
+              <div class="field field-full"><label>Texto foto (Alt Text)</label><input type="text" id="fAltText" value="${p?.altText||''}" placeholder="Descripción de la foto para invidentes y SEO"></div>
+            </div>
+          </details>
           <div class="preview-panel">
             <div class="preview-label">Vista previa en tienda</div>
             <div class="preview-card-wrap"><div class="preview-card" id="livePreview"></div></div>
           </div>
           <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem">
             <button class="btn-save" id="saveProdBtn" onclick="saveProduct()">
-              <Icon name="save"  /> <span>${isNew?'Crear producto':'Guardar cambios'}</span>
+              💾 <span>${isNew?'Crear producto':'Guardar cambios'}</span>
             </button>
             <button class="btn-cancel" onclick="showEditorEmpty()">Cancelar</button>
           </div>
@@ -423,12 +601,24 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       document.getElementById('tab-productos').innerHTML=buildEditorHTML(p);
       renderImgPreviews();updatePreview();
     }
+    
+    function getDescTemplate(type) {
+      const templates = {
+        ramo: "Hermoso ramo tejido a mano con hilo de algodón 100% hipoalergénico. Incluye envoltura premium y tarjeta. Flores que nunca se marchitan, el detalle perfecto para sorprender.",
+        amigurumi: "Adorable amigurumi tejido a mano con atención a cada detalle. Ideal para coleccionar, decorar o dar un regalo verdaderamente único y personalizado.",
+        maceta: "Tierna maceta tejida a crochet. La alternativa perfecta para decorar tu escritorio o habitación con naturaleza eterna que no necesita riego ni cuidados especiales.",
+        especial: "Diseño especial y exclusivo elaborado a mano. Cada puntada refleja calidad y dedicación, creando un obsequio premium verdaderamente inolvidable."
+      };
+      return templates[type] || '';
+    }
+
     function toggleOfertaFields(){document.getElementById('ofertaFields').style.display=document.getElementById('fTagOferta').checked?'block':'none';}
 
     async function handleFileUpload(files){
       if(!files.length)return;
-      for(const file of files){
-        const url=await uploadToCloudinary(file);
+      for(let i=0; i<files.length; ++i){
+        const file = files[i];
+        const url=await uploadToCloudinary(file, null, i);
         if(url){currentEditingImgs.push(url);if(!document.getElementById('fImg').value)document.getElementById('fImg').value=url;renderImgPreviews();updatePreview();}
       }
     }
@@ -497,8 +687,12 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       if(tagNuevo){badge='Nuevo';badgeClass='nuevo';}else if(tagPopular){badge='Popular';}else if(tagEspecial){badge='Especial';}
       const precioOriginal=parseInt(document.getElementById('fPrecioOriginal')?.value)||0;
       const precioOferta=parseInt(document.getElementById('fPrecioOferta')?.value)||0;
+      const metaTitle=document.getElementById('fMetaTitle')?.value.trim()||'';
+      const seoKeywords=document.getElementById('fSeoKeywords')?.value.trim()||'';
+      const metaDesc=document.getElementById('fMetaDesc')?.value.trim()||'';
+      const altText=document.getElementById('fAltText')?.value.trim()||'';
       if(!nombre){showToast('⚠️ Nombre obligatorio');return;}
-      const data={name:nombre,price:precio,cat,emoji,desc,img,imgs,badge,badgeClass,activo,oferta:tagOferta,envioGratis:tagEnvio,stock,precioOriginal:tagOferta?precioOriginal:0,precioOferta:tagOferta?precioOferta:0};
+      const data={name:nombre,price:precio,cat,emoji,desc,img,imgs,badge,badgeClass,activo,oferta:tagOferta,envioGratis:tagEnvio,stock,precioOriginal:tagOferta?precioOriginal:0,precioOferta:tagOferta?precioOferta:0,metaTitle,seoKeywords,metaDescription:metaDesc,altText};
       const btn=document.getElementById('saveProdBtn');
       if(btn){btn.disabled=true;btn.querySelector('span').textContent='...';}
       try{
@@ -564,20 +758,212 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
             <button class="p-action-btn" style="color:var(--red)" onclick="deletePedido(${p.id})">🗑️</button>
           </div>
         </div>`).join(''):`<div style="text-align:center;padding:2rem;color:var(--soft)">No hay pedidos</div>`;}
-
-    /* ── CATEGORÍAS ── */
-    function renderCategoriasList() {
-      document.getElementById('catAdminList').innerHTML = adminCategories.length ? adminCategories.map(c => `
-        <div class="cat-admin-card">
-          <div class="ca-icon">${c.icon}</div>
-          <div class="ca-info"><div class="ca-name">${c.nombre}</div><div class="ca-slug">ID: ${c.id}</div></div>
-          <div class="ca-actions"><button class="ca-btn" onclick="editCategory('${c.id}')"><Icon name="edit"  /></button></div>
-        </div>`).join('') : '';
+    /* ── CATEGORY MANAGER desde el panel de Productos ── */
+    function showCategoryManager(){
+      document.getElementById('tab-productos').innerHTML=`
+        <div class="editor-card">
+          <div class="ec-header">
+            <div>
+              <div class="ec-title">📁 Gestionar Categorías</div>
+              <div class="ec-sub">Crea, edita u elimina las categorías de tu catálogo</div>
+            </div>
+            <div class="ec-actions">
+              <button class="btn-vis on" onclick="newCategory()">+ Nueva categoría</button>
+              <button class="btn-cancel" onclick="showEditorEmpty()">Volver</button>
+            </div>
+          </div>
+          <div class="cat-admin-grid" id="catAdminList" style="margin-top:1rem"></div>
+        </div>`;
+      renderCategoriasList();
     }
-    function newCategory() { document.getElementById('catModalTitle').textContent = 'Nueva categoría'; document.getElementById('catEditId').value = ''; document.getElementById('catId').value = ''; document.getElementById('catId').disabled = false; document.getElementById('catNombre').value = ''; document.getElementById('catIcon').value = '🌸'; document.getElementById('catModal').classList.add('open'); }
-    function editCategory(id) { const c = adminCategories.find(x => x.id === id); if (!c) return; document.getElementById('catEditId').value = id; document.getElementById('catId').value = id; document.getElementById('catId').disabled = true; document.getElementById('catNombre').value = c.nombre; document.getElementById('catIcon').value = c.icon; document.getElementById('catModal').classList.add('open'); }
-    function closeCatModal() { document.getElementById('catModal').classList.remove('open'); }
-    async function saveCategory() { const id = document.getElementById('catId').value.trim().toLowerCase(); const data = { id, nombre: document.getElementById('catNombre').value.trim(), icon: document.getElementById('catIcon').value.trim() || '🌸', activo: true }; try { await sbAdminSaveCategory(data, !document.getElementById('catEditId').value); loadAll(); closeCatModal(); showToast(`✓ Guardada`); } catch { showToast('❌ Error'); } }
+    async function deleteCategoryFromSidebar(id) {
+      // Reutiliza la misma lógica robusta del modal
+      await deleteCategory(id);
+    }
+
+    /* ── CATEGORÍAS (modal) ── */
+    function renderCategoriasList() {
+      const el = document.getElementById('catAdminList');
+      if (!el) return;
+      el.innerHTML = adminCategories.length ? adminCategories.map(c => {
+        const total = adminProducts.filter(p=>p.cat===c.id).length;
+        const vis   = adminProducts.filter(p=>p.cat===c.id&&p.activo!==false).length;
+        return `
+        <div class="cat-admin-card">
+          <div class="ca-icon">${c.icon||'🌸'}</div>
+          <div class="ca-info">
+            <div class="ca-name">${c.nombre||c.name}</div>
+            <div class="ca-slug">ID: ${c.id} · <strong style="color:var(--lila)">${total}</strong> producto${total!==1?'s':''} (${vis} visible${vis!==1?'s':''})</div>
+          </div>
+          <div class="ca-actions">
+            <button class="ca-btn" onclick="editCategory('${c.id}')" title="Editar">✏️</button>
+            <button class="ca-btn ca-del" onclick="deleteCategory('${c.id}')" title="Eliminar">🗑️</button>
+          </div>
+        </div>`;
+      }).join('') : '<div style="padding:2rem;text-align:center;color:var(--soft)">Sin categorías. Crea una nueva.</div>';
+    }
+
+    function newCategory() {
+      document.getElementById('catModalTitle').textContent = 'Nueva categoría';
+      document.getElementById('catModalSub').textContent = 'Crea una nueva sección en tu catálogo';
+      document.getElementById('catEditId').value = '';
+      document.getElementById('catId').value = '';
+      document.getElementById('catId').disabled = false;
+      document.getElementById('catNombre').value = '';
+      document.getElementById('catIcon').value = '🌸';
+      document.getElementById('catOrden').value = adminCategories.length + 1;
+      document.getElementById('catStatsRow').style.display = 'none';
+      document.getElementById('emojiPickerPanel').classList.remove('open');
+      loadEmojiGrid('flores');
+      document.getElementById('catModal').classList.add('open');
+    }
+
+    function editCategory(id) {
+      const c = adminCategories.find(x => x.id === id);
+      if (!c) return;
+      const total   = adminProducts.filter(p=>p.cat===id).length;
+      const visibles = adminProducts.filter(p=>p.cat===id&&p.activo!==false).length;
+      document.getElementById('catModalTitle').textContent = 'Editar categoría';
+      document.getElementById('catModalSub').textContent = `Actualizando: ${c.nombre||c.name}`;
+      document.getElementById('catEditId').value = id;
+      document.getElementById('catId').value = id;
+      document.getElementById('catId').disabled = true;
+      document.getElementById('catNombre').value = c.nombre || c.name || '';
+      document.getElementById('catIcon').value = c.icon || '🌸';
+      document.getElementById('catOrden').value = c.orden || 1;
+      // Mostrar stats de productos
+      document.getElementById('catStatsRow').style.display = 'flex';
+      document.getElementById('catStatTotal').textContent = total;
+      document.getElementById('catStatVisible').textContent = visibles;
+      document.getElementById('catStatOcultos').textContent = total - visibles;
+      document.getElementById('emojiPickerPanel').classList.remove('open');
+      loadEmojiGrid('flores');
+      document.getElementById('catModal').classList.add('open');
+    }
+
+    function closeCatModal() {
+      document.getElementById('catModal').classList.remove('open');
+      document.getElementById('emojiPickerPanel').classList.remove('open');
+    }
+
+    async function saveCategory() {
+      const id = document.getElementById('catId').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-');
+      const nombre = document.getElementById('catNombre').value.trim();
+      const icon   = document.getElementById('catIcon').value.trim() || '🌸';
+      const orden  = parseInt(document.getElementById('catOrden').value) || adminCategories.length + 1;
+      if (!id || !nombre) { showToast('⚠️ ID y nombre son obligatorios'); return; }
+      const data = { id, nombre, icon, orden, activo: true };
+      const isNew = !document.getElementById('catEditId').value;
+      const btn = document.getElementById('catSaveBtn');
+      if(btn){btn.disabled=true;btn.textContent='⏳ Guardando...';}
+      try {
+        await sbAdminSaveCategory(data, isNew);
+        if (isNew) {
+          adminCategories.push(data);
+        } else {
+          const idx = adminCategories.findIndex(c=>c.id===id);
+          if(idx!==-1) adminCategories[idx] = {...adminCategories[idx], ...data};
+        }
+        adminCategories.sort((a,b)=>(a.orden||0)-(b.orden||0));
+        buildSideFilters();
+        renderCategoriasList();
+        closeCatModal();
+        showToast(`✓ Categoría ${isNew?'creada':'actualizada'}`);
+        addToHistory(`📁 Categoría ${isNew?'creada':'editada'}: ${nombre}`);
+      } catch {
+        showToast('❌ Error al guardar');
+      } finally {
+        if(btn){btn.disabled=false;btn.textContent='Guardar categoría';}
+      }
+    }
+    async function deleteCategory(id) {
+      const cat = adminCategories.find(c=>c.id===id);
+      const label = cat?.nombre || cat?.name || id;
+      const prods = adminProducts.filter(p=>p.cat===id);
+      const msg = prods.length
+        ? `¿Eliminar la categoría "${label}" y sus ${prods.length} producto${prods.length>1?'s':''}? Todo se borrará permanentemente.`
+        : `¿Eliminar la categoría vacía "${label}"?`;
+      if(!confirm(msg)) return;
+
+      // Eliminar productos con progreso visible
+      if(prods.length > 0){
+        for(let i=0; i<prods.length; i++){
+          showToast(`⏳ Eliminando productos ${i+1} de ${prods.length}...`);
+          const p = prods[i];
+          try{ await sbAdminDeleteProduct(p.id); adminProducts=adminProducts.filter(x=>x.id!==p.id); }catch{}
+        }
+      }
+
+      // Eliminar la categoría
+      try {
+        await sbAdminDeleteCategory(id);
+        adminCategories = adminCategories.filter(c=>c.id!==id);
+        if(sideFilterCat===id) { sideFilterCat=''; selectedProducts.clear(); }
+        buildSideFilters();
+        renderCategoriasList();
+        renderSidebar(); renderStats(); updateBulkBar();
+        if(selectedId && !adminProducts.find(p=>p.id===selectedId)) { selectedId=null; showEditorEmpty(); }
+        const msg2 = prods.length ? `🗑️ Categoría y ${prods.length} producto${prods.length>1?'s':''} eliminados` : '🗑️ Categoría eliminada';
+        showToast(msg2);
+        addToHistory(`🗑️ Eliminada: ${label} (${prods.length} productos)`);
+      } catch { showToast('❌ Error al eliminar la categoría'); }
+    }
+
+    /* ── EMOJI PICKER ── */
+    const EMOJI_CATS = {
+      flores:     ['🌸','🌹','🌺','🌻','🌼','🌷','🏵️','🌶️','🌽','🌾','🎐','🍂','🍃','🍁','🌱','🍲','🌳','🌲','🍀','🌿'],
+      animales:   ['🐶','🐱','🐇','🐼','🐻','🦚','🐦','🦋','🐝','🦊','🐄','🧿','🐔','🐪','🦧','🐠','🐟','🐈‍⬛','🐑','🦄'],
+      objetos:    ['🎁','🎀','🎂','💍','💎','🎉','🥰','💖','💝','💟','🎨','😀','😍','📸','🛒','📦','🇨🇴','💌','🧧','🧶'],
+      corazones:  ['❤️','🧡','💛','💚','💙','💜','🤍','🤎','🖤','💞','💕','💟','💔','💓','💖','💗','💘','💝','♥️','🇨🇴'],
+      naturaleza: ['🌎','🌟','✨','💫','🌙','☀️','🌈','⚡','❄️','🌊','🏔️','🇬🏾','🌌','🏡','🌾','🏕️','🏞️','🎅','🎄','⛄'],
+    };
+
+    function toggleEmojiPicker() {
+      const panel = document.getElementById('emojiPickerPanel');
+      panel.classList.toggle('open');
+    }
+
+    function loadEmojiGrid(cat) {
+      const grid = document.getElementById('emojiGrid');
+      let list = cat === 'todos'
+        ? Object.values(EMOJI_CATS).flat()
+        : (EMOJI_CATS[cat] || EMOJI_CATS.flores);
+      grid.innerHTML = list.map(e =>
+        `<button type="button" class="ep-emoji-btn" onclick="selectEmoji('${e}')">${e}</button>`
+      ).join('');
+    }
+
+    function showEmojiCat(cat) {
+      document.querySelectorAll('.ep-categories button').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      loadEmojiGrid(cat);
+    }
+
+    function filterEmojis(q) {
+      const all = Object.values(EMOJI_CATS).flat();
+      const list = q ? all.filter(e => e.includes(q)) : all;
+      const grid = document.getElementById('emojiGrid');
+      grid.innerHTML = list.map(e =>
+        `<button type="button" class="ep-emoji-btn" onclick="selectEmoji('${e}')">${e}</button>`
+      ).join('');
+    }
+
+    function selectEmoji(emoji) {
+      document.getElementById('catIcon').value = emoji;
+      document.getElementById('emojiPickerPanel').classList.remove('open');
+    }
+
+    // Inicializar picker al cargar
+    document.addEventListener('DOMContentLoaded', () => loadEmojiGrid('flores'));
+
+    // Cerrar picker al clic fuera
+    document.addEventListener('click', (e) => {
+      const panel = document.getElementById('emojiPickerPanel');
+      const btn   = document.querySelector('.btn-emoji-picker');
+      if (panel && !panel.contains(e.target) && btn && !btn.contains(e.target)) {
+        panel.classList.remove('open');
+      }
+    });
 
     /* ── DASHBOARD ── */
     function renderDashboard(){
@@ -609,7 +995,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           <div class="banner-admin-card" style="margin-bottom: 1rem; border: 1px solid #eee; padding: 1.2rem; border-radius: 1.2rem; background: #fff;">
             <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
                <h4 style="margin:0; font-family:serif; font-size: 1rem; color: var(--lila-dark)">${b.afterCat.startsWith('home') ? 'Banner Inicio ' + b.afterCat.slice(-1) : 'Categoría: ' + b.afterCat}</h4>
-               <button onclick="removeBanner(${realIdx})" style="background: none; color: #ef4444; border:none; padding: 5px; cursor:pointer; font-size: 1.1rem;"><Icon name="delete-bin"  /></button>
+               <button onclick="removeBanner(${realIdx})" style="background: none; color: #ef4444; border:none; padding: 5px; cursor:pointer; font-size: 1.1rem;">🗑️</button>
             </div>
             
             <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
@@ -643,7 +1029,8 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     };
     window.uploadBannerImg = async function(i, files) {
       if(!files.length) return;
-      const url = await uploadToCloudinary(files[0]);
+      const bTitle = editorialBannersAdmin[i].title.replace(/<[^>]+>/g, '') || 'banner';
+      const url = await uploadToCloudinary(files[0], bTitle, 0);
       if(url) {
         editorialBannersAdmin[i].imgUrl = url;
         renderBannerList();
@@ -656,7 +1043,21 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     function renderCatViewsList(){ document.getElementById('catViewsList').innerHTML=categories.filter(c=>c.id!=='todos').map(c=>`<div>${c.name}</div>`).join(''); }
 
     async function saveConfig(){
-      const newCfg={ramoDestacado:momentoSelection,carruselHero:heroSelection,descuentoActivo:document.getElementById('toggleDescuento').classList.contains('on'),descuentoCodigo:document.getElementById('descCodigo').value.trim(),descuentoPorcentaje:parseInt(document.getElementById('descPorcentaje').value)||10,descuentoTexto:document.getElementById('descTexto').value.trim(),wompiActivo:document.getElementById('toggleWompi').classList.contains('on'),wompiKey:document.getElementById('wompiKey').value.trim(),metaPixelActivo:document.getElementById('toggleMetaPixel').classList.contains('on'),metaPixelId:document.getElementById('metaPixelId').value.trim(),catViews:{}};
+      const newCfg={
+        ramoDestacado:momentoSelection,
+        carruselHero:heroSelection,
+        descuentoActivo:document.getElementById('toggleDescuento').classList.contains('on'),
+        descuentoCodigo:document.getElementById('descCodigo').value.trim(),
+        descuentoPorcentaje:parseInt(document.getElementById('descPorcentaje').value)||10,
+        descuentoTexto:document.getElementById('descTexto').value.trim(),
+        wompiActivo:document.getElementById('toggleWompi').classList.contains('on'),
+        wompiKey:document.getElementById('wompiKey').value.trim(),
+        wompiIntegrity:document.getElementById('wompiIntegrity').value.trim(),
+        wompiEvents:document.getElementById('wompiEvents').value.trim(),
+        metaPixelActivo:document.getElementById('toggleMetaPixel').classList.contains('on'),
+        metaPixelId:document.getElementById('metaPixelId').value.trim(),
+        catViews:{}
+      };
       try{ await sbAdminSaveConfig(newCfg); await sbAdminSaveBanners(editorialBannersAdmin); showToast('✅ Guardado'); }catch{ showToast('❌ Error');}
     }
     function showToast(msg){ const t=document.getElementById('toastAdmin'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }

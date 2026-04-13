@@ -6,10 +6,34 @@ import Icon from '../Icon.astro';
 <!-- SIDEBAR -->
 <div class="left-col" id="leftCol">
   <div class="left-header">
-    <div class="left-title">🌸 Mis ramos</div>
+    <div class="left-title-row">
+      <div class="left-title">🌸 Mis ramos</div>
+      <button class="btn-manage-cats" onclick="showCategoryManager()" title="Gestionar categorías">
+        📁 <span>Categorías</span>
+      </button>
+    </div>
     <input class="left-search" type="text" id="sideSearch" placeholder="Buscar ramo..." oninput="renderSidebar()">
     <div class="left-filters" id="sideFilters"></div>
   </div>
+
+  <!-- BARRA DE ACCIONES MASIVAS (oculta por defecto) -->
+  <div class="bulk-bar" id="bulkBar">
+    <div class="bulk-info">
+      <input type="checkbox" id="selectAllCheck" onchange="toggleSelectAll(this.checked)" title="Seleccionar todos">
+      <span id="bulkCount">0 seleccionados</span>
+    </div>
+    <div class="bulk-actions">
+      <div class="bulk-group">
+        <button class="bulk-btn bulk-hide" onclick="bulkToggleVisibility(false)" title="Ocultar">👁‍🗨</button>
+        <button class="bulk-btn bulk-show" onclick="bulkToggleVisibility(true)" title="Mostrar">✅</button>
+      </div>
+      <div class="bulk-group">
+        <button class="bulk-btn bulk-move" onclick="openBulkMoveModal()" title="Mover a otra categoría">📂 Mover</button>
+        <button class="bulk-btn bulk-delete" onclick="bulkDeleteProducts()" title="Eliminar">🗑️</button>
+      </div>
+    </div>
+  </div>
+
   <div class="left-stats" id="sideStats"></div>
   <button class="btn-add-prod" onclick="newProduct()">
     <Icon name="add"  /> Agregar ramo nuevo

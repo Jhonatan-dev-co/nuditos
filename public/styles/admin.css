@@ -131,6 +131,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);heig
 .img-upload-title{font-size:.72rem;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.5px}
 .upload-zone{border:2px dashed var(--lila-light);border-radius:10px;padding:1.2rem;text-align:center;cursor:pointer;background:var(--lila-xlight);transition:all .2s;margin-bottom:.65rem;position:relative;}
 .upload-zone:hover{border-color:var(--lila);background:#eee9fe}
+.upload-zone.dragover{border-color:var(--lila-dark);background:#e0d4fc;transform:scale(1.02)}
 .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .upload-zone-icon{font-size:1.6rem;margin-bottom:.3rem}
 .upload-zone-text{font-size:.78rem;color:var(--lila-dark);font-weight:600}
@@ -381,3 +382,87 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);heig
 
 .t-header-row{display:flex;align-items:center;justify-content:space-between;gap:1.2rem;margin-bottom:1.4rem;flex-wrap:wrap}
 
+/* ── BULK ACTIONS BAR ── */
+.left-title-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.45rem}
+.btn-manage-cats{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);padding:.26rem .6rem;border-radius:8px;font-size:.65rem;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:.3rem;white-space:nowrap;flex-shrink:0}
+.btn-manage-cats:hover{background:var(--lila);color:#fff;border-color:var(--lila)}
+.bulk-bar{background:rgba(139,92,246,.18);border-bottom:1px solid rgba(139,92,246,.3);padding:.38rem .7rem;display:none;align-items:center;gap:.5rem;flex-wrap:wrap;flex-shrink:0}
+.bulk-bar.active{display:flex}
+.bulk-info{display:flex;align-items:center;gap:.4rem;min-width:0}
+.bulk-info input[type=checkbox]{width:15px;height:15px;accent-color:var(--lila);cursor:pointer;flex-shrink:0}
+#bulkCount{font-size:.68rem;font-weight:600;color:#c4b5fd;white-space:nowrap}
+.bulk-actions{display:flex;gap:.3rem;flex-wrap:wrap;margin-left:auto}
+.bulk-btn{font-size:.63rem;font-weight:700;padding:.24rem .58rem;border-radius:6px;cursor:pointer;font-family:'Outfit',sans-serif;border:none;transition:all .18s;white-space:nowrap}
+.bulk-hide{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
+.bulk-hide:hover{background:rgba(255,255,255,.2);color:#fff}
+.bulk-show{background:rgba(16,185,129,.2);color:#6ee7b7}
+.bulk-show:hover{background:var(--mint);color:#fff}
+.bulk-delete{background:rgba(239,68,68,.2);color:#fca5a5}
+.bulk-delete:hover{background:var(--red);color:#fff}
+.bulk-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── CHECKBOX EN PROD-ITEM ── */
+.prod-check{width:14px;height:14px;accent-color:var(--lila);cursor:pointer;flex-shrink:0;opacity:.5;transition:opacity .15s}
+.prod-item:hover .prod-check,.prod-item.bulk-selected .prod-check{opacity:1}
+.prod-item.bulk-selected{background:rgba(139,92,246,.22);border-color:rgba(139,92,246,.45)}
+
+/* ── CATEGORÍA INLINE EN SIDEBAR ── */
+.cat-group-label{font-size:.58rem;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px;padding:.55rem .45rem .22rem;display:flex;align-items:center;justify-content:space-between}
+.cat-group-del{background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:.75rem;padding:.1rem .25rem;border-radius:4px;transition:all .18s;line-height:1;flex-shrink:0}
+.cat-group-del:hover{color:#fca5a5;background:rgba(239,68,68,.15)}
+
+/* ── DOT de visibilidad clickeable ── */
+.pi-dot{cursor:pointer;width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:transform .2s}
+.pi-dot:hover{transform:scale(1.6)}
+.pi-dot.on{background:var(--mint)}.pi-dot.off{background:#374151}
+
+/* ── MODAL CATEGORÍA MEJORADO ── */
+.cat-modal-box{max-width:500px}
+
+.emoji-field-row{display:flex;align-items:center;gap:.55rem;position:relative}
+.emoji-field-row input{flex-shrink:0}
+.btn-emoji-picker{background:var(--lila-light);color:var(--lila-dark);border:1.5px solid var(--lila-light);border-radius:10px;padding:.48rem .85rem;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-emoji-picker:hover{background:var(--lila);color:#fff}
+
+.emoji-picker-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;width:300px;background:#fff;border:1.5px solid var(--border);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:500;padding:.7rem;}
+.emoji-picker-panel.open{display:block}
+.ep-search-row{margin-bottom:.5rem}
+.ep-search-row input{width:100%;padding:.42rem .75rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.8rem;outline:none}
+.ep-search-row input:focus{border-color:var(--lila)}
+.ep-categories{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.55rem}
+.ep-categories button{font-size:.65rem;padding:.2rem .5rem;border:1px solid var(--border);border-radius:20px;background:#fff;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s}
+.ep-categories button:hover,.ep-categories button.active{background:var(--lila);color:#fff;border-color:var(--lila)}
+.ep-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;max-height:160px;overflow-y:auto}
+.ep-grid::-webkit-scrollbar{width:3px}
+.ep-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.ep-emoji-btn{border:none;background:none;font-size:1.2rem;cursor:pointer;padding:.2rem;border-radius:6px;transition:background .15s;line-height:1}
+.ep-emoji-btn:hover{background:var(--lila-xlight)}
+
+/* ── STATS DE CATEGORÍA (en modal editar) ── */
+.cat-stats-row{display:flex;gap:.6rem;background:var(--lila-xlight);border:1px solid var(--lila-light);border-radius:10px;padding:.65rem .9rem;margin-bottom:.85rem}
+.cat-stat-item{display:flex;flex-direction:column;align-items:center;flex:1}
+.stat-num{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--lila)}
+.stat-num.green{color:var(--mint-dark)}.stat-num.red{color:var(--red)}
+.stat-label{font-size:.6rem;color:var(--soft);text-transform:uppercase;letter-spacing:.5px;margin-top:.05rem;text-align:center}
+
+/* ── ACCIONES MASIVAS MEJORADAS ── */
+.bulk-actions{display:flex;gap:.4rem;flex-direction:column}
+.bulk-group{display:flex;gap:.3rem}
+.bulk-btn{flex:1;padding:.45rem .4rem;font-size:.68rem;border-radius:8px;border:none;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:.3rem;transition:all .2s;background:var(--card-bg);color:#fff;border:1px solid rgba(255,255,255,.1)}
+.bulk-btn:hover{background:var(--accent);transform:translateY(-1px);box-shadow:0 4px 12px rgba(109,40,217,0.3)}
+.bulk-btn.bulk-delete:hover{background:var(--red)}
+.bulk-btn.bulk-move:hover{background:var(--lila)}
+
+.prod-item.bulk-selected{background:rgba(109,40,217,.12);border-left:3px solid var(--lila)}
+
+/* ── MODAL MOVER A CATEGORÍA ── */
+.move-options-grid{display:grid;grid-template-columns:1fr;gap:.5rem;max-height:250px;overflow-y:auto;padding-right:.4rem}
+.move-cat-option{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;background:var(--lila-xlight);border:1.5px solid var(--lila-light);border-radius:12px;cursor:pointer;transition:all .2s;text-align:left;width:100%;font-family:'Outfit',sans-serif}
+.move-cat-option:hover{background:var(--lila-light);border-color:var(--lila);transform:scale(1.02);box-shadow:0 8px 20px rgba(0,0,0,0.05)}
+.mco-icon{font-size:1.3rem}
+.mco-name{font-weight:600;color:var(--lila-dark);font-size:.85rem}
+
+/* ── SIDEBAR CONTADORES ── */
+.cat-group-label{display:flex;justify-content:space-between;align-items:center;padding:.8rem .4rem .3rem;border-top:1px solid rgba(255,255,255,0.05);margin-top:.4rem;font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);font-weight:700}
+.cat-group-del{background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;padding:2px;font-size:.8rem;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.cat-group-del:hover{color:var(--red);transform:scale(1.2)}

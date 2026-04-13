@@ -29,9 +29,33 @@ const catMap = Object.fromEntries(categories.map(c => [c.id, c.name]));
 const urlCat = Astro.url.searchParams.get('categoria') || 'todos';
 
 const totalProducts = allProducts.length;
-const seoTitle   = 'Catálogo Nuditos | Ramos Eternos y Amigurumis';
-const seoDesc    = `Explora nuestra colección de ${totalProducts} productos tejidos a mano. Ramos de flores eternas, amigurumis y regalos únicos con envío a toda Colombia.`;
-const canonical  = `${SITE_URL}/catalogo`;
+const catParam = Astro.url.searchParams.get('categoria');
+const activeCat = catParam ? categories.find(c => c.id === catParam) : null;
+
+// SEO Dinámico Priorizando Supabase
+const seoTitle = activeCat?.metaTitle 
+  ? activeCat.metaTitle
+  : (activeCat 
+      ? `${activeCat.name} | La Evolución de las Flores Naturales | Nuditos` 
+      : 'Catálogo de Ramos | La alternativa eterna a las flores naturales | Nuditos');
+
+const seoDesc = activeCat?.metaDescription
+  ? activeCat.metaDescription
+  : (activeCat
+      ? `Regala ${activeCat.name} tejidos a mano. Olvídate de las flores naturales que se marchitan, regala arte eterno. Envíos en toda Colombia.`
+      : `Explora nuestros ramos. Más originales, hermosos y duraderos que las flores naturales. El detalle perfecto que no se marchita. Envío en Colombia.`);
+
+const canonical = `${SITE_URL}/catalogo${catParam ? `?categoria=${catParam}` : ''}`;
+
+// Schema Breadcrumbs
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Inicio", "item": SITE_URL },
+    { "@type": "ListItem", "position": 2, "name": "Catálogo", "item": `${SITE_URL}/catalogo` }
+  ]
+};
 
 // Schema ItemList para SEO
 const schemaItemList = {
@@ -68,6 +92,7 @@ const schemaItemList = {
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(schemaItemList)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
     <meta name="robots" content="index, follow" />
     <script is:inline set:html={`window.NUDITOS_LIVE_PRODUCTS = ${JSON.stringify(allProducts)};`}></script>
   </Fragment>
@@ -171,6 +196,15 @@ const schemaItemList = {
         Quitar Filtros
       </button>
     </div>
+
+    <!-- SECCIÓN SEO INFERIOR CATEGORÍA (OPCIONAL) -->
+    {activeCat?.descripcionSeo && (
+      <section class="mt-20 pt-12 border-t border-stone-100">
+        <div class="max-w-4xl min-h-[50px] prose prose-stone prose-sm md:prose-base text-stone-500">
+          <div set:html={activeCat.descripcionSeo}></div>
+        </div>
+      </section>
+    )}
   </main>
 </Layout>
 

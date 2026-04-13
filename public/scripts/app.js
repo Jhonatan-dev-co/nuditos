@@ -177,11 +177,7 @@ document.addEventListener('astro:page-load', async () => {
   // renderCart(); // Ahora en Nanostores (cart-ui.ts)
   // initSearch(); // Eliminado: ahora manejado por SearchOverlay.astro y search-ui.ts
 
-  // Burbuja de WhatsApp después de 5s
-  setTimeout(() => {
-    const bub = document.getElementById('waBubble');
-    if (bub) bub.classList.add('show');
-  }, 5000);
+  // WhatsApp bubble removed as per user request
 });
 
 

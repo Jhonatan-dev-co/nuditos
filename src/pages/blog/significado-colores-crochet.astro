@@ -5,10 +5,13 @@ import { clUrl } from '../../data/datos';
 
 const post = {
   title: 'El lenguaje de las flores eternas: ¿Qué significa cada color?',
+  slug: 'significado-colores-crochet',
   date: '25 de Marzo, 2026',
+  dateISO: '2026-03-25T10:00:00Z',
   category: 'Regalos',
   author: 'Nuditos Team',
   img: 'https://images.unsplash.com/photo-1490750967868-88aa3386c946?q=80&w=2000&auto=format&fit=crop',
+  desc: 'Descubre el significado detrás de los colores de nuestros ramos de crochet. El lenguaje de las flores eternas.',
   content: `
     <p>Regalar flores es una tradición milenaria, pero regalar flores eternas de crochet tiene un significado aún más profundo: <strong>un sentimiento que no se marchita</strong>.</p>
     
@@ -34,12 +37,42 @@ const post = {
     </div>
   `
 };
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": post.title,
+  "image": post.img,
+  "author": {
+    "@type": "Organization",
+    "name": "Nuditos Tejidos"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Nuditos Tejidos",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://nuditos.com.co/favicon.svg"
+    }
+  },
+  "datePublished": post.dateISO,
+  "dateModified": post.dateISO,
+  "description": post.desc,
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": `https://nuditos.com.co/blog/${post.slug}`
+  }
+};
 ---
 
 <Layout
   title={`${post.title} | Blog Nuditos`}
-  description={post.date + " — " + "Descubre el significado detrás de los colores de nuestros ramos de crochet."}
+  description={post.desc}
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema)} />
+  </Fragment>
+
   <style>
     .article-hero { position: relative; height: 50vh; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }

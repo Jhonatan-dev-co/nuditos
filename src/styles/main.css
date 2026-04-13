@@ -37,8 +37,10 @@
   --shadow-lg:   0 20px 60px rgba(140,95,173,0.18);
   --nav-h:       64px;
   --nav-h-mob:   56px;
-  --glass-bg:    rgba(255, 255, 255, 0.72);
+  --glass-bg:    rgba(255, 255, 255, 0.65);
   --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-blur:  40px;
+  --glass-saturate: 180%;
   --font-serif:  'Jost', sans-serif;
   --font-sans:   'Jost', sans-serif;
 }
@@ -96,8 +98,8 @@ h1, h2, h3, h4, h5, h6 {
 .nav-wrap {
   position:sticky; top:0; z-index:100;
   background: var(--glass-bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-bottom: 1px solid var(--glass-border);
   height: var(--nav-h);
   @media (max-width: 768px) {
@@ -848,8 +850,8 @@ footer { background:var(--text); color:white; padding:5rem 1.5rem 3rem; }
   position:fixed; top:0; right:0;
   width:min(400px,96vw); height:100svh;
   background: var(--glass-bg);
-  backdrop-filter: blur(28px) saturate(200%);
-  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   z-index:201;
   transform:translateX(105%);
   transition:transform 0.42s cubic-bezier(0.4,0,0.2,1);
@@ -1012,7 +1014,8 @@ footer { background:var(--text); color:white; padding:5rem 1.5rem 3rem; }
 .search-overlay {
   position:fixed; inset:0; z-index:200;
   background:rgba(26,18,32,0.55);
-  backdrop-filter:blur(6px);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
   display:flex; align-items:flex-start; justify-content:center;
   padding-top:calc(var(--nav-h) + 1rem);
   opacity:0; pointer-events:none;
@@ -1925,9 +1928,9 @@ footer { background:var(--text); color:white; padding:5rem 1.5rem 3rem; }
   left: 0;
   right: 0;
   height: 68px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   display: none;
   grid-template-columns: repeat(4, 1fr);
   align-items: center;

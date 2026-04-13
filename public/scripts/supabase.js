@@ -129,6 +129,10 @@ function sbToProduct(p) {
     badgeClass:     p.badge_class   || '',
     oferta:         p.oferta        || false,
     envioGratis:    p.envio_gratis  || false,
+    metaTitle:      p.meta_title      || '',
+    metaDescription:p.meta_description || '',
+    altText:        p.alt_text        || '',
+    seoKeywords:    p.seo_keywords    || ''
   };
 }
 
@@ -150,6 +154,10 @@ function productToSb(p) {
     badge_class:      p.badgeClass     || '',
     oferta:           p.oferta         || false,
     envio_gratis:     p.envioGratis    || false,
+    meta_title:       p.metaTitle      || null,
+    meta_description: p.metaDescription|| null,
+    alt_text:         p.altText        || null,
+    seo_keywords:     p.seoKeywords    || null
   };
 }
 
@@ -165,6 +173,8 @@ function sbToConfig(rows) {
     ramoDestacado:        parseInt(m.ramo_destacado)  || 17,
     wompiActivo:          m.wompi_activo        === 'true',
     wompiKey:             m.wompi_key           || '',
+    wompiIntegrity:       m.wompi_integrity_secret || '',
+    wompiEvents:          m.wompi_events_secret || '',
     catViews:             JSON.parse(m.cat_views || '{}'),
     metaPixelActivo:      m.meta_pixel_activo === 'true',
     metaPixelId:          m.meta_pixel_id || '',
@@ -376,6 +386,8 @@ async function sbAdminSaveConfig(cfg) {
     { clave: 'ramo_destacado',       valor: String(cfg.ramoDestacado || 0) },
     { clave: 'wompi_activo',         valor: String(!!cfg.wompiActivo) },
     { clave: 'wompi_key',            valor: cfg.wompiKey            || '' },
+    { clave: 'wompi_integrity_secret', valor: cfg.wompiIntegrity    || '' },
+    { clave: 'wompi_events_secret',    valor: cfg.wompiEvents       || '' },
     { clave: 'cat_views',            valor: JSON.stringify(cfg.catViews || {}) },
     { clave: 'meta_pixel_activo',    valor: String(!!cfg.metaPixelActivo) },
     { clave: 'meta_pixel_id',        valor: cfg.metaPixelId || '' },

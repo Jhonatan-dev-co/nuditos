@@ -16,8 +16,8 @@
 /* ── Header del Checkout ── */
 .co-header {
   background: var(--glass-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-bottom: 1px solid var(--glass-border);
   padding: 0 1.5rem;
   height: var(--nav-h);
@@ -38,12 +38,18 @@
   justify-content: flex-end;
 }
 .co-secure {
-  display: flex; align-items: center; gap: 0.5rem;
-  font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 0.4rem;
   color: var(--text-mid); font-weight: 700;
 }
-.co-secure span { margin-top: 1px; }
-.co-secure-icon { width: 15px; height: 15px; color: var(--text-soft); }
+.co-secure-icon { width: 14px; height: 14px; color: var(--mint-dark); }
+.co-secure-text { 
+  display: none; 
+  font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase;
+}
+@media (min-width: 850px) {
+  .co-secure-text { display: inline; }
+  .co-secure-icon { width: 12px; height: 12px; }
+}
 
 /* ── Título Checkout ── */
 .co-page-title-wrap {
@@ -68,7 +74,8 @@
 }
 .co-acc-item {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border: 1px solid var(--glass-border);
   border-radius: 24px !important;
   overflow: hidden;
@@ -478,8 +485,8 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
 /* ── Panel de Resumen Premium ── */
 .co-summary-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border: 1px solid var(--glass-border);
   border-radius: 24px;
   padding: 1.6rem;
@@ -614,8 +621,8 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
   margin: 1.2rem 0;
   border: 1px solid var(--glass-border);
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border-radius: 12px;
   overflow: hidden;
   box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);

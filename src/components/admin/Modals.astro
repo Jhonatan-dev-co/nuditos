@@ -42,18 +42,92 @@ import Icon from '../Icon.astro';
   </div>
 </div>
 
-<!-- MODAL CATEGORÍA -->
+<!-- ════════ MODAL CATEGORÍA MEJORADO ════════ -->
 <div class="modal-overlay" id="catModal">
-  <div class="modal-box">
+  <div class="modal-box cat-modal-box">
     <div class="modal-title" id="catModalTitle">Nueva categoría</div>
+    <div class="modal-sub" id="catModalSub">Crea una nueva sección en tu catálogo</div>
     <input type="hidden" id="catEditId">
-    <div class="modal-field"><label>ID (Slug - Ej: ramos-novia)</label><input type="text" id="catId" placeholder="ramos-novia"></div>
-    <div class="modal-field"><label>Nombre visible</label><input type="text" id="catNombre" placeholder="Ramos de Novia"></div>
-    <div class="modal-field"><label>Icono / Emoji</label><input type="text" id="catIcon" placeholder="👰"></div>
-    <div class="modal-field"><label>Orden (1, 2, 3...)</label><input type="number" id="catOrden" placeholder="1"></div>
+
+    <!-- ID -->
+    <div class="modal-field">
+      <label>ID Interno (slug) <span style="font-weight:400;color:#9ca3af">— Sin espacios, ej: ramos-novia</span></label>
+      <input type="text" id="catId" placeholder="ramos-novia" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-')">
+    </div>
+
+    <!-- NOMBRE -->
+    <div class="modal-field">
+      <label>Nombre visible en tienda</label>
+      <input type="text" id="catNombre" placeholder="Ramos de Novia">
+    </div>
+
+    <!-- EMOJI + PICKER -->
+    <div class="modal-field">
+      <label>Ícono / Emoji</label>
+      <div class="emoji-field-row">
+        <input type="text" id="catIcon" placeholder="🌸" maxlength="4" style="width:70px;font-size:1.4rem;text-align:center">
+        <button type="button" class="btn-emoji-picker" onclick="toggleEmojiPicker()">
+          🎨 Elegir emoji
+        </button>
+      </div>
+      <!-- EMOJI PICKER PANEL -->
+      <div class="emoji-picker-panel" id="emojiPickerPanel">
+        <div class="ep-search-row">
+          <input type="text" id="emojiSearch" placeholder="Buscar emoji..." oninput="filterEmojis(this.value)">
+        </div>
+        <div class="ep-categories">
+          <button onclick="showEmojiCat('flores')">🌸 Flores</button>
+          <button onclick="showEmojiCat('animales')">🐾 Animales</button>
+          <button onclick="showEmojiCat('objetos')">🎁 Regalos</button>
+          <button onclick="showEmojiCat('corazones')">❤️ Amor</button>
+          <button onclick="showEmojiCat('naturaleza')">🌿 Naturaleza</button>
+          <button onclick="showEmojiCat('todos')">✨ Todos</button>
+        </div>
+        <div class="ep-grid" id="emojiGrid"></div>
+      </div>
+    </div>
+
+    <!-- ORDEN -->
+    <div class="modal-field">
+      <label>Orden en menú</label>
+      <input type="number" id="catOrden" placeholder="1" min="1">
+    </div>
+
+    <!-- CONTADOR DE PRODUCTOS (aparece al editar) -->
+    <div class="cat-stats-row" id="catStatsRow" style="display:none">
+      <div class="cat-stat-item">
+        <span class="stat-num" id="catStatTotal">0</span>
+        <span class="stat-label">Productos totales</span>
+      </div>
+      <div class="cat-stat-item">
+        <span class="stat-num green" id="catStatVisible">0</span>
+        <span class="stat-label">Visibles</span>
+      </div>
+      <div class="cat-stat-item">
+        <span class="stat-num red" id="catStatOcultos">0</span>
+        <span class="stat-label">Ocultos</span>
+      </div>
+    </div>
+
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeCatModal()">Cancelar</button>
-      <button class="btn-save" onclick="saveCategory()"><Icon name="save"  /> Guardar</button>
+      <button class="btn-save" id="catSaveBtn" onclick="saveCategory()"><Icon name="save"  /> Guardar categoría</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: MOVER A CATEGORÍA (BULK) -->
+<div class="confirm-overlay" id="moveModal">
+  <div class="confirm-card cat-modal-box">
+    <h3 id="moveModalTitle" style="margin-bottom:.3rem">Mover productos</h3>
+    <p id="moveModalSub" style="font-size:.78rem;color:var(--soft);margin-bottom:1.5rem">Selecciona la categoría de destino para los ramos seleccionados</p>
+    
+    <div class="move-options-grid" id="moveOptionsList">
+      <!-- Se llena dinámicamente en openBulkMoveModal -->
+    </div>
+
+    <div style="display:flex;gap:.5rem;margin-top:1.5rem">
+      <button class="btn-cancel" style="flex:1" onclick="document.getElementById('moveModal').classList.remove('open')">Cancelar</button>
     </div>
   </div>
 </div>

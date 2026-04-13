@@ -87,11 +87,18 @@ function updateCartUI(cart: readonly any[]) {
                   ${item.qty > 1 ? `<span class="text-[10px] text-stone-400 font-normal">($${item.price.toLocaleString('es-CO')}/u)</span>` : ''}
                 </div>
               </div>
+              
+              <!-- Controles de cantidad -->
               <div class="flex items-center gap-2 shrink-0 bg-stone-50 rounded-2xl px-1.5 py-1.5 border border-stone-200/50 cursor-pointer pointer-events-auto" onclick="event.stopPropagation()">
                 <button class="w-7 h-7 rounded-xl flex items-center justify-center bg-white text-stone-500 shadow-sm hover:bg-stone-900 hover:text-white transition-all active:scale-90" onclick="changeQtyWithAnim(${item.id}, -1, this)">${getIconSvg('subtract', 'text-sm flex')}</button>
                 <span class="text-xs font-bold w-4 text-center text-stone-800">${item.qty}</span>
                 <button class="w-7 h-7 rounded-xl flex items-center justify-center bg-white text-stone-500 shadow-sm hover:bg-stone-900 hover:text-white transition-all active:scale-90" onclick="changeQtyWithAnim(${item.id}, 1, this)">${getIconSvg('add', 'text-sm flex')}</button>
               </div>
+
+              <!-- Botón X de eliminar (Especial para PC) -->
+              <button class="ml-2 w-8 h-8 flex items-center justify-center text-stone-300 hover:text-rose-500 transition-colors pointer-events-auto" onclick="event.stopPropagation(); changeQtyWithAnim(${item.id}, -999, this)" title="Eliminar producto">
+                ${getIconSvg('close', 'text-lg')}
+              </button>
             </div>
           </div>`;
       }).join('');

@@ -26,8 +26,8 @@ const wompiActivo = config?.wompiActivo || false;
       <a href="/" class="logo logo-centered">NUDITOS<em>.</em></a>
       <div class="co-header-right">
         <div class="co-secure">
-          <Icon name="shield-user" class="co-secure-icon" />
-          <span>COMPRA 100% SEGURA</span>
+          <Icon name="lock" class="co-secure-icon" />
+          <span class="co-secure-text">COMPRA 100% SEGURA</span>
         </div>
       </div>
     </header>
@@ -631,7 +631,7 @@ const wompiActivo = config?.wompiActivo || false;
     }
 
     // ── Finalizar: guardar en Supabase → abrir Wompi ──
-    window.finalizarPedido = function() {
+    window.finalizarPedido = async function() {
       if (_cart.length === 0) {
         alert('Tu carrito está vacío. Agrega productos antes de continuar.');
         return;
@@ -645,49 +645,83 @@ const wompiActivo = config?.wompiActivo || false;
 
       const o = buildOrderData();
       const isPlaceholder = !wompiKey || wompiKey.includes('XXXX') || wompiKey === '';
+      // Si está vacío, usamos una llave de prueba por defecto
       const finalWompiKey = isPlaceholder ? 'pub_test_Q5yDA9xoKdePzhS8qn96X697697' : wompiKey;
 
-      // Guardar en Supabase y luego abrir Widget de Wompi
-      savePedidoToSupabase(o).then(pedido => {
-        const ref = pedido && pedido.id ? `NUDITOS-${pedido.id}` : `NUDITOS-${Date.now()}`;
+      try {
+        // 1. Guardar en Supabase primero
+        const pedido = await savePedidoToSupabase(o);
+        const pedidoId = pedido && pedido.id ? pedido.id : Date.now();
+        const ref = `NUDITOS-${pedidoId}`;
         const amountCents = o.total * 100;
+        const currency = 'COP';
 
-        // Iniciar Widget de Wompi
+        // 2. Obtener firma de integridad desde nuestro servidor (seguro)
+        let signature = null;
+        try {
+          const signRes = await fetch('/api/wompi-sign', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: ref, amountInCents: amountCents, currency: currency })
+          });
+          if (signRes.ok) {
+            const signData = await signRes.json();
+            signature = signData.signature;
+          }
+        } catch (e) {
+          console.warn('Error obteniendo firma, procediendo sin ella:', e);
+        }
+
+        // 3. Iniciar Widget de Wompi
         if (window.WidgetCheckout) {
-          const checkout = new window.WidgetCheckout({
-            currency: 'COP',
+          const checkoutConfig = {
+            currency: currency,
             amountInCents: amountCents,
             reference: ref,
             publicKey: finalWompiKey,
             redirectUrl: window.location.origin + '/gracias'
-          });
+          };
+          
+          if (signature) {
+            checkoutConfig.signature = { integrity: signature };
+          }
+
+          const checkout = new window.WidgetCheckout(checkoutConfig);
 
           checkout.open(function ( result ) {
             const transaction = result.transaction;
             if (transaction.status === 'APPROVED') {
               window.location.href = '/gracias?ref=' + transaction.id;
+            } else if (transaction.status === 'DECLINED') {
+              alert('El pago fue declinado. Por favor intenta con otro medio.');
+              if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = 'INTENTAR DE NUEVO';
+              }
             }
           });
           
-          // Restaurar botón después de abrir el widget
+          // Restaurar botón después de un tiempo si no se abrió o se cerró
           setTimeout(() => {
             if (btn) {
               btn.disabled = false;
-              btn.innerHTML = 'FINALIZAR COMPRA';
+              btn.innerHTML = 'PAGO SEGURO';
             }
-          }, 2000);
+          }, 5000);
 
         } else {
           // Fallback a redirección si el script no cargó
-          const wompiUrl = `https://checkout.wompi.co/l/?public-key=${finalWompiKey}&currency=COP&amount-in-cents=${amountCents}&reference=${ref}&redirect-url=${encodeURIComponent(window.location.origin + '/')}`;
+          const wompiUrl = `https://checkout.wompi.co/l/?public-key=${finalWompiKey}&currency=${currency}&amount-in-cents=${amountCents}&reference=${ref}${signature ? '&signature:integrity=' + signature : ''}&redirect-url=${encodeURIComponent(window.location.origin + '/gracias')}`;
           window.location.href = wompiUrl;
         }
-      }).catch(err => {
+      } catch (err) {
         console.error('Error al procesar pedido:', err);
-        const ref = `NUDITOS-${Date.now()}`;
-        const amountCents = o.total * 100;
-        window.location.href = `https://checkout.wompi.co/l/?public-key=${finalWompiKey}&currency=COP&amount-in-cents=${amountCents}&reference=${ref}`;
-      });
+        alert('Hubo un error al procesar tu pedido. Intenta nuevamente o contáctanos por WhatsApp.');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = 'PAGO SEGURO';
+        }
+      }
     };
 
     // ── Init ──

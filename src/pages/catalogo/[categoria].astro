@@ -1,0 +1,66 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { getLiveProducts, getLiveCategories } from '../../lib/supabase';
+
+const { categoria } = Astro.params;
+const [productos, categorias] = await Promise.all([
+  getLiveProducts(),
+  getLiveCategories()
+]);
+
+const cat = categorias.find(c => c.id === categoria);
+if (!cat) return Astro.redirect('/catalogo');
+
+const items = productos.filter(p => p.cat === categoria && p.activo !== false);
+const catMap = Object.fromEntries(categorias.map(c => [c.id, c.nombre || c.name]));
+
+// SEO Dinámico desde Supabase
+const seoTitle = cat.metaTitle || `${cat.nombre || cat.name} de Crochet | Nuditos Tejidos Colombia`;
+const seoDesc = cat.metaDescription || `Explora nuestra colección de ${cat.nombre || cat.name} tejidas a mano. Diseños únicos en crochet con envío a todo el país.`;
+---
+
+<Layout title={seoTitle} description={seoDesc}>
+  
+  <header class="bg-stone-50 border-b border-stone-100 py-12 md:py-20 text-center px-6">
+    <div class="max-w-4xl mx-auto space-y-4">
+      <span class="text-[2rem] drop-shadow-sm">{cat.icon}</span>
+      <h1 class="font-serif text-3xl md:text-5xl text-stone-900">{cat.nombre || cat.name}</h1>
+      <p class="text-stone-500 max-w-xl mx-auto text-sm md:text-base">
+        Descubre nuestra selección artesanal de {cat.nombre?.toLowerCase() || cat.name?.toLowerCase()}. 
+        Tejidos con amor y dedicación.
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-[1400px] mx-auto px-6 md:px-12 py-12">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+      {items.map(p => (
+        <ProductCard p={p} catName={catMap[p.cat]} />
+      ))}
+    </div>
+
+    {items.length === 0 && (
+      <div class="text-center py-20 bg-stone-50 rounded-3xl border border-dashed border-stone-200">
+        <p class="text-stone-400 font-serif text-xl italic">Aún no hay productos en esta categoría.</p>
+        <a href="/catalogo" class="text-violet-600 font-bold uppercase tracking-widest text-[10px] mt-4 inline-block hover:underline">Volver al catálogo</a>
+      </div>
+    )}
+
+    <!-- SECCIÓN SEO INFERIOR (DESCRIPCIÓN DINÁMICA) -->
+    {cat.descripcionSeo && (
+      <section class="mt-20 pt-12 border-t border-stone-100">
+        <div class="max-w-4xl prose prose-stone prose-sm md:prose-base text-stone-500">
+          <div set:html={cat.descripcionSeo}></div>
+        </div>
+      </section>
+    )}
+  </main>
+
+  <div class="bg-violet-50/50 py-12 text-center">
+     <a href="/catalogo" class="bg-stone-900 text-white px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-violet-700 transition-all">
+        Ver Todas las Categorías
+     </a>
+  </div>
+</Layout>

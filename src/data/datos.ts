@@ -13,12 +13,21 @@ export interface Product {
   oferta?: boolean;
   precioOriginal?: number;
   envioGratis?: boolean;
+  // Campos SEO
+  metaTitle?: string;
+  metaDescription?: string;
+  altText?: string;
+  seoKeywords?: string;
 }
 
 export interface Category {
   id: string;
   name: string;
   icon: string;
+  // Campos SEO
+  metaTitle?: string;
+  metaDescription?: string;
+  descripcionSeo?: string;
 }
 
 export const CONFIG_DEFAULT = {

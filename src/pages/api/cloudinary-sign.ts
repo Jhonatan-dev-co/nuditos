@@ -12,7 +12,7 @@ async function signParams(params: Record<string, string | number>, apiSecret: st
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-export const POST: APIRoute = async () => {
+export const POST: APIRoute = async ({ request }) => {
   const apiSecret = import.meta.env.CLOUDINARY_API_SECRET;
   const apiKey = import.meta.env.CLOUDINARY_API_KEY;
   const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME || 'dzxgu27wr';
@@ -31,15 +31,29 @@ export const POST: APIRoute = async () => {
     );
   }
 
+  let customPublicId = null;
+  try {
+    const body = await request.clone().json();
+    if (body && body.public_id) {
+      customPublicId = body.public_id;
+    }
+  } catch (e) {
+    // Sin body
+  }
+
   const timestamp = Math.floor(Date.now() / 1000);
-  const signature = await signParams(
-    {
-      folder,
-      timestamp,
-      upload_preset: uploadPreset,
-    },
-    apiSecret
-  );
+  
+  const paramsToSign: Record<string, string | number> = {
+    folder,
+    timestamp,
+    upload_preset: uploadPreset,
+  };
+
+  if (customPublicId) {
+    paramsToSign.public_id = customPublicId;
+  }
+
+  const signature = await signParams(paramsToSign, apiSecret);
 
   return new Response(
     JSON.stringify({
@@ -49,6 +63,7 @@ export const POST: APIRoute = async () => {
       cloudName,
       uploadPreset,
       folder,
+      publicId: customPublicId,
     }),
     {
       status: 200,

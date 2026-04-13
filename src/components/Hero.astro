@@ -29,19 +29,18 @@ function heroTitle(p: any) {
       <div class="swiper-slide hero-slide">
         {p.img ? (
           <div class="hero-slide-bg">
-            <picture style="display: contents;">
-              <source media="(max-width: 768px)" srcset={clUrl(p.img, 480)} />
-              <img 
-                src={clUrl(p.img, 1200)} 
-                alt={p.name} 
-                loading={index === 0 ? "eager" : "lazy"}
-                fetchpriority={index === 0 ? "high" : "auto"}
-                class="w-full h-full object-cover"
-                width={1200}
-                height={800}
-                decoding="async"
-              />
-            </picture>
+            <img 
+              src={clUrl(p.img, 1200)} 
+              srcset={`${clUrl(p.img, 480)} 480w, ${clUrl(p.img, 1200)} 1200w`}
+              sizes="(max-width: 768px) 480px, 1200px"
+              alt={p.name} 
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchpriority={index === 0 ? "high" : "auto"}
+              class="w-full h-full object-cover"
+              width={1200}
+              height={800}
+              decoding="async"
+            />
           </div>
         ) : (
           <div class="hero-slide-bg hero-slide-emoji">{p.emoji}</div>
@@ -82,7 +81,9 @@ function heroTitle(p: any) {
           autoplay: { delay: 5000, disableOnInteraction: false },
           pagination: { el: '.swiper-pagination', clickable: true },
           navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-          effect: 'fade', fadeEffect: { crossFade: true }, speed: 900,
+          speed: 600, // Más ágil para interacción táctil
+          grabCursor: true,
+          watchSlidesProgress: true,
           preventClicks: false,
           preventClicksPropagation: false,
           touchStartPreventDefault: false,
@@ -91,3 +92,11 @@ function heroTitle(p: any) {
     }
   });
 </script>
+<style>
+  .hero-swiper {
+    touch-action: pan-y !important; /* Evita que el navegador detenga el swipe horizontal */
+  }
+  .hero-slide {
+    overflow: hidden;
+  }
+</style>

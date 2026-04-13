@@ -1,12 +1,34 @@
 ---
 import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
+
+const faqs = [
+  { q: "¿De qué están hechos los ramos de crochet Nuditos?", a: "Todos nuestros ramos están tejidos con hilos premium en técnica crochet. Las flores no se marchitan, no necesitan agua y pueden durar años." },
+  { q: "¿Cuánto tiempo tarda en llegar mi pedido?", a: "El tiempo de elaboración es de 1 a 3 días hábiles, más 2 a 5 días hábiles de envío según tu ciudad en Colombia." },
+  { q: "¿Hacen envíos a toda Colombia?", a: "Sí, enviamos a toda Colombia desde El Dorado, Meta. El costo base es de $17.000 COP." },
+  { q: "¿Puedo personalizar mi ramo de crochet?", a: "Sí, podemos personalizar colores, diseño y tamaño. Escríbenos por WhatsApp al +57 314 493 1525." },
+  { q: "¿Cuáles son los métodos de pago?", a: "Aceptamos tarjeta de crédito, débito, Nequi, Daviplata y PSE a través de Wompi." },
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(f => ({
+    "@type": "Question",
+    "name": f.q,
+    "acceptedAnswer": { "@type": "Answer", "text": f.a }
+  }))
+};
 ---
 
 <Layout
   title="Preguntas Frecuentes — Nuditos Tejidos"
   description="Todo lo que necesitas saber sobre envíos, materiales y pedidos de flores de crochet en Nuditos Tejidos."
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
   <style>
     .page-hero { background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%); padding: 5rem 1.5rem 4rem; text-align: center; }
     .page-eyebrow { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem; }
