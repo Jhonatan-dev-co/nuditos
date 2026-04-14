@@ -3,12 +3,15 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import { getLiveProducts, getLiveCategories } from '../../lib/supabase';
+import { categories as FALLBACK_CATEGORIES } from '../../data/datos';
 
 const { categoria } = Astro.params;
-const [productos, categorias] = await Promise.all([
+const [productos, rawCategorias] = await Promise.all([
   getLiveProducts(),
   getLiveCategories()
 ]);
+
+const categorias = rawCategorias && rawCategorias.length > 0 ? rawCategorias : FALLBACK_CATEGORIES;
 
 const cat = categorias.find(c => c.id === categoria);
 if (!cat) return Astro.redirect('/catalogo');
@@ -19,9 +22,22 @@ const catMap = Object.fromEntries(categorias.map(c => [c.id, c.nombre || c.name]
 // SEO Dinámico desde Supabase
 const seoTitle = cat.metaTitle || `${cat.nombre || cat.name} de Crochet | Nuditos Tejidos Colombia`;
 const seoDesc = cat.metaDescription || `Explora nuestra colección de ${cat.nombre || cat.name} tejidas a mano. Diseños únicos en crochet con envío a todo el país.`;
+
+const SITE_URL  = Astro.site?.toString().replace(/\/$/, '') || Astro.url.origin;
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Inicio", "item": SITE_URL },
+    { "@type": "ListItem", "position": 2, "name": "Catálogo", "item": `${SITE_URL}/catalogo` },
+    { "@type": "ListItem", "position": 3, "name": cat.nombre || cat.name, "item": `${SITE_URL}/catalogo/${categoria}` }
+  ]
+};
 ---
 
 <Layout title={seoTitle} description={seoDesc}>
+  <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
   
   <header class="bg-stone-50 border-b border-stone-100 py-12 md:py-20 text-center px-6">
     <div class="max-w-4xl mx-auto space-y-4">

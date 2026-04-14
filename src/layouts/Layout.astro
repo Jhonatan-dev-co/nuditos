@@ -8,8 +8,8 @@ import { getLiveConfig } from '../lib/supabase';
 
 // Fetch live configuration for SEO and Social
 const config = await getLiveConfig();
-const siteTitle = config?.seoTitle || 'Nuditos Tejidos — Ramos de Crochet y Flores Eternas';
-const siteDesc = config?.seoDescription || 'Ramos de crochet hechos a mano en El Dorado, Meta. Flores eternas tejidas con amor. Envíos a todo Colombia.';
+const siteTitle = config?.seoTitle || 'Nuditos Tejidos — Ramos de Crochet, Regalos y Detalles Originales';
+const siteDesc = config?.seoDescription || 'Ramos de crochet hechos a mano y amigurumis. El regalo eterno perfecto para detalles inolvidables en Colombia. Envíos a todo el país.';
 const siteOgImg = config?.seoOgImage || 'https://nuditos.com.co/og-default.jpg';
 const instaUrl = config?.socialInstagram || 'https://www.instagram.com/nuditos_tejidos/';
 const whatsappNum = config?.socialWhatsapp || '573144931525';
@@ -97,6 +97,8 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     </script>
     <noscript><img height="1" width="1" style="display:none" src={`https://www.facebook.com/tr?id=${config.metaPixelId}&ev=PageView&noscript=1`} /></noscript>
   )}
+
+
 
   <!-- Google Analytics -->
   {config?.gaActive && config?.gaId && (

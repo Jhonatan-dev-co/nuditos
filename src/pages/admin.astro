@@ -87,6 +87,115 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     let uploadedImgs=[], currentEditingImgs=[];
     let changeHistory=[];
     let selectedProducts = new Set(); // Para selección múltiple
+    let isDraftLoading = false; // Bloqueo para evitar bucles durante la carga
+
+    /* ── DRAFT SYSTEM (AUTOSAVE) ── */
+    function saveProductDraft() {
+      if (isDraftLoading) return;
+      const editor = document.getElementById('tab-productos');
+      if (!editor || !document.getElementById('fNombre')) return;
+
+      const draft = {
+        id: document.getElementById('editingId').value,
+        name: document.getElementById('fNombre').value,
+        price: document.getElementById('fPrecio').value,
+        cat: document.getElementById('fCat').value,
+        emoji: document.getElementById('fEmoji').value,
+        desc: document.getElementById('fDesc').value,
+        activo: document.getElementById('fActivo').value === 'true',
+        stock: document.getElementById('fStock').value,
+        stockUnlimited: document.getElementById('fStockUnlimited').checked,
+        badge: getSelectedBadge(),
+        oferta: document.getElementById('fTagOferta').checked,
+        precioOriginal: document.getElementById('fPrecioOriginal').value,
+        precioOferta: document.getElementById('fPrecioOferta').value,
+        imgs: document.getElementById('fImgs').value.split('\n').filter(s=>s.trim()),
+        img: document.getElementById('fImg').value,
+        metaTitle: document.getElementById('fMetaTitle').value,
+        seoKeywords: document.getElementById('fSeoKeywords').value,
+        metaDescription: document.getElementById('fMetaDesc').value,
+        altText: document.getElementById('fAltText').value,
+        timestamp: Date.now()
+      };
+
+      localStorage.setItem('nuditos_product_draft', JSON.stringify(draft));
+      const indicator = document.getElementById('draftIndicator');
+      if (indicator) {
+        indicator.textContent = '✓ Borrador guardado localmente';
+        indicator.style.opacity = '1';
+        setTimeout(() => { if (indicator) indicator.style.opacity = '0.5'; }, 2000);
+      }
+    }
+
+    function getSelectedBadge() {
+       if(document.getElementById('fTagNuevo')?.checked) return 'Nuevo';
+       if(document.getElementById('fTagPopular')?.checked) return 'Popular';
+       if(document.getElementById('fTagEspecial')?.checked) return 'Especial';
+       return '';
+    }
+
+    function clearProductDraft() {
+      localStorage.removeItem('nuditos_product_draft');
+      const indicator = document.getElementById('draftIndicator');
+      if (indicator) indicator.textContent = '';
+    }
+
+    function checkAndRestoreDraft() {
+      const saved = localStorage.getItem('nuditos_product_draft');
+      if (!saved) return;
+      
+      const draft = JSON.parse(saved);
+      const diff = Date.now() - draft.timestamp;
+      const minutes = Math.floor(diff / 60000);
+      
+      if (confirm(`📦 Se encontró un borrador de "${draft.name || 'Sin nombre'}" guardado hace ${minutes} min. ¿Deseas recuperarlo?`)) {
+        isDraftLoading = true;
+        
+        // Si el draft tiene ID, seleccionamos ese producto primero
+        if (draft.id) {
+          selectProduct(parseInt(draft.id));
+        } else {
+          newProduct();
+        }
+
+        // Poblar campos (darle un pequeño delay para que el HTML se renderice si fue newProduct)
+        setTimeout(() => {
+          if (document.getElementById('fNombre')) document.getElementById('fNombre').value = draft.name || '';
+          if (document.getElementById('fPrecio')) document.getElementById('fPrecio').value = draft.price || 0;
+          if (document.getElementById('fCat')) document.getElementById('fCat').value = draft.cat || '';
+          if (document.getElementById('fEmoji')) document.getElementById('fEmoji').value = draft.emoji || '🌸';
+          if (document.getElementById('fDesc')) document.getElementById('fDesc').value = draft.desc || '';
+          if (document.getElementById('fActivo')) document.getElementById('fActivo').value = draft.activo ? 'true' : 'false';
+          if (document.getElementById('fStock')) document.getElementById('fStock').value = draft.stock || 99;
+          if (document.getElementById('fStockUnlimited')) document.getElementById('fStockUnlimited').checked = draft.stockUnlimited;
+          
+          if (document.getElementById('fTagNuevo')) document.getElementById('fTagNuevo').checked = (draft.badge === 'Nuevo');
+          if (document.getElementById('fTagPopular')) document.getElementById('fTagPopular').checked = (draft.badge === 'Popular');
+          if (document.getElementById('fTagEspecial')) document.getElementById('fTagEspecial').checked = (draft.badge === 'Especial');
+          
+          if (document.getElementById('fTagOferta')) {
+            document.getElementById('fTagOferta').checked = draft.oferta;
+            toggleOfertaFields();
+          }
+          if (document.getElementById('fPrecioOriginal')) document.getElementById('fPrecioOriginal').value = draft.precioOriginal || 0;
+          if (document.getElementById('fPrecioOferta')) document.getElementById('fPrecioOferta').value = draft.precioOferta || 0;
+          
+          if (document.getElementById('fImgs')) document.getElementById('fImgs').value = (draft.imgs || []).join('\n');
+          if (document.getElementById('fImg')) document.getElementById('fImg').value = draft.img || '';
+          
+          if (document.getElementById('fMetaTitle')) document.getElementById('fMetaTitle').value = draft.metaTitle || '';
+          if (document.getElementById('fSeoKeywords')) document.getElementById('fSeoKeywords').value = draft.seoKeywords || '';
+          if (document.getElementById('fMetaDesc')) document.getElementById('fMetaDesc').value = draft.metaDescription || '';
+          if (document.getElementById('fAltText')) document.getElementById('fAltText').value = draft.altText || '';
+          
+          isDraftLoading = false;
+          updatePreview();
+          showToast('✓ Borrador restaurado');
+        }, 100);
+      } else {
+        clearProductDraft();
+      }
+    }
 
     /* ── AUTH / LOGIN ── */
     async function doLogin(){
@@ -296,6 +405,9 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       const statusLabel = window._isLiveMode ? '✅ Conectado a Supabase' : '⚠️ Usando datos locales (Fallback)';
       showToast(statusLabel);
       console.log(`[Admin] Modo: ${window._isLiveMode ? 'LIVE' : 'FALLBACK'}`);
+
+      // Verificar si hay borradores pendientes al cargar
+      setTimeout(checkAndRestoreDraft, 1000);
     }
 
     async function sbAdminGetConfig_(){
@@ -510,14 +622,14 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
             </div>
           </div>
           <div class="form-grid">
-            <div class="field field-full"><label>Nombre del producto *</label><input type="text" id="fNombre" value="${p?.name||''}" oninput="updatePreview()" placeholder="Ramo de rosas con mariposas"></div>
-            <div class="field"><label>Precio (COP)</label><input type="number" id="fPrecio" value="${p?.price||0}" oninput="updatePreview()" min="0"></div>
-            <div class="field"><label>Categoría *</label><select id="fCat" onchange="updatePreview()">${cats}</select></div>
-            <div class="field"><label>Emoji (si no hay foto)</label><input type="text" id="fEmoji" value="${p?.emoji||'🌸'}" oninput="updatePreview()"></div>
+            <div class="field field-full"><label>Nombre del producto *</label><input type="text" id="fNombre" value="${p?.name||''}" oninput="updatePreview();saveProductDraft()" placeholder="Ramo de rosas con mariposas"></div>
+            <div class="field"><label>Precio (COP)</label><input type="number" id="fPrecio" value="${p?.price||0}" oninput="updatePreview();saveProductDraft()" min="0"></div>
+            <div class="field"><label>Categoría *</label><select id="fCat" onchange="updatePreview();saveProductDraft()">${cats}</select></div>
+            <div class="field"><label>Emoji (si no hay foto)</label><input type="text" id="fEmoji" value="${p?.emoji||'🌸'}" oninput="updatePreview();saveProductDraft()"></div>
             <div class="field field-full">
               <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: .3rem">
                 <label style="margin-bottom:0">Descripción / detalles</label>
-                <select id="descTemplate" onchange="if(this.value){ document.getElementById('fDesc').value=getDescTemplate(this.value); updatePreview(); this.value=''; }" style="width:auto; padding:.25rem .5rem; font-size:.65rem; border-radius:6px; border:1px solid var(--lila-light); background:var(--lila-xlight); color:var(--lila-dark); cursor:pointer; font-weight:600">
+                <select id="descTemplate" onchange="if(this.value){ document.getElementById('fDesc').value=getDescTemplate(this.value); updatePreview(); saveProductDraft(); this.value=''; }" style="width:auto; padding:.25rem .5rem; font-size:.65rem; border-radius:6px; border:1px solid var(--lila-light); background:var(--lila-xlight); color:var(--lila-dark); cursor:pointer; font-weight:600">
                   <option value="">✨ Plantillas rápidas...</option>
                   <option value="ramo">💐 Ramo clásico</option>
                   <option value="amigurumi">🧸 Amigurumi / Personaje</option>
@@ -525,10 +637,10 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
                   <option value="especial">✨ Edición Especial</option>
                 </select>
               </div>
-              <textarea id="fDesc" oninput="updatePreview()" rows="3" placeholder="Escribe aquí o elige una plantilla arriba...">${p?.desc||''}</textarea>
+              <textarea id="fDesc" oninput="updatePreview();saveProductDraft()" rows="3" placeholder="Escribe aquí o elige una plantilla arriba...">${p?.desc||''}</textarea>
             </div>
             <div class="field field-full"><label>Estado</label>
-              <select id="fActivo" onchange="updatePreview()">
+              <select id="fActivo" onchange="updatePreview();saveProductDraft()">
                 <option value="true" ${p?.activo!==false?'selected':''}>✅ Visible en tienda</option>
                 <option value="false" ${p?.activo===false?'selected':''}>🚫 Oculto</option>
               </select>
@@ -577,21 +689,22 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           <details class="t-card" style="padding:1rem; margin-top: 1rem; margin-bottom: 0; border:1px solid var(--border); box-shadow:none;">
             <summary style="font-weight:700; font-size:0.75rem; cursor:pointer; color:var(--lila-dark); display:flex; align-items:center; gap:.4rem">🔍 Ajustes Avanzados de Búsqueda (SEO Google)</summary>
             <div class="form-grid" style="margin-top:0.8rem;">
-              <div class="field field-full"><label>Título en Google (Meta Title)</label><input type="text" id="fMetaTitle" value="${p?.metaTitle||''}" placeholder="Ej: Ramo de Girasoles a Crochet - Sueño de Van Gogh"></div>
-              <div class="field field-full"><label>Palabras clave (Keywords)</label><input type="text" id="fSeoKeywords" value="${p?.seoKeywords||''}" placeholder="Ej: girasoles amarillos, regalo novia, flores tejidas"></div>
-              <div class="field field-full"><label>Descripción para Google</label><textarea id="fMetaDesc" rows="2" placeholder="Dejar vacío para que Google use la descripción principal...">${p?.metaDescription||''}</textarea></div>
-              <div class="field field-full"><label>Texto foto (Alt Text)</label><input type="text" id="fAltText" value="${p?.altText||''}" placeholder="Descripción de la foto para invidentes y SEO"></div>
+              <div class="field field-full"><label>Título en Google (Meta Title)</label><input type="text" id="fMetaTitle" value="${p?.metaTitle||''}" oninput="saveProductDraft()" placeholder="Ej: Ramo de Girasoles a Crochet - Sueño de Van Gogh"></div>
+              <div class="field field-full"><label>Palabras clave (Keywords)</label><input type="text" id="fSeoKeywords" value="${p?.seoKeywords||''}" oninput="saveProductDraft()" placeholder="Ej: girasoles amarillos, regalo novia, flores tejidas"></div>
+              <div class="field field-full"><label>Descripción para Google</label><textarea id="fMetaDesc" rows="2" oninput="saveProductDraft()" placeholder="Dejar vacío para que Google use la descripción principal...">${p?.metaDescription||''}</textarea></div>
+              <div class="field field-full"><label>Texto foto (Alt Text)</label><input type="text" id="fAltText" value="${p?.altText||''}" oninput="saveProductDraft()" placeholder="Descripción de la foto para invidentes y SEO"></div>
             </div>
           </details>
           <div class="preview-panel">
             <div class="preview-label">Vista previa en tienda</div>
             <div class="preview-card-wrap"><div class="preview-card" id="livePreview"></div></div>
           </div>
-          <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem">
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem; align-items:center;">
             <button class="btn-save" id="saveProdBtn" onclick="saveProduct()">
               💾 <span>${isNew?'Crear producto':'Guardar cambios'}</span>
             </button>
             <button class="btn-cancel" onclick="showEditorEmpty()">Cancelar</button>
+            <span id="draftIndicator" style="font-size:0.65rem; color:var(--soft); font-weight:600; text-transform:uppercase; margin-left:auto; opacity:0; transition:opacity 0.3s"></span>
           </div>
         </div>`;
     }
@@ -702,10 +815,12 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           const idx=adminProducts.findIndex(p=>p.id===parseInt(editId));
           if(idx!==-1)adminProducts[idx]={...adminProducts[idx],...data};
           showToast(`✓ Actualizado`);addToHistory(`✏️ Editado: ${nombre}`);
+          clearProductDraft();
         }else{
           const saved=await sbAdminSaveProduct({...data,_isNew:true});
           if(saved){adminProducts.push({...data,id:saved.id});selectedId=saved.id;}
           showToast(`✓ Creado`);addToHistory(`➕ Agregado: ${nombre}`);
+          clearProductDraft();
         }
         renderSidebar();renderStats();renderMomentoList(adminProducts);renderHeroList(adminProducts);
       }catch(e){showToast('❌ Error');}

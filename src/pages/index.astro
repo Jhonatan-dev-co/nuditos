@@ -20,7 +20,7 @@ const liveConfig = liveConfigRaw ? { ...FALLBACK_CONFIG, ...liveConfigRaw } : FA
 
 // Categorías y Banners dinámicos
 const sbCategories = await getLiveCategories();
-const liveCategories = sbCategories;
+const liveCategories = sbCategories && sbCategories.length > 0 ? sbCategories : FALLBACK_CATEGORIES;
 const liveBanners = await getLiveBanners();
 
 // Preparar hero products
@@ -65,12 +65,12 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2') || {
 ---
 
 <Layout
-  title="Nuditos Tejidos — Ramos de Crochet hechos a mano | Colombia"
-  description="Ramos de crochet únicos e irrepetibles. Flores que nunca se marchitan. Envíos a todo Colombia desde El Dorado, Meta."
+  title="Nuditos Tejidos — Detalles y Regalos Originales | Ramos de Crochet en Colombia"
+  description="Encuentra el detalle perfecto: ramos de crochet hechos a mano y amigurumis. Regalos que nunca se marchitan. Envíos a todo Colombia."
   ogType="website"
   preloadImage={firstHeroImg}
 >
-  <h1 class="sr-only">Nuditos Tejidos — Ramos y Flores Eternas de Crochet en Colombia</h1>
+  <h1 class="sr-only">Nuditos Tejidos — Expertos en Detalles y Regalos de Flores Eternas a Crochet en Colombia</h1>
 
   <!-- ════════ BANNER DESCUENTO ════════ -->
   <div id="discountBanner" class="bg-rose-50 text-rose-950 text-center py-2.5 tracking-widest text-[10px] uppercase font-medium border-b border-rose-100/50">
