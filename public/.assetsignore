@@ -1,0 +1,2 @@
+# Este archivo vacío permite que Wrangler suba el directorio _worker.js 
+# sin marcarlo como error de seguridad en despliegues tipo Worker.
