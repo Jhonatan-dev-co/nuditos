@@ -1,10 +1,10 @@
 {
-  "name": "nuditos-tejidos",
+  "name": "nuditos",
   "type": "module",
   "version": "1.0.0",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && echo # > dist/.assetsignore",
     "preview": "astro preview"
   },
   "engines": {
