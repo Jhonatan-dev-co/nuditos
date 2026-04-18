@@ -1,6 +1,7 @@
 name = "nuditos"
+main = "dist/_worker.js/index.js"
 compatibility_date = "2026-04-18"
-pages_build_output_dir = "dist"
+assets = { directory = "dist" }
 
 [observability]
 enabled = true
