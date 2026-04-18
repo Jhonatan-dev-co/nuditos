@@ -3,5 +3,13 @@ main = "dist/_worker.js/index.js"
 compatibility_date = "2026-04-18"
 assets = { directory = "dist" }
 
+[[routes]]
+pattern = "nuditos.com.co"
+custom_domain = true
+
+[[routes]]
+pattern = "www.nuditos.com.co"
+custom_domain = true
+
 [observability]
 enabled = true
