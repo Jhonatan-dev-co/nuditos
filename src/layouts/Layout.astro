@@ -116,20 +116,9 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   
-  {preloadImage && preloadImage.includes('res.cloudinary.com') ? (
-    <link 
-      rel="preload" 
-      as="image" 
-      imagesrcset={`${clUrl(preloadImage, 480)} 480w, ${clUrl(preloadImage, 1200)} 1200w`}
-      imagesizes="(max-width: 768px) 480px, 1200px"
-      fetchpriority="high" 
-    />
-  ) : preloadImage && (
-    <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />
-  )}
 
-  <!-- Fuentes (Precarga de CSS crítica) -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" />
+
+  <!-- Fuentes (Carga optimizada) -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" /></noscript>
 
@@ -652,6 +641,23 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <script is:inline define:vars={{ liveConfig: config }}>
     window.NUDITOS_CONFIG = liveConfig;
+
+    // Autoplay Fixer: Asegura que los videos muted autoplay arranquen en todos los navegadores
+    document.addEventListener('astro:page-load', () => {
+      const videos = document.querySelectorAll('video[autoplay][muted]');
+      videos.forEach(v => {
+        v.play().catch(() => {
+          // Si falla, intentamos de nuevo al primer toque del usuario
+          const forcePlay = () => {
+            v.play();
+            document.removeEventListener('click', forcePlay);
+            document.removeEventListener('touchstart', forcePlay);
+          };
+          document.addEventListener('click', forcePlay);
+          document.addEventListener('touchstart', forcePlay);
+        });
+      });
+    });
   </script>
 </body>
 </html>

@@ -198,16 +198,29 @@ function loadMetaPixel(cfg) {
 }
 
 /* ════════════════════════════
-   BANNER
+   BANNER COMPUESTO (CAMPAÑAS + GENERAL)
 ════════════════════════════ */
 function renderBanner(cfg) {
-  if (!cfg.descuentoActivo) return;
+  // 1. Prioridad: Campaña activa
+  const campaignBanner = localStorage.getItem('nuditos_active_campaign_banner');
+  
+  // 2. Fallback: Descuento general del Admin
+  const hasGlobalDiscount = cfg.descuentoActivo && cfg.descuentoTexto;
+
+  if (!campaignBanner && !hasGlobalDiscount) return;
+
   const bannerText = document.getElementById('bannerText');
   const discountBanner = document.getElementById('discountBanner');
   if (!bannerText || !discountBanner) return;
   
   try {
-    bannerText.innerHTML = `${cfg.descuentoTexto} — código <strong>${cfg.descuentoCodigo}</strong>`;
+    if (campaignBanner) {
+      bannerText.innerHTML = campaignBanner;
+    } else {
+      let html = cfg.descuentoTexto;
+      if (cfg.descuentoCodigo) html += ` — código <strong>${cfg.descuentoCodigo}</strong>`;
+      bannerText.innerHTML = html;
+    }
     discountBanner.classList.add('visible');
   } catch (e) { console.error("Error al renderizar banner:", e); }
 }
@@ -313,8 +326,9 @@ function renderCatPills() {
   }
 
   catRow.innerHTML = cats.map((c, i) => {
-    const count = c.id === 'todos' ? ap.length : ap.filter(p => p.cat?.toLowerCase() === c.id?.toLowerCase()).length;
-    if (count === 0 && c.id !== 'todos') return '';
+    const cid = c.id?.toLowerCase();
+    const count = cid === 'todos' ? ap.length : ap.filter(p => (p.cats || []).includes(cid) || p.cat?.toLowerCase() === cid).length;
+    if (count === 0 && cid !== 'todos') return '';
     const icon = c.icon || '🌸';
     const name = c.nombre || c.name || 'Sin nombre';
     return `<button class="cat-pill${(activeFilter||'todos') === c.id ? ' active' : ''}" onclick="filterCat('${c.id}',this)">
@@ -355,7 +369,8 @@ function renderCatalog() {
     rows.innerHTML = '';
 
     getCategories().filter(c => c.id !== 'todos').forEach(cat => {
-      const items = activeProducts().filter(p => p.cat?.toLowerCase() === cat.id?.toLowerCase());
+      const cid = cat.id?.toLowerCase();
+      const items = activeProducts().filter(p => (p.cats || []).includes(cid) || p.cat?.toLowerCase() === cid);
       if (!items.length) return;
       const view = getCatView(cat.id);
 
@@ -557,7 +572,8 @@ function filterCatByName(catId) {
 
   setTimeout(() => {
     const ap = activeProducts();
-    const items = catId === 'todos' ? ap : ap.filter(p => p.cat?.toLowerCase() === catId.toLowerCase());
+    const cid = catId.toLowerCase();
+    const items = catId === 'todos' ? ap : ap.filter(p => (p.cats || []).includes(cid) || p.cat?.toLowerCase() === cid);
     
     if (items.length === 0) {
       grid.innerHTML = '<div style="grid-column:1/-1;padding:4rem 0;text-align:center;color:var(--text-soft)">No hay productos en esta categoría aún.</div>';

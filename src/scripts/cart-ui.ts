@@ -317,11 +317,32 @@ document.addEventListener('astro:page-load', () => {
   msg.textContent = 'Verificando...';
   msg.classList.remove('hidden');
 
+  let discountApplied = false;
+  let pct = 0;
+
+  // 1. Chequear campaña temporal activa
+  try {
+    const campDiscountRaw = localStorage.getItem('nuditos_active_campaign_discount');
+    if (campDiscountRaw) {
+      const campDiscount = JSON.parse(campDiscountRaw);
+      if (campDiscount.code === code) {
+        discountApplied = true;
+        pct = campDiscount.pct;
+      }
+    }
+  } catch(e){}
+
+  // 2. Códigos fijos
   if (code === 'NUDITOS10') {
-    $discount.set({ code, pct: 10 });
-    msg.textContent = '✓ 10% de descuento aplicado';
+    discountApplied = true;
+    pct = 10;
+  }
+
+  if (discountApplied) {
+    $discount.set({ code, pct });
+    msg.textContent = `✓ ${pct}% de descuento aplicado`;
     msg.className = 'text-[10px] uppercase font-bold tracking-widest mt-1 text-emerald-500';
-    showToast('🎉 ¡10% de descuento aplicado!');
+    showToast(`🎉 ¡${pct}% de descuento aplicado!`);
   } else {
     $discount.set(null);
     msg.textContent = '✖ Código incorrecto o expirado.';

@@ -93,6 +93,15 @@ import Icon from '../Icon.astro';
       <input type="number" id="catOrden" placeholder="1" min="1">
     </div>
 
+    <!-- MOSTRAR EN HOME -->
+    <div class="modal-field">
+      <label>Mostrar en página de inicio (Loop editorial) <span class="help-text" style="font-weight:400;color:#9ca3af;font-size:0.75rem">— Si marcas no, solo saldrá en la página Catálogo.</span></label>
+      <select id="catShowInHome" style="width:100%; border-radius:10px; border:1px solid var(--border); padding:0.6rem; font-family:inherit;">
+        <option value="true">✅ Sí, mostrar grilla de esta categoría en el Home</option>
+        <option value="false">🚫 No, ocultar del Home</option>
+      </select>
+    </div>
+
     <!-- CONTADOR DE PRODUCTOS (aparece al editar) -->
     <div class="cat-stats-row" id="catStatsRow" style="display:none">
       <div class="cat-stat-item">

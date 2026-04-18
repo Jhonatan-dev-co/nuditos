@@ -7,6 +7,8 @@ export interface Product {
   img: string;
   imgs: string[];
   cat: string;
+  cats?: string[];
+  orden?: number;
   badge: string;
   badgeClass: string;
   activo: boolean;

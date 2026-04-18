@@ -18,7 +18,8 @@ function getCatView(catId: string) {
 }
 
 const catsToRender = categories.filter(c => c.id !== 'todos').map(cat => {
-  const items = activeProducts.filter(p => p.cat?.toLowerCase() === cat.id?.toLowerCase());
+  const cid = cat.id?.toLowerCase();
+  const items = activeProducts.filter(p => (p.cats || []).includes(cid) || p.cat?.toLowerCase() === cid);
   return { cat, items };
 }).filter(c => c.items.length > 0);
 

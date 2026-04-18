@@ -16,7 +16,7 @@ const categorias = rawCategorias && rawCategorias.length > 0 ? rawCategorias : F
 const cat = categorias.find(c => c.id === categoria);
 if (!cat) return Astro.redirect('/catalogo');
 
-const items = productos.filter(p => p.cat === categoria && p.activo !== false);
+const items = productos.filter(p => ((p.cats || []).includes(categoria) || p.cat === categoria) && p.activo !== false);
 const catMap = Object.fromEntries(categorias.map(c => [c.id, c.nombre || c.name]));
 
 // SEO Dinámico desde Supabase

@@ -28,6 +28,8 @@ const allImgs = parentView === 'carousel' ? [allImgsRaw[0]] : allImgsRaw;
 
 // String pre-compilado para la máxima velocidad de búsqueda en el cliente
 const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replace(/<[^>]*>?/gm, '').toLowerCase();
+// Todas las categorías como string CSV para búsqueda correcta en el filtro
+const allCats = [...new Set([p.cat, ...(p.cats || [])].filter(Boolean))].join(',');
 ---
 <article 
   class:list={[
@@ -35,35 +37,47 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
     className
   ]}
   data-cat={p.cat}
+  data-cats={allCats}
   data-price={p.price}
+  data-orden={p.orden || 999}
   data-search={searchStr}
 >
   <!-- CONTENEDOR DE IMAGEN / CARRUSEL -->
   <div class="relative aspect-[4/5] overflow-hidden bg-stone-50">
     
     {allImgs.length > 1 ? (
-      <div 
-        class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none h-full w-full"
-        id={`carousel-${p.id}`}
-      >
-        {allImgs.map((img, i) => (
-          <a 
-            href={`/ramo/${productSlug}`}
-            class="flex-shrink-0 w-full h-full snap-center relative block"
-            aria-label={`Ver ${p.name} - Imagen ${i + 1}`}
-          >
-            <img 
-              src={clUrl(img, 480)} 
-              alt={`${p.name} - Vista ${i + 1}`} 
-              width="480"
-              height="600"
-              loading={i === 0 ? imgLoading : 'lazy'}
-              decoding={eager ? 'sync' : 'async'} 
-              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-          </a>
-        ))}
-      </div>
+      <>
+        <div 
+          class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none h-full w-full"
+          id={`carousel-${p.id}`}
+        >
+          {allImgs.map((img, i) => (
+            <a 
+              href={`/ramo/${productSlug}`}
+              class="flex-shrink-0 w-full h-full snap-center relative block"
+              aria-label={`Ver ${p.name} - Imagen ${i + 1}`}
+            >
+              <img 
+                src={clUrl(img, 480)} 
+                alt={`${p.name} - Vista ${i + 1}`} 
+                width="480"
+                height="600"
+                loading={i === 0 ? imgLoading : 'lazy'}
+                decoding={eager ? 'sync' : 'async'} 
+                class="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-105"
+              />
+            </a>
+          ))}
+        </div>
+        
+        <!-- Controle Desktop -->
+        <button class="carousel-prev absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/70 backdrop-blur-md rounded-full items-center justify-center hidden md:flex opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white z-20 shadow-sm" aria-label="Anterior" data-target={`carousel-${p.id}`}>
+          <Icon name="arrow-left-s" class="text-stone-800 text-sm" />
+        </button>
+        <button class="carousel-next absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/70 backdrop-blur-md rounded-full items-center justify-center hidden md:flex opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white z-20 shadow-sm" aria-label="Siguiente" data-target={`carousel-${p.id}`}>
+          <Icon name="arrow-right-s" class="text-stone-800 text-sm" />
+        </button>
+      </>
     ) : (
       <a href={`/ramo/${productSlug}`} class="block h-full w-full relative">
         {p.img ? (
@@ -106,17 +120,17 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
       )}
       {p.oferta && (
         <div class="bg-rose-50/90 text-rose-700 border border-rose-100 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-sm backdrop-blur-md self-start">
-          <Icon name="price-tag-3"  /> Oferta
+          <Icon name="price-tag-3" /> Oferta
         </div>
       )}
     </div>
 
-    <!-- Botón de Acción Rápida (Hover en desktop, siempre visible en móvil) -->
+    <!-- Botón de Acción Rápida -->
     <div class="absolute bottom-4 right-4 z-30 md:opacity-0 md:group-hover:opacity-100 md:translate-y-2 md:group-hover:translate-y-0 transition-all duration-300">
       {p.price > 0 ? (
         <button 
           class="w-11 h-11 md:w-12 md:h-12 bg-stone-900/90 backdrop-blur-sm text-white rounded-2xl flex items-center justify-center shadow-xl hover:bg-violet-600 hover:scale-110 active:scale-95 transition-all duration-300"
-          onclick={`event.preventDefault(); event.stopPropagation(); addToCart(${p.id})`} 
+          onclick={`event.preventDefault(); event.stopPropagation(); window.addToCart(${p.id})`} 
           aria-label="Agregar al carrito"
           id={`padd-${p.id}`}
         >
@@ -164,21 +178,66 @@ const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replac
 
       {p.envioGratis && (
         <div class="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-          <Icon name="truck"  /> Gratis
+          <Icon name="truck" /> Gratis
         </div>
       )}
     </div>
   </div>
 </article>
 
-
 <style>
   .scrollbar-none::-webkit-scrollbar { display: none; }
   .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-  
-  /* Ajuste de dots para que se vean bien con el auto-slide */
-  [data-idx] {
-    transition: all 0.5s ease;
-  }
 </style>
 
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    // Sincronización de dots para carruseles de tarjetas
+    document.querySelectorAll('.snap-x').forEach(container => {
+      const dots = container.parentElement.querySelectorAll('[data-idx]');
+      if(!dots.length) return;
+      
+      // Init
+      if (dots[0]) {
+        dots[0].classList.replace('bg-white/40', 'bg-white');
+        dots[0].classList.add('w-2');
+      }
+
+      let isScrolling;
+      container.addEventListener('scroll', () => {
+        window.clearTimeout(isScrolling);
+        isScrolling = setTimeout(() => {
+          const idx = Math.round(container.scrollLeft / container.clientWidth);
+          dots.forEach((dot, i) => {
+            if(i === idx) {
+              dot.classList.replace('bg-white/40', 'bg-white');
+              dot.classList.add('w-2');
+            } else {
+              dot.classList.replace('bg-white', 'bg-white/40');
+              dot.classList.remove('w-2');
+            }
+          });
+        }, 60);
+      }, { passive: true });
+    });
+
+    // Controles por botones (Desktop)
+    document.querySelectorAll('.carousel-prev').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const target = document.getElementById(btn.dataset.target);
+        if (target) target.scrollBy({ left: -target.clientWidth, behavior: 'smooth' });
+      });
+    });
+
+    document.querySelectorAll('.carousel-next').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const target = document.getElementById(btn.dataset.target);
+        if (target) target.scrollBy({ left: target.clientWidth, behavior: 'smooth' });
+      });
+    });
+  });
+</script>

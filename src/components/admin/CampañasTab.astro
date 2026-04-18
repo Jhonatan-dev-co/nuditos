@@ -1,0 +1,199 @@
+---
+import Icon from '../Icon.astro';
+---
+<!-- CAMPAÑAS TEMPORALES -->
+<div class="tab-content" id="tab-campanas">
+
+  <!-- Header -->
+  <div class="t-card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #f3edf9 0%, #fce4ec 100%); border: 1.5px solid #e8d5f5;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <div class="t-title" style="color: #6d28d9;">🎪 Campañas Temporales</div>
+        <div class="t-sub">Crea campañas con fecha de inicio y fin. La web aplica banners, etiquetas y descuentos automáticamente — sin tocar código.</div>
+      </div>
+      <button onclick="newCampaign()" style="background: #6d28d9; color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 0.8rem; white-space: nowrap;">
+        ✨ Nueva campaña
+      </button>
+    </div>
+  </div>
+
+  <!-- Estado actual -->
+  <div class="t-card" style="margin-bottom: 1.5rem;">
+    <div class="t-title">📡 Estado Actual</div>
+    <div id="activeCampaignStatus" style="padding: 1rem; background: #f8f9fa; border-radius: 1rem; font-size: 0.82rem; color: #666; text-align: center;">
+      Cargando...
+    </div>
+  </div>
+
+  <!-- Lista de campañas -->
+  <div class="t-card">
+    <div class="t-title">📅 Mis Campañas</div>
+    <div id="campaignsList">
+      <div style="text-align:center; padding: 2rem; color: var(--soft); font-size: 0.8rem;">Cargando campañas...</div>
+    </div>
+  </div>
+
+  <!-- Editor de campaña (se muestra al crear/editar) -->
+  <div id="campaignEditor" style="display:none; margin-top: 1.5rem;">
+    <div class="t-card" style="border: 2px solid #6d28d9;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.2rem;">
+        <div class="t-title" id="campaignEditorTitle">Nueva Campaña</div>
+        <button onclick="closeCampaignEditor()" style="background: none; border:none; cursor:pointer; color: #999; font-size: 1.2rem;">✕</button>
+      </div>
+
+      <input type="hidden" id="campEditId">
+
+      <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+
+        <!-- Nombre -->
+        <div class="field field-full">
+          <label>Nombre de la campaña *</label>
+          <input type="text" id="campNombre" placeholder="Ej: Especial Día de la Madre 🌸">
+        </div>
+
+        <!-- Emoji de campaña -->
+        <div class="field">
+          <label>Emoji identificador</label>
+          <input type="text" id="campEmoji" value="🌸" maxlength="4" style="font-size: 1.5rem; text-align:center;">
+        </div>
+
+        <!-- Color de acento -->
+        <div class="field">
+          <label>Color de acento</label>
+          <div style="display:flex; gap: 6px; flex-wrap: wrap;" id="colorPicker">
+            <button type="button" class="color-chip active" data-color="#ec4899" onclick="selectCampColor('#ec4899',this)" style="width:28px;height:28px;border-radius:50%;background:#ec4899;border:3px solid #fff;box-shadow:0 0 0 2px #ec4899;cursor:pointer;"></button>
+            <button type="button" class="color-chip" data-color="#8b5cf6" onclick="selectCampColor('#8b5cf6',this)" style="width:28px;height:28px;border-radius:50%;background:#8b5cf6;border:3px solid #fff;box-shadow:0 0 0 0px #8b5cf6;cursor:pointer;"></button>
+            <button type="button" class="color-chip" data-color="#f59e0b" onclick="selectCampColor('#f59e0b',this)" style="width:28px;height:28px;border-radius:50%;background:#f59e0b;border:3px solid #fff;box-shadow:0 0 0 0px #f59e0b;cursor:pointer;"></button>
+            <button type="button" class="color-chip" data-color="#10b981" onclick="selectCampColor('#10b981',this)" style="width:28px;height:28px;border-radius:50%;background:#10b981;border:3px solid #fff;box-shadow:0 0 0 0px #10b981;cursor:pointer;"></button>
+            <button type="button" class="color-chip" data-color="#ef4444" onclick="selectCampColor('#ef4444',this)" style="width:28px;height:28px;border-radius:50%;background:#ef4444;border:3px solid #fff;box-shadow:0 0 0 0px #ef4444;cursor:pointer;"></button>
+            <button type="button" class="color-chip" data-color="#0ea5e9" onclick="selectCampColor('#0ea5e9',this)" style="width:28px;height:28px;border-radius:50%;background:#0ea5e9;border:3px solid #fff;box-shadow:0 0 0 0px #0ea5e9;cursor:pointer;"></button>
+          </div>
+          <input type="hidden" id="campColor" value="#ec4899">
+        </div>
+
+        <!-- Fechas -->
+        <div class="field">
+          <label>Fecha de inicio</label>
+          <input type="date" id="campFechaInicio">
+        </div>
+
+        <div class="field">
+          <label>Fecha de fin</label>
+          <input type="date" id="campFechaFin">
+        </div>
+
+        <!-- Banner superior -->
+        <div class="field field-full" style="grid-column: 1/-1;">
+          <label>Mensaje del banner superior de la tienda</label>
+          <input type="text" id="campBannerMsg" placeholder="Ej: 🌸 Especial Día de la Madre — Regala flores eternas que duran para siempre">
+          <div style="font-size: 0.65rem; color: #999; margin-top: 3px;">Aparece en la barra de color en la parte superior de la tienda.</div>
+        </div>
+
+        <!-- Código de descuento -->
+        <div class="field">
+          <label>Código de descuento (opcional)</label>
+          <input type="text" id="campDescCodigo" placeholder="Ej: MAMA2025" style="text-transform:uppercase;">
+        </div>
+
+        <div class="field">
+          <label>% de descuento</label>
+          <input type="number" id="campDescPct" min="0" max="80" value="10" placeholder="10">
+        </div>
+
+        <!-- Etiqueta que se aplica a productos -->
+        <div class="field">
+          <label>Etiqueta automática en productos</label>
+          <select id="campBadge">
+            <option value="">Sin etiqueta</option>
+            <option value="Especial">⭐ Especial</option>
+            <option value="Popular">🔥 Popular</option>
+            <option value="Nuevo">🟢 Nuevo</option>
+          </select>
+        </div>
+
+        <!-- Categoría a destacar -->
+        <div class="field">
+          <label>Categoría a destacar (opcional)</label>
+          <select id="campCatDestacada">
+            <option value="">Ninguna — mostrar todo</option>
+          </select>
+        </div>
+
+        <!-- Título editorial del Home -->
+        <div class="field field-full" style="grid-column: 1/-1;">
+          <label>Título del Banner Editorial (Home)</label>
+          <input type="text" id="campBannerTitle" placeholder="Ej: Flores que &lt;em&gt;nunca se marchitan&lt;/em&gt; para mamá">
+        </div>
+
+        <div class="field field-full" style="grid-column: 1/-1;">
+          <label>Subtítulo del Banner Editorial</label>
+          <textarea id="campBannerSubtitle" rows="2" placeholder="Una descripción breve y emotiva de la campaña..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>URL de imagen del banner</label>
+          <input type="text" id="campBannerImg" placeholder="https://res.cloudinary.com/...">
+        </div>
+
+        <div class="field">
+          <label>URL del botón</label>
+          <input type="text" id="campBannerCta" placeholder="/catalogo" value="/catalogo">
+        </div>
+
+      </div>
+
+      <!-- Preview -->
+      <div id="campPreview" style="background: linear-gradient(135deg, #fce4ec, #f3edf9); padding: 1rem; border-radius: 1rem; margin-bottom: 1rem; font-size: 0.82rem; border: 1px dashed #e8d5f5;">
+        <div style="font-size: 0.65rem; color: #999; font-weight: 700; text-transform:uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Vista previa de banner superior</div>
+        <div id="campPreviewInner" style="text-align:center; font-size: 0.75rem; font-weight: 600; color: #6d28d9; letter-spacing: 1px;"></div>
+      </div>
+
+      <!-- Botones -->
+      <div style="display:flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button onclick="saveCampaign()" id="campSaveBtn" style="background: #6d28d9; color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 0.85rem;">
+          💾 Guardar campaña
+        </button>
+        <button onclick="closeCampaignEditor()" style="background: #f3f4f6; color: #666; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-size: 0.85rem;">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .campaign-card {
+    border: 1.5px solid #e5e7eb;
+    border-radius: 1.2rem;
+    padding: 1.2rem;
+    background: #fff;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.2s;
+  }
+  .campaign-card:hover {
+    box-shadow: 0 4px 16px rgba(109,40,217,0.1);
+  }
+  .campaign-card.active-camp {
+    border-color: #6d28d9;
+    background: linear-gradient(135deg, #f9f5ff, #fff);
+  }
+  .camp-badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: 99px;
+  }
+  .camp-status-active { background: #d1fae5; color: #065f46; }
+  .camp-status-upcoming { background: #fef3c7; color: #92400e; }
+  .camp-status-expired { background: #fee2e2; color: #991b1b; }
+  .camp-status-draft { background: #f3f4f6; color: #6b7280; }
+  .color-chip.active {
+    box-shadow: 0 0 0 2.5px #fff, 0 0 0 4px var(--c-color, #6d28d9) !important;
+  }
+</style>

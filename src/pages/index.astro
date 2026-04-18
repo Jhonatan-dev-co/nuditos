@@ -6,9 +6,10 @@ import Icon from '../components/Icon.astro';
  */
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
-import Hero from '../components/Hero.astro';
 import RamoDestacado from '../components/RamoDestacado.astro';
 import EditorialBanner from '../components/EditorialBanner.astro';
+import CoverBanner from '../components/CoverBanner.astro';
+import ProductCard from '../components/ProductCard.astro';
 import Catalogo from '../components/Catalogo.astro';
 
 import { getLiveProducts, getLiveConfig, getLiveCategories, getLiveBanners } from '../lib/supabase';
@@ -33,6 +34,10 @@ const firstHeroImg = heroProducts[0]?.img || null;
 // Ramo destacado
 const ramoDestacado = liveProducts.find(p => p.id === liveConfig.ramoDestacado);
 
+// Selección Nuditos
+const seleccionIds = liveConfig.seleccionNuditos || [];
+const selectionProducts = seleccionIds.map(id => liveProducts.find(p => p.id === id)).filter(p => p !== undefined);
+
 // Preparar datos seguros para el cliente (serialización limpia)
 const safeProducts = liveProducts.map(p => ({
   id: p.id,
@@ -47,28 +52,14 @@ const safeProducts = liveProducts.map(p => ({
 const safeCategories = liveCategories || [];
 
 // Banners Editoriales Dinámicos
-const homeBanner1 = liveBanners.find(b => b.afterCat === 'home1') || {
-  title: "Pétalos que <em>guardan</em> historias",
-  subtitle: "Creamos ramos que no se marchitan para momentos que deben durar por siempre. Hecho 100% a mano con hilos de la mejor calidad.",
-  imgUrl: "https://images.unsplash.com/photo-1583209814683-c023dd293cc6?q=80&w=1200",
-  ctaText: "Ver Colección",
-  ctaUrl: "/catalogo"
-};
-
-const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2') || {
-  title: "Regala un <em>pedacito</em> de arte",
-  subtitle: "Cada puntada es un detalle pensado en la persona que amas. Personaliza tus colores y crea el regalo perfecto.",
-  imgUrl: "https://images.unsplash.com/photo-1599307767316-776533da941c?q=80&w=1200",
-  ctaText: "Personalizar",
-  ctaUrl: "/#personalizado"
-};
+const homeBanner1 = liveBanners.find(b => b.afterCat === 'home1');
+const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
 ---
 
 <Layout
   title="Nuditos Tejidos — Detalles y Regalos Originales | Ramos de Crochet en Colombia"
   description="Encuentra el detalle perfecto: ramos de crochet hechos a mano y amigurumis. Regalos que nunca se marchitan. Envíos a todo Colombia."
   ogType="website"
-  preloadImage={firstHeroImg}
 >
   <h1 class="sr-only">Nuditos Tejidos — Expertos en Detalles y Regalos de Flores Eternas a Crochet en Colombia</h1>
 
@@ -77,64 +68,88 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2') || {
     🎁 <span id="bannerText"></span>
   </div>
 
-  <!-- ════════ HERO SWIPER ════════ -->
-  <Hero heroProducts={heroProducts} />
+  <!-- ════════ COVER INICIAL (home1) ════════ -->
+  {homeBanner1 && (
+    <CoverBanner 
+      title={homeBanner1.title} 
+      subtitle={homeBanner1.subtitle}
+      img={homeBanner1.imgUrl || (homeBanner1 as any).img}
+      video={homeBanner1.videoUrl}
+      ctaText={homeBanner1.ctaText}
+      ctaUrl={homeBanner1.ctaUrl}
+    />
+  )}
 
-  <!-- ════════ BANNER EDITORIAL 1 ════════ -->
-  <EditorialBanner 
-    title={homeBanner1.title} 
-    subtitle={homeBanner1.subtitle}
-    img={homeBanner1.imgUrl || homeBanner1.img}
-    ctaText={homeBanner1.ctaText}
-    ctaUrl={homeBanner1.ctaUrl}
-  />
+  <!-- ════════ LOOP EDITORIAL: BANNER → CATEGORÍA → BANNER → CATEGORÍA... ════════ -->
+  {(() => {
+    // 1. Preparar la "Categoría Virtual" de Selección Nuditos
+    const selectionCat = {
+      id: 'home_selection',
+      name: 'Selección Nuditos',
+      isVirtual: true,
+      items: selectionProducts as any
+    };
 
-  <!-- ════════ RAMO DEL MOMENTO ════════ -->
-  <RamoDestacado p={ramoDestacado} />
+    // 2. Obtener categorías reales visibles en Home
+    const realCategories = liveCategories
+      .filter(c => c.id !== 'todos' && c.showInHome !== false)
+      .sort((a,b) => (a.orden||0) - (b.orden||0));
 
-  <!-- ════════ CATEGORÍAS STICKY ════════ -->
-  <div class="cat-sticky" id="catalogSection">
-    <div class="cat-inner">
-      <div class="cat-row" id="catRow"></div>
+    // 3. Unir todo (Selección Nuditos siempre va de primero)
+    const allSections = [selectionCat, ...realCategories];
+    const activeProds = liveProducts.filter(p => p.activo !== false);
+
+    return allSections.map((section, idx) => {
+      // Obtener items (si es virtual ya los tiene, si no, filtrar por cat)
+      const items = section.isVirtual 
+        ? section.items 
+        : activeProds.filter(p => ((p.cats || []).includes(section.id?.toLowerCase()) || p.cat?.toLowerCase() === section.id?.toLowerCase())).sort((a,b) => (a.orden||0) - (b.orden||0)).slice(0, 4);
       
-      <!-- Selector Global de Vista -->
-      <div class="view-toggle-global">
-        <button class="vtoggle active" data-view="carousel" title="Ver como carrusel">
-          <Icon name="slideshow-3"  />
-        </button>
-        <button class="vtoggle" data-view="grid" title="Ver como mosaico">
-          <Icon name="grid"  />
-        </button>
-        <button class="vtoggle" data-view="list" title="Ver como lista">
-          <Icon name="list-check-2"  />
-        </button>
+      if (items.length === 0) return null;
+
+      // Banner que va ANTES de esta categoría
+      const banner = liveBanners.find(b => b.afterCat === section.id);
+
+      return (
+        <>
+          {banner && (
+            <EditorialBanner 
+              title={banner.title} 
+              subtitle={banner.subtitle}
+              img={banner.imgUrl || (banner as any).img}
+              video={(banner as any).videoUrl}
+              ctaText={banner.ctaText}
+              ctaUrl={banner.ctaUrl}
+              reverse={idx % 2 !== 0}
+            />
+          )}
+
+          <section class="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-14">
+            <div class="flex items-center justify-between mb-5 pb-2 border-b border-stone-200">
+              <h2 class="uppercase font-bold tracking-widest text-[#1a1220] text-xs md:text-sm">{section.name}</h2>
+              <a href={section.isVirtual ? "/catalogo" : `/catalogo?categoria=${section.id}`} class="text-[9px] md:text-[10px] tracking-widest uppercase font-bold text-stone-500 hover:text-stone-900 border border-stone-200 px-3 py-1 bg-white hover:bg-stone-50 transition-colors">
+                Ver todo
+              </a>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-x-2 gap-y-6 md:gap-6">
+              {items.map(p => <ProductCard p={p} parentView="grid" />)}
+            </div>
+          </section>
+        </>
+      );
+    });
+  })()}
+  
+  <!-- ════════ FILTRO ACTIVO (Oculto por defecto) ════════ -->
+  <div id="filteredView" style="display: none;" class="pb-24 pt-12">
+    <div class="max-w-[1400px] mx-auto px-6">
+      <div class="flex items-center justify-between mb-8 pb-2 border-b border-stone-200">
+        <h2 class="uppercase font-bold tracking-widest text-[#1a1220] text-sm" id="filteredTitle">Resultados</h2>
+        <button class="text-[10px] tracking-widest uppercase font-bold text-stone-500 border border-stone-200 px-3 py-1" onclick="location.reload()">VER INICIO</button>
       </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6" id="filteredGrid"></div>
     </div>
   </div>
-
-  <!-- ════════ CATÁLOGO ════════ -->
-  <div class="catalog-section" id="catalogRows">
-    <Catalogo products={liveProducts} config={liveConfig} categories={liveCategories} banners={liveBanners} />
-  </div>
-
-  <!-- ════════ FILTRO ACTIVO ════════ -->
-  <div id="filteredView">
-    <div class="filtered-header">
-      <h2 class="filtered-title" id="filteredTitle"></h2>
-      <button class="clear-filter rounded-2xl" onclick="clearFilter()">← Ver todo</button>
-    </div>
-    <div class="filtered-grid" id="filteredGrid"></div>
-  </div>
-
-  <!-- ════════ BANNER EDITORIAL 2 ════════ -->
-  <EditorialBanner 
-    title={homeBanner2.title} 
-    subtitle={homeBanner2.subtitle}
-    img={homeBanner2.imgUrl || homeBanner2.img}
-    ctaText={homeBanner2.ctaText}
-    ctaUrl={homeBanner2.ctaUrl}
-    reverse={true}
-  />
 
   <!-- ════════ RESEÑAS ════════ -->
   <section class="bg-stone-50 py-14 px-6 overflow-hidden" id="resenas">

@@ -36,8 +36,8 @@ const [allProducts, rawCategories] = await Promise.all([
 const categories = rawCategories && rawCategories.length > 0 ? rawCategories : FALLBACK_CATEGORIES;
 
 // Related Products
-const sameCat = allProducts.filter(p => p.cat === product.cat && p.id !== product.id).slice(0, 4);
-const others  = allProducts.filter(p => p.cat !== product.cat && p.id !== product.id).slice(0, 4 - sameCat.length);
+const sameCat = allProducts.filter(p => ((p.cats || []).some(cid => (product.cats || []).includes(cid)) || p.cat === product.cat) && p.id !== product.id).slice(0, 4);
+const others  = allProducts.filter(p => !((p.cats || []).some(cid => (product.cats || []).includes(cid)) || p.cat === product.cat) && p.id !== product.id).slice(0, 4 - sameCat.length);
 const related = [...sameCat, ...others].slice(0, 4);
 
 // UI Helpers

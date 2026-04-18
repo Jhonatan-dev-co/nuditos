@@ -18,8 +18,7 @@ async function fetchWithTimeout(url: string, options: any, timeout = 4000) {
 
 export async function getLiveProducts(): Promise<Product[]> {
   try {
-    const columns = 'id,nombre,precio,precio_original,descripcion,categoria,emoji,img,imgs,stock,badge,badge_class,oferta,envio_gratis,destacado,activo,meta_title,meta_description,alt_text,seo_keywords';
-    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.asc&select=${columns}`, {
+    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.desc`, {
       headers: { 
         apikey: SB_ANON, 
         Authorization: `Bearer ${SB_ANON}` 
@@ -38,13 +37,21 @@ export async function getLiveProducts(): Promise<Product[]> {
         imgsArr = p.imgs.split(',').map((s: string) => s.trim());
       }
 
+      // Manejar cats (múltiples categorías separadas por coma)
+      let catsArr: string[] = [];
+      if (p.categoria) {
+        catsArr = p.categoria.split(',').map((s: string) => s.trim().toLowerCase()).filter((s: string) => s);
+      }
+
       return {
         id:             p.id,
         name:           p.nombre          || '',
         price:          p.precio          || 0,
         precioOriginal: p.precio_original || 0,
         desc:           p.descripcion     || '',
-        cat:            p.categoria       || '',
+        cat:            catsArr[0]        || '', // Fallback a la primera categoría
+        cats:           catsArr, // Múltiples categorías
+        orden:          p.orden           || 0,
         emoji:          p.emoji           || '🌸',
         img:            p.img             || '',
         imgs:           imgsArr,
@@ -70,8 +77,7 @@ export async function getLiveProducts(): Promise<Product[]> {
 
 export async function getLiveCategories(): Promise<any[]> {
   try {
-    const columns = 'id,nombre,icon,emoji,orden,meta_title,meta_description,descripcion_seo';
-    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/categorias?order=orden.asc&select=${columns}`, {
+    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/categorias?order=orden.asc`, {
       headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
     });
     if (!res.ok) return [];
@@ -93,7 +99,8 @@ export async function getLiveCategories(): Promise<any[]> {
         nombre: name,
         metaTitle:       c.meta_title       || null,
         metaDescription: c.meta_description || null,
-        descripcionSeo:  c.descripcion_seo  || null
+        descripcionSeo:  c.descripcion_seo  || null,
+        showInHome:      c.show_in_home     !== false
       };
     });
   } catch {
@@ -117,6 +124,7 @@ export async function getLiveBanners(): Promise<any[]> {
       subtitle: b.subtitle  || '',
       ctaText:  b.cta_text  || '',
       ctaUrl:   b.cta_url   || '',
+      videoUrl: b.video_url || '',
     }));
   } catch {
     return [];
@@ -151,6 +159,7 @@ export async function getLiveConfig() {
       wompiIntegrity:       m.wompi_integrity_secret || '',
       wompiEvents:          m.wompi_events_secret || '',
       catViews:             JSON.parse(m.cat_views || '{}'),
+      seleccionNuditos:     JSON.parse(m.seleccion_nuditos || '[]'),
       metaPixelActivo:      m.meta_pixel_activo === 'true',
       metaPixelId:          m.meta_pixel_id || '',
       seoTitle:             m.seo_title || '',

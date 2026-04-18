@@ -176,6 +176,7 @@ function sbToConfig(rows) {
     wompiIntegrity:       m.wompi_integrity_secret || '',
     wompiEvents:          m.wompi_events_secret || '',
     catViews:             JSON.parse(m.cat_views || '{}'),
+    seleccionNuditos:     JSON.parse(m.seleccion_nuditos || '[]'),
     metaPixelActivo:      m.meta_pixel_activo === 'true',
     metaPixelId:          m.meta_pixel_id || '',
     seoTitle:             m.seo_title || '',
@@ -389,6 +390,7 @@ async function sbAdminSaveConfig(cfg) {
     { clave: 'wompi_integrity_secret', valor: cfg.wompiIntegrity    || '' },
     { clave: 'wompi_events_secret',    valor: cfg.wompiEvents       || '' },
     { clave: 'cat_views',            valor: JSON.stringify(cfg.catViews || {}) },
+    { clave: 'seleccion_nuditos',    valor: JSON.stringify(cfg.seleccionNuditos || []) },
     { clave: 'meta_pixel_activo',    valor: String(!!cfg.metaPixelActivo) },
     { clave: 'meta_pixel_id',        valor: cfg.metaPixelId || '' },
     { clave: 'seo_title',           valor: cfg.seoTitle || '' },
@@ -425,13 +427,22 @@ async function sbAdminDeletePost(id) {
 }
 
 async function sbAdminSaveBanners(banners) {
-  try { await _del('banners', 'id=gt.0', true); } catch {}
+  // Primero intentamos borrar todo lo actual con una condición que siempre se cumpla (como id > 0)
+  try { 
+    const delRes = await _del('banners', 'id=gt.0', true); 
+    if (!delRes) console.warn('No se pudieron borrar banners antiguos o la tabla ya estaba vacía');
+  } catch(err) {
+    console.error('Error limpiando tabla banners:', err);
+  }
+
   if (!banners.length) return true;
+
   const data = banners.map((b, i) => ({
     after_cat: b.afterCat || '',
     emoji:     b.emoji    || '🌸',
     title:     b.title    || '',
     img_url:   b.imgUrl   || '',
+    video_url: b.videoUrl || '', // ← Faltaba este campo vital
     subtitle:  b.subtitle || '',
     cta_text:  b.ctaText  || '',
     cta_url:   b.ctaUrl   || '',

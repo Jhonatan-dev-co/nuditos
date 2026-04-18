@@ -16,6 +16,7 @@ import DashboardTab from '../components/admin/DashboardTab.astro';
 import OrdersTab from '../components/admin/OrdersTab.astro';
 // import CategoriesTab from '../components/admin/CategoriesTab.astro'; // Eliminado, ahora embebido en productos
 import VitrinaTab from '../components/admin/VitrinaTab.astro';
+import CampañasTab from '../components/admin/CampañasTab.astro';
 import BannersTab from '../components/admin/BannersTab.astro';
 import DiscountsTab from '../components/admin/DiscountsTab.astro';
 import BlogTab from '../components/admin/BlogTab.astro';
@@ -55,6 +56,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         <OrdersTab />
         <!-- <CategoriesTab /> -->
         <VitrinaTab />
+        <CampañasTab />
         <BannersTab />
         <DiscountsTab />
         <BlogTab />
@@ -84,10 +86,12 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     let editorialBannersAdmin=[], sideFilterCat='';
     let pedidos=[], pedidoFilter='todos';
     let adminCategories=[];
+    let seleccionSelection=[]; // Nueva lista para sección superior
+    let adminCampaigns=[]; // ← Nueva lista de campañas
     let uploadedImgs=[], currentEditingImgs=[];
     let changeHistory=[];
-    let selectedProducts = new Set(); // Para selección múltiple
-    let isDraftLoading = false; // Bloqueo para evitar bucles durante la carga
+    let selectedProducts = new Set();
+    let isDraftLoading = false;
 
     /* ── DRAFT SYSTEM (AUTOSAVE) ── */
     function saveProductDraft() {
@@ -247,9 +251,9 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       document.querySelectorAll('.a-tab').forEach(el=>el.classList.remove('active'));
       document.getElementById('tab-'+name).classList.add('active');
       if(btn)btn.classList.add('active');
-      if(name==='dashboard')renderDashboard();
-      if(name==='pedidos')renderPedidosList();
       if(name==='blog')loadPosts();
+      if(name==='campanas')renderCampaignsList();
+      if(name==='vitrina') renderVitrina();
     }
 
     /* ── CLOUDINARY ── */
@@ -311,13 +315,22 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         fd.append('api_key',apiKey);fd.append('signature',signature);
         if(signedPublicId) fd.append('public_id', signedPublicId);
         showUploadProgress(30);
-        const res=await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,{method:'POST',body:fd});
+        const res=await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,{method:'POST',body:fd});
         if(!res.ok) {
           const cloudErr = await res.json();
           throw new Error(cloudErr.error?.message || 'Error en Cloudinary');
         }
         const data=await res.json();
-        const url=data.secure_url.replace('/upload/','/upload/w_1200,q_auto,f_auto/');
+        let url = data.secure_url;
+        if (data.resource_type === 'video') {
+         // Aseguramos que el video tenga extensión .mp4 y prefijo de video
+         url = url.replace('/image/upload/', '/video/upload/');
+         url = url.replace('/upload/', '/upload/q_auto,vc_auto/');
+         if (!url.toLowerCase().endsWith('.mp4')) url += '.mp4';
+        } else {
+         // Transformación para imagen
+         url = url.replace('/upload/', '/upload/w_1200,q_auto,f_auto/');
+        }
         showUploadProgress(100);setTimeout(()=>hideUploadProgress(),800);
         addToHistory(`📸 Foto subida: ${data.original_filename||'imagen'}`);
         return url;
@@ -346,14 +359,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
             {afterCat:'home2',title:'Regala un <em>pedacito</em> de arte',subtitle:'Cada puntada es un detalle pensado en la persona que amas.',imgUrl:'https://images.unsplash.com/photo-1599307767316-776533da941c',ctaText:'Personalizar',ctaUrl:'/#personalizado'}
           ];
           
-          editorialBannersAdmin = rows && rows.length ? rows : [...defaults];
-          
-          // Aseguramos que HOME1 y HOME2 siempre existan en la lista
-          defaults.forEach(def => {
-            if(!editorialBannersAdmin.find(b => b.afterCat === def.afterCat)) {
-              editorialBannersAdmin.push(def);
-            }
-          });
+          editorialBannersAdmin = rows && rows.length ? rows : [];
         }catch{editorialBannersAdmin=[];}
         try{pedidos=await sbAdminGetPedidos();}catch{pedidos=[];}
         try{
@@ -370,7 +376,10 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         adminProducts=products.map(p=>({...p}));adminCfg={...CONFIG_DEFAULT};editorialBannersAdmin=[];pedidos=[];
       }
       
-      heroSelection=[...(adminCfg.carruselHero||[])];momentoSelection=adminCfg.ramoDestacado;
+      heroSelection=[...(adminCfg.carruselHero||[])];
+      seleccionSelection=[...(adminCfg.seleccionNuditos||[])];
+      momentoSelection=adminCfg.ramoDestacado;
+
       document.getElementById('descCodigo').value=adminCfg.descuentoCodigo||'';
       document.getElementById('descPorcentaje').value=adminCfg.descuentoPorcentaje||10;
       document.getElementById('descTexto').value=adminCfg.descuentoTexto||'';
@@ -401,6 +410,18 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       buildSideFilters();renderSidebar();renderStats();showEditorEmpty();renderCategoriasList();
       renderHeroSlots();renderMomentoSelected();renderMomentoList(adminProducts);renderHeroList(adminProducts);
       renderCatViewsList();renderBannerList();
+      
+      // Populate Sortable Filter
+      const sf = document.getElementById('sortCatFilter');
+      if (sf) {
+        sf.innerHTML = '<option value="todos">Todas las categorías</option>' + 
+          adminCategories.filter(c=>c.id!=='todos').map(c=>`<option value="${c.id}">${c.icon||''} ${c.nombre||c.name}</option>`).join('');
+      }
+      if(window.renderSortableList) window.renderSortableList();
+      
+      // Inicializar campañas temporales
+      renderCampaignsList();
+      if(window._applyCampaigns) window._applyCampaigns();
       
       const statusLabel = window._isLiveMode ? '✅ Conectado a Supabase' : '⚠️ Usando datos locales (Fallback)';
       showToast(statusLabel);
@@ -604,8 +625,11 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
 
     function buildEditorHTML(p){
       const isNew=!p;
-      const catSource = adminCategories.length ? adminCategories : categories.filter(c=>c.id!=='todos');
-      const cats=catSource.filter(c=>c.id!=='todos').map(c=>`<option value="${c.id}" ${p?.cat===c.id?'selected':''}>${c.icon||'🌸'} ${c.nombre||c.name}</option>`).join('');
+      const catSource = adminCategories.length ? adminCategories : (window.categories||[]).filter(c=>c.id!=='todos');
+      const cats=catSource.filter(c=>c.id!=='todos').map(c=>{
+         const isSelected = p?.cats ? p.cats.includes(c.id.toLowerCase()) : (p?.cat === c.id);
+         return `<label class="chip-check" style="font-size:0.75rem; padding: 4px 10px"><input type="checkbox" name="fCatMult" value="${c.id}" ${isSelected?'checked':''} onchange="updatePreview();saveProductDraft()"> ${c.icon||'🌸'} ${c.nombre||c.name}</label>`;
+      }).join('');
       return `
         <input type="hidden" id="editingId" value="${p?.id||''}">
         <div class="editor-card">
@@ -624,7 +648,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           <div class="form-grid">
             <div class="field field-full"><label>Nombre del producto *</label><input type="text" id="fNombre" value="${p?.name||''}" oninput="updatePreview();saveProductDraft()" placeholder="Ramo de rosas con mariposas"></div>
             <div class="field"><label>Precio (COP)</label><input type="number" id="fPrecio" value="${p?.price||0}" oninput="updatePreview();saveProductDraft()" min="0"></div>
-            <div class="field"><label>Categoría *</label><select id="fCat" onchange="updatePreview();saveProductDraft()">${cats}</select></div>
+            <div class="field field-full"><label>Categorías (puedes elegir varias) *</label><div class="chips-row" style="margin-top:0.3rem">${cats}</div></div>
             <div class="field"><label>Emoji (si no hay foto)</label><input type="text" id="fEmoji" value="${p?.emoji||'🌸'}" oninput="updatePreview();saveProductDraft()"></div>
             <div class="field field-full">
               <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: .3rem">
@@ -739,11 +763,29 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     function updateImgsTextarea(){const ta=document.getElementById('fImgs');if(ta)ta.value=currentEditingImgs.join('\n');}
     function renderImgPreviews(){
       const row=document.getElementById('imgPreviewRow');if(!row)return;
+      const mainImg = document.getElementById('fImg')?.value || currentEditingImgs[0] || '';
       row.innerHTML=currentEditingImgs.map((url,i)=>`
-        <div class="img-thumb-wrap">
+        <div class="img-thumb-wrap" style="${url===mainImg?'border-color:var(--emerald)':''}">
+          ${url===mainImg?`<div style="position:absolute;top:-8px;left:-8px;background:var(--emerald);color:white;font-size:0.6rem;padding:2px 6px;border-radius:10px;font-weight:bold;z-index:10;pointer-events:none;">🌟 Portada</div>`:''}
           <img class="img-thumb" src="${url}">
+          <div style="position:absolute;bottom:4px;left:4px;display:flex;gap:4px;z-index:10">
+            ${url!==mainImg?`<button type="button" style="background:#10b981;color:white;border:none;border-radius:4px;font-size:0.65rem;padding:3px 6px;cursor:pointer;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.1)" onclick="setMainImg('${url}')" title="Hacer foto de portada">⭐ Portada</button>`:''}
+          </div>
           <button class="img-thumb-rm" onclick="removeImg(${i})">×</button>
         </div>`).join('');
+    }
+    
+    function setMainImg(url){
+       document.getElementById('fImg').value = url;
+       const idx = currentEditingImgs.indexOf(url);
+       if(idx > -1) {
+         currentEditingImgs.splice(idx, 1);
+         currentEditingImgs.unshift(url);
+       }
+       renderImgPreviews();
+       updateImgsTextarea();
+       updatePreview();
+       saveProductDraft();
     }
     function removeImg(i){currentEditingImgs.splice(i,1);renderImgPreviews();updateImgsTextarea();updatePreview();}
 
@@ -757,8 +799,8 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       const isEspecial=document.getElementById('fTagEspecial')?.checked;
       const isOferta=document.getElementById('fTagOferta')?.checked;
       const precioOrig=parseInt(document.getElementById('fPrecioOriginal')?.value)||0;
-      const catId=document.getElementById('fCat')?.value;
-      const cat=categories.find(c=>c.id===catId);
+      const catId = Array.from(document.querySelectorAll('input[name="fCatMult"]:checked')).map(el=>el.value)[0] || '';
+      const cat=(window.categories||adminCategories).find(c=>c.id===catId);
       const isActive=document.getElementById('fActivo')?.value==='true';
       const badge=isNew?'Nuevo':isPopular?'Popular':isEspecial?'Especial':'';
       const badgeCls=isNew?'nuevo':isPopular?'popular':isEspecial?'especial':'';
@@ -781,7 +823,8 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     async function saveProduct(){
       const nombre=document.getElementById('fNombre')?.value.trim();
       const precio=parseInt(document.getElementById('fPrecio')?.value)||0;
-      const cat=document.getElementById('fCat')?.value;
+      const checkedCats=Array.from(document.querySelectorAll('input[name="fCatMult"]:checked')).map(el=>el.value);
+      const cat = checkedCats.join(',');
       const emoji=document.getElementById('fEmoji')?.value.trim()||'🌸';
       const desc=document.getElementById('fDesc')?.value.trim()||'';
       const img=document.getElementById('fImg')?.value.trim()||'';
@@ -907,7 +950,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         <div class="cat-admin-card">
           <div class="ca-icon">${c.icon||'🌸'}</div>
           <div class="ca-info">
-            <div class="ca-name">${c.nombre||c.name}</div>
+            <div class="ca-name">${c.nombre||c.name} ${c.showInHome !== false ? '<span style="font-size:0.6rem; background:#dcfce7; color:#166534; padding:2px 6px; border-radius:4px; margin-left:8px;">🏠 Home</span>' : ''}</div>
             <div class="ca-slug">ID: ${c.id} · <strong style="color:var(--lila)">${total}</strong> producto${total!==1?'s':''} (${vis} visible${vis!==1?'s':''})</div>
           </div>
           <div class="ca-actions">
@@ -927,6 +970,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       document.getElementById('catNombre').value = '';
       document.getElementById('catIcon').value = '🌸';
       document.getElementById('catOrden').value = adminCategories.length + 1;
+      document.getElementById('catShowInHome').value = 'true';
       document.getElementById('catStatsRow').style.display = 'none';
       document.getElementById('emojiPickerPanel').classList.remove('open');
       loadEmojiGrid('flores');
@@ -946,6 +990,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       document.getElementById('catNombre').value = c.nombre || c.name || '';
       document.getElementById('catIcon').value = c.icon || '🌸';
       document.getElementById('catOrden').value = c.orden || 1;
+      document.getElementById('catShowInHome').value = c.showInHome !== false ? 'true' : 'false';
       // Mostrar stats de productos
       document.getElementById('catStatsRow').style.display = 'flex';
       document.getElementById('catStatTotal').textContent = total;
@@ -966,8 +1011,9 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       const nombre = document.getElementById('catNombre').value.trim();
       const icon   = document.getElementById('catIcon').value.trim() || '🌸';
       const orden  = parseInt(document.getElementById('catOrden').value) || adminCategories.length + 1;
+      const showInHome = document.getElementById('catShowInHome').value === 'true';
       if (!id || !nombre) { showToast('⚠️ ID y nombre son obligatorios'); return; }
-      const data = { id, nombre, icon, orden, activo: true };
+      const data = { id, nombre, icon, orden, showInHome, activo: true };
       const isNew = !document.getElementById('catEditId').value;
       const btn = document.getElementById('catSaveBtn');
       if(btn){btn.disabled=true;btn.textContent='⏳ Guardando...';}
@@ -1093,50 +1139,241 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     function addToHistory(action){ changeHistory.push({action,time:new Date().toLocaleString('es-CO')}); if(changeHistory.length>50)changeHistory.shift(); localStorage.setItem('nuditos_history',JSON.stringify(changeHistory)); }
 
     /* ── VITRINA & METADATA ── */
+    /* ── VITRINA & ESTRUCTURA TIENDA ── */
+    function renderVitrina() {
+      renderMomentoSelected();
+      renderHeroSlots();
+      renderSeleccionSlots();
+      renderVitrinaCategories();
+      searchHeroProducts();
+      searchSeleccionProducts();
+      searchMomentoProducts();
+      // Poblar filtros en vitrina
+      const sortSel = document.getElementById('sortCatFilter');
+      if (sortSel) {
+        sortSel.innerHTML = '<option value="todos">Todas las categorías</option>' + 
+          adminCategories.filter(c => c.id !== 'todos').map(c => `<option value="${c.id}">${c.nombre || c.name}</option>`).join('');
+      }
+    }
+
+    function renderVitrinaCategories() {
+      const el = document.getElementById('vitrinaCategoriesList');
+      if (!el) return;
+      
+      const sorted = [...adminCategories].filter(c => c.id !== 'todos').sort((a,b) => (a.orden||0) - (b.orden||0));
+      
+      el.innerHTML = sorted.map((c, i) => {
+        const isVisible = c.showInHome !== false;
+        return `
+          <div class="cat-admin-card" style="padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; gap: 1rem; transition: all 0.2s ease;">
+            <div style="font-size: 1.5rem; width: 40px; text-align: center;">${c.icon || '🌸'}</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; color: var(--text); font-size: 0.9rem;">${c.nombre || c.name}</div>
+              <div style="font-size: 0.75rem; color: var(--soft);">Orden: ${c.orden || 0}</div>
+            </div>
+            
+            <div style="display: flex; gap: 0.4rem; align-items:center;">
+              <!-- Toggle Home -->
+              <button onclick="toggleCatHome('${c.id}')" 
+                style="padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s;
+                ${isVisible ? 'background: #dcfce7; color: #166534;' : 'background: #f1f5f9; color: #64748b;'}">
+                ${isVisible ? '🏠 visible' : '🙈 oculto'}
+              </button>
+              
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <button onclick="moveCat('${c.id}', -1)" class="ca-btn" style="padding: 2px 6px; font-size: 10px;" ${i===0?'disabled opacity-30':''}>▲</button>
+                <button onclick="moveCat('${c.id}', 1)" class="ca-btn" style="padding: 2px 6px; font-size: 10px;" ${i===sorted.length-1?'disabled opacity-30':''}>▼</button>
+              </div>
+
+              <button class="ca-btn" onclick="editCategory('${c.id}')" style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:8px;">✏️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.toggleCatHome = async function(id) {
+      const idx = adminCategories.findIndex(c => c.id === id);
+      if (idx === -1) return;
+      adminCategories[idx].showInHome = (adminCategories[idx].showInHome === false ? true : false);
+      showToast(`${adminCategories[idx].showInHome ? '✅ Visible' : '🙈 Oculto'} en Home`);
+      renderVitrinaCategories();
+      await sbAdminSaveCategory(adminCategories[idx], false);
+      renderBannerList(); // Para actualizar los dropdows de banners
+    }
+
+    window.moveCat = async function(id, direction) {
+      const sorted = [...adminCategories].filter(c => c.id !== 'todos').sort((a,b) => (a.orden||0) - (b.orden||0));
+      const idx = sorted.findIndex(c => c.id === id);
+      if (idx === -1) return;
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= sorted.length) return;
+      
+      const current = sorted[idx];
+      const target = sorted[targetIdx];
+      
+      // Swap orden values
+      const temp = current.orden;
+      current.orden = target.orden;
+      target.orden = temp;
+      
+      // Si son iguales o faltan, forzar correlativo
+      if (current.orden === target.orden) {
+        current.orden = idx + direction + 1;
+        target.orden = idx + 1;
+      }
+
+      showToast('⏳ Sincronizando orden...');
+      renderVitrinaCategories();
+      
+      await sbAdminSaveCategory(current, false);
+      await sbAdminSaveCategory(target, false);
+      
+      renderVitrinaCategories();
+      renderBannerList();
+    }
+
     function renderMomentoSelected(){ const p=momentoSelection?adminProducts.find(x=>x.id===momentoSelection):null; document.getElementById('momentoSelected').textContent=p?`✅: ${p.name}`:'Sin seleccionar'; }
-    function renderMomentoList(list){ document.getElementById('momentoList').innerHTML=list.slice(0,10).map(p=>`<div class="v-prod-row"><div class="v-info">${p.name}</div><button class="btn-select" onclick="selectMomento(${p.id})">Seleccionar</button></div>`).join(''); }
+    function renderMomentoList(list){ document.getElementById('momentoList').innerHTML=list.slice(0,50).map(p=>`<div class="v-prod-row"><div class="v-info">${p.name} <span style="font-size:0.6rem;opacity:0.6;">(${p.cat})</span></div><button class="btn-select" onclick="selectMomento(${p.id})">Seleccionar</button></div>`).join(''); }
     function selectMomento(id){ momentoSelection=id; renderMomentoSelected(); }
-    function renderHeroSlots(){ document.getElementById('heroSlots').innerHTML=heroSelection.map(id=>{ const p=adminProducts.find(x=>x.id===id); return `<div class="hero-slot filled">${p?.name.slice(0,10)}</div>`; }).join(''); }
-    function renderHeroList(list){ document.getElementById('heroList').innerHTML=list.slice(0,10).map(p=>`<div class="v-prod-row"><div class="v-info">${p.name}</div><button class="btn-select" onclick="toggleHero(${p.id})">+ Agregar</button></div>`).join(''); }
-    function toggleHero(id){ if(!heroSelection.includes(id))heroSelection.push(id); renderHeroSlots(); }
+    
+    function renderHeroSlots(){ document.getElementById('heroSlots').innerHTML=heroSelection.map(id=>{ const p=adminProducts.find(x=>x.id===id); return `<div class="hero-slot filled" onclick="toggleHero(${id})" title="Click para quitar">${p?.name.slice(0,10)}</div>`; }).join(''); }
+    function renderHeroList(list){ document.getElementById('heroList').innerHTML=list.slice(0,50).map(p=>`<div class="v-prod-row"><div class="v-info">${p.name} <span style="font-size:0.6rem;opacity:0.6;">(${p.cat})</span></div><button class="btn-select" onclick="toggleHero(${p.id})">${heroSelection.includes(p.id)?'Quitar':'+ Agregar'}</button></div>`).join(''); }
+    function toggleHero(id){ 
+      if(heroSelection.includes(id)) {
+        heroSelection = heroSelection.filter(x => x !== id);
+      } else {
+        if(heroSelection.length >= 6) return showToast('Máximo 6 productos');
+        heroSelection.push(id); 
+      }
+      renderHeroSlots(); 
+      searchHeroProducts();
+    }
+    window.searchHeroProducts = function() {
+      const q = document.getElementById('searchHero').value.toLowerCase();
+      const list = adminProducts.filter(p => !q || p.name.toLowerCase().includes(q));
+      renderHeroList(list);
+    }
+
+    /* Selección Nuditos */
+    function renderSeleccionSlots(){ document.getElementById('seleccionSlots').innerHTML=seleccionSelection.map(id=>{ const p=adminProducts.find(x=>x.id===id); return `<div class="hero-slot filled" onclick="toggleSeleccion(${id})" title="Click para quitar">${p?.name.slice(0,10)}</div>`; }).join(''); }
+    function renderSeleccionList(list){ document.getElementById('seleccionList').innerHTML=list.slice(0,50).map(p=>`<div class="v-prod-row"><div class="v-info">${p.name} <span style="font-size:0.6rem;opacity:0.6;">(${p.cat})</span></div><button class="btn-select" onclick="toggleSeleccion(${p.id})">${seleccionSelection.includes(p.id)?'Quitar':'+ Agregar'}</button></div>`).join(''); }
+    function toggleSeleccion(id){ 
+      if(seleccionSelection.includes(id)) {
+        seleccionSelection = seleccionSelection.filter(x => x !== id);
+      } else {
+        if(seleccionSelection.length >= 4) return showToast('Máximo 4 productos');
+        seleccionSelection.push(id); 
+      }
+      renderSeleccionSlots(); 
+      searchSeleccionProducts();
+    }
+    window.searchSeleccionProducts = function() {
+      const q = document.getElementById('searchSeleccion').value.toLowerCase();
+      const list = adminProducts.filter(p => !q || p.name.toLowerCase().includes(q));
+      renderSeleccionList(list);
+    }
+
     function renderBannerList(){ 
       const editorialList = editorialBannersAdmin.filter(b => b.afterCat === 'home1' || b.afterCat === 'home2');
       const collectionsList = editorialBannersAdmin.filter(b => b.afterCat !== 'home1' && b.afterCat !== 'home2');
 
+      // Construir opciones de posición desde categorías (Solo las visibles en Home)
+      const catOpts = [
+        `<option value="home_selection">⭐ Selección Nuditos (Sección Superior)</option>`,
+        ...adminCategories.filter(c => c.id !== 'todos' && c.showInHome !== false)
+          .sort((a,b) => (a.orden||0) - (b.orden||0))
+          .map(c => `<option value="${c.id}">${c.icon||'📁'} Antes de "${c.nombre || c.name}"</option>`)
+      ].join('');
+
       const buildCard = (b, i) => {
-        // Encontrar el índice real en el array original
         const realIdx = editorialBannersAdmin.findIndex(x => x === b);
+        const isHome = b.afterCat === 'home1' || b.afterCat === 'home2';
+        
+        // Etiqueta de posición legible
+        let posLabel = '📍 Sin asignar';
+        if (b.afterCat === 'home1') posLabel = '🏠 Portada Principal';
+        else if (b.afterCat === 'home2') posLabel = '🏠 Segundo Banner Inicio';
+        else if (b.afterCat === 'home_selection') posLabel = '⭐ Antes de la Selección Nuditos';
+        else if (b.afterCat) {
+          const cat = adminCategories.find(c => c.id === b.afterCat);
+          posLabel = cat ? `📍 Antes de "${cat.nombre || cat.name}"` : `📍 ${b.afterCat}`;
+        }
+
         return `
-          <div class="banner-admin-card" style="margin-bottom: 1rem; border: 1px solid #eee; padding: 1.2rem; border-radius: 1.2rem; background: #fff;">
+          <div style="margin-bottom: 1rem; border: 1px solid #e5e7eb; padding: 1rem; border-radius: 1rem; background: #fff;">
             <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-               <h4 style="margin:0; font-family:serif; font-size: 1rem; color: var(--lila-dark)">${b.afterCat.startsWith('home') ? 'Banner Inicio ' + b.afterCat.slice(-1) : 'Categoría: ' + b.afterCat}</h4>
-               <button onclick="removeBanner(${realIdx})" style="background: none; color: #ef4444; border:none; padding: 5px; cursor:pointer; font-size: 1.1rem;">🗑️</button>
+               <div>
+                 <span style="font-size: 0.7rem; color: #6d28d9; background: #f3e8ff; padding: 3px 10px; border-radius: 99px; font-weight: 700;">${posLabel}</span>
+               </div>
+               <button onclick="removeBanner(${realIdx})" style="background: none; color: #ef4444; border:none; padding: 5px; cursor:pointer; font-size: 1rem;">🗑️</button>
             </div>
             
-            <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
-              <div class="field"><label>Título (Usa &lt;em&gt; para cursiva)</label><input type="text" value="${b.title||''}" oninput="updateBanner(${realIdx},'title',this.value)"></div>
-              <div class="field"><label>Aparecer después de (id o home1/2)</label><input type="text" value="${b.afterCat||''}" oninput="updateBanner(${realIdx},'afterCat',this.value)"></div>
-              <div class="field field-full"><label>Subtítulo / Descripción</label><textarea style="width:100%; border-radius:10px; border:1px solid #ddd; padding:8px; font-size:0.8rem" oninput="updateBanner(${realIdx},'subtitle',this.value)">${b.subtitle||''}</textarea></div>
-              <div class="field"><label>Texto del botón</label><input type="text" value="${b.ctaText||'Ver más'}" oninput="updateBanner(${realIdx},'ctaText',this.value)"></div>
-              <div class="field"><label>URL del botón</label><input type="text" value="${b.ctaUrl||'/catalogo'}" oninput="updateBanner(${realIdx},'ctaUrl',this.value)"></div>
-              <div class="field field-full"><label>Imagen URL o Subir</label>
-                <div style="display:flex; gap: 5px;">
-                  <input type="text" id="bImg-${realIdx}" value="${b.imgUrl||''}" style="flex:1; font-size: 0.7rem;" oninput="updateBanner(${realIdx},'imgUrl',this.value)">
-                  <button onclick="document.getElementById('bFile-${realIdx}').click()" style="background:var(--lila); color:white; border:none; padding: 0 12px; border-radius: 10px; cursor:pointer; font-size: 0.7rem;">📸</button>
-                  <input type="file" id="bFile-${realIdx}" style="display:none" onchange="uploadBannerImg(${realIdx}, this.files)">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.8rem;">
+              ${!isHome ? `
+              <div class="field" style="grid-column: 1/-1;">
+                <label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">📍 ¿Dónde aparece?</label>
+                <select onchange="updateBanner(${realIdx},'afterCat',this.value)" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ddd; font-size:0.8rem;">
+                  <option value="">— Elige posición —</option>
+                  ${catOpts.replace(`value="${b.afterCat}"`, `value="${b.afterCat}" selected`)}
+                </select>
+              </div>` : ''}
+              
+              <div class="field"><label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">Título (opcional)</label><input type="text" value="${b.title||''}" oninput="updateBanner(${realIdx},'title',this.value)" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></div>
+              <div class="field"><label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">Subtítulo (opcional)</label><input type="text" value="${b.subtitle||''}" oninput="updateBanner(${realIdx},'subtitle',this.value)" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></div>
+              <div class="field"><label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">Texto botón (vacío = sin botón)</label><input type="text" value="${b.ctaText||''}" oninput="updateBanner(${realIdx},'ctaText',this.value)" placeholder="Dejar vacío para no mostrar" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></div>
+              <div class="field"><label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">URL del botón / link</label><input type="text" value="${b.ctaUrl||'/catalogo'}" oninput="updateBanner(${realIdx},'ctaUrl',this.value)" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></div>
+              
+              <div class="field" style="grid-column: 1/-1;">
+                <label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">🖼️ Imagen o Video (subir o url)</label>
+                <div style="display:flex; gap: 5px; flex-wrap: wrap;">
+                  <input type="text" id="bImg-${realIdx}" value="${b.imgUrl||b.videoUrl||''}" style="flex:1; min-width: 150px; font-size: 0.7rem; padding:6px 8px; border-radius:8px; border:1px solid #ddd;" oninput="updateBannerMedia(${realIdx},this.value)" placeholder="URL de imagen/video .mp4">
+                  <button onclick="document.getElementById('bFile-${realIdx}').click()" style="background:#6d28d9; color:white; border:none; padding: 0 12px; border-radius: 8px; cursor:pointer; font-size: 0.7rem;">📸 Subir (Img/Mp4)</button>
+                  <input type="file" id="bFile-${realIdx}" style="display:none" accept="image/*,video/*" onchange="uploadBannerImg(${realIdx}, this.files)">
                 </div>
               </div>
             </div>
-            ${b.imgUrl ? `<img src="${b.imgUrl}" style="width:100%; height: 80px; object-fit: cover; border-radius: 0.8rem; margin-top: 0.8rem; border: 1px solid #eee;">` : ''}
+            
+            ${b.videoUrl ? `<div style="margin-top:0.6rem; padding: 0.5rem; background: #e0e7ff; color: #4338ca; font-size: 0.7rem; border-radius: 0.5rem; text-align: center; font-weight: 600;">🎬 Video configurado</div>` : ''}
+            ${!b.videoUrl && b.imgUrl ? `<img src="${b.imgUrl}" style="width:100%; height: 70px; object-fit: cover; border-radius: 0.6rem; margin-top: 0.6rem; border: 1px solid #eee;">` : ''}
           </div>
         `;
       };
 
       document.getElementById('editorialBannersList').innerHTML = editorialList.map(b => buildCard(b)).join('') || '<div style="padding:1rem; text-align:center; color:#999; font-size: 0.8rem;">No hay banners de inicio</div>';
-      document.getElementById('bannerList').innerHTML = collectionsList.map(b => buildCard(b)).join('') || '<div style="padding:1rem; text-align:center; color:#999; font-size: 0.8rem;">No hay banners de categoría</div>';
+      document.getElementById('bannerList').innerHTML = collectionsList.map(b => buildCard(b)).join('') || '<div style="padding:1rem; text-align:center; color:#999; font-size: 0.8rem;">No hay banners de categoría — ¡Agrega uno!</div>';
     }
     window.updateBanner = function(i,key,val){ 
       editorialBannersAdmin[i][key]=val; 
+    };
+    window.updateBannerMedia = function(i, val) {
+      console.log(`[Banner] Intento de actualización de media en banner ${i}: ${val}`);
+      if (!val) {
+        editorialBannersAdmin[i].videoUrl = '';
+        editorialBannersAdmin[i].imgUrl = '';
+        renderBannerList();
+        return;
+      }
+
+      const isVideo = val.toLowerCase().endsWith('.mp4') || val.includes('/video/') || val.includes('video-upload');
+      
+      if (isVideo) {
+        // Es un video: Limpiamos y formateamos
+        let cleanVideo = val.replace('/image/upload/', '/video/upload/');
+        if (!cleanVideo.toLowerCase().endsWith('.mp4') && cleanVideo.includes('cloudinary')) {
+          cleanVideo += '.mp4';
+        }
+        editorialBannersAdmin[i].videoUrl = cleanVideo;
+        editorialBannersAdmin[i].imgUrl = '';
+      } else {
+        // Es una imagen
+        editorialBannersAdmin[i].imgUrl = val;
+        // Solo borramos el video si el valor anterior NO era un video (para evitar borrados accidentales al editar)
+        if (!editorialBannersAdmin[i].videoUrl) {
+           editorialBannersAdmin[i].videoUrl = '';
+        }
+      }
+      renderBannerList();
     };
     window.removeBanner = function(i){ 
       editorialBannersAdmin.splice(i,1); 
@@ -1144,24 +1381,124 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     };
     window.uploadBannerImg = async function(i, files) {
       if(!files.length) return;
-      const bTitle = editorialBannersAdmin[i].title.replace(/<[^>]+>/g, '') || 'banner';
-      const url = await uploadToCloudinary(files[0], bTitle, 0);
+      const file = files[0];
+      const bTitle = editorialBannersAdmin[i].title?.replace(/<[^>]+>/g, '') || 'banner';
+      
+      const url = await uploadToCloudinary(file, bTitle, 0);
       if(url) {
-        editorialBannersAdmin[i].imgUrl = url;
+        if (file.type.startsWith('video/')) {
+          editorialBannersAdmin[i].videoUrl = url;
+          editorialBannersAdmin[i].imgUrl = '';
+          showToast('🎬 Video subido correctamente');
+        } else {
+          editorialBannersAdmin[i].imgUrl = url;
+          editorialBannersAdmin[i].videoUrl = '';
+        }
         renderBannerList();
       }
     };
     window.addNewBanner = function() {
-      editorialBannersAdmin.push({ title: 'Nuevo Banner', afterCat: '', imgUrl: '', subtitle: '', ctaText: 'Ver más', ctaUrl: '/catalogo' });
+      editorialBannersAdmin.push({ title: '', afterCat: '', imgUrl: '', videoUrl: '', subtitle: '', ctaText: '', ctaUrl: '/catalogo' });
       renderBannerList();
     };
     function renderCatViewsList(){ document.getElementById('catViewsList').innerHTML=categories.filter(c=>c.id!=='todos').map(c=>`<div>${c.name}</div>`).join(''); }
+
+    /* ── D&D ORDEN CUSTOM ── */
+    let draggedRow = null;
+    window.renderSortableList = function() {
+      const cat = document.getElementById('sortCatFilter')?.value || 'todos';
+      const list = document.getElementById('sortableCatalogList');
+      if(!list) return;
+
+      const items = [...adminProducts]
+        .filter(p => p.activo !== false && (cat === 'todos' || (p.cats||[]).includes(cat) || p.cat === cat))
+        .sort((a,b) => (a.orden||0) - (b.orden||0) || (b.id - a.id));
+
+      if (items.length === 0) {
+        list.innerHTML = '<div style="padding:10px;text-align:center;color:#999;font-size:0.8rem;">No hay productos en esta categoría</div>';
+        return;
+      }
+
+      list.innerHTML = items.map((p, i) => `
+        <div class="v-prod-row sortable-item" draggable="true" data-id="${p.id}" data-orden="${i}" style="cursor:grab; background:#fff; margin-bottom:4px; padding:8px; border-radius:6px; border:1px solid var(--border); display:flex; align-items:center;">
+          <div style="margin-right:10px; opacity:0.3; cursor:grab;">☰</div>
+          <img src="${p.img||''}" style="width:30px;height:30px;border-radius:4px;object-fit:cover;margin-right:10px;background:#eee">
+          <div class="v-info" style="flex:1;">
+            <div style="font-weight:600; font-size:0.85rem">${p.name}</div>
+            <div style="font-size:0.65rem; color:#999; text-transform:uppercase">${p.cats?.join(', ') || p.cat || 'General'}</div>
+          </div>
+          <div style="font-size:0.7rem; color:var(--lila); font-weight:bold">Orden: ${p.orden||0}</div>
+        </div>
+      `).join('');
+
+      // Add Native Drag Events
+      const rows = list.querySelectorAll('.sortable-item');
+      rows.forEach(row => {
+        row.addEventListener('dragstart', function(e) {
+          draggedRow = this;
+          e.dataTransfer.effectAllowed = 'move';
+          setTimeout(() => this.style.opacity = '0.4', 0);
+        });
+        row.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        });
+        row.addEventListener('dragenter', function(e) { this.style.border = '1px dashed var(--lila)'; });
+        row.addEventListener('dragleave', function(e) { this.style.border = '1px solid var(--border)'; });
+        row.addEventListener('drop', function(e) {
+          e.stopPropagation();
+          this.style.border = '1px solid var(--border)';
+          if (draggedRow !== this) {
+            const allItems = Array.from(list.children);
+            const draggedIdx = allItems.indexOf(draggedRow);
+            const thisIdx = allItems.indexOf(this);
+            if (draggedIdx < thisIdx) {
+              list.insertBefore(draggedRow, this.nextSibling);
+            } else {
+              list.insertBefore(draggedRow, this);
+            }
+          }
+          return false;
+        });
+        row.addEventListener('dragend', function() {
+          this.style.opacity = '1';
+          rows.forEach(r => r.style.border = '1px solid var(--border)');
+          draggedRow = null;
+        });
+      });
+    }
+
+    window.saveCatalogOrder = async function() {
+      const btn = document.getElementById('saveOrderBtn');
+      if(btn) { btn.disabled = true; btn.textContent = '⏳ Guardando...'; }
+      const items = Array.from(document.querySelectorAll('#sortableCatalogList .sortable-item'));
+      let err=0;
+      
+      showToast(`⏳ Guardando orden de ${items.length} productos...`);
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const id = parseInt(item.dataset.id);
+        const newOrden = i + 1; // 1-based order
+        const pIdx = adminProducts.findIndex(p => p.id === id);
+        if (pIdx !== -1 && adminProducts[pIdx].orden !== newOrden) {
+           adminProducts[pIdx].orden = newOrden;
+           try {
+             await sbAdminSaveProduct({ ...adminProducts[pIdx], _isNew: false });
+           } catch { err++; }
+        }
+      }
+      showToast(err ? `⚠️ Guardado con ${err} errores` : '✅ Orden guardado con éxito');
+      if(btn) { btn.disabled = false; btn.textContent = '💾 Guardar Orden'; }
+      renderSortableList(); // refresh UI
+    }
 
     async function saveConfig(){
       const newCfg={
         ramoDestacado:momentoSelection,
         carruselHero:heroSelection,
+        seleccionNuditos:seleccionSelection,
         descuentoActivo:document.getElementById('toggleDescuento').classList.contains('on'),
+
         descuentoCodigo:document.getElementById('descCodigo').value.trim(),
         descuentoPorcentaje:parseInt(document.getElementById('descPorcentaje').value)||10,
         descuentoTexto:document.getElementById('descTexto').value.trim(),
@@ -1176,5 +1513,276 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       try{ await sbAdminSaveConfig(newCfg); await sbAdminSaveBanners(editorialBannersAdmin); showToast('✅ Guardado'); }catch{ showToast('❌ Error');}
     }
     function showToast(msg){ const t=document.getElementById('toastAdmin'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+
+    /* ══════════════════════════════════════════
+       SISTEMA DE CAMPAÑAS TEMPORALES
+       Usa localStorage para persistencia ligera.
+       No requiere tabla nueva en Supabase.
+       ══════════════════════════════════════════ */
+
+    function loadCampaigns() {
+      try {
+        const saved = localStorage.getItem('nuditos_campaigns');
+        adminCampaigns = saved ? JSON.parse(saved) : [];
+      } catch { adminCampaigns = []; }
+    }
+
+    function saveCampaignsToStorage() {
+      localStorage.setItem('nuditos_campaigns', JSON.stringify(adminCampaigns));
+    }
+
+    function getCampaignStatus(camp) {
+      if (!camp.fechaInicio && !camp.fechaFin) return 'draft';
+      const now = new Date();
+      const start = camp.fechaInicio ? new Date(camp.fechaInicio + 'T00:00:00') : null;
+      const end   = camp.fechaFin   ? new Date(camp.fechaFin   + 'T23:59:59') : null;
+      if (start && now < start) return 'upcoming';
+      if (end && now > end) return 'expired';
+      return 'active';
+    }
+
+    function getActiveCampaign() {
+      return adminCampaigns.find(c => getCampaignStatus(c) === 'active') || null;
+    }
+
+    function renderCampaignsList() {
+      loadCampaigns();
+      const active = getActiveCampaign();
+
+      // Estado actual
+      const statusEl = document.getElementById('activeCampaignStatus');
+      if (statusEl) {
+        if (active) {
+          statusEl.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px; justify-content:center; flex-wrap:wrap;">
+              <span style="font-size:1.5rem">${active.emoji || '🎪'}</span>
+              <div style="text-align:left;">
+                <div style="font-weight:700; color: ${active.color || '#6d28d9'}; font-size:0.9rem;">${active.nombre}</div>
+                <div style="color:#666; font-size:0.75rem;">Activa hasta: ${active.fechaFin || 'sin fin'} · ${active.bannerMsg ? '"' + active.bannerMsg + '"' : 'Sin banner'}</div>
+              </div>
+              <span style="background:#d1fae5; color:#065f46; font-size:0.65rem; font-weight:700; padding:4px 12px; border-radius:99px;">✅ ACTIVA AHORA</span>
+            </div>`;
+        } else {
+          statusEl.innerHTML = `<span style="color:#aaa;">⚡ No hay campaña activa en este momento.</span>`;
+        }
+      }
+
+      // Poblar select de categorías en el editor
+      const catSel = document.getElementById('campCatDestacada');
+      if (catSel && catSel.options.length <= 1) {
+        adminCategories.filter(c => c.id !== 'todos').forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = `${c.icon || '🌸'} ${c.nombre || c.name}`;
+          catSel.appendChild(opt);
+        });
+      }
+
+      // Lista de campañas
+      const listEl = document.getElementById('campaignsList');
+      if (!listEl) return;
+
+      const statusLabels = {
+        active:   { text: '✅ Activa', cls: 'camp-status-active' },
+        upcoming: { text: '⏰ Próxima', cls: 'camp-status-upcoming' },
+        expired:  { text: '⌛ Expirada', cls: 'camp-status-expired' },
+        draft:    { text: '📝 Borrador', cls: 'camp-status-draft' },
+      };
+
+      if (!adminCampaigns.length) {
+        listEl.innerHTML = `
+          <div style="text-align:center; padding:3rem; color:#bbb;">
+            <div style="font-size:3rem; margin-bottom:1rem;">🎪</div>
+            <div style="font-weight:600; margin-bottom:0.5rem;">Aún no tienes campañas</div>
+            <div style="font-size:0.8rem;">Crea tu primera campaña para el Día de la Madre, Black Friday, etc.</div>
+          </div>`;
+        return;
+      }
+
+      listEl.innerHTML = adminCampaigns.map((camp, i) => {
+        const status = getCampaignStatus(camp);
+        const lbl = statusLabels[status];
+        return `
+          <div class="campaign-card ${status === 'active' ? 'active-camp' : ''}">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.75rem;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="font-size:2rem; width:48px; height:48px; border-radius:50%; background: ${camp.color || '#6d28d9'}22; display:flex; align-items:center; justify-content:center;">${camp.emoji || '🎪'}</div>
+                <div>
+                  <div style="font-weight:700; font-size:0.9rem; margin-bottom:2px;">${camp.nombre}</div>
+                  <div style="font-size:0.72rem; color:#888;">${camp.fechaInicio || '—'} → ${camp.fechaFin || '—'}</div>
+                  ${camp.descCodigo ? `<div style="font-size:0.7rem; color:#6d28d9; font-weight:600; margin-top:3px;">🏷️ ${camp.descCodigo} (${camp.descPct || 0}% OFF)</div>` : ''}
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span class="camp-badge-status ${lbl.cls}">${lbl.text}</span>
+                <button onclick="editCampaign(${i})" style="background:#f3f4f6; border:none; padding:7px 14px; border-radius:10px; cursor:pointer; font-size:0.8rem; font-weight:600;">✏️ Editar</button>
+                <button onclick="deleteCampaign(${i})" style="background:#fee2e2; color:#dc2626; border:none; padding:7px 14px; border-radius:10px; cursor:pointer; font-size:0.8rem; font-weight:600;">🗑️</button>
+              </div>
+            </div>
+            ${camp.bannerMsg ? `<div style="margin-top:0.8rem; background:#f8f9fa; border-radius:0.8rem; padding:0.6rem 1rem; font-size:0.78rem; color:#444; border-left:3px solid ${camp.color || '#6d28d9'};">📢 ${camp.bannerMsg}</div>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    function newCampaign() {
+      document.getElementById('campEditId').value = '';
+      document.getElementById('campaignEditorTitle').textContent = 'Nueva Campaña';
+      document.getElementById('campNombre').value = '';
+      document.getElementById('campEmoji').value = '🌸';
+      document.getElementById('campColor').value = '#ec4899';
+      document.getElementById('campFechaInicio').value = '';
+      document.getElementById('campFechaFin').value = '';
+      document.getElementById('campBannerMsg').value = '';
+      document.getElementById('campDescCodigo').value = '';
+      document.getElementById('campDescPct').value = '10';
+      document.getElementById('campBadge').value = '';
+      document.getElementById('campCatDestacada').value = '';
+      document.getElementById('campBannerTitle').value = '';
+      document.getElementById('campBannerSubtitle').value = '';
+      document.getElementById('campBannerImg').value = '';
+      document.getElementById('campBannerCta').value = '/catalogo';
+      document.querySelectorAll('.color-chip').forEach(b => b.classList.remove('active'));
+      document.querySelector('.color-chip[data-color="#ec4899"]')?.classList.add('active');
+      updateCampPreview();
+      document.getElementById('campaignEditor').style.display = 'block';
+      document.getElementById('campaignEditor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function editCampaign(idx) {
+      const camp = adminCampaigns[idx];
+      if (!camp) return;
+      document.getElementById('campEditId').value = idx;
+      document.getElementById('campaignEditorTitle').textContent = 'Editar Campaña';
+      document.getElementById('campNombre').value = camp.nombre || '';
+      document.getElementById('campEmoji').value = camp.emoji || '🌸';
+      document.getElementById('campColor').value = camp.color || '#ec4899';
+      document.getElementById('campFechaInicio').value = camp.fechaInicio || '';
+      document.getElementById('campFechaFin').value = camp.fechaFin || '';
+      document.getElementById('campBannerMsg').value = camp.bannerMsg || '';
+      document.getElementById('campDescCodigo').value = camp.descCodigo || '';
+      document.getElementById('campDescPct').value = camp.descPct || 10;
+      document.getElementById('campBadge').value = camp.badge || '';
+      document.getElementById('campCatDestacada').value = camp.catDestacada || '';
+      document.getElementById('campBannerTitle').value = camp.bannerTitle || '';
+      document.getElementById('campBannerSubtitle').value = camp.bannerSubtitle || '';
+      document.getElementById('campBannerImg').value = camp.bannerImg || '';
+      document.getElementById('campBannerCta').value = camp.bannerCta || '/catalogo';
+      // Seleccionar el color correcto
+      document.querySelectorAll('.color-chip').forEach(b => {
+        b.classList.toggle('active', b.dataset.color === (camp.color || '#ec4899'));
+        b.style.setProperty('--c-color', b.dataset.color);
+      });
+      updateCampPreview();
+      document.getElementById('campaignEditor').style.display = 'block';
+      document.getElementById('campaignEditor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function deleteCampaign(idx) {
+      const camp = adminCampaigns[idx];
+      if (!confirm(`¿Eliminar la campaña "${camp?.nombre}"?`)) return;
+      adminCampaigns.splice(idx, 1);
+      saveCampaignsToStorage();
+      renderCampaignsList();
+      showToast('🗑️ Campaña eliminada');
+    }
+
+    function closeCampaignEditor() {
+      document.getElementById('campaignEditor').style.display = 'none';
+    }
+
+    function saveCampaign() {
+      const nombre = document.getElementById('campNombre').value.trim();
+      if (!nombre) { showToast('⚠️ El nombre es obligatorio'); return; }
+
+      const camp = {
+        nombre,
+        emoji:          document.getElementById('campEmoji').value.trim() || '🎪',
+        color:          document.getElementById('campColor').value || '#ec4899',
+        fechaInicio:    document.getElementById('campFechaInicio').value || '',
+        fechaFin:       document.getElementById('campFechaFin').value || '',
+        bannerMsg:      document.getElementById('campBannerMsg').value.trim(),
+        descCodigo:     document.getElementById('campDescCodigo').value.trim().toUpperCase(),
+        descPct:        parseInt(document.getElementById('campDescPct').value) || 0,
+        badge:          document.getElementById('campBadge').value,
+        catDestacada:   document.getElementById('campCatDestacada').value,
+        bannerTitle:    document.getElementById('campBannerTitle').value.trim(),
+        bannerSubtitle: document.getElementById('campBannerSubtitle').value.trim(),
+        bannerImg:      document.getElementById('campBannerImg').value.trim(),
+        bannerCta:      document.getElementById('campBannerCta').value.trim() || '/catalogo',
+        creadaEn:       new Date().toISOString(),
+      };
+
+      const editIdx = document.getElementById('campEditId').value;
+      if (editIdx !== '') {
+        adminCampaigns[parseInt(editIdx)] = camp;
+        showToast('✓ Campaña actualizada');
+        addToHistory(`✏️ Campaña editada: ${nombre}`);
+      } else {
+        adminCampaigns.push(camp);
+        showToast('✅ Campaña creada');
+        addToHistory(`🎪 Campaña creada: ${nombre}`);
+      }
+
+      saveCampaignsToStorage();
+      closeCampaignEditor();
+      renderCampaignsList();
+
+      // Si la campaña está activa, aplicar el banner al admin también
+      const active = getActiveCampaign();
+      if (active && active.bannerMsg) {
+        const bannerEl = document.getElementById('bannerText');
+        if (bannerEl) bannerEl.textContent = active.bannerMsg;
+      }
+    }
+
+    function selectCampColor(color, btn) {
+      document.getElementById('campColor').value = color;
+      document.querySelectorAll('.color-chip').forEach(b => {
+        b.classList.remove('active');
+        b.style.removeProperty('--c-color');
+      });
+      btn.classList.add('active');
+      btn.style.setProperty('--c-color', color);
+      updateCampPreview();
+    }
+
+    function updateCampPreview() {
+      const msg = document.getElementById('campBannerMsg')?.value || '(escribe el mensaje del banner arriba)';
+      const color = document.getElementById('campColor')?.value || '#ec4899';
+      const el = document.getElementById('campPreviewInner');
+      if (el) {
+        el.style.color = color;
+        el.textContent = '🎁 ' + msg;
+      }
+    }
+
+    // Conectar preview en tiempo real
+    document.addEventListener('DOMContentLoaded', () => {
+      const msgInput = document.getElementById('campBannerMsg');
+      if (msgInput) msgInput.addEventListener('input', updateCampPreview);
+    });
+
+    // Inyectar campañas en loadAll al final de su ejecución
+    // Hacemos esto de forma segura sin romper el flujo existente
+    window._applyCampaigns = function() {
+      loadCampaigns();
+      const active = getActiveCampaign();
+      if (active) {
+        // Aplicar banner superior en la tienda (via localStorage que lee la tienda)
+        if (active.bannerMsg) {
+          localStorage.setItem('nuditos_active_campaign_banner', active.bannerMsg);
+        }
+        if (active.descCodigo && active.descPct > 0) {
+          localStorage.setItem('nuditos_active_campaign_discount', JSON.stringify({
+            code: active.descCodigo,
+            pct: active.descPct
+          }));
+        }
+      } else {
+        localStorage.removeItem('nuditos_active_campaign_banner');
+        localStorage.removeItem('nuditos_active_campaign_discount');
+      }
+    };
+
   </script>
 </AdminLayout>
