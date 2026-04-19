@@ -287,17 +287,15 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
       }
 
       list.innerHTML = filtered.map(p => `
-        <div class="prod-item ${selectedId === p.id ? 'active' : ''}" onclick="selectProduct(${p.id})">
-          <div class="prod-item-img">
+        <div class="prod-item ${selectedId === p.id ? 'selected' : ''} ${p.activo === false ? 'inactive' : ''}" onclick="selectProduct(${p.id})">
+          <div class="pi-thumb">
             ${p.img ? `<img src="${p.img}">` : `<span>${p.emoji || '🌸'}</span>`}
           </div>
-          <div class="prod-item-info">
-            <div class="prod-item-name">${p.name}</div>
-            <div class="prod-item-price">$${(p.price || 0).toLocaleString('es-CO')}</div>
+          <div class="pi-info">
+            <div class="pi-name">${p.name}</div>
+            <div class="pi-meta">$${(p.price || 0).toLocaleString('es-CO')} COP</div>
           </div>
-          <button class="prod-item-vis ${p.activo !== false ? 'on' : 'off'}" onclick="event.stopPropagation(); quickToggleVis(${p.id})">
-            ${p.activo !== false ? '👁' : '🚫'}
-          </button>
+          <div class="pi-dot ${p.activo !== false ? 'on' : 'off'}" onclick="event.stopPropagation(); quickToggleVis(${p.id})" title="${p.activo !== false ? 'Visible' : 'Oculto'}"></div>
         </div>
       `).join('');
     }
