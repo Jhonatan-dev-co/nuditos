@@ -88,6 +88,18 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
        NUDITOS Admin Logic — Core JS
        ══════════════════════════════════════════ -->
   <script is:inline>
+    // Inicialización del Namespace Global para componentes modulares
+    window.NuditosAdmin = window.NuditosAdmin || {
+      Products: {},
+      Orders: {},
+      Settings: {},
+      Dashboard: {},
+      Vitrina: {},
+      Banners: {},
+      Blog: {},
+      SEO: {}
+    };
+
     let adminCfg={}, heroSelection=[], momentoSelection=null;
     let adminProducts=[], selectedId=null, pendingDeleteId=null;
     let editorialBannersAdmin=[], sideFilterCat='';
@@ -136,6 +148,45 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         loadAll();
       }
     });
+
+    /* ── UI HELPERS ── */
+    window.showTab = function(tabId, btn) {
+      // Ocultar todos los contenidos de pestañas
+      document.querySelectorAll('.tab-content').forEach(t => {
+        t.classList.remove('active');
+        t.style.display = 'none';
+      });
+
+      // Mostrar la pestaña seleccionada
+      const target = document.getElementById('tab-' + tabId);
+      if(target) {
+        target.classList.add('active');
+        target.style.display = 'block';
+      }
+
+      // Actualizar estado visual de los botones
+      document.querySelectorAll('.a-tab').forEach(b => b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+
+      // Cerrar sidebar en móvil al cambiar
+      if (window.innerWidth < 1024) toggleSidebar(false);
+    };
+
+    window.toggleSidebar = function(force) {
+      const sidebar = document.getElementById('leftCol');
+      const overlay = document.getElementById('sidebarOverlay');
+      if(!sidebar || !overlay) return;
+
+      const isShowing = force !== undefined ? force : !sidebar.classList.contains('show');
+      
+      if(isShowing) {
+        sidebar.classList.add('show');
+        overlay.classList.add('show');
+      } else {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+      }
+    };
 
     /* ── UI & CLOUDINARY HELPERS MOVED TO COMPONENTS ── */
 
