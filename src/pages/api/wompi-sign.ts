@@ -10,7 +10,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const config = await getLiveConfig();
-    const integritySecret = config?.wompiIntegrity;
+    const integritySecret = import.meta.env.WOMPI_INTEGRITY_SECRET || config?.wompiIntegrity;
 
     if (!integritySecret || integritySecret === '') {
       // Si no hay secreto, enviamos nulo (Wompi intentará sin firma)

@@ -60,7 +60,7 @@ export const POST: APIRoute = async ({ request }) => {
     console.log('[Wompi Webhook] Received:', JSON.stringify(body, null, 2));
 
     const config = await getLiveConfig();
-    const eventSecret = config?.wompiEvents;
+    const eventSecret = import.meta.env.WOMPI_EVENTS_SECRET || config?.wompiEvents;
 
     // 1. Validar firma si hay secreto configurado
     if (eventSecret && eventSecret !== '') {

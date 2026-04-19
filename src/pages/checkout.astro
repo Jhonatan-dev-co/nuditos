@@ -7,8 +7,8 @@ import { getLiveConfig } from '../lib/supabase';
 import { COLOMBIA_DATA } from '../data/colombia';
 
 const config = await getLiveConfig();
-const wompiKey = config?.wompiKey || 'pub_test_XXXXXXXXXXXXXXXX';
-const wompiActivo = config?.wompiActivo || false;
+const wompiKey = import.meta.env.PUBLIC_WOMPI_KEY || config?.wompiKey || 'pub_test_XXXXXXXXXXXXXXXX';
+const wompiActivo = config?.wompiActivo || (!!import.meta.env.PUBLIC_WOMPI_KEY);
 
 const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
 const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
