@@ -357,6 +357,8 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       const idx=adminProducts.findIndex(p=>p.id===id);if(idx===-1)return;
       adminProducts[idx].activo=!(adminProducts[idx].activo!==false);
       try{await sbAdminSaveProduct({...adminProducts[idx],_isNew:false});renderSidebar();renderStats();const p=adminProducts[idx];const btn=document.getElementById('visBtn');if(btn){btn.className=`btn-vis ${p.activo!==false?'on':'off'}`;btn.textContent=p.activo!==false?'👁 Visible':'🚫 Oculto';}showToast(p.activo!==false?'✓ Visible':'🚫 Oculto');}catch{showToast('❌ Error');}
+    }
+
     /* ── CORE MANAGEMENT ── */
     async function saveConfig(){
       const pixelId = document.getElementById('seoMetaPixelId')?.value.trim() || document.getElementById('metaPixelId')?.value.trim();
