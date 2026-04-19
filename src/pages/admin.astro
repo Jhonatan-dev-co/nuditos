@@ -258,14 +258,15 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
       if(adminCfg.metaPixelActivo) document.getElementById('toggleMetaPixel')?.classList.add('on');
       if(adminCfg.gaActive) document.getElementById('toggleGASEO')?.classList.add('on');
 
-      // Auto-completar Cloudinary si están en env
-      if (window.NUDITOS_CL_NAME) {
-        const clName = document.getElementById('ccCloudName');
-        if (clName && !clName.value) clName.value = window.NUDITOS_CL_NAME;
+      // Auto-completar Cloudinary priorizando ENV
+      const clNameInput = document.getElementById('ccCloudName');
+      const clPresetInput = document.getElementById('ccPreset');
+      
+      if (clNameInput) {
+        clNameInput.value = window.NUDITOS_CL_NAME || adminCfg.cloudinaryCloudName || '';
       }
-      if (window.NUDITOS_CL_PRESET) {
-        const clPreset = document.getElementById('ccPreset');
-        if (clPreset && !clPreset.value) clPreset.value = window.NUDITOS_CL_PRESET;
+      if (clPresetInput) {
+        clPresetInput.value = window.NUDITOS_CL_PRESET || adminCfg.cloudinaryUploadPreset || '';
       }
     }
 
