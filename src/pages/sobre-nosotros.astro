@@ -48,11 +48,7 @@ import Layout from '../layouts/Layout.astro';
     .stat-label { font-size: 0.83rem; color: var(--text-soft); line-height: 1.4; }
 
     .cta-section { background: var(--text); color: white; padding: 4rem 1.5rem; text-align: center; }
-    .cta-section h2 { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 400; margin-bottom: 1rem; }
-    .cta-section h2 em { font-style: italic; color: var(--lila); }
-    .cta-section p { color: rgba(255,255,255,0.6); margin-bottom: 2rem; font-size: 0.95rem; }
-    .cta-wa { display: inline-flex; align-items: center; gap: 0.6rem; background: var(--lila-dark); color: white; padding: 0.9rem 2rem; border-radius: 50px; font-weight: 500; font-size: 0.95rem; transition: transform 0.2s, background 0.2s; }
-    .cta-wa:hover { background: var(--lila); transform: scale(1.03); }
+    .cta-section .history-p { color: rgba(255,255,255,0.6); margin: 0 auto; max-width: 600px; font-size: 0.95rem; }
 
     @media (max-width: 640px) {
       .story-block { grid-template-columns: 1fr; gap: 1.5rem; }
@@ -115,10 +111,6 @@ import Layout from '../layouts/Layout.astro';
   </div>
 
   <div class="cta-section">
-    <h2>¿Quieres un ramo <em>especial?</em></h2>
-    <p>Cuéntanos tu idea y lo hacemos realidad puntada a puntada.</p>
-    <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20personalizado%20🌸" class="cta-wa" target="_blank">
-      <Icon name="whatsapp"  /> Escribir por WhatsApp
-    </a>
+    <p class="history-p">Desde nuestra pequeña boutique en Colombia, tejemos cada pétalo con la esperanza de que tu regalo se convierta en un recuerdo inolvidable.</p>
   </div>
 </Layout>

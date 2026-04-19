@@ -9,6 +9,9 @@ import { COLOMBIA_DATA } from '../data/colombia';
 const config = await getLiveConfig();
 const wompiKey = config?.wompiKey || 'pub_test_XXXXXXXXXXXXXXXX';
 const wompiActivo = config?.wompiActivo || false;
+
+const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 ---
 
 <Layout
@@ -218,8 +221,8 @@ const wompiActivo = config?.wompiActivo || false;
                 VOLVER A LA BOLSA
               </a>
 
-              <button class="co-btn-pay-premium" id="btn-pay-wompi" onclick="window.finalizarPedido()" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 1rem;">
-                <Icon name="shield-user" style="color: white; width: 14px; height: 14px;" /> PAGO SEGURO
+              <button class="co-btn-pay-premium" id="btn-pay-wompi" onclick="window.finalizarPedido()" style="width: 100%; display: flex; justify-center: center; align-items: center; gap: 0.5rem; padding: 1rem;">
+                <Icon name="shield-user" style="color: white; width: 14px; height: 14px;" /> PAGAR
               </button>
             </div>
 
@@ -267,7 +270,7 @@ const wompiActivo = config?.wompiActivo || false;
   <script src="https://checkout.wompi.co/widget.js" is:inline></script>
 
   <!-- ════ LOGICA CHECKOUT ════ -->
-  <script is:inline define:vars={{ wompiKey, wompiActivo, COLOMBIA_DATA }}>
+  <script is:inline define:vars={{ wompiKey, wompiActivo, COLOMBIA_DATA, SB_URL, SB_ANON }}>
     let _cart = [];
     let _discount = null;
 
@@ -592,36 +595,27 @@ const wompiActivo = config?.wompiActivo || false;
     };
 
 
-    // ── Guardar pedido en Supabase ──
+    // ── Guardar pedido en Supabase vía API Segura ──
     async function savePedidoToSupabase(orderData) {
       try {
-        const SB_URL = 'https://fpyhkxikxdwjhukltmqf.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweWhreGlreGR3amh1a2x0bXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzE1OTIsImV4cCI6MjA4ODI0NzU5Mn0.U1fHtV23e3uTlaH9qoeibzbm1d6MEcUaFE7rDhnokgM';
-
-        const payload = {
-          cliente_nombre: orderData.fullname,
-          cliente_email: orderData.email,
-          cliente_telefono: orderData.phone,
-          items: JSON.stringify(orderData.cart.map(i => `${i.qty}x ${i.name}`).join(', ')),
-          total: orderData.total,
-          estado: 'pendiente',
-          notas: `${orderData.direccion}, ${orderData.barrio}, ${orderData.ciudad}, ${orderData.departamento}${orderData.codigoPostal ? ' CP:' + orderData.codigoPostal : ''}${orderData.notas ? ' | ' + orderData.notas : ''}`,
-        };
-
-        const res = await fetch(`${SB_URL}/rest/v1/pedidos`, {
+        const res = await fetch('/api/create-order', {
           method: 'POST',
-          headers: {
-            'apikey': SB_KEY,
-            'Authorization': `Bearer ${SB_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation',
-          },
-          body: JSON.stringify(payload),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullname: orderData.fullname,
+            email: orderData.email,
+            phone: orderData.phone,
+            items: orderData.cart,
+            total: orderData.total,
+            discount: orderData.discount,
+            address: `${orderData.direccion}, ${orderData.barrio}, ${orderData.ciudad}, ${orderData.departamento}${orderData.codigoPostal ? ' CP:' + orderData.codigoPostal : ''}`,
+            notes: orderData.notas,
+          }),
         });
 
         if (res.ok) {
-          const rows = await res.json();
-          return rows && rows[0] ? rows[0] : null;
+          const data = await res.json();
+          return data.pedido;
         }
         return null;
       } catch(e) {
@@ -645,8 +639,18 @@ const wompiActivo = config?.wompiActivo || false;
 
       const o = buildOrderData();
       const isPlaceholder = !wompiKey || wompiKey.includes('XXXX') || wompiKey === '';
-      // Si está vacío, usamos una llave de prueba por defecto
-      const finalWompiKey = isPlaceholder ? 'pub_test_Q5yDA9xoKdePzhS8qn96X697697' : wompiKey;
+      
+      // ✅ Si no hay llave configurada, bloquear el pago con mensaje claro
+      if (isPlaceholder) {
+        alert('⚠️ Los pagos en línea aún no están configurados. Por favor intenta más tarde.');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = 'PAGAR';
+        }
+        return;
+      }
+      
+      const finalWompiKey = wompiKey;
 
       try {
         // 1. Guardar en Supabase primero
@@ -705,7 +709,7 @@ const wompiActivo = config?.wompiActivo || false;
           setTimeout(() => {
             if (btn) {
               btn.disabled = false;
-              btn.innerHTML = 'PAGO SEGURO';
+              btn.innerHTML = 'PAGAR';
             }
           }, 5000);
 
@@ -716,10 +720,10 @@ const wompiActivo = config?.wompiActivo || false;
         }
       } catch (err) {
         console.error('Error al procesar pedido:', err);
-        alert('Hubo un error al procesar tu pedido. Intenta nuevamente o contáctanos por WhatsApp.');
+        alert('Hubo un error al procesar tu pedido. Intenta nuevamente.');
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = 'PAGO SEGURO';
+          btn.innerHTML = 'PAGAR';
         }
       }
     };

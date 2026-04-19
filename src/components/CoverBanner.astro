@@ -3,102 +3,204 @@ import { clUrl } from '../data/datos';
 import Icon from './Icon.astro';
 
 interface Props {
-  title: string;
+  title?: string;
   subtitle?: string;
-  img: string;
+  img?: string; 
   video?: string;
   mobileImg?: string;
   mobileVideo?: string;
   ctaText?: string;
   ctaUrl?: string;
-  reverse?: boolean;
 }
 
-const { title, subtitle, img, video: rawVideo, mobileImg, mobileVideo: rawMobileVideo, ctaText = 'Ver Colección', ctaUrl = '/catalogo', reverse = false } = Astro.props;
-// Limpieza Extrema (Forzamos /video/upload/ y .mp4)
-let video = rawVideo ? rawVideo.replace('/image/upload/', '/video/upload/').replace(/w_\d+,q_auto,f_auto\//, 'f_auto,q_auto/') : '';
-if (video && !video.toLowerCase().endsWith('.mp4')) video += '.mp4';
-const poster = video ? video.replace(/\/v\d+\//, '/so_0/').replace(/\.mp4$/, '.jpg') : '';
+const { title, subtitle, img, video: rawVideo, mobileImg, mobileVideo: rawMobileVideo, ctaUrl, ctaText: rawCtaText } = Astro.props;
 
-let mobileVideo = rawMobileVideo ? rawMobileVideo.replace('/image/upload/', '/video/upload/').replace(/w_\d+,q_auto,f_auto\//, 'f_auto,q_auto/') : '';
-if (mobileVideo && !mobileVideo.toLowerCase().endsWith('.mp4')) mobileVideo += '.mp4';
-const mobilePoster = mobileVideo ? mobileVideo.replace(/\/v\d+\//, '/so_0/').replace(/\.mp4$/, '.jpg') : '';
+// Texto por defecto "Ver" para que sea minimalista
+const ctaText = (!rawCtaText && ctaUrl) ? 'Ver' : rawCtaText;
 
-const isVideo = !!(video && video.trim());
-const isMobileVideo = !!(mobileVideo && mobileVideo.trim());
+function cleanVideoUrl(url: string): string {
+  if (!url) return '';
+  let clean = url;
+  clean = clean.replace(/,vc_auto/g, '').replace(/vc_auto,/g, '').replace(/vc_auto/g, '');
+  clean = clean.replace(/,q_auto/g, '').replace(/q_auto,/g, '').replace(/q_auto/g, '');
+  clean = clean.replace(/\/upload\/\/+/g, '/upload/');
+  clean = clean.replace(/\/upload\/,/g, '/upload/');
+  return clean;
+}
+
+const video = cleanVideoUrl(rawVideo);
+const mobileVideo = cleanVideoUrl(rawMobileVideo) || video;
+const isVideo = !!video.trim();
+const isMobileVideo = !!mobileVideo.trim();
+const fallbackImg = img || mobileImg || '';
+
+const hasContent = !!(title || subtitle || ctaText);
 ---
 
-<div class="grid grid-cols-1 grid-rows-1 w-full overflow-hidden bg-transparent">
-  <!-- Bg Media dictating size -->
-  <div class="col-start-1 row-start-1 w-full z-0 pointer-events-none">
-    <!-- --- DESKTOP --- -->
+<div class="cover-wrapper">
+  <div class="cover-container">
+    {/* Media Layer */}
     {isVideo ? (
-      <video 
-        src={video}
-        poster={poster}
-        autoplay 
-        muted 
-        loop 
-        playsinline
-        preload="auto"
-        class="hidden md:block w-full h-auto object-cover"
-        onloadeddata="console.log('✅ Video portada cargado:', this.src)"
-        onerror="console.error('❌ Error video portada:', this.src)"
-      ></video>
+      <div class="video-wrapper">
+        <video src={video} autoplay muted loop playsinline class="cover-vid-desktop"></video>
+        <video src={isMobileVideo ? mobileVideo : video} autoplay muted loop playsinline class="cover-vid-mobile"></video>
+      </div>
+    ) : fallbackImg ? (
+      <img src={clUrl(fallbackImg, 1400)} alt="" class="cover-img" />
     ) : (
-      <img 
-        src={clUrl(img, 1200)} 
-        alt="Cover Portada"
-        class="hidden md:block w-full h-auto object-cover"
-        loading="eager"
-        fetchpriority="high"
-      />
+      <div class="h-20 bg-stone-900"></div>
     )}
 
-    <!-- --- MOBILE --- -->
-    {(isMobileVideo || isVideo) ? (
-      <video 
-        src={isMobileVideo ? mobileVideo : video}
-        poster={isMobileVideo ? mobilePoster : poster}
-        autoplay 
-        muted 
-        loop 
-        playsinline
-        preload="auto"
-        class="block md:hidden w-full h-auto object-cover"
-      ></video>
-    ) : (
-      <img 
-        src={clUrl(mobileImg || img, 800)} 
-        alt="Cover Portada"
-        class="block md:hidden w-full h-auto object-cover"
-        loading="eager"
-        fetchpriority="high"
-      />
-    )}
-  </div>
-
-  <!-- Contenido -->
-  <div class="col-start-1 row-start-1 relative z-20 flex flex-col justify-end p-8 md:p-16 pb-16 md:pb-24 text-center md:text-left max-w-[1400px] mx-auto w-full pointer-events-none">
-    {ctaUrl && !ctaText && (
-      <a href={ctaUrl} class="absolute inset-0 z-20 pointer-events-auto" aria-label={title.replace(/<[^>]*>/g, '')}></a>
-    )}
-
-    <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl font-light text-white leading-[1.05] tracking-tight mb-4 pointer-events-auto" set:html={title}></h1>
-    
-    {subtitle && (
-      <p class="text-white/80 text-sm md:text-lg max-w-md mx-auto md:mx-0 mb-8 font-light tracking-wide">
-        {subtitle}
-      </p>
-    )}
-
-    {ctaText && ctaUrl && (
-      <div class="relative z-30 pointer-events-auto">
-        <a href={ctaUrl} class="inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest">
-          {ctaText}
-          <Icon name="arrow-right" class="w-4 h-4" />
-        </a>
+    {/* Content Overlay */}
+    {hasContent && (
+      <div class="cover-overlay">
+        <div class="cover-content">
+          <div class="cover-inner">
+            {title && <h1 class="cover-title" set:html={title}></h1>}
+            {subtitle && <p class="cover-subtitle">{subtitle}</p>}
+            
+            {ctaText && ctaUrl && (
+              <div class="cover-cta">
+                <a href={ctaUrl} class="cover-btn">
+                  {ctaText}
+                  <Icon name="arrow-right" class="w-4 h-4" />
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     )}
   </div>
 </div>
+
+<style>
+  .cover-wrapper { width: 100%; background: #000; }
+  .cover-container { position: relative; width: 100%; overflow: hidden; }
+  .video-wrapper { width: 100%; line-height: 0; }
+  video, .cover-img { width: 100%; height: auto; display: block; }
+  
+  .cover-vid-desktop { display: none; }
+  .cover-vid-mobile { display: block; }
+  @media (min-width: 768px) {
+    .cover-vid-desktop { display: block; }
+    .cover-vid-mobile { display: none; }
+  }
+
+  /* === CAPA DE CONTENIDO === */
+  .cover-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    /* Móvil: Contenido abajo a la derecha */
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 1rem;
+    pointer-events: none;
+    background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.4) 100%);
+  }
+
+  .cover-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+
+  .cover-inner {
+    text-align: right;
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .cover-overlay {
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+    }
+    .cover-content {
+      justify-content: center;
+      align-items: center;
+    }
+    .cover-inner {
+      text-align: center;
+    }
+  }
+
+  .cover-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 6vw, 6rem);
+    font-weight: 300;
+    color: white;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    pointer-events: auto;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  .cover-subtitle {
+    color: white;
+    font-size: clamp(0.75rem, 1.2vw, 1rem);
+    margin-bottom: 1.5rem;
+    font-weight: 300;
+    pointer-events: auto;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+
+  /* === BOTÓN GLASS === */
+  .cover-cta {
+    pointer-events: auto;
+    opacity: 1;
+    transition: all 0.5s ease;
+  }
+
+  @media (min-width: 768px) {
+    .cover-cta {
+      opacity: 0;
+      transform: translateY(20px);
+      margin-top: 2rem;
+    }
+    .cover-container:hover .cover-cta {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .cover-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.75rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+  }
+
+  @media (min-width: 768px) {
+    .cover-btn {
+      padding: 1rem 2.5rem;
+      border-radius: 1.25rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      gap: 1rem;
+    }
+    .cover-btn:hover {
+      background: white;
+      color: black;
+      transform: scale(1.05);
+    }
+  }
+</style>

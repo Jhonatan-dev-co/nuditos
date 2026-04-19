@@ -9,7 +9,7 @@
 /* ── Layout General ── */
 .checkout-page {
   min-height: 100svh;
-  background: var(--cream);
+  background: var(--bg);
   padding-bottom: 4rem;
 }
 
@@ -27,12 +27,12 @@
   position: sticky; top: 0; z-index: 50;
 }
 .logo-centered {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.4rem; font-weight: 600;
+  font-family: var(--font-serif);
+  font-size: 1.6rem; font-weight: 600;
   letter-spacing: 4px; text-transform: uppercase;
   color: var(--text);
 }
-.logo-centered em { font-style: normal; color: var(--lila-dark); }
+.logo-centered em { font-style: normal; color: var(--accent); }
 .co-header-right {
   display: flex;
   justify-content: flex-end;
@@ -144,8 +144,8 @@
 .co-acc-item.active .co-acc-icon-wrap { background: var(--text); color: white; }
 
 .co-acc-item.active {
-  border-color: var(--lila);
-  box-shadow: 0 10px 30px rgba(140,95,173,0.15);
+  border-color: var(--accent);
+  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.12);
   transform: translateY(-2px);
 }
 .co-acc-item.active .co-acc-header {
@@ -153,7 +153,7 @@
   cursor: pointer;
 }
 .co-acc-item.active .co-acc-status {
-  color: var(--lila-dark);
+  color: var(--accent);
 }
 
 /* Done State */
@@ -238,16 +238,16 @@
   margin-top: 0;
 }
 .co-input {
-  width: 100%; padding: 1rem 1.2rem;
+  width: 100%; padding: 1rem 1.25rem;
   border: 1px solid var(--border-dark);
-  border-radius: 14px;
-  font-family: 'Jost', sans-serif; font-size: 1rem;
+  border-radius: 1rem;
+  font-family: var(--font-sans); font-size: 1rem;
   color: var(--text); background: white;
-  outline: none; transition: all 0.25s;
+  outline: none; transition: all 0.3s;
 }
 .co-input:focus {
-  border-color: var(--lila-dark);
-  box-shadow: 0 0 0 4px var(--lila-xlight);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 .co-input::placeholder { color: #ccc; }
 .co-input.error { border-color: #e05252; }
@@ -275,18 +275,18 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
   margin-top: 1.5rem; gap: 1rem;
 }
 .co-btn-primary {
-  flex: 1; background: var(--lila-dark); color: white; border: none;
-  padding: 1.1rem;
-  font-family: 'Jost', sans-serif;
+  flex: 1; background: var(--accent); color: white; border: none;
+  padding: 1.2rem;
+  font-family: var(--font-sans);
   font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
   border-radius: 50px; cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(140,95,173,0.25);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
 }
 .co-btn-primary:hover { 
-  background: var(--text); 
+  background: var(--primary); 
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(140,95,173,0.35);
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.35);
 }
 .co-btn-primary:active { transform: translateY(0); }
 .co-btn-back {
@@ -379,25 +379,25 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
 }
 
 .co-btn-pay-premium {
-  background: var(--lila-dark);
+  background: var(--accent);
   color: white;
   border: none;
-  padding: 1.1rem 3.5rem;
+  padding: 1.25rem 4rem;
   border-radius: 100px;
-  font-family: 'Jost', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 1px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 10px 25px rgba(140, 95, 173, 0.35);
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
 }
 
 .co-btn-pay-premium:hover {
-  background: var(--text);
-  transform: scale(1.02);
-  box-shadow: 0 15px 35px rgba(140, 95, 173, 0.45);
+  background: var(--primary);
+  transform: scale(1.03) translateY(-2px);
+  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.4);
 }
 
 .co-btn-pay-premium:active {

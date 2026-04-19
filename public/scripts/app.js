@@ -4,7 +4,6 @@
    ══════════════════════════════════════════ */
 
 const WA_NUMBER      = '573144931525';
-const WOMPI_PUBLIC_KEY = 'pub_test_XXXXXXXXXXXXXXXX';
 
 // let cart = []; // Ahora en Nanostores
 // let appliedDiscount = null; // Ahora en Nanostores
@@ -622,7 +621,7 @@ function toggleSearch() {
   const overlay = document.getElementById('searchOverlay');
   if (!overlay) return;
   overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.classList.add('scroll-lock');
   setTimeout(() => {
     const input = document.getElementById('searchInput');
     if (input) input.focus();
@@ -636,7 +635,7 @@ function closeSearch() {
   if (input) input.value = '';
   const results = document.getElementById('searchResults');
   if (results) results.innerHTML = '';
-  document.body.style.overflow = '';
+  document.body.classList.remove('scroll-lock');
 }
 
 /* ════════════════════════════
@@ -679,7 +678,7 @@ function toggleCart() {
   overlay.classList.toggle('open');
   panel.classList.toggle('open');
   const isOpen = panel.classList.contains('open');
-  document.body.style.overflow = isOpen ? 'hidden' : '';
+  document.body.classList.toggle('scroll-lock', isOpen);
 }
 
 /* Checkout migrado a Nanostores */
@@ -695,7 +694,7 @@ function toggleMenu() {
   overlay.classList.toggle('open');
   panel.classList.toggle('open');
   const isOpen = panel.classList.contains('open');
-  document.body.style.overflow = isOpen ? 'hidden' : '';
+  document.body.classList.toggle('scroll-lock', isOpen);
 }
 
 function toggleAcc(btn) {

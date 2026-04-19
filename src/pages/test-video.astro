@@ -1,0 +1,109 @@
+---
+// Página de prueba aislada para diagnosticar el video
+export const prerender = false;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Video</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1a1a1a; color: white; font-family: sans-serif; }
+    h1 { text-align: center; padding: 20px; }
+    .test-container { 
+      width: 100%; 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 20px;
+    }
+    video { 
+      width: 100%; 
+      height: auto; 
+      display: block;
+      border: 3px solid lime;
+    }
+    .info { 
+      background: #333; 
+      padding: 10px; 
+      margin: 10px 0; 
+      font-family: monospace; 
+      font-size: 12px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Test de Video Cloudinary</h1>
+  
+  <div class="test-container">
+    <h2>Test 1: Video directo sin transformaciones</h2>
+    <div class="info">
+      URL: https://res.cloudinary.com/dzxgu27wr/video/upload/v1776563681/nuditos-products/fondo-portada-web-ramo-tejido-crochet-u5hb.mp4
+    </div>
+    <video 
+      src="https://res.cloudinary.com/dzxgu27wr/video/upload/v1776563681/nuditos-products/fondo-portada-web-ramo-tejido-crochet-u5hb.mp4"
+      autoplay 
+      muted 
+      loop 
+      playsinline
+      controls
+      id="video1"
+    ></video>
+    <div class="info" id="status1">Cargando...</div>
+
+    <br><br>
+    <h2>Test 2: Video mobile</h2>
+    <div class="info">
+      URL: https://res.cloudinary.com/dzxgu27wr/video/upload/v1776559568/nuditos-products/banner-mobile-ramo-tejido-crochet-proi.mp4
+    </div>
+    <video 
+      src="https://res.cloudinary.com/dzxgu27wr/video/upload/v1776559568/nuditos-products/banner-mobile-ramo-tejido-crochet-proi.mp4"
+      autoplay 
+      muted 
+      loop 
+      playsinline
+      controls
+      id="video2"
+    ></video>
+    <div class="info" id="status2">Cargando...</div>
+
+    <br><br>
+    <h2>Test 3: Video de prueba externo (referencia)</h2>
+    <video 
+      src="https://www.w3schools.com/html/mov_bbb.mp4"
+      autoplay 
+      muted 
+      loop 
+      playsinline
+      controls
+      id="video3"
+    ></video>
+    <div class="info" id="status3">Cargando...</div>
+  </div>
+
+  <script>
+    function checkVideo(id, statusId) {
+      const v = document.getElementById(id);
+      const s = document.getElementById(statusId);
+      if (!v) return;
+      
+      const update = () => {
+        s.innerHTML = `readyState: ${v.readyState} | paused: ${v.paused} | error: ${v.error ? 'CODE '+v.error.code : 'none'} | videoWidth: ${v.videoWidth}x${v.videoHeight} | currentTime: ${v.currentTime.toFixed(1)}s | src: ${v.src}`;
+      };
+      
+      v.addEventListener('loadeddata', update);
+      v.addEventListener('error', update);
+      v.addEventListener('playing', update);
+      setInterval(update, 1000);
+      update();
+    }
+    
+    checkVideo('video1', 'status1');
+    checkVideo('video2', 'status2');
+    checkVideo('video3', 'status3');
+  </script>
+</body>
+</html>

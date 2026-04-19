@@ -12,12 +12,14 @@ import CoverBanner from '../components/CoverBanner.astro';
 import ProductCard from '../components/ProductCard.astro';
 import Catalogo from '../components/Catalogo.astro';
 
-import { getLiveProducts, getLiveConfig, getLiveCategories, getLiveBanners } from '../lib/supabase';
+import { getLiveProducts, getLiveConfig, getPublicConfig, getLiveCategories, getLiveBanners } from '../lib/supabase';
 import { CONFIG_DEFAULT as FALLBACK_CONFIG, categories as FALLBACK_CATEGORIES } from '../data/datos';
 
 const liveProducts = await getLiveProducts();
 const liveConfigRaw = await getLiveConfig();
+const publicConfigRaw = await getPublicConfig();
 const liveConfig = liveConfigRaw ? { ...FALLBACK_CONFIG, ...liveConfigRaw } : FALLBACK_CONFIG;
+const publicConfig = publicConfigRaw ? { ...FALLBACK_CONFIG, ...publicConfigRaw } : FALLBACK_CONFIG;
 
 // Categorías y Banners dinámicos
 const sbCategories = await getLiveCategories();
@@ -234,21 +236,6 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
       </p>
       
       <div class="flex flex-wrap justify-center gap-3 mb-12">
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20un%20ramo%20personalizado%20para%20un%20Cumpleaños%20🎂" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">🎂 Cumpleaños</a>
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20un%20ramo%20personalizado%20para%20una%20Boda%20💍" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">💍 Bodas</a>
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20un%20ramo%20personalizado%20por%20mi%20Aniversario%20💝" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">💝 Aniversario</a>
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20un%20ramo%20personalizado%20para%20un%20Grado%20🎓" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">🎓 Grado</a>
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20mandar%20a%20hacer%20un%20Regalo%20especial%20🎁" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">🎁 Regalo especial</a>
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20🌸%20Quiero%20un%20ramo%20personalizado%20de%20mi%20Michi%20🐱" target="_blank" class="bg-white border border-violet-100 px-5 py-2 rounded-full text-xs font-medium text-violet-700 hover:bg-violet-100 hover:border-violet-200 transition-all shadow-sm">🐱 Tu Michi</a>
-      </div>
-
-      <a
-        href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20personalizado%20🌸"
-        class="inline-flex items-center gap-3 bg-green-500 text-white px-10 py-4 rounded-2xl font-bold shadow-xl shadow-green-200 hover:bg-green-600 hover:-translate-y-1 transition-all uppercase text-xs tracking-widest"
-        target="_blank"
-      >
-        <Icon name="whatsapp" class="text-lg" /> Escribir por WhatsApp
-      </a>
     </div>
 
     <!-- Decoración fondo -->
@@ -307,5 +294,5 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
     </div>
   </section>
 
-  <script is:inline set:html={`window.NUDITOS_LIVE_PRODUCTS = ${JSON.stringify(safeProducts)}; window.NUDITOS_CATEGORIES = ${JSON.stringify(safeCategories)}; window.NUDITOS_LIVE_CONFIG = ${JSON.stringify(liveConfig)}; `} />
+  <script is:inline set:html={`window.NUDITOS_LIVE_PRODUCTS = ${JSON.stringify(safeProducts)}; window.NUDITOS_CATEGORIES = ${JSON.stringify(safeCategories)}; window.NUDITOS_LIVE_CONFIG = ${JSON.stringify(publicConfig)}; `} />
 </Layout>

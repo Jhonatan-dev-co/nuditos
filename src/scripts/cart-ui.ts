@@ -165,18 +165,32 @@ document.addEventListener('astro:page-load', () => {
 
 
 // Exponer funciones al objeto window para compatibilidad con onclick
-(window as any).addToCart = (id: number) => {
+(window as any).addToCart = (id: number | string) => {
+  const nid = Number(id);
   const live = (window as any).NUDITOS_LIVE_PRODUCTS || [];
-  const p = live.find((x: any) => x.id === id) || products.find(x => x.id === id);
+  const p = live.find((x: any) => Number(x.id) === nid) || products.find(x => Number(x.id) === nid);
 
   if (p && p.price > 0) {
     addToCart(p);
     showToast(`${getIconSvg('check')} ${p.name} agregado`);
     
-    const fn = (window as any).sbTrackCartEvent;
-    if (fn) fn(getOrCreateSessionId(), 'add_to_cart', { product_id: id, product_name: p.name, quantity: 1, cart_total: getCartTotal() });
+    /* Comentado para evitar que sea incómodo abrirlo siempre
+    setTimeout(() => {
+        const cartPanel = document.getElementById('cartPanel');
+        const cartOverlay = document.getElementById('cartOverlay');
+        if (cartPanel && !cartPanel.classList.contains('open')) {
+            cartPanel.classList.add('open');
+            cartOverlay?.classList.add('open');
+            const lockFn = (window as any).toggleScrollLock;
+            if (lockFn) lockFn(true);
+        }
+    }, 100);
+    */
 
-    document.querySelectorAll(`#padd-${id}`).forEach(btn => {
+    const fn = (window as any).sbTrackCartEvent;
+    if (fn) fn(getOrCreateSessionId(), 'add_to_cart', { product_id: nid, product_name: p.name, quantity: 1, cart_total: getCartTotal() });
+
+    document.querySelectorAll(`[id="padd-${nid}"]`).forEach(btn => {
       btn.classList.add('added');
       const originalHTML = btn.innerHTML;
       btn.innerHTML = getIconSvg('check');
@@ -186,7 +200,7 @@ document.addEventListener('astro:page-load', () => {
       }, 1300);
     });
   } else {
-    console.warn('[cart] Producto no encontrado o sin precio:', id);
+    console.warn('[cart] Producto no encontrado o sin precio:', id, 'Pool:', live);
   }
 };
 
@@ -271,38 +285,11 @@ document.addEventListener('astro:page-load', () => {
   }
 };
 
+// ✅ Redirigir al checkout completo (flujo real de Wompi está en checkout.astro)
 (window as any).checkoutWompi = () => {
-  const subtotal = getCartTotal();
-  const discount = $discount.get();
-  const cfg = (window as any).NUDITOS_CONFIG || {};
-  const WOMPI_KEY = cfg.wompiKey || 'pub_test_XXXXXXXXXXXXXXXX';
-  
-  if (!cfg.wompiActivo && !WOMPI_KEY.includes('test')) {
-    showToast('Los pagos con tarjeta no están activos');
-    return;
-  }
-  
-  let total = subtotal;
-  if (discount) total = subtotal - Math.round(subtotal * discount.pct / 100);
-  
-  if (total === 0) {
-    showToast('Agrega productos para pagar');
-    return;
-  }
-  
-  window.open(`https://checkout.wompi.co/l/?public-key=${WOMPI_KEY}&currency=COP&amount-in-cents=${total * 100}&reference=NUDITOS-${Date.now()}`, '_blank');
-  
-  // Registrar eventos en Supabase
-  const sid = getOrCreateSessionId();
-  const trackFn = (window as any).sbTrackCartEvent;
-  if (trackFn) trackFn(sid, 'checkout_wompi', { cart_total: total });
-
-  // Marcar estado en Supabase
-  const upsertFn = (window as any).sbUpsertCarrito;
-  if (upsertFn) {
-    const items = $cart.get().map(({ id, name, price, qty, img }) => ({ id, name, price, qty, img }));
-    upsertFn(sid, items, total, 'checkout_wompi');
-  }
+  const cart = $cart.get();
+  if (cart.length === 0) return showToast('Agrega productos para pagar');
+  window.location.href = '/checkout';
 };
 
 

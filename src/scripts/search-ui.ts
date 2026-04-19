@@ -19,8 +19,20 @@ document.addEventListener('astro:page-load', () => {
   closeBtn.addEventListener('click', closeSearch);
   overlay.addEventListener('click', e => { if (e.target === overlay) closeSearch(); });
 
+  let searchTimer: any = null;
   input.addEventListener('input', e => {
     const q = (e.target as HTMLInputElement).value.trim().toLowerCase();
+    
+    // Facebook Pixel Track - Search (Debounced)
+    clearTimeout(searchTimer);
+    if (q.length >= 3) {
+      searchTimer = setTimeout(() => {
+        if (typeof window.fbq === 'function') {
+          window.fbq('track', 'Search', { search_string: q });
+        }
+      }, 700);
+    }
+
     if (q.length < 2) { 
         results.innerHTML = ''; 
         return; 

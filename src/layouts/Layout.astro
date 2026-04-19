@@ -3,11 +3,17 @@ import Icon from '../components/Icon.astro';
 import '../styles/main.css';
 import SearchOverlay from '../components/SearchOverlay.astro';
 import { ViewTransitions } from 'astro:transitions';
-import { categories, clUrl } from '../data/datos';
-import { getLiveConfig } from '../lib/supabase';
+import { categories as FALLBACK_CATEGORIES, clUrl } from '../data/datos';
+import { getLiveConfig, getPublicConfig, getLiveCategories } from '../lib/supabase';
 
-// Fetch live configuration for SEO and Social
-const config = await getLiveConfig();
+// Fetch live configuration and categories in parallel
+const [config, publicConfig, rawCategories] = await Promise.all([
+  getLiveConfig(),
+  getPublicConfig(),
+  getLiveCategories()
+]);
+
+const categories = rawCategories && rawCategories.length > 0 ? rawCategories : FALLBACK_CATEGORIES;
 const siteTitle = config?.seoTitle || 'Nuditos Tejidos — Ramos de Crochet, Regalos y Detalles Originales';
 const siteDesc = config?.seoDescription || 'Ramos de crochet hechos a mano y amigurumis. El regalo eterno perfecto para detalles inolvidables en Colombia. Envíos a todo el país.';
 const siteOgImg = config?.seoOgImage || 'https://nuditos.com.co/og-default.jpg';
@@ -58,6 +64,67 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <!-- SEO básico -->
   <title>{fullTitle}</title>
+  <ViewTransitions />
+  
+  <!-- Barra de Carga Premium -->
+  <style is:global>
+    #loading-bar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: var(--accent);
+      z-index: 1000;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease-out;
+      pointer-events: none;
+    }
+    #loading-bar.loading {
+      transform: scaleX(0.7);
+      transition: transform 2s cubic-bezier(0.1, 0, 0, 1);
+    }
+    #loading-bar.done {
+      transform: scaleX(1);
+      opacity: 0;
+      transition: transform 0.3s ease-out, opacity 0.3s 0.3s;
+    }
+  </style>
+  <script>
+    document.addEventListener('astro:before-preparation', () => {
+      const bar = document.getElementById('loading-bar');
+      if (bar) {
+        bar.style.transform = 'scaleX(0)';
+        bar.style.opacity = '1';
+        bar.classList.remove('done');
+        bar.classList.add('loading');
+      }
+    });
+
+    document.addEventListener('astro:page-load', () => {
+      const bar = document.getElementById('loading-bar');
+      if (bar) {
+        bar.classList.add('done');
+        setTimeout(() => {
+          bar.classList.remove('loading', 'done');
+          bar.style.transform = 'scaleX(0)';
+        }, 600);
+      }
+      
+      // Global helpers
+      (window as any).closeSearch = () => {
+        const searchOverlay = document.getElementById('searchOverlay');
+        searchOverlay?.classList.remove('open');
+        const scrollLockFn = (window as any).toggleScrollLock;
+        if (scrollLockFn) scrollLockFn(false);
+      };
+
+      (window as any).toggleMenuAccordion = (btn) => {
+        const item = btn.closest('.menu-accordion-item');
+        item.classList.toggle('open');
+      };
+    });
+  </script>
+
   <meta name="description" content={description} />
   <link rel="canonical" href={canonicalURL} />
   {noIndex && <meta name="robots" content="noindex, nofollow" />}
@@ -204,59 +271,78 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 </head>
 
 <body>
+  <div id="loading-bar"></div>
 
   <!-- ════════ NAVBAR ════════ -->
 <style is:global>
   :root {
-    --nav-h:       64px;
-    --nav-h-mob:   56px;
-    --glass-bg:    rgba(255, 255, 255, 0.65);
-    --glass-border: rgba(255, 255, 255, 0.4);
-    --glass-blur:  40px;
-    --glass-saturate: 180%;
-    --font-serif:  'Jost', sans-serif;
+    --nav-h:       72px;
+    --nav-h-mob:   64px;
+    --glass-bg:    rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-blur:  25px;
+    --font-serif:  'Cormorant Garamond', serif;
     --font-sans:   'Jost', sans-serif;
   }
   body {
     font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
-    font-weight: 300;
-    letter-spacing: -0.02em;
+    font-weight: 400;
   }
   .nav-wrap {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: white;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-bottom: 1px solid transparent;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-bottom: 1px solid var(--glass-border);
   }
   .nav-wrap.nav-scrolled {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    border-bottom: 1px solid var(--glass-border);
-    padding: 2px 0;
-  }
-  .nav-wrap.nav-hidden {
-    transform: translateY(-100%);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
   }
   @media (max-width: 768px) {
     .nav-center .logo {
-      font-size: 1.1rem;
-      letter-spacing: 2px;
+      font-size: 1.2rem;
+      letter-spacing: 3px;
     }
-    .nav-wrap nav {
-      padding: 0 0.75rem;
-    }
-    .nav-icon-btn {
-      width: 40px;
-      height: 40px;
-      font-size: 1.1rem;
-    }
+  }
+  /* Estilos para el Acordeón del Menú */
+  .menu-submenu-collapsible {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(0,0,0,0.02);
+    border-radius: 1rem;
+  }
+  .menu-accordion-item.open .menu-submenu-collapsible {
+    max-height: 500px;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+  }
+  .menu-accordion-item.open .acc-arrow {
+    transform: rotate(180deg);
+    color: var(--accent);
+  }
+  .accordion-trigger {
+    border: none;
+    width: 100%;
+    text-align: left;
+    background: none;
+    cursor: pointer;
+  }
+  
+  body.scroll-lock {
+    overflow: hidden !important;
+    height: 100vh !important;
+    touch-action: none;
+    position: fixed;
+    width: 100%;
   }
 </style>
 
@@ -278,9 +364,9 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       <div class="nav-center">
         <a href="/" class="logo">NUDITOS<em>.</em></a>
       </div>
-      <div class="nav-right hide-mobile">
-        <button class="nav-icon-btn" onclick="toggleSearch()" aria-label="Buscar">
-          <Icon name="search"  />
+      <div class="nav-right">
+        <button class="nav-icon-btn hide-mobile" onclick="toggleSearch()" aria-label="Buscar">
+          <Icon name="search" />
         </button>
         <button class="nav-icon-btn" onclick="toggleCart()" aria-label="Carrito">
           <Icon name="shopping-bag"  />
@@ -296,7 +382,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
   <div class="menu-panel" id="menuPanel" style="background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));">
     <div class="menu-head">
-      <span class="menu-logo">NUDITOS<em>.</em></span>
+      <a href="/" class="menu-logo" onclick="toggleMenu()">NUDITOS<em>.</em></a>
       <button class="menu-close" onclick="toggleMenu()" aria-label="Cerrar menú">
         <Icon name="close"  />
       </button>
@@ -318,18 +404,26 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
         Reseñas <Icon name="arrow-right"  />
       </a>
 
-      <!-- Submenu Categorías -->
-      <div class="menu-divider">Categorías</div>
-      <div class="menu-submenu">
-        {categories.filter(c => c.id !== 'todos').map(cat => (
-          <a class="menu-sub-item" href={`/catalogo?categoria=${cat.id}`} onclick="toggleMenu()">
-            <span class="sub-item-icon">{cat.icon}</span> {cat.name}
-          </a>
-        ))}
+      <!-- Acordeón de Categorías -->
+      <div class="menu-accordion-item">
+        <button class="menu-nav-item accordion-trigger" onclick="toggleMenuAccordion(this)">
+          Categorías 
+          <div class="acc-arrow transition-transform duration-300">
+            <Icon name="arrow-down-s"  />
+          </div>
+        </button>
+        <div class="menu-submenu-collapsible">
+          {categories.filter(c => c.id !== 'todos').map(cat => (
+            <a class="menu-sub-item" href={`/catalogo?categoria=${cat.id}`} onclick="toggleMenu()">
+              {cat.name}
+              <Icon name="arrow-right-s" class="opacity-20 ml-auto" />
+            </a>
+          ))}
+        </div>
       </div>
 
-      <div class="menu-divider">Ayuda</div>
-      <a class="menu-nav-item" href="/preguntas-frecuentes">
+      <div class="menu-divider">Atención al cliente</div>
+      <a class="menu-nav-item" href="/preguntas-frecuentes" onclick="toggleMenu()">
         Preguntas frecuentes <Icon name="arrow-right"  />
       </a>
       <a class="menu-nav-item wa-item" href={whatsappLink} target="_blank">
@@ -362,13 +456,10 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       <Icon name="magic"  />
       <span>Ramos</span>
     </a>
-    <button class="mb-nav-item" onclick="toggleCart()" aria-label="Ver carrito de compras">
-      <div class="mb-cart-icon-wrap">
-        <Icon name="shopping-bag-3"  />
-        <span class="mb-cart-badge hidden" id="mbCartCount">0</span>
-      </div>
-      <span>Carrito</span>
-    </button>
+    <a href="/" class="mb-nav-item" id="nav-home" aria-label="Ir al Inicio">
+      <Icon name="home"  />
+      <span>Inicio</span>
+    </a>
   </nav>
   )}
 
@@ -522,7 +613,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
         <a href="/checkout" class="w-full bg-stone-900 text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="toggleCart()">
           <Icon name="bank-card" class="text-lg leading-none" />
-          <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Ir a Pagar</span>
+          <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Pagar</span>
         </a>
       </div>
     </div>
@@ -558,18 +649,6 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   </div>
 
   <SearchOverlay />
-
-  <!-- ════════ WHATSAPP FLOTANTE ════════ -->
-  <div class="wa-float-wrap">
-    <a
-      href={`${whatsappLink}?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸`}
-      class="wa-float"
-      target="_blank"
-      aria-label="WhatsApp"
-    >
-      <Icon name="whatsapp"  />
-    </a>
-  </div>
 
   <div class="toast" id="toast"></div>
 
@@ -636,23 +715,32 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <!-- Slot para scripts extra de cada página -->
   <slot name="scripts" />
 
-  <script is:inline define:vars={{ liveConfig: config }}>
+  <script is:inline define:vars={{ liveConfig: publicConfig }}>
     window.NUDITOS_CONFIG = liveConfig;
 
-    // Autoplay Fixer: Asegura que los videos muted autoplay arranquen en todos los navegadores
+    // Autoplay Fixer y Tracking Global
     document.addEventListener('astro:page-load', () => {
+      // Videos
       const videos = document.querySelectorAll('video[autoplay][muted]');
       videos.forEach(v => {
         v.play().catch(() => {
-          // Si falla, intentamos de nuevo al primer toque del usuario
-          const forcePlay = () => {
-            v.play();
-            document.removeEventListener('click', forcePlay);
-            document.removeEventListener('touchstart', forcePlay);
-          };
+          const forcePlay = () => { v.play(); document.removeEventListener('click', forcePlay); document.removeEventListener('touchstart', forcePlay); };
           document.addEventListener('click', forcePlay);
           document.addEventListener('touchstart', forcePlay);
         });
+      });
+
+      // Facebook Pixel - Contact event on WhatsApp clicks
+      document.body.addEventListener('click', (e) => {
+        const target = e.target.closest('a');
+        if (target && target.href.includes('wa.me')) {
+          if (typeof window.fbq === 'function') {
+            window.fbq('track', 'Contact', {
+              method: 'WhatsApp',
+              url: target.href
+            });
+          }
+        }
       });
     });
   </script>

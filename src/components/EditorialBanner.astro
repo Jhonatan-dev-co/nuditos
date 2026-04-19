@@ -14,103 +14,181 @@ interface Props {
   reverse?: boolean;
 }
 
-const { title, subtitle, img, video: rawVideo, mobileImg, mobileVideo: rawMobileVideo, ctaText, ctaUrl, reverse = false } = Astro.props;
-// Limpieza Extrema (Forzamos /video/upload/ y .mp4)
-let video = rawVideo ? rawVideo.replace('/image/upload/', '/video/upload/').replace(/w_\d+,q_auto,f_auto\//, 'f_auto,q_auto/') : '';
-if (video && !video.toLowerCase().endsWith('.mp4')) video += '.mp4';
-const poster = video ? video.replace(/\/v\d+\//, '/so_0/').replace(/\.mp4$/, '.jpg') : '';
+const { title, subtitle, img, video: rawVideo, mobileImg, mobileVideo: rawMobileVideo, ctaUrl, reverse = false, ctaText: rawCtaText } = Astro.props;
 
-let mobileVideo = rawMobileVideo ? rawMobileVideo.replace('/image/upload/', '/video/upload/').replace(/w_\d+,q_auto,f_auto\//, 'f_auto,q_auto/') : '';
-if (mobileVideo && !mobileVideo.toLowerCase().endsWith('.mp4')) mobileVideo += '.mp4';
-const mobilePoster = mobileVideo ? mobileVideo.replace(/\/v\d+\//, '/so_0/').replace(/\.mp4$/, '.jpg') : '';
+// Texto por defecto "Ver" para móvil
+const ctaText = (!rawCtaText && ctaUrl) ? 'Ver' : rawCtaText;
 
-const isVideo = !!(video && video.trim());
-const isMobileVideo = !!(mobileVideo && mobileVideo.trim());
-const hasText = !!(title && title.trim());
+function cleanVideoUrl(url: string): string {
+  if (!url) return '';
+  let clean = url;
+  clean = clean.replace(/,vc_auto/g, '').replace(/vc_auto,/g, '').replace(/vc_auto/g, '');
+  clean = clean.replace(/,q_auto/g, '').replace(/q_auto,/g, '').replace(/q_auto/g, '');
+  clean = clean.replace(/\/upload\/\/+/g, '/upload/');
+  clean = clean.replace(/\/upload\/,/g, '/upload/');
+  return clean;
+}
+
+const video = cleanVideoUrl(rawVideo);
+const mobileVideo = cleanVideoUrl(rawMobileVideo) || video;
+const isVideo = !!video.trim();
+const isMobileVideo = !!mobileVideo.trim();
+const fallbackImg = img || mobileImg || '';
+
+const hasContent = !!(title || subtitle || ctaText);
 ---
 
-<section class="w-full md:py-16 md:px-6">
-  <div class="grid grid-cols-1 grid-rows-1 w-full md:max-w-[1400px] md:mx-auto md:rounded-[2rem] overflow-hidden bg-transparent relative">
-    
-    {/* Link invisible que cubre todo el banner si hay URL pero no botón */}
-    {ctaUrl && !ctaText && (
-      <a href={ctaUrl} class="absolute inset-0 z-30" aria-label={title ? title.replace(/<[^>]*>/g, '') : 'Ver más'}></a>
-    )}
-
-    {/* Fondo: Video o Imagen (El contenedor toma sus dimensiones) */}
-    <div class="col-start-1 row-start-1 w-full z-0 pointer-events-none">
-      {/* --- DESKTOP --- */}
+<section class="ed-section">
+  <div class={`ed-container ${reverse ? 'ed-reverse' : ''}`}>
+    {/* Media Layer */}
+    <div class="ed-media-wrapper">
       {isVideo ? (
-        <video 
-          src={video}
-          poster={poster}
-          autoplay 
-          muted 
-          loop 
-          playsinline
-          preload="auto"
-          class="hidden md:block w-full h-auto object-cover"
-          onloadeddata="console.log('✅ Video cargado:', this.src)"
-          onerror="console.error('❌ Error cargando video:', this.src)"
-        ></video>
-      ) : img ? (
-        <img 
-          src={clUrl(img, 1400)} 
-          alt={title ? title.replace(/<[^>]*>/g, '') : 'Banner Nuditos'}
-          class="hidden md:block w-full h-auto object-cover"
-          loading="eager"
-          fetchpriority="high"
-        />
-      ) : null}
-
-      {/* --- MOBILE --- */}
-      {(isMobileVideo || isVideo) ? (
-        <video 
-          src={isMobileVideo ? mobileVideo : video}
-          poster={isMobileVideo ? mobilePoster : poster}
-          autoplay 
-          muted 
-          loop 
-          playsinline
-          preload="auto"
-          class="block md:hidden w-full h-auto object-cover"
-        ></video>
-      ) : (mobileImg || img) ? (
-        <img 
-          src={clUrl(mobileImg || img, 800)} 
-          alt={title ? title.replace(/<[^>]*>/g, '') : 'Banner Nuditos'}
-          class="block md:hidden w-full h-auto object-cover"
-          loading="eager"
-          fetchpriority="high"
-        />
+        <>
+          <video src={video} autoplay muted loop playsinline class="ed-vid-desktop"></video>
+          <video src={isMobileVideo ? mobileVideo : video} autoplay muted loop playsinline class="ed-vid-mobile"></video>
+        </>
+      ) : fallbackImg ? (
+        <img src={clUrl(fallbackImg, 1400)} alt="" class="ed-img" />
       ) : null}
     </div>
 
-    {/* Contenido encima (solo si hay título) */}
-    {hasText && (
-      <div class={`col-start-1 row-start-1 relative z-10 w-full md:w-1/2 p-8 pb-12 md:pb-24 flex flex-col justify-end ${reverse ? 'md:ml-auto md:text-right md:items-end' : 'md:text-left'} text-center md:justify-end mt-auto pointer-events-none`}>
-        
-        <h2 class="font-serif text-3xl md:text-5xl font-light text-white leading-[1.1] mb-4 tracking-tight pointer-events-auto" set:html={title}>
-        </h2>
-        
-        {subtitle && (
-          <p class="text-stone-200 text-sm md:text-base leading-snug mb-8 max-w-md">
-            {subtitle}
-          </p>
-        )}
-        
-        {ctaText && ctaUrl && (
-          <div class="relative z-40 pointer-events-auto">
-              <a 
-              href={ctaUrl} 
-              class="inline-flex items-center gap-3 bg-white text-stone-900 px-8 py-3.5 rounded-xl font-bold uppercase text-[10px] tracking-widest"
-            >
-              {ctaText} 
-              <Icon name="arrow-right" class="transition-transform" />
-            </a>
-          </div>
-        )}
+    {/* Content Overlay */}
+    {hasContent && (
+      <div class="ed-overlay">
+        <div class="ed-content">
+          {title && <h2 class="ed-title" set:html={title}></h2>}
+          {subtitle && <p class="ed-subtitle">{subtitle}</p>}
+          
+          {ctaText && ctaUrl && (
+            <div class="ed-cta">
+              <a href={ctaUrl} class="ed-btn">
+                {ctaText} <Icon name="arrow-right" class="w-2.5 h-2.5" />
+              </a>
+            </div>
+          )}
+        </div>
       </div>
     )}
   </div>
 </section>
+
+<style>
+  .ed-section { width: 100%; background: #000; }
+  .ed-container { position: relative; width: 100%; overflow: hidden; }
+  .ed-media-wrapper { width: 100%; line-height: 0; }
+  video, .ed-img { width: 100%; height: auto; display: block; }
+  
+  .ed-vid-desktop { display: none; }
+  .ed-vid-mobile { display: block; }
+  @media (min-width: 768px) {
+    .ed-vid-desktop { display: block; }
+    .ed-vid-mobile { display: none; }
+  }
+
+  /* === CAPA DE CONTENIDO === */
+  .ed-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    /* Móvil: Abajo Derecha */
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 1rem;
+    pointer-events: none;
+    background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.3) 100%);
+  }
+
+  .ed-content {
+    text-align: right;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  @media (min-width: 768px) {
+    .ed-overlay {
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+    }
+    .ed-content {
+      text-align: center;
+      align-items: center;
+    }
+  }
+
+  .ed-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.5rem, 4vw, 3.5rem);
+    font-weight: 300;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    pointer-events: auto;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+  }
+
+  .ed-subtitle {
+    color: rgba(255,255,255,0.9);
+    font-size: clamp(0.7rem, 1vw, 0.9rem);
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    max-width: 20rem;
+    pointer-events: auto;
+    text-shadow: 0 1px 10px rgba(0,0,0,0.5);
+  }
+
+  /* === BOTÓN === */
+  .ed-cta {
+    pointer-events: auto;
+    opacity: 1;
+    transition: all 0.4s ease;
+  }
+
+  @media (min-width: 768px) {
+    .ed-cta {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .ed-container:hover .ed-cta {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .ed-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  @media (min-width: 768px) {
+    .ed-btn {
+      padding: 0.9rem 2rem;
+      border-radius: 1rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+    }
+    .ed-btn:hover {
+      background: white;
+      color: black;
+      transform: translateY(-2px) scale(1.05);
+    }
+  }
+</style>

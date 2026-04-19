@@ -13,221 +13,229 @@ interface Props {
 const { p, catName = 'Nuditos', class: className, parentView = 'grid', eager = false } = Astro.props;
 const imgLoading = eager ? 'eager' : 'lazy';
 
-function badgeIcon(badge: string) {
-  if (badge === 'Nuevo')    return '<Icon name="sparkling"  />';
-  if (badge === 'Popular')  return '<Icon name="fire"  />';
-  if (badge === 'Especial') return '<Icon name="award"  />';
-  return '';
-}
-
 const productSlug = slugify(p.name);
-const allImgsRaw = [p.img, ...(p.imgs || [])].filter((u, i, arr) => u && arr.indexOf(u) === i);
-// Si la tarjeta está dentro del carrusel principal, mostramos solo 1 foto para evitar conflictos de gestos.
-// Si está en modo grilla/lista, mostramos todas con el scroll manual normal.
-const allImgs = parentView === 'carousel' ? [allImgsRaw[0]] : allImgsRaw;
+const allImgs = [p.img, ...(p.imgs || [])].filter((u, i, arr) => u && arr.indexOf(u) === i);
+const hasMultiple = allImgs.length > 1;
 
-// String pre-compilado para la máxima velocidad de búsqueda en el cliente
 const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replace(/<[^>]*>?/gm, '').toLowerCase();
-// Todas las categorías como string CSV para búsqueda correcta en el filtro
 const allCats = [...new Set([p.cat, ...(p.cats || [])].filter(Boolean))].join(',');
+
+// Normalización de seguridad para p.price (si viene de Supabase directamente sin pasar por getLiveProducts)
+const displayPrice = p.price || p.precio || 0;
 ---
+
 <article 
   class:list={[
-    "group relative bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-stone-100/50 flex flex-col",
-    className
+    "product-card group", 
+    className,
+    { "has-carousel": hasMultiple }
   ]}
   data-cat={p.cat}
   data-cats={allCats}
   data-price={p.price}
-  data-orden={p.orden || 999}
   data-search={searchStr}
+  id={`pcard-${p.id}`}
 >
-  <!-- CONTENEDOR DE IMAGEN / CARRUSEL -->
-  <div class="relative aspect-[4/5] overflow-hidden bg-stone-50">
-    
-    {allImgs.length > 1 ? (
-      <>
-        <div 
-          class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none h-full w-full"
-          id={`carousel-${p.id}`}
-        >
-          {allImgs.map((img, i) => (
-            <a 
-              href={`/ramo/${productSlug}`}
-              class="flex-shrink-0 w-full h-full snap-center relative block"
-              aria-label={`Ver ${p.name} - Imagen ${i + 1}`}
-            >
-              <img 
-                src={clUrl(img, 480)} 
-                alt={`${p.name} - Vista ${i + 1}`} 
-                width="480"
-                height="600"
-                loading={i === 0 ? imgLoading : 'lazy'}
-                decoding={eager ? 'sync' : 'async'} 
-                class="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-105"
-              />
-            </a>
+  <div class="card-media">
+    <div class="media-viewport">
+      <a 
+        href={`/ramo/${productSlug}`} 
+        class="media-link" 
+        data-astro-prefetch="hover"
+        data-product-id={p.id}
+        onclick={`this.querySelector('.main-img').style.viewTransitionName = 'p-img-' + this.dataset.productId`}
+      >
+        <div class="img-track" data-imgs={allImgs.map(img => clUrl(img, 480)).join('|')}>
+          <img 
+            src={clUrl(allImgs[0], 480)} 
+            alt={p.name}
+            class="main-img"
+            loading={imgLoading}
+            width="400" height="500"
+            style={`view-transition-name: p-img-${p.id}-card-${Math.random().toString(36).substr(2, 4)}`}
+          />
+          {hasMultiple && (
+            <img 
+              src={clUrl(allImgs[1], 480)} 
+              alt={p.name}
+              class="hover-img"
+              loading="lazy"
+              width="400" height="500"
+            />
+          )}
+        </div>
+      </a>
+    </div>
+
+    {/* Flechas Flotantes (Solo si hay varias fotos) */}
+    {hasMultiple && (
+      <div class="media-controls">
+        <button class="pcard-nav pcard-prev" aria-label="Anterior">
+          <Icon name="arrow-left-s" class="w-8 h-8" />
+        </button>
+        <button class="pcard-nav pcard-next" aria-label="Siguiente">
+          <Icon name="arrow-right-s" class="w-8 h-8" />
+        </button>
+        
+        <div class="pcard-dots">
+          {allImgs.map((_, i) => (
+            <span class={`dot ${i === 0 ? 'active' : ''}`}></span>
           ))}
         </div>
-        
-        <!-- Controle Desktop -->
-        <button class="carousel-prev absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/70 backdrop-blur-md rounded-full items-center justify-center hidden md:flex opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white z-20 shadow-sm" aria-label="Anterior" data-target={`carousel-${p.id}`}>
-          <Icon name="arrow-left-s" class="text-stone-800 text-sm" />
-        </button>
-        <button class="carousel-next absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/70 backdrop-blur-md rounded-full items-center justify-center hidden md:flex opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white z-20 shadow-sm" aria-label="Siguiente" data-target={`carousel-${p.id}`}>
-          <Icon name="arrow-right-s" class="text-stone-800 text-sm" />
-        </button>
-      </>
-    ) : (
-      <a href={`/ramo/${productSlug}`} class="block h-full w-full relative">
-        {p.img ? (
-          <img 
-            src={clUrl(p.img, 480)} 
-            alt={`${p.name} - Ramo tejido a mano`} 
-            width="480"
-            height="600"
-            loading={imgLoading}
-            decoding={eager ? 'sync' : 'async'} 
-            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-        ) : (
-          <div class="w-full h-full flex items-center justify-center text-6xl opacity-20">
-            {p.emoji}
-          </div>
-        )}
-      </a>
-    )}
-
-    <!-- Indicador de carrusel Dots -->
-    {allImgs.length > 1 && (
-      <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-20 pointer-events-none">
-        {allImgs.map((_, i) => (
-          <div class="w-1 h-1 rounded-full bg-white/40 shadow-sm transition-all duration-300" data-idx={i}></div>
-        ))}
       </div>
     )}
 
-    <!-- Badges -->
-    <div class="absolute top-4 left-4 z-20 pointer-events-none flex flex-col gap-2">
-      {p.badge && (
-        <div class={`rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-sm backdrop-blur-md border ${
-          p.badge.toLowerCase() === 'nuevo' ? 'bg-emerald-50/90 text-emerald-700 border-emerald-100' : 
-          p.badge.toLowerCase() === 'popular' ? 'bg-orange-50/90 text-orange-700 border-orange-100' :
-          'bg-violet-50/90 text-violet-700 border-violet-100'
-        }`}>
-          <span set:html={badgeIcon(p.badge)}></span> {p.badge}
-        </div>
-      )}
-      {p.oferta && (
-        <div class="bg-rose-50/90 text-rose-700 border border-rose-100 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-sm backdrop-blur-md self-start">
-          <Icon name="price-tag-3" /> Oferta
-        </div>
-      )}
+    {/* Badges */}
+    <div class="badges-overlay">
+      {p.badge && <span class="badge">{p.badge}</span>}
+      {p.oferta && <span class="badge-off">Oferta</span>}
     </div>
 
-    <!-- Botón de Acción Rápida -->
-    <div class="absolute bottom-4 right-4 z-30 md:opacity-0 md:group-hover:opacity-100 md:translate-y-2 md:group-hover:translate-y-0 transition-all duration-300">
-      {p.price > 0 && (
-        <button 
-          class="w-11 h-11 md:w-12 md:h-12 bg-stone-900/90 backdrop-blur-sm text-white rounded-2xl flex items-center justify-center shadow-xl hover:bg-violet-600 hover:scale-110 active:scale-95 transition-all duration-300"
-          onclick={`event.preventDefault(); event.stopPropagation(); window.addToCart(${p.id})`} 
-          aria-label="Agregar al carrito"
-          id={`padd-${p.id}`}
-        >
-          <Icon name="shopping-bag-3" class="text-lg md:text-xl" />
-        </button>
-      )}
-    </div>
+    {/* Quick Add icon */}
+    {displayPrice > 0 && (
+      <button class="quick-add" id={`padd-${p.id}`} onclick={`event.preventDefault(); event.stopPropagation(); window.addToCart(${p.id})`}>
+        <Icon name="shopping-bag-3" class="w-5 h-5" />
+      </button>
+    )}
   </div>
-  
-  <!-- INFO DEL PRODUCTO -->
-  <div class="p-5 flex flex-col gap-1.5 bg-white flex-1 relative z-10">
-    <div class="text-[9px] font-bold uppercase tracking-[0.4em] text-stone-400">
-      {catName}
-    </div>
-    
-    <a href={`/ramo/${productSlug}`} class="block group/link">
-      <h3 class="font-serif text-base md:text-lg font-light text-stone-800 leading-tight group-hover/link:text-violet-700 transition-colors tracking-tight">
-        {p.name}
-      </h3>
-    </a>
-    
-    <div class="flex items-center justify-between mt-auto pt-2">
-      <div class="font-sans text-sm md:text-base font-bold text-stone-700 flex items-center gap-2">
-       {p.price > 0 ? (
-          <>
-            <span class="text-violet-700">${p.price.toLocaleString('es-CO')}</span>
-            {p.oferta && p.precioOriginal > p.price && (
-              <span class="text-[11px] text-stone-300 line-through font-normal">${p.precioOriginal.toLocaleString('es-CO')}</span>
-            )}
-          </>
-        ) : (
-          <span class="text-[10px] uppercase tracking-widest text-violet-500 font-bold">Solicitar Precio</span>
-        )}
-      </div>
 
-      {p.envioGratis && (
-        <div class="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-          <Icon name="truck" /> Gratis
-        </div>
-      )}
+  <div class="card-info">
+    <div class="cat-label">{catName}</div>
+    <a href={`/ramo/${productSlug}`}>
+      <h3 class="product-name">{p.name}</h3>
+    </a>
+    <div class="price-container">
+      <span class="price">${displayPrice.toLocaleString('es-CO')}</span>
     </div>
   </div>
 </article>
 
 <style>
-  .scrollbar-none::-webkit-scrollbar { display: none; }
-  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  .product-card {
+    position: relative;
+    background: white;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    transition: all 0.4s ease;
+  }
+
+  .card-media {
+    position: relative;
+    aspect-ratio: 4/5;
+    background: #fdfdfc;
+    overflow: hidden;
+    border-radius: 1.5rem;
+  }
+
+  .media-viewport { width: 100%; height: 100%; }
+  .media-link { display: block; width: 100%; height: 100%; position: relative; }
+  .img-track { width: 100%; height: 100%; position: relative; }
+
+  .main-img, .hover-img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: opacity 0.5s ease;
+  }
+  .hover-img { position: absolute; inset: 0; opacity: 0; }
+
+  /* HOVER EFFECT (SOLO PC) - Solo si no estamos interactuando con las flechas */
+  @media (hover: hover) {
+    .has-carousel:not(.user-navigating):hover .hover-img { opacity: 1; }
+    .has-carousel:not(.user-navigating):hover .main-img { opacity: 0; }
+  }
+
+  /* FLECHAS FLOTANTES */
+  .media-controls {
+    position: absolute; inset: 0;
+    pointer-events: none; z-index: 20;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 0.5rem;
+    color: white;
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  /* Visibilidad de flechas */
+  @media (min-width: 768px) {
+    .media-controls { opacity: 0; transition: opacity 0.3s ease; }
+    .product-card:hover .media-controls { opacity: 1; }
+  }
+
+  .pcard-nav {
+    background: transparent; border: none; color: white; cursor: pointer;
+    pointer-events: auto; padding: 0.5rem; display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s, opacity 0.2s; opacity: 0.8;
+  }
+  .pcard-nav:hover { transform: scale(1.2); opacity: 1; }
+
+  .pcard-dots {
+    position: absolute; bottom: 0.75rem; left: 50%;
+    transform: translateX(-50%); display: flex; gap: 4px;
+  }
+  .dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: all 0.3s; }
+  .dot.active { width: 12px; border-radius: 4px; background: #fff; }
+
+  /* QUICK ADD */
+  .quick-add {
+    position: absolute; bottom: 0.75rem; right: 0.75rem;
+    background: white; color: black; border-radius: 0.75rem;
+    width: 2.5rem; height: 2.5rem;
+    display: flex; align-items: center; justify-content: center;
+    border: none; cursor: pointer; z-index: 30;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+  }
+  @media (min-width: 768px) {
+    .quick-add { opacity: 0; transform: translateY(10px); }
+    .product-card:hover .quick-add { opacity: 1; transform: translateY(0); }
+  }
+  .quick-add:hover { background: #000; color: #fff; transform: scale(1.1); }
+
+  .card-info { padding: 1rem 0.5rem; }
+  .cat-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: #a8a29e; font-weight: 700; }
+  .product-name { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: #1c1917; margin: 2px 0; }
+  .price { font-weight: 700; color: #1c1917; font-size: 0.9rem; }
 </style>
 
-<script is:inline>
-  document.addEventListener('astro:page-load', () => {
-    // Sincronización de dots para carruseles de tarjetas
-    document.querySelectorAll('.snap-x').forEach(container => {
-      const dots = container.parentElement.querySelectorAll('[data-idx]');
-      if(!dots.length) return;
+<script>
+  function initProductCards() {
+    const cards = document.querySelectorAll('.product-card.has-carousel:not([data-initialized])');
+    
+    cards.forEach(card => {
+      const track = card.querySelector('.img-track');
+      if (!track) return;
       
-      // Init
-      if (dots[0]) {
-        dots[0].classList.replace('bg-white/40', 'bg-white');
-        dots[0].classList.add('w-2');
+      const imgs = track.dataset.imgs?.split('|') || [];
+      const mainImg = track.querySelector('.main-img') as HTMLImageElement;
+      const hoverImg = track.querySelector('.hover-img') as HTMLImageElement;
+      const dots = card.querySelectorAll('.dot');
+      let currentIdx = 0;
+
+      function update(idx: number) {
+        currentIdx = (idx + imgs.length) % imgs.length;
+        
+        if (mainImg) mainImg.src = imgs[currentIdx];
+        if (hoverImg) {
+          hoverImg.src = imgs[(currentIdx + 1) % imgs.length];
+        }
+        
+        dots.forEach((d, i) => d.classList.toggle('active', i === currentIdx));
+
+        card.classList.add('user-navigating');
+        const existingTimer = (card as any)._navTimer;
+        clearTimeout(existingTimer);
+        (card as any)._navTimer = setTimeout(() => card.classList.remove('user-navigating'), 2000);
       }
 
-      let isScrolling;
-      container.addEventListener('scroll', () => {
-        window.clearTimeout(isScrolling);
-        isScrolling = setTimeout(() => {
-          const idx = Math.round(container.scrollLeft / container.clientWidth);
-          dots.forEach((dot, i) => {
-            if(i === idx) {
-              dot.classList.replace('bg-white/40', 'bg-white');
-              dot.classList.add('w-2');
-            } else {
-              dot.classList.replace('bg-white', 'bg-white/40');
-              dot.classList.remove('w-2');
-            }
-          });
-        }, 60);
-      }, { passive: true });
-    });
-
-    // Controles por botones (Desktop)
-    document.querySelectorAll('.carousel-prev').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const target = document.getElementById(btn.dataset.target);
-        if (target) target.scrollBy({ left: -target.clientWidth, behavior: 'smooth' });
+      card.querySelector('.pcard-prev')?.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation(); update(currentIdx - 1);
       });
-    });
-
-    document.querySelectorAll('.carousel-next').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const target = document.getElementById(btn.dataset.target);
-        if (target) target.scrollBy({ left: target.clientWidth, behavior: 'smooth' });
+      card.querySelector('.pcard-next')?.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation(); update(currentIdx + 1);
       });
+
+      card.setAttribute('data-initialized', 'true');
     });
-  });
+  }
+
+  // Ejecutar en cada carga de página (soporta View Transitions)
+  document.addEventListener('astro:page-load', initProductCards);
 </script>

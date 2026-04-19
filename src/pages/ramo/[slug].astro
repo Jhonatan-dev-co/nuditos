@@ -135,23 +135,35 @@ const productSchema = {
       >
         <div class="swiper-wrapper">
           {allImgs.map((img: string, i: number) => (
-            <div class="swiper-slide cursor-zoom-in" onclick={`openLightbox('${img}', ${i})`}>
+            <div class="swiper-slide cursor-zoom-in" onclick={`openLightbox(${i})`}>
               <img
                 src={clUrl(img, 1000)} 
                 alt={i === 0 ? mainAltText : `${product.name} - Imagen ${i + 1}`}
                 width="1000"
                 height="1250"
-                class="w-full h-full object-cover"
+                class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 loading={i === 0 ? "eager" : "lazy"}
                 decoding={i === 0 ? "sync" : "async"}
                 fetchpriority={i === 0 ? "high" : "low"}
                 id={i === 0 ? "ramoMainImg" : undefined}
+                style={i === 0 ? `view-transition-name: p-img-${product.id}` : undefined}
               />
             </div>
           ))}
         </div>
 
-        <div class="swiper-pagination md:hidden !bottom-4"></div>
+        <div class="swiper-pagination !bottom-6"></div>
+        
+        {allImgs.length > 1 && (
+          <div class="hidden md:block">
+            <button class="gallery-nav-btn prev absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-stone-100 flex items-center justify-center text-stone-600 hover:bg-white hover:scale-110 active:scale-95 transition-all shadow-sm group">
+              <Icon name="arrow-left-s" class="text-2xl group-hover:-translate-x-0.5 transition-transform" />
+            </button>
+            <button class="gallery-nav-btn next absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-stone-100 flex items-center justify-center text-stone-600 hover:bg-white hover:scale-110 active:scale-95 transition-all shadow-sm group">
+              <Icon name="arrow-right-s" class="text-2xl group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
+        )}
 
         {product.badge && (
           <div class="absolute top-6 left-6 z-10 hidden md:flex bg-white/90 backdrop-blur-md border border-stone-100 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider items-center gap-2 shadow-sm">
@@ -210,70 +222,89 @@ const productSchema = {
         </div>
       </div>
 
-      <div class="flex flex-col gap-2 pt-1 order-3 md:order-none">
         {inStock && showPrice > 0 && (
-          <button 
-            class="w-full h-[3.25rem] bg-stone-900 text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 hover:bg-violet-700 transition-all active:scale-95 shadow-md"
-            onclick={`addToCartFromPage(${product.id})`} 
-            id="ramoCartBtn"
-          >
-            <Icon name="shopping-bag-3" class="text-xl leading-none" /> Agregar al Carrito
-          </button>
+          <div class="flex flex-col gap-4 mt-8">
+            <button 
+              class="w-full h-[3.25rem] bg-stone-900 text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 hover:bg-violet-700 transition-all active:scale-95 shadow-md"
+              onclick={`addToCartFromPage(${product.id})`} 
+              id="ramoCartBtn"
+            >
+              <Icon name="shopping-bag-3" class="text-xl leading-none" /> Agregar al Carrito
+            </button>
+
+            <div class="flex items-center gap-2">
+              <span class={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5 border ${inStock ? 'bg-stone-50 text-stone-500 border-stone-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                <Icon name={inStock ? 'checkbox-circle' : 'close-circle'} />
+                {inStock ? 'Disponible' : 'Bajo Pedido'}
+              </span>
+            </div>
+          </div>
         )}
-      </div>
 
-      {product.desc && (
-        <p class="text-stone-500 leading-relaxed text-xs md:text-base max-w-lg order-4 md:order-none">
-          {product.desc}
-        </p>
-      )}
-
-      <div class="flex flex-wrap gap-1.5 order-5 md:order-none">
-        <span class={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5 border ${inStock ? 'bg-stone-50 text-stone-500 border-stone-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
-          <Icon name={inStock ? 'checkbox-circle' : 'close-circle'} />
-          {inStock ? 'Disponible' : 'Bajo Pedido'}
-        </span>
-      </div>
-
-      <div class="h-px bg-stone-100 w-full mt-2 hidden md:block"></div>
-
-      <!-- COMPROMISO NUDITOS -->
-      <div class="flex flex-col gap-4 mt-4 border-t border-stone-100 pt-6 order-6 md:order-none pb-0">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
-            <Icon name="truck" class="text-lg" />
+        {product.desc && (
+          <div class="pt-6 border-t border-stone-100 mt-6">
+             <h4 class="text-[10px] uppercase font-bold tracking-widest text-stone-400 mb-2">Descripción</h4>
+             <p class="text-stone-500 leading-relaxed text-xs md:text-base max-w-lg">
+               {product.desc}
+             </p>
           </div>
-          <div class="space-y-0.5">
-            <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Envíos Nacionales</div>
-            <p class="text-[11px] text-stone-400 font-medium">Enviamos con amor a toda Colombia.</p>
+        )}
+
+        <!-- COMPROMISO NUDITOS -->
+        <div class="flex flex-col gap-4 mt-6 border-t border-stone-100 pt-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
+              <Icon name="truck" class="text-lg" />
+            </div>
+            <div class="space-y-0.5">
+              <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Envíos Nacionales</div>
+              <p class="text-[11px] text-stone-400 font-medium">Enviamos con amor a toda Colombia.</p>
+            </div>
           </div>
-        </div>
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
-            <Icon name="history" class="text-lg" />
-          </div>
-          <div class="space-y-0.5">
-            <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Te llega pronto</div>
-            <p class="text-[11px] text-stone-400 font-medium">Cada ramo se teje especialmente para ti.</p>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
+              <Icon name="history" class="text-lg" />
+            </div>
+            <div class="space-y-0.5">
+              <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Te llega pronto</div>
+              <p class="text-[11px] text-stone-400 font-medium">Cada ramo se teje especialmente para ti.</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SECCIÓN DE DETALLES ADICIONALES (ACORDEÓN SEO DINÁMICO) -->
+  <!-- SECCIÓN DE DETALLES ADICIONALES (ACORDEÓN PREMIUM) -->
   {product.desc && (
-    <section class="border-t border-stone-100 bg-stone-50/50">
-      <div class="max-w-[1200px] mx-auto px-6 py-8 md:py-12">
+    <section class="border-t border-stone-100 bg-white">
+      <div class="max-w-[1200px] mx-auto px-6 py-12 md:py-20">
         <button 
           onclick="document.getElementById('seoDetails').classList.toggle('hidden'); this.querySelector('.icon-unfold').classList.toggle('rotate-180');"
-          class="w-full flex items-center justify-between py-4 group"
+          class="w-full relative overflow-hidden p-8 md:p-12 rounded-[2.5rem] bg-gradient-to-br from-violet-50/50 to-white border border-violet-100 group transition-all hover:border-violet-200 hover:shadow-xl hover:shadow-violet-900/5 active:scale-[0.99] text-left"
         >
-          <h2 class="font-serif text-xl md:text-2xl text-stone-900 group-hover:text-violet-600 transition-colors">
-            Detalles <em>especiales</em> y cuidados
-          </h2>
-          <div class="icon-unfold transition-transform duration-300">
-            <Icon name="arrow-down-s" class="text-2xl text-stone-400" />
+          <!-- Decoración sutil -->
+          <div class="absolute -right-10 -top-10 w-40 h-40 bg-violet-100/30 rounded-full blur-3xl group-hover:bg-violet-200/40 transition-colors"></div>
+          
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div class="flex items-center gap-6">
+              <div class="w-16 h-16 rounded-[1.25rem] bg-white border border-violet-100 flex items-center justify-center text-violet-600 shadow-sm group-hover:bg-violet-600 group-hover:text-white group-hover:rotate-6 transition-all duration-500">
+                <Icon name="flower" class="text-2xl" />
+              </div>
+              <div class="space-y-1">
+                <div class="text-[10px] uppercase font-bold tracking-[0.3em] text-violet-400">Artesanía Pura</div>
+                <h2 class="font-serif text-2xl md:text-3xl text-stone-900 leading-none">
+                  Detalles <em>especiales</em> y cuidados
+                </h2>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+              <span class="hidden md:inline text-[10px] uppercase font-bold tracking-widest text-stone-400 group-hover:text-violet-500 transition-colors">Explorar más</span>
+              <div class="icon-unfold transition-transform duration-700 w-12 h-12 rounded-full border border-violet-100 flex items-center justify-center group-hover:bg-stone-900 group-hover:border-stone-900 group-hover:text-white shadow-sm">
+                <Icon name="arrow-down-s" class="text-3xl" />
+              </div>
+            </div>
           </div>
         </button>
 
@@ -345,56 +376,106 @@ const productSchema = {
     </section>
   )}
 
-  <!-- LIGHTBOX -->
-  <div class="fixed inset-0 bg-stone-950/95 z-[1000] opacity-0 pointer-events-none transition-all duration-300 backdrop-blur-xl flex items-center justify-center p-6" id="ramoLightbox" onclick="closeLightbox()">
-    <button class="absolute top-8 right-8 text-white/40 hover:text-white transition-colors text-4xl" onclick="closeLightbox()"><Icon name="close"  /></button>
-    <div class="relative max-w-full max-h-full">
-      <img id="lbImg" src="" alt="Vista ampliada" class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl" />
+  <!-- LIGHTBOX PREMIUM CON ZOOM -->
+  <div class="fixed inset-0 bg-stone-950/98 z-[1000] opacity-0 pointer-events-none transition-all duration-500 backdrop-blur-2xl flex flex-col" id="ramoLightbox">
+    <div class="flex justify-between items-center p-6 z-10">
+      <div class="text-white/60 text-[10px] font-bold uppercase tracking-[0.2em]">Galería Nuditos</div>
+      <button class="text-white/60 hover:text-white transition-colors p-2" onclick="closeLightbox()">
+        <Icon name="close" class="text-3xl" />
+      </button>
+    </div>
+    
+    <div class="flex-1 overflow-hidden">
+      <div class="swiper lightbox-swiper w-full h-full">
+        <div class="swiper-wrapper">
+          {allImgs.map((img: string, i: number) => (
+            <div class="swiper-slide !flex items-center justify-center">
+              <div class="swiper-zoom-container">
+                <img 
+                   src={clUrl(img, 1600)} 
+                   alt={`Zoom ${product.name}`} 
+                   class="max-w-full max-h-screen object-contain"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div class="swiper-pagination-lb absolute bottom-8 left-0 right-0 z-10 flex justify-center gap-2"></div>
+      </div>
+    </div>
+    
+    <div class="p-8 text-center text-white/20 text-[9px] uppercase tracking-widest pointer-events-none">
+       Pellizca para hacer zoom · Desliza para navegar
     </div>
   </div>
 
 </Layout>
 
-<script define:vars={{ allImgs, clUrl, product, showPrice, mainImg }}>
+<script define:vars={{ allImgs, clUrl, product, showPrice, mainImg, related }}>
   let currentImg = 0;
-  const imgs = allImgs;
   window.gallerySwiper = null;
+  window.lightboxSwiper = null;
 
-  const clImg = (url, w) => {
-    if (!url || !url.includes('res.cloudinary.com')) return url;
-    const suffix = url.includes('upload/v') ? 'upload/v' : 'upload/';
-    const param = `upload/q_auto,f_auto,w_${w}/v`;
-    const simpleParam = `upload/q_auto,f_auto,w_${w}/`;
-    return url.replace(suffix, url.includes('upload/v') ? param : simpleParam);
-  };
-
-  function initGallerySwiper() {
+  function initSwipers() {
     if (!window.Swiper) return;
+
+    // Swiper Principal
     window.gallerySwiper = new window.Swiper('.product-gallery-swiper', {
       slidesPerView: 1,
       spaceBetween: 0,
-      pagination: { el: '.swiper-pagination', clickable: true, dynamicBullets: true },
-      on: { slideChange: function() { currentImg = this.activeIndex; updateThumbs(this.activeIndex); } }
+      speed: 800,
+      loop: allImgs.length >= 3,
+      navigation: {
+        nextEl: '.gallery-nav-btn.next',
+        prevEl: '.gallery-nav-btn.prev',
+      },
+      pagination: { 
+        el: '.swiper-pagination', 
+        clickable: true, 
+        dynamicBullets: true 
+      },
+      on: { 
+        slideChange: function() { 
+          updateThumbs(this.realIndex); 
+        } 
+      }
+    });
+
+    // Swiper Lightbox (Zoom)
+    window.lightboxSwiper = new window.Swiper('.lightbox-swiper', {
+      slidesPerView: 1,
+      spaceBetween: 40,
+      speed: 800,
+      loop: allImgs.length >= 3,
+      zoom: {
+        maxRatio: 3,
+        minRatio: 1,
+      },
+      grabCursor: true,
+      keyboard: { enabled: true },
+      on: {
+        slideChange: function() {
+          if (window.gallerySwiper) window.gallerySwiper.slideToLoop(this.activeIndex);
+        }
+      }
     });
   }
 
   function updateThumbs(idx) {
-    document.querySelectorAll('.ramo-thumb').forEach((t, i) => {
-      const isActive = i === idx;
-      t.classList.toggle('border-violet-300', isActive);
-      t.classList.toggle('border-transparent', !isActive);
-      t.classList.toggle('opacity-60', !isActive);
-      t.classList.toggle('opacity-100', isActive);
+    document.querySelectorAll('.thumb-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === idx);
     });
   }
 
-  window.openLightbox = function(url, idx) {
-    currentImg = idx;
-    const lbImg = document.getElementById('lbImg');
+  window.moveGallery = function(idx) {
+    if (window.gallerySwiper) window.gallerySwiper.slideToLoop(idx);
+  }
+
+  window.openLightbox = function() {
     const box = document.getElementById('ramoLightbox');
-    if (lbImg) lbImg.src = clImg(url, 1200);
-    if (box) { box.classList.add('open'); document.body.style.overflow = 'hidden'; }
-  };
+    if (box) box.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
 
   window.closeLightbox = function() {
     const box = document.getElementById('ramoLightbox');
@@ -402,35 +483,31 @@ const productSchema = {
     document.body.style.overflow = '';
   };
 
-  // Carrito logic
-  const currentProduct = { id: Number(product.id), name: product.name, price: Number(showPrice), img: mainImg, emoji: product.emoji || '🌸' };
-  window.NUDITOS_LIVE_PRODUCTS = [currentProduct, ...(window.NUDITOS_LIVE_PRODUCTS || [])];
-
-  window.addToCartFromPage = function(id) {
-    if (typeof addToCart !== 'function') return;
-    addToCart(id);
-    const btn = document.getElementById('ramoCartBtn');
-    if (btn) {
-      const original = btn.innerHTML;
-      btn.innerHTML = '¡Agregado!';
-      btn.classList.add('bg-emerald-600');
-      setTimeout(() => { btn.innerHTML = original; btn.classList.remove('bg-emerald-600'); }, 2000);
-    }
-    
-    // Facebook Pixel Track - AddToCart
-    if (typeof window.fbq === 'function') {
-      window.fbq('track', 'AddToCart', {
-        content_ids: [currentProduct.id.toString()],
-        content_name: currentProduct.name,
-        content_type: 'product',
-        value: currentProduct.price,
-        currency: 'COP'
-      });
-    }
-  };
-
+  // ─── LÓGICA DE INICIALIZACIÓN ───
   document.addEventListener('astro:page-load', () => {
-    initGallerySwiper();
+    initSwipers();
+
+    // Inyectar productos en el pool "live" para que funcionen los botones de agregar (ProductCard)
+    const currentProduct = { 
+      id: Number(product.id), 
+      name: product.name, 
+      price: Number(showPrice), 
+      img: mainImg, 
+      emoji: product.emoji || '🌸' 
+    };
+    
+    const relatedPool = (related || []).map(p => ({
+      ...p,
+      id: Number(p.id),
+      price: Number(p.price || 0)
+    }));
+
+    window.NUDITOS_LIVE_PRODUCTS = [
+      currentProduct, 
+      ...relatedPool, 
+      ...(window.NUDITOS_LIVE_PRODUCTS || [])
+    ];
+
     // Facebook Pixel Track - ViewContent
     if (typeof window.fbq === 'function') {
       window.fbq('track', 'ViewContent', {
@@ -442,7 +519,37 @@ const productSchema = {
       });
     }
   });
-  if (document.readyState === 'complete') initGallerySwiper();
+
+  // ─── ACCIÓN AGREGAR AL CARRITO ───
+  window.addToCartFromPage = function(id) {
+    if (typeof window.addToCart !== 'function') return;
+    
+    // El objeto addToCart global busca en window.NUDITOS_LIVE_PRODUCTS
+    window.addToCart(id);
+    
+    // Feedback visual en el botón principal
+    const btn = document.getElementById('ramoCartBtn');
+    if (btn) {
+      const original = btn.innerHTML;
+      btn.innerHTML = '¡Agregado!';
+      btn.classList.add('bg-emerald-600');
+      setTimeout(() => { 
+        btn.innerHTML = original; 
+        btn.classList.remove('bg-emerald-600'); 
+      }, 2000);
+    }
+    
+    // Facebook Pixel Track - AddToCart
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'AddToCart', {
+        content_ids: [product.id.toString()],
+        content_name: product.name,
+        content_type: 'product',
+        value: Number(showPrice),
+        currency: 'COP'
+      });
+    }
+  };
 </script>
 
 <style is:global>

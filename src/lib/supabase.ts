@@ -84,8 +84,7 @@ export async function getLiveCategories(): Promise<any[]> {
     
     const rows = await res.json();
     return rows.map((c: any) => {
-      let icon = c.icon || c.emoji || '🌸';
-      if (icon.includes(':(')) icon = '🌸'; // Fallback para icono roto
+      let icon = c.icon || c.emoji || '';
       
       let name = c.nombre || c.name || '';
       if (name.toLowerCase().includes('lindsas')) {
@@ -153,7 +152,7 @@ export async function getLiveConfig() {
       descuentoActivo:      m.descuento_activo    === 'true',
       descuentoCodigo:      m.descuento_codigo    || 'NUDITOS10',
       descuentoPorcentaje:  parseInt(m.descuento_porcentaje) || 10,
-      descuentoTexto:       m.descuento_texto     || '10% de descuento en tu primer pedido',
+      descuentoTexto:       m.descuento_texto     || '',
       carruselHero:         JSON.parse(m.carrusel_hero  || '[]'),
       ramoDestacado:        parseInt(m.ramo_destacado)  || 0,
       wompiActivo:          m.wompi_activo        === 'true',
@@ -178,9 +177,29 @@ export async function getLiveConfig() {
   }
 }
 
+/**
+ * Retorna la configuración filtrada para uso público en el navegador (sin secretos)
+ */
+export async function getPublicConfig() {
+  const config = await getLiveConfig();
+  if (!config) return null;
+  
+  // Clonar y eliminar campos sensibles
+  const publicConfig = { ...config };
+  delete (publicConfig as any).wompiIntegrity;
+  delete (publicConfig as any).wompiEvents;
+  
+  return publicConfig;
+}
+
 export async function getLiveProductBySlug(slug: string) {
+  // Optimizamos obteniendo todos los productos activos y buscando por slugify
+  // Se recomienda añadir una columna 'slug' en Supabase para una búsqueda directa .eq('slug', slug)
   const all = await getLiveProducts();
-  return all.find(p => slugify(p.name) === slug) || null;
+  return all.find(p => {
+    const pSlug = slugify(p.name);
+    return pSlug === slug;
+  }) || null;
 }
 
 export async function getLivePosts(): Promise<any[]> {

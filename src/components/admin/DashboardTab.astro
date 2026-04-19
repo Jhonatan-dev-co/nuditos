@@ -1,6 +1,45 @@
-<!-- DASHBOARD -->
-<div class="tab-content" id="tab-dashboard">
-  <div class="dash-grid" id="dashStats"></div>
+<div class="right-col tab-content active" id="tab-dashboard" style="display:none">
+  <div class="dash-grid">
+    <div class="dash-card">
+      <h3>Resumen General</h3>
+      <div id="dashStats" class="dash-stats">
+        <!-- Rendered via renderDashboard() -->
+      </div>
+    </div>
+    
+    <div class="dash-card">
+      <h3>Historial de Cambios</h3>
+      <div id="histList" class="hist-list">
+        <!-- Rendered via renderDashboard() -->
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    window.renderDashboard = function() {
+      if (!window.adminProducts || !window.pedidos) return;
+      
+      const total = window.adminProducts.length;
+      const visibles = window.adminProducts.filter(p => p.activo !== false).length;
+      
+      document.getElementById('dashStats').innerHTML = `
+        <div class="dash-stat"><div class="dash-num">${total}</div><div class="dash-label">Ramos</div></div>
+        <div class="dash-stat"><div class="dash-num green">${visibles}</div><div class="dash-label">Visibles</div></div>
+        <div class="dash-stat"><div class="dash-num">${window.pedidos.length}</div><div class="dash-label">Pedidos</div></div>`;
+        
+      document.getElementById('histList').innerHTML = window.changeHistory.length 
+        ? [...window.changeHistory].reverse().slice(0, 10).map(h => `
+          <div class="hist-item">
+            <div class="hist-dot"></div>
+            <div>
+              <div class="hist-action">${h.action}</div>
+              <div class="hist-time">${h.time}</div>
+            </div>
+          </div>`).join('') 
+        : '<div style="padding:1rem;color:#999;font-size:0.8rem">No hay actividad reciente</div>';
+    };
+  </script>
+
   <div class="dash-chart">
     <div class="dash-chart-title">📈 Productos por precio</div>
     <div id="viewsChart"></div>

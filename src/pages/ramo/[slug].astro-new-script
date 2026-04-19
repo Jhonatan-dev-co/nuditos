@@ -1,0 +1,140 @@
+
+<script define:vars={{ allImgs, clUrl, product, showPrice, mainImg, related }}>
+  let currentImg = 0;
+  window.gallerySwiper = null;
+  window.lightboxSwiper = null;
+
+  function initSwipers() {
+    if (!window.Swiper) return;
+
+    // Swiper Principal
+    window.gallerySwiper = new window.Swiper('.product-gallery-swiper', {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      speed: 800,
+      loop: allImgs.length >= 3,
+      pagination: { 
+        el: '.swiper-pagination', 
+        clickable: true, 
+        dynamicBullets: true 
+      },
+      on: { 
+        slideChange: function() { 
+          updateThumbs(this.realIndex); 
+        } 
+      }
+    });
+
+    // Swiper Lightbox (Zoom)
+    window.lightboxSwiper = new window.Swiper('.lightbox-swiper', {
+      slidesPerView: 1,
+      spaceBetween: 40,
+      speed: 800,
+      loop: allImgs.length >= 3,
+      zoom: {
+        maxRatio: 3,
+        minRatio: 1,
+      },
+      grabCursor: true,
+      keyboard: { enabled: true },
+      on: {
+        slideChange: function() {
+          if (window.gallerySwiper) window.gallerySwiper.slideToLoop(this.activeIndex);
+        }
+      }
+    });
+  }
+
+  function updateThumbs(idx) {
+    document.querySelectorAll('.thumb-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === idx);
+    });
+  }
+
+  window.moveGallery = function(idx) {
+    if (window.gallerySwiper) window.gallerySwiper.slideToLoop(idx);
+  }
+
+  window.openLightbox = function() {
+    const box = document.getElementById('ramoLightbox');
+    if (box) box.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  window.closeLightbox = function() {
+    const box = document.getElementById('ramoLightbox');
+    if (box) box.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  // ─── LÓGICA DE INICIALIZACIÓN ───
+  document.addEventListener('astro:page-load', () => {
+    initSwipers();
+
+    // Inyectar productos en el pool "live" para que funcionen los botones de agregar (ProductCard)
+    const currentProduct = { 
+      id: Number(product.id), 
+      name: product.name, 
+      price: Number(showPrice), 
+      img: mainImg, 
+      emoji: product.emoji || '🌸' 
+    };
+    
+    const relatedPool = (related || []).map(p => ({
+      id: Number(p.id),
+      name: p.name,
+      price: Number(p.precio_oferta || p.precio || 0),
+      img: p.img,
+      emoji: p.emoji || '🌸'
+    }));
+
+    window.NUDITOS_LIVE_PRODUCTS = [
+      currentProduct, 
+      ...relatedPool, 
+      ...(window.NUDITOS_LIVE_PRODUCTS || [])
+    ];
+
+    // Facebook Pixel Track - ViewContent
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'ViewContent', {
+        content_ids: [product.id.toString()],
+        content_name: product.name,
+        content_type: 'product',
+        value: Number(showPrice),
+        currency: 'COP'
+      });
+    }
+  });
+
+  // ─── ACCIÓN AGREGAR AL CARRITO ───
+  window.addToCartFromPage = function(id) {
+    if (typeof addToCart !== 'function') return;
+    
+    // El objeto addToCart global busca en window.NUDITOS_LIVE_PRODUCTS
+    window.addToCart(id);
+    
+    // Feedback visual en el botón principal
+    const btn = document.getElementById('ramoCartBtn');
+    if (btn) {
+      const original = btn.innerHTML;
+      btn.innerHTML = '¡Agregado!';
+      btn.classList.add('bg-emerald-600');
+      setTimeout(() => { 
+        btn.innerHTML = original; 
+        btn.classList.remove('bg-emerald-600'); 
+      }, 2000);
+    }
+    
+    // Facebook Pixel Track - AddToCart
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'AddToCart', {
+        content_ids: [product.id.toString()],
+        content_name: product.name,
+        content_type: 'product',
+        value: Number(showPrice),
+        currency: 'COP'
+      });
+    }
+  };
+  
+</script>

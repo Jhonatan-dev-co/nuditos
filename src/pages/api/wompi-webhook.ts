@@ -3,9 +3,11 @@ import { getLiveConfig } from '../../lib/supabase';
 
 // Helper para actualizar Supabase sin auth completa (usando service role de ser posible, o anon si hay RLS abierto)
 async function updatePedidoStatus(pedidoId: string, status: string, transactionId: string) {
-  const SB_URL = 'https://fpyhkxikxdwjhukltmqf.supabase.co';
-  // Usamos el API KEY del .env para tener permisos de escritura (Server side)
-  const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY; 
+  const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+  // ⚠️ IMPORTANTE: Para que el PATCH funcione con RLS activado en Supabase,
+  // debes configurar SUPABASE_SERVICE_ROLE_KEY en tu .env y Cloudflare Pages.
+  // La service_role_key tiene permisos de escritura sin autenticación (solo server-side).
+  const SB_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
   const finalStatus = status === 'APPROVED' ? 'pagado' : (status === 'DECLINED' ? 'cancelado' : 'error');
 
