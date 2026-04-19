@@ -28,11 +28,15 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
 
 const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
 const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+const CLOUDINARY_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 ---
 
-<script is:inline define:vars={{ SB_URL, SB_ANON }}>
+<script is:inline define:vars={{ SB_URL, SB_ANON, CLOUDINARY_NAME, CLOUDINARY_PRESET }}>
   window.NUDITOS_SB_URL = SB_URL;
   window.NUDITOS_SB_ANON = SB_ANON;
+  window.NUDITOS_CL_NAME = CLOUDINARY_NAME;
+  window.NUDITOS_CL_PRESET = CLOUDINARY_PRESET;
 </script>
 
 <AdminLayout title="Nuditos — Panel Admin">
@@ -224,6 +228,10 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       // Sync settings UI (moved from monolithic block)
       syncSettingsUI();
       
+      // Renderizar UI inicial
+      renderSidebar();
+      renderStats();
+      
       // Initialize Modular Components
       Object.keys(window.NuditosAdmin || {}).forEach(key => {
         if(typeof window.NuditosAdmin[key].init === 'function') window.NuditosAdmin[key].init();
@@ -249,7 +257,65 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       if(adminCfg.wompiActivo) document.getElementById('toggleWompi')?.classList.add('on');
       if(adminCfg.metaPixelActivo) document.getElementById('toggleMetaPixel')?.classList.add('on');
       if(adminCfg.gaActive) document.getElementById('toggleGASEO')?.classList.add('on');
+
+      // Auto-completar Cloudinary si están en env
+      if (window.NUDITOS_CL_NAME) {
+        const clName = document.getElementById('ccCloudName');
+        if (clName && !clName.value) clName.value = window.NUDITOS_CL_NAME;
+      }
+      if (window.NUDITOS_CL_PRESET) {
+        const clPreset = document.getElementById('ccPreset');
+        if (clPreset && !clPreset.value) clPreset.value = window.NUDITOS_CL_PRESET;
+      }
     }
+
+    /* ── RENDERING FUNCTIONS ── */
+    function renderSidebar() {
+      const list = document.getElementById('sideList');
+      if(!list) return;
+      const query = document.getElementById('sideSearch')?.value.toLowerCase() || '';
+      
+      const filtered = adminProducts.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        (p.cat && p.cat.toLowerCase().includes(query))
+      );
+
+      if(filtered.length === 0) {
+        list.innerHTML = '<div style="padding:2rem;text-align:center;color:#666;font-size:0.8rem">No se encontraron ramos</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(p => `
+        <div class="prod-item ${selectedId === p.id ? 'active' : ''}" onclick="selectProduct(${p.id})">
+          <div class="prod-item-img">
+            ${p.img ? `<img src="${p.img}">` : `<span>${p.emoji || '🌸'}</span>`}
+          </div>
+          <div class="prod-item-info">
+            <div class="prod-item-name">${p.name}</div>
+            <div class="prod-item-price">$${(p.price || 0).toLocaleString('es-CO')}</div>
+          </div>
+          <button class="prod-item-vis ${p.activo !== false ? 'on' : 'off'}" onclick="event.stopPropagation(); quickToggleVis(${p.id})">
+            ${p.activo !== false ? '👁' : '🚫'}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderStats() {
+      const stats = document.getElementById('sideStats');
+      if(!stats) return;
+      const total = adminProducts.length;
+      const active = adminProducts.filter(p => p.activo !== false).length;
+      const hidden = total - active;
+      stats.innerHTML = `
+        <div class="stat-pill"><b>${total}</b> Total</div>
+        <div class="stat-pill"><b>${active}</b> Visibles</div>
+        <div class="stat-pill"><b>${hidden}</b> Ocultos</div>
+      `;
+    }
+
+    function renderMomentoList(prods) {} 
+    function renderHeroList(prods) {}
 
     async function sbAdminGetConfig_(){
       try{const rows=await fetch(`${SB_URL}/rest/v1/config?select=clave,valor`,{headers:_h(true)}).then(r=>r.json());return sbToConfig(rows);}
