@@ -25,7 +25,15 @@ import SettingsTab from '../components/admin/SettingsTab.astro';
 import Modals from '../components/admin/Modals.astro';
 
 Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+
+const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 ---
+
+<script is:inline define:vars={{ SB_URL, SB_ANON }}>
+  window.NUDITOS_SB_URL = SB_URL;
+  window.NUDITOS_SB_ANON = SB_ANON;
+</script>
 
 <AdminLayout title="Nuditos — Panel Admin">
   <!-- LOGIN SECTION -->
