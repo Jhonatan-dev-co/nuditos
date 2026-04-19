@@ -192,6 +192,18 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
       }
     };
 
+    window.saveCloudinaryConfig = function() {
+      const name = document.getElementById('ccCloudName')?.value.trim();
+      const preset = document.getElementById('ccPreset')?.value.trim();
+      if(!name || !preset) {
+        showToast('⚠️ Completa Cloud Name y Preset');
+        return;
+      }
+      localStorage.setItem('cloudinary_name', name);
+      localStorage.setItem('cloudinary_preset', preset);
+      showToast('✅ Cloudinary guardado localmente');
+    };
+
     /* ── UI & CLOUDINARY HELPERS MOVED TO COMPONENTS ── */
 
     /* ── INITIAL LOAD ── */
