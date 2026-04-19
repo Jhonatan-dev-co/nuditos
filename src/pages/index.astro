@@ -75,6 +75,8 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
       subtitle={homeBanner1.subtitle}
       img={homeBanner1.imgUrl || (homeBanner1 as any).img}
       video={homeBanner1.videoUrl}
+      mobileImg={homeBanner1.mobileImgUrl}
+      mobileVideo={homeBanner1.mobileVideoUrl}
       ctaText={homeBanner1.ctaText}
       ctaUrl={homeBanner1.ctaUrl}
     />
@@ -118,6 +120,8 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
               subtitle={banner.subtitle}
               img={banner.imgUrl || (banner as any).img}
               video={(banner as any).videoUrl}
+              mobileImg={(banner as any).mobileImgUrl}
+              mobileVideo={(banner as any).mobileVideoUrl}
               ctaText={banner.ctaText}
               ctaUrl={banner.ctaUrl}
               reverse={idx % 2 !== 0}

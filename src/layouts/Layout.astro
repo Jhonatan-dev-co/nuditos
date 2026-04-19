@@ -519,10 +519,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       </div>
       
       <div class="flex flex-col gap-3">
-        <button class="w-full bg-[#25d366] text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-[#1da851] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="checkoutWA()">
-          <Icon name="whatsapp" class="text-xl leading-none" />
-          <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Comprar por WhatsApp</span>
-        </button>
+
         <a href="/checkout" class="w-full bg-stone-900 text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="toggleCart()">
           <Icon name="bank-card" class="text-lg leading-none" />
           <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Ir a Pagar</span>

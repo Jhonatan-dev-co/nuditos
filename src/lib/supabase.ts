@@ -121,10 +121,12 @@ export async function getLiveBanners(): Promise<any[]> {
       emoji:    b.emoji     || '🌸',
       title:    b.title     || '',
       imgUrl:   b.img_url   || '',
+      mobileImgUrl: b.mobile_img_url || '',
       subtitle: b.subtitle  || '',
       ctaText:  b.cta_text  || '',
       ctaUrl:   b.cta_url   || '',
       videoUrl: b.video_url || '',
+      mobileVideoUrl: b.mobile_video_url || '',
     }));
   } catch {
     return [];

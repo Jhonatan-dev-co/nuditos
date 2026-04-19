@@ -733,6 +733,16 @@ const wompiActivo = config?.wompiActivo || false;
       renderSummary();
       restoreFormData();
       updateMiniSummaries();
+
+      // Facebook Pixel Track - InitiateCheckout
+      if (typeof window.fbq === 'function' && _cart.length > 0) {
+        window.fbq('track', 'InitiateCheckout', {
+          content_ids: _cart.map(i => i.id ? i.id.toString() : ''),
+          value: getTotal(),
+          currency: 'COP',
+          num_items: _cart.reduce((sum, i) => sum + i.qty, 0)
+        });
+      }
     }
 
     document.addEventListener('astro:page-load', init);

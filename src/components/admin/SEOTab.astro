@@ -186,23 +186,30 @@ import Icon from '../Icon.astro';
   }
 
   async function saveSEOConfig() {
-    const data = {
-      seo_title: document.getElementById('seoTitle').value.trim(),
-      seo_description: document.getElementById('seoDescription').value.trim(),
-      seo_og_image: document.getElementById('seoOgImage').value.trim(),
-      social_instagram: document.getElementById('socialInsta').value.trim(),
-      social_whatsapp: document.getElementById('socialWhasapp').value.trim(),
-      meta_pixel_id: document.getElementById('seoMetaPixelId').value.trim(),
-      meta_pixel_active: document.getElementById('toggleMetaPixelSEO').classList.contains('on'),
-      ga_id: document.getElementById('seoGAId').value.trim(),
-      ga_active: document.getElementById('toggleGASEO').classList.contains('on')
-    };
-    
     showToast('⏳ Guardando SEO...');
     try {
-      await sbAdminSaveConfig(data);
-      showToast('✅ SEO actualizado correctamente');
-      addToHistory('🔍 SEO Global actualizado');
+      // Sincronizar el Meta Pixel con los inputs del Settings Tab para asegurar la persistencia
+      const seoPixelId = document.getElementById('seoMetaPixelId').value.trim();
+      const seoPixelActive = document.getElementById('toggleMetaPixelSEO').classList.contains('on');
+      
+      const settingsPixelId = document.getElementById('metaPixelId');
+      const settingsPixelToggle = document.getElementById('toggleMetaPixel');
+
+      if (settingsPixelId) {
+        if (seoPixelId && seoPixelId !== settingsPixelId.value) settingsPixelId.value = seoPixelId;
+        else if (!seoPixelId && settingsPixelId.value) document.getElementById('seoMetaPixelId').value = settingsPixelId.value;
+      }
+
+      if (settingsPixelToggle) {
+        if (seoPixelActive) settingsPixelToggle.classList.add('on');
+        else settingsPixelToggle.classList.remove('on');
+      }
+
+      // Llamar a saveConfig global de admin.astro
+      if (typeof saveConfig === 'function') {
+        await saveConfig();
+        addToHistory('🔍 SEO Global actualizado');
+      }
     } catch(e) {
       showToast('❌ Error al guardar SEO');
     }

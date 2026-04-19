@@ -1,0 +1,90 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import { getLiveConfig } from '../lib/supabase';
+
+// Nuditos: Página de Agradecimiento
+export const prerender = false;
+
+const config = await getLiveConfig();
+const ref = Astro.url.searchParams.get('ref') || '';
+---
+
+<Layout
+  title="¡Gracias por tu compra! — Nuditos"
+  description="Tu pedido ha sido procesado exitosamente."
+  noIndex={true}
+>
+  <div class="max-w-[800px] mx-auto px-6 py-20 text-center flex flex-col items-center">
+    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
+      <Icon name="checkbox-circle" class="text-4xl" />
+    </div>
+    <h1 class="font-serif text-3xl md:text-5xl font-light text-stone-800 mb-4">
+      ¡Gracias por tu compra!
+    </h1>
+    <p class="text-stone-500 mb-8 w-full max-w-md">
+      Hemos recibido tu pedido correctamente. Estamos tejiendo amor para ti.
+      Pronto recibirás un correo con los detalles de tu orden.
+    </p>
+
+    {ref && (
+      <div class="bg-stone-50 border border-stone-200 py-3 px-6 rounded-xl text-xs text-stone-600 font-medium mb-8 uppercase tracking-widest">
+        Número de transacción: <strong class="text-stone-800">{ref}</strong>
+      </div>
+    )}
+
+    <a href="/" class="bg-violet-700 text-white font-bold uppercase tracking-widest text-[11px] px-8 py-4 rounded-2xl hover:bg-violet-800 transition-colors shadow-md">
+      Volver al Inicio
+    </a>
+  </div>
+
+  <script is:inline>
+    document.addEventListener('astro:page-load', () => {
+      // 1. Check local storage for cart
+      let totalAmount = 0;
+      let orderItems = [];
+      try {
+        const cartStr = localStorage.getItem('nuditos_cart');
+        if (cartStr) {
+          orderItems = JSON.parse(cartStr);
+          if (Array.isArray(orderItems)) {
+            const subtotal = orderItems.reduce((acc, i) => acc + (i.price * i.qty), 0);
+            totalAmount = subtotal;
+            try {
+              const dStr = localStorage.getItem('nuditos_discount');
+              if (dStr) {
+                const discount = JSON.parse(dStr);
+                if (discount && discount.pct) {
+                  totalAmount = subtotal - Math.round(subtotal * discount.pct / 100);
+                }
+              }
+            } catch(e){}
+          }
+        }
+      } catch (e) {}
+
+      // 2. Track Facebook Pixel Purchase Event
+      if (typeof window.fbq === 'function' && totalAmount > 0) {
+        window.fbq('track', 'Purchase', {
+          content_ids: orderItems.map(i => i.id ? i.id.toString() : ''),
+          value: totalAmount,
+          currency: 'COP',
+          num_items: orderItems.reduce((acc, i) => acc + (i.qty || 1), 0),
+          content_type: 'product'
+        });
+      }
+
+      // 3. Clear cart after successful purchase
+      if (window.$cart && typeof window.$cart.set === 'function') {
+        window.$cart.set([]);
+      } else {
+        localStorage.removeItem('nuditos_cart');
+      }
+      if (window.$discount && typeof window.$discount.set === 'function') {
+        window.$discount.set(null);
+      } else {
+        localStorage.removeItem('nuditos_discount');
+      }
+    });
+  </script>
+</Layout>

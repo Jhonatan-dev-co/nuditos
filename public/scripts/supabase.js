@@ -196,9 +196,12 @@ function sbToBanner(b) {
     emoji:    b.emoji     || '🌸',
     title:    b.title     || '',
     imgUrl:   b.img_url   || '',
+    mobileImgUrl: b.mobile_img_url || '',
     subtitle: b.subtitle  || '',
     ctaText:  b.cta_text  || '',
     ctaUrl:   b.cta_url   || '',
+    videoUrl: b.video_url || '',
+    mobileVideoUrl: b.mobile_video_url || '',
   };
 }
 
@@ -442,7 +445,9 @@ async function sbAdminSaveBanners(banners) {
     emoji:     b.emoji    || '🌸',
     title:     b.title    || '',
     img_url:   b.imgUrl   || '',
+    mobile_img_url: b.mobileImgUrl || '',
     video_url: b.videoUrl || '', // ← Faltaba este campo vital
+    mobile_video_url: b.mobileVideoUrl || '',
     subtitle:  b.subtitle || '',
     cta_text:  b.ctaText  || '',
     cta_url:   b.ctaUrl   || '',

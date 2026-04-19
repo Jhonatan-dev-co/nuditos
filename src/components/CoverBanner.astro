@@ -7,22 +7,31 @@ interface Props {
   subtitle?: string;
   img: string;
   video?: string;
+  mobileImg?: string;
+  mobileVideo?: string;
   ctaText?: string;
   ctaUrl?: string;
   reverse?: boolean;
 }
 
-const { title, subtitle, img, video: rawVideo, ctaText = 'Ver Colección', ctaUrl = '/catalogo', reverse = false } = Astro.props;
+const { title, subtitle, img, video: rawVideo, mobileImg, mobileVideo: rawMobileVideo, ctaText = 'Ver Colección', ctaUrl = '/catalogo', reverse = false } = Astro.props;
 // Limpieza Extrema (Forzamos /video/upload/ y .mp4)
 let video = rawVideo ? rawVideo.replace('/image/upload/', '/video/upload/').replace(/w_\d+,q_auto,f_auto\//, 'f_auto,q_auto/') : '';
 if (video && !video.toLowerCase().endsWith('.mp4')) video += '.mp4';
 const poster = video ? video.replace(/\/v\d+\//, '/so_0/').replace(/\.mp4$/, '.jpg') : '';
+
+let mobileVideo = rawMobileVideo ? rawMobileVideo.replace('/image/upload/', '/video/upload/').replace(/w_\d+,q_auto,f_auto\//, 'f_auto,q_auto/') : '';
+if (mobileVideo && !mobileVideo.toLowerCase().endsWith('.mp4')) mobileVideo += '.mp4';
+const mobilePoster = mobileVideo ? mobileVideo.replace(/\/v\d+\//, '/so_0/').replace(/\.mp4$/, '.jpg') : '';
+
 const isVideo = !!(video && video.trim());
+const isMobileVideo = !!(mobileVideo && mobileVideo.trim());
 ---
 
-<div class="relative w-full h-[85vh] md:h-[90vh] overflow-hidden bg-stone-900 flex flex-col justify-end">
-  <!-- Bg Media (GIF Behavior) -->
-  <div class="absolute inset-0 z-0">
+<div class="grid grid-cols-1 grid-rows-1 w-full overflow-hidden bg-transparent">
+  <!-- Bg Media dictating size -->
+  <div class="col-start-1 row-start-1 w-full z-0 pointer-events-none">
+    <!-- --- DESKTOP --- -->
     {isVideo ? (
       <video 
         src={video}
@@ -32,7 +41,7 @@ const isVideo = !!(video && video.trim());
         loop 
         playsinline
         preload="auto"
-        class="w-full h-full object-cover"
+        class="hidden md:block w-full h-auto object-cover"
         onloadeddata="console.log('✅ Video portada cargado:', this.src)"
         onerror="console.error('❌ Error video portada:', this.src)"
       ></video>
@@ -40,23 +49,42 @@ const isVideo = !!(video && video.trim());
       <img 
         src={clUrl(img, 1200)} 
         alt="Cover Portada"
-        class="w-full h-full object-cover"
+        class="hidden md:block w-full h-auto object-cover"
+        loading="eager"
+        fetchpriority="high"
+      />
+    )}
+
+    <!-- --- MOBILE --- -->
+    {(isMobileVideo || isVideo) ? (
+      <video 
+        src={isMobileVideo ? mobileVideo : video}
+        poster={isMobileVideo ? mobilePoster : poster}
+        autoplay 
+        muted 
+        loop 
+        playsinline
+        preload="auto"
+        class="block md:hidden w-full h-auto object-cover"
+      ></video>
+    ) : (
+      <img 
+        src={clUrl(mobileImg || img, 800)} 
+        alt="Cover Portada"
+        class="block md:hidden w-full h-auto object-cover"
         loading="eager"
         fetchpriority="high"
       />
     )}
   </div>
 
-  <!-- Overlay para oscurecer el fondo y mejorar legibilidad -->
-  <div class="absolute inset-0 bg-black/30 z-10 pointer-events-none"></div>
-
   <!-- Contenido -->
-  <div class="relative z-20 p-8 md:p-16 pb-16 md:pb-24 text-center md:text-left max-w-[1400px] mx-auto w-full">
+  <div class="col-start-1 row-start-1 relative z-20 flex flex-col justify-end p-8 md:p-16 pb-16 md:pb-24 text-center md:text-left max-w-[1400px] mx-auto w-full pointer-events-none">
     {ctaUrl && !ctaText && (
       <a href={ctaUrl} class="absolute inset-0 z-20 pointer-events-auto" aria-label={title.replace(/<[^>]*>/g, '')}></a>
     )}
 
-    <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl font-light text-white leading-[1.05] tracking-tight mb-4 drop-shadow-md" set:html={title}></h1>
+    <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl font-light text-white leading-[1.05] tracking-tight mb-4 pointer-events-auto" set:html={title}></h1>
     
     {subtitle && (
       <p class="text-white/80 text-sm md:text-lg max-w-md mx-auto md:mx-0 mb-8 font-light tracking-wide">
@@ -65,10 +93,10 @@ const isVideo = !!(video && video.trim());
     )}
 
     {ctaText && ctaUrl && (
-      <div class="relative z-30">
-        <a href={ctaUrl} class="inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-stone-200 transition-colors group">
+      <div class="relative z-30 pointer-events-auto">
+        <a href={ctaUrl} class="inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest">
           {ctaText}
-          <Icon name="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          <Icon name="arrow-right" class="w-4 h-4" />
         </a>
       </div>
     )}

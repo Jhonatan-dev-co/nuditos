@@ -21,7 +21,7 @@ const { p } = Astro.props;
     </div>
   </div>
   <div class="flex flex-col items-center gap-2 pr-2">
-    {p.price > 0 ? (
+    {p.price > 0 && (
       <button 
         class="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center text-stone-600 hover:bg-violet-600 hover:text-white transition-all shadow-sm"
         id={`padd-${p.id}`} 
@@ -29,15 +29,6 @@ const { p } = Astro.props;
       >
         <Icon name="shopping-bag"  />
       </button>
-    ) : (
-      <a 
-        class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white hover:bg-green-600 transition-all shadow-sm"
-        href={`https://wa.me/573144931525?text=Hola!%20Me%20interesa%20${encodeURIComponent(p.name)}`} 
-        target="_blank" 
-        onclick="event.stopPropagation()"
-      >
-        <Icon name="whatsapp"  />
-      </a>
     )}
     <Icon name="arrow-right-s" class="text-stone-300 text-lg group-hover:text-violet-400 transform transition-transform group-hover:translate-x-1" />
   </div>

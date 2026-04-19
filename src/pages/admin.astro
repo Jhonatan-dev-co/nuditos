@@ -1325,11 +1325,20 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
               <div class="field"><label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">URL del botón / link</label><input type="text" value="${b.ctaUrl||'/catalogo'}" oninput="updateBanner(${realIdx},'ctaUrl',this.value)" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></div>
               
               <div class="field" style="grid-column: 1/-1;">
-                <label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">🖼️ Imagen o Video (subir o url)</label>
+                <label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">🖼️ Fondo Web (Escritorio)</label>
                 <div style="display:flex; gap: 5px; flex-wrap: wrap;">
-                  <input type="text" id="bImg-${realIdx}" value="${b.imgUrl||b.videoUrl||''}" style="flex:1; min-width: 150px; font-size: 0.7rem; padding:6px 8px; border-radius:8px; border:1px solid #ddd;" oninput="updateBannerMedia(${realIdx},this.value)" placeholder="URL de imagen/video .mp4">
-                  <button onclick="document.getElementById('bFile-${realIdx}').click()" style="background:#6d28d9; color:white; border:none; padding: 0 12px; border-radius: 8px; cursor:pointer; font-size: 0.7rem;">📸 Subir (Img/Mp4)</button>
-                  <input type="file" id="bFile-${realIdx}" style="display:none" accept="image/*,video/*" onchange="uploadBannerImg(${realIdx}, this.files)">
+                  <input type="text" id="bImg-${realIdx}" value="${b.imgUrl||b.videoUrl||''}" style="flex:1; min-width: 150px; font-size: 0.7rem; padding:6px 8px; border-radius:8px; border:1px solid #ddd;" oninput="updateBannerMedia(${realIdx},this.value,'desktop')" placeholder="URL de imagen/video .mp4">
+                  <button onclick="document.getElementById('bFile-${realIdx}').click()" style="background:#6d28d9; color:white; border:none; padding: 0 12px; border-radius: 8px; cursor:pointer; font-size: 0.7rem;">📸 Subir Web</button>
+                  <input type="file" id="bFile-${realIdx}" style="display:none" accept="image/*,video/*" onchange="uploadBannerImg(${realIdx}, this.files, 'desktop')">
+                </div>
+              </div>
+
+              <div class="field" style="grid-column: 1/-1;">
+                <label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">📱 Fondo Móvil</label>
+                <div style="display:flex; gap: 5px; flex-wrap: wrap;">
+                  <input type="text" id="bImgMob-${realIdx}" value="${b.mobileImgUrl||b.mobileVideoUrl||''}" style="flex:1; min-width: 150px; font-size: 0.7rem; padding:6px 8px; border-radius:8px; border:1px solid #ddd;" oninput="updateBannerMedia(${realIdx},this.value,'mobile')" placeholder="URL de imagen/video móvil .mp4">
+                  <button onclick="document.getElementById('bFileMob-${realIdx}').click()" style="background:#ec4899; color:white; border:none; padding: 0 12px; border-radius: 8px; cursor:pointer; font-size: 0.7rem;">📱 Subir Móvil</button>
+                  <input type="file" id="bFileMob-${realIdx}" style="display:none" accept="image/*,video/*" onchange="uploadBannerImg(${realIdx}, this.files, 'mobile')">
                 </div>
               </div>
             </div>
@@ -1346,11 +1355,15 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     window.updateBanner = function(i,key,val){ 
       editorialBannersAdmin[i][key]=val; 
     };
-    window.updateBannerMedia = function(i, val) {
-      console.log(`[Banner] Intento de actualización de media en banner ${i}: ${val}`);
+    window.updateBannerMedia = function(i, val, type = 'desktop') {
+      console.log(`[Banner] Intento de actualización de media en banner ${i} (${type}): ${val}`);
+      
+      const imgKey = type === 'desktop' ? 'imgUrl' : 'mobileImgUrl';
+      const videoKey = type === 'desktop' ? 'videoUrl' : 'mobileVideoUrl';
+
       if (!val) {
-        editorialBannersAdmin[i].videoUrl = '';
-        editorialBannersAdmin[i].imgUrl = '';
+        editorialBannersAdmin[i][videoKey] = '';
+        editorialBannersAdmin[i][imgKey] = '';
         renderBannerList();
         return;
       }
@@ -1358,19 +1371,16 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       const isVideo = val.toLowerCase().endsWith('.mp4') || val.includes('/video/') || val.includes('video-upload');
       
       if (isVideo) {
-        // Es un video: Limpiamos y formateamos
         let cleanVideo = val.replace('/image/upload/', '/video/upload/');
         if (!cleanVideo.toLowerCase().endsWith('.mp4') && cleanVideo.includes('cloudinary')) {
           cleanVideo += '.mp4';
         }
-        editorialBannersAdmin[i].videoUrl = cleanVideo;
-        editorialBannersAdmin[i].imgUrl = '';
+        editorialBannersAdmin[i][videoKey] = cleanVideo;
+        editorialBannersAdmin[i][imgKey] = '';
       } else {
-        // Es una imagen
-        editorialBannersAdmin[i].imgUrl = val;
-        // Solo borramos el video si el valor anterior NO era un video (para evitar borrados accidentales al editar)
-        if (!editorialBannersAdmin[i].videoUrl) {
-           editorialBannersAdmin[i].videoUrl = '';
+        editorialBannersAdmin[i][imgKey] = val;
+        if (!editorialBannersAdmin[i][videoKey]) {
+           editorialBannersAdmin[i][videoKey] = '';
         }
       }
       renderBannerList();
@@ -1379,26 +1389,29 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       editorialBannersAdmin.splice(i,1); 
       renderBannerList(); 
     };
-    window.uploadBannerImg = async function(i, files) {
+    window.uploadBannerImg = async function(i, files, type = 'desktop') {
       if(!files.length) return;
       const file = files[0];
       const bTitle = editorialBannersAdmin[i].title?.replace(/<[^>]+>/g, '') || 'banner';
       
-      const url = await uploadToCloudinary(file, bTitle, 0);
+      const imgKey = type === 'desktop' ? 'imgUrl' : 'mobileImgUrl';
+      const videoKey = type === 'desktop' ? 'videoUrl' : 'mobileVideoUrl';
+
+      const url = await uploadToCloudinary(file, bTitle + (type === 'mobile' ? '-mobile' : ''), 0);
       if(url) {
         if (file.type.startsWith('video/')) {
-          editorialBannersAdmin[i].videoUrl = url;
-          editorialBannersAdmin[i].imgUrl = '';
-          showToast('🎬 Video subido correctamente');
+          editorialBannersAdmin[i][videoKey] = url;
+          editorialBannersAdmin[i][imgKey] = '';
+          showToast(`🎬 Video (${type}) subido`);
         } else {
-          editorialBannersAdmin[i].imgUrl = url;
-          editorialBannersAdmin[i].videoUrl = '';
+          editorialBannersAdmin[i][imgKey] = url;
+          editorialBannersAdmin[i][videoKey] = '';
         }
         renderBannerList();
       }
     };
     window.addNewBanner = function() {
-      editorialBannersAdmin.push({ title: '', afterCat: '', imgUrl: '', videoUrl: '', subtitle: '', ctaText: '', ctaUrl: '/catalogo' });
+      editorialBannersAdmin.push({ title: '', afterCat: '', imgUrl: '', videoUrl: '', mobileImgUrl: '', mobileVideoUrl: '', subtitle: '', ctaText: '', ctaUrl: '/catalogo' });
       renderBannerList();
     };
     function renderCatViewsList(){ document.getElementById('catViewsList').innerHTML=categories.filter(c=>c.id!=='todos').map(c=>`<div>${c.name}</div>`).join(''); }
@@ -1493,6 +1506,9 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     }
 
     async function saveConfig(){
+      const pixelId = document.getElementById('seoMetaPixelId')?.value.trim() || document.getElementById('metaPixelId')?.value.trim();
+      const pixelActivo = document.getElementById('toggleMetaPixelSEO')?.classList.contains('on') || document.getElementById('toggleMetaPixel')?.classList.contains('on');
+
       const newCfg={
         ramoDestacado:momentoSelection,
         carruselHero:heroSelection,
@@ -1506,9 +1522,16 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         wompiKey:document.getElementById('wompiKey').value.trim(),
         wompiIntegrity:document.getElementById('wompiIntegrity').value.trim(),
         wompiEvents:document.getElementById('wompiEvents').value.trim(),
-        metaPixelActivo:document.getElementById('toggleMetaPixel').classList.contains('on'),
-        metaPixelId:document.getElementById('metaPixelId').value.trim(),
-        catViews:{}
+        metaPixelActivo: pixelActivo,
+        metaPixelId: pixelId,
+        catViews:{},
+        seoTitle: document.getElementById('seoTitle')?.value.trim() || '',
+        seoDescription: document.getElementById('seoDescription')?.value.trim() || '',
+        seoOgImage: document.getElementById('seoOgImage')?.value.trim() || '',
+        socialInstagram: document.getElementById('socialInsta')?.value.trim() || '',
+        socialWhatsapp: document.getElementById('socialWhasapp')?.value.trim() || '',
+        gaId: document.getElementById('seoGAId')?.value.trim() || '',
+        gaActive: !!document.getElementById('toggleGASEO')?.classList.contains('on')
       };
       try{ await sbAdminSaveConfig(newCfg); await sbAdminSaveBanners(editorialBannersAdmin); showToast('✅ Guardado'); }catch{ showToast('❌ Error');}
     }

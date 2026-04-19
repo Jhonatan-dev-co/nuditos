@@ -220,13 +220,6 @@ const productSchema = {
             <Icon name="shopping-bag-3" class="text-xl leading-none" /> Agregar al Carrito
           </button>
         )}
-        <a 
-          href={`https://wa.me/${WA_NUMBER}?text=${waMsg}`} 
-          target="_blank" 
-          class="w-full h-[3.25rem] bg-[#25d366] text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 hover:bg-[#1da851] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md"
-        >
-          <Icon name="whatsapp" class="text-xl leading-none" /> {inStock ? 'Comprar por WhatsApp' : 'Consultar disponibilidad'}
-        </a>
       </div>
 
       {product.desc && (
@@ -423,9 +416,32 @@ const productSchema = {
       btn.classList.add('bg-emerald-600');
       setTimeout(() => { btn.innerHTML = original; btn.classList.remove('bg-emerald-600'); }, 2000);
     }
+    
+    // Facebook Pixel Track - AddToCart
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'AddToCart', {
+        content_ids: [currentProduct.id.toString()],
+        content_name: currentProduct.name,
+        content_type: 'product',
+        value: currentProduct.price,
+        currency: 'COP'
+      });
+    }
   };
 
-  document.addEventListener('astro:page-load', initGallerySwiper);
+  document.addEventListener('astro:page-load', () => {
+    initGallerySwiper();
+    // Facebook Pixel Track - ViewContent
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'ViewContent', {
+        content_ids: [product.id.toString()],
+        content_name: product.name,
+        content_type: 'product',
+        value: Number(showPrice),
+        currency: 'COP'
+      });
+    }
+  });
   if (document.readyState === 'complete') initGallerySwiper();
 </script>
 

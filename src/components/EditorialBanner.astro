@@ -7,30 +7,39 @@ interface Props {
   subtitle?: string;
   img?: string;
   video?: string;
+  mobileImg?: string;
+  mobileVideo?: string;
   ctaText?: string;
   ctaUrl?: string;
   reverse?: boolean;
 }
 
-const { title, subtitle, img, video: rawVideo, ctaText, ctaUrl, reverse = false } = Astro.props;
+const { title, subtitle, img, video: rawVideo, mobileImg, mobileVideo: rawMobileVideo, ctaText, ctaUrl, reverse = false } = Astro.props;
 // Limpieza Extrema (Forzamos /video/upload/ y .mp4)
 let video = rawVideo ? rawVideo.replace('/image/upload/', '/video/upload/').replace(/w_\d+,q_auto,f_auto\//, 'f_auto,q_auto/') : '';
 if (video && !video.toLowerCase().endsWith('.mp4')) video += '.mp4';
 const poster = video ? video.replace(/\/v\d+\//, '/so_0/').replace(/\.mp4$/, '.jpg') : '';
+
+let mobileVideo = rawMobileVideo ? rawMobileVideo.replace('/image/upload/', '/video/upload/').replace(/w_\d+,q_auto,f_auto\//, 'f_auto,q_auto/') : '';
+if (mobileVideo && !mobileVideo.toLowerCase().endsWith('.mp4')) mobileVideo += '.mp4';
+const mobilePoster = mobileVideo ? mobileVideo.replace(/\/v\d+\//, '/so_0/').replace(/\.mp4$/, '.jpg') : '';
+
 const isVideo = !!(video && video.trim());
+const isMobileVideo = !!(mobileVideo && mobileVideo.trim());
 const hasText = !!(title && title.trim());
 ---
 
 <section class="w-full md:py-16 md:px-6">
-  <div class="relative w-full aspect-[4/5] md:aspect-[21/9] lg:aspect-[2/1] min-h-[420px] md:max-w-[1400px] md:mx-auto md:rounded-[2rem] overflow-hidden bg-stone-900 flex flex-col justify-end">
+  <div class="grid grid-cols-1 grid-rows-1 w-full md:max-w-[1400px] md:mx-auto md:rounded-[2rem] overflow-hidden bg-transparent relative">
     
     {/* Link invisible que cubre todo el banner si hay URL pero no botón */}
     {ctaUrl && !ctaText && (
       <a href={ctaUrl} class="absolute inset-0 z-30" aria-label={title ? title.replace(/<[^>]*>/g, '') : 'Ver más'}></a>
     )}
 
-    {/* Fondo: Video o Imagen (Sin efectos de zoom o difuminado) */}
-    <div class="absolute inset-0 pointer-events-none">
+    {/* Fondo: Video o Imagen (El contenedor toma sus dimensiones) */}
+    <div class="col-start-1 row-start-1 w-full z-0 pointer-events-none">
+      {/* --- DESKTOP --- */}
       {isVideo ? (
         <video 
           src={video}
@@ -40,7 +49,7 @@ const hasText = !!(title && title.trim());
           loop 
           playsinline
           preload="auto"
-          class="w-full h-full object-cover"
+          class="hidden md:block w-full h-auto object-cover"
           onloadeddata="console.log('✅ Video cargado:', this.src)"
           onerror="console.error('❌ Error cargando video:', this.src)"
         ></video>
@@ -48,7 +57,29 @@ const hasText = !!(title && title.trim());
         <img 
           src={clUrl(img, 1400)} 
           alt={title ? title.replace(/<[^>]*>/g, '') : 'Banner Nuditos'}
-          class="w-full h-full object-cover"
+          class="hidden md:block w-full h-auto object-cover"
+          loading="eager"
+          fetchpriority="high"
+        />
+      ) : null}
+
+      {/* --- MOBILE --- */}
+      {(isMobileVideo || isVideo) ? (
+        <video 
+          src={isMobileVideo ? mobileVideo : video}
+          poster={isMobileVideo ? mobilePoster : poster}
+          autoplay 
+          muted 
+          loop 
+          playsinline
+          preload="auto"
+          class="block md:hidden w-full h-auto object-cover"
+        ></video>
+      ) : (mobileImg || img) ? (
+        <img 
+          src={clUrl(mobileImg || img, 800)} 
+          alt={title ? title.replace(/<[^>]*>/g, '') : 'Banner Nuditos'}
+          class="block md:hidden w-full h-auto object-cover"
           loading="eager"
           fetchpriority="high"
         />
@@ -57,22 +88,22 @@ const hasText = !!(title && title.trim());
 
     {/* Contenido encima (solo si hay título) */}
     {hasText && (
-      <div class={`relative z-10 w-full md:w-1/2 p-8 pb-12 md:pb-24 flex flex-col justify-end h-full ${reverse ? 'md:ml-auto md:text-right md:items-end' : 'md:text-left'} text-center md:justify-end mt-auto`}>
+      <div class={`col-start-1 row-start-1 relative z-10 w-full md:w-1/2 p-8 pb-12 md:pb-24 flex flex-col justify-end ${reverse ? 'md:ml-auto md:text-right md:items-end' : 'md:text-left'} text-center md:justify-end mt-auto pointer-events-none`}>
         
-        <h2 class="font-serif text-3xl md:text-5xl font-light text-white leading-[1.1] mb-4 tracking-tight drop-shadow-lg" set:html={title}>
+        <h2 class="font-serif text-3xl md:text-5xl font-light text-white leading-[1.1] mb-4 tracking-tight pointer-events-auto" set:html={title}>
         </h2>
         
         {subtitle && (
-          <p class="text-stone-200 text-sm md:text-base leading-snug mb-8 max-w-md drop-shadow-md">
+          <p class="text-stone-200 text-sm md:text-base leading-snug mb-8 max-w-md">
             {subtitle}
           </p>
         )}
         
         {ctaText && ctaUrl && (
-          <div class="relative z-40">
-            <a 
+          <div class="relative z-40 pointer-events-auto">
+              <a 
               href={ctaUrl} 
-              class="inline-flex items-center gap-3 bg-white text-stone-900 px-8 py-3.5 rounded-xl font-bold shadow-lg hover:bg-violet-600 hover:text-white transition-all uppercase text-[10px] tracking-widest"
+              class="inline-flex items-center gap-3 bg-white text-stone-900 px-8 py-3.5 rounded-xl font-bold uppercase text-[10px] tracking-widest"
             >
               {ctaText} 
               <Icon name="arrow-right" class="transition-transform" />
