@@ -226,7 +226,7 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
                 VOLVER A LA BOLSA
               </a>
 
-              <button class="co-btn-pay-premium" id="btn-pay-wompi" onclick="window.finalizarPedido()" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 1rem;">
+              <button class="co-btn-pay-premium" id="btn-pay-wompi" onclick="window.finalizarPedido()" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 1rem;" disabled>
                 <Icon name="shield-user" style="color: white; width: 14px; height: 14px;" /> PAGO SEGURO
               </button>
             </div>
@@ -435,38 +435,80 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       if (step === 1) {
         valid = validateField('co-nombre', v => v.trim().length >= 2) && valid;
         valid = validateField('co-apellido', v => v.trim().length >= 2) && valid;
-        valid = validateField('co-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) && valid;
-        valid = validateField('co-phone', v => v.replace(/\D/g,'').length >= 7) && valid;
+        // Email: Regex robusto
+        valid = validateField('co-email', v => /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(v)) && valid;
+        // Phone: En Colombia son 10 dígitos (ej: 3144931525)
+        valid = validateField('co-phone', v => v.replace(/\D/g,'').length === 10) && valid;
       }
       if (step === 2) {
         valid = validateField('co-departamento', v => v !== '') && valid;
         valid = validateField('co-ciudad', v => v !== '') && valid;
         valid = validateField('co-direccion', v => v.trim().length >= 5) && valid;
         valid = validateField('co-barrio', v => v.trim().length >= 2) && valid;
+        // Documento: Muy importante para pasarelas
+        valid = validateField('co-doc', v => v.trim().length >= 5 && /^\d+$/.test(v)) && valid;
       }
       return valid;
     }
 
+    function checkGlobalValidity() {
+      const isStep1Valid = validateStep(1);
+      const isStep2Valid = validateStep(2);
+      const termsAccepted = document.getElementById('co-terms')?.checked;
+      
+      const btn = document.getElementById('btn-pay-wompi');
+      if (btn) {
+        const isValid = isStep1Valid && isStep2Valid && termsAccepted;
+        btn.disabled = !isValid;
+        
+        // Efecto visual de "habilitado"
+        if (isValid) {
+          btn.style.opacity = '1';
+          btn.style.cursor = 'pointer';
+        } else {
+          btn.style.opacity = '0.6';
+          btn.style.cursor = 'not-allowed';
+        }
+      }
+      return isStep1Valid && isStep2Valid;
+    }
+
     function saveFormData() {
-      const fields = ['co-nombre','co-apellido','co-email','co-phone','co-doc',
+      const fields = ['co-nombre','co-apellido','co-email','co-phone','co-doc','co-doc-type',
                       'co-departamento','co-ciudad','co-direccion','co-barrio','co-codigo-postal','co-notas'];
       const data = {};
-      fields.forEach(f => { const el = document.getElementById(f); if (el) data[f] = el.value; });
-      sessionStorage.setItem('nuditos_checkout_data', JSON.stringify(data));
+      fields.forEach(f => { 
+        const el = document.getElementById(f); 
+        if (el) data[f] = el.value; 
+      });
+      localStorage.setItem('nuditos_checkout_data_v2', JSON.stringify(data));
+      checkGlobalValidity();
     }
 
     function restoreFormData() {
       try {
-        const data = JSON.parse(sessionStorage.getItem('nuditos_checkout_data') || '{}');
+        const raw = localStorage.getItem('nuditos_checkout_data_v2');
+        if (!raw) return;
+        const data = JSON.parse(raw);
         Object.entries(data).forEach(([id, val]) => {
           const el = document.getElementById(id);
           if (el) {
             el.value = val;
-            if (id === 'co-departamento') el.dispatchEvent(new Event('change'));
-            if (id === 'co-ciudad') el.value = val;
+            if (id === 'co-departamento' && val) {
+              const event = new Event('change');
+              el.dispatchEvent(event);
+            }
           }
         });
-      } catch(e) {}
+        // Esperar un poco a que el select de ciudad se pueble si hay departamento
+        setTimeout(() => {
+          if (data['co-ciudad']) {
+            const ciudadEl = document.getElementById('co-ciudad');
+            if (ciudadEl) ciudadEl.value = data['co-ciudad'];
+          }
+          checkGlobalValidity();
+        }, 100);
+      } catch(e) { console.error('Error restaurando datos:', e); }
     }
 
     function getFieldVal(id) {
@@ -699,6 +741,21 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
           num_items: _cart.reduce((sum, i) => sum + i.qty, 0)
         });
       }
+
+      // ── LISTENERS PARA VALIDACIÓN EN TIEMPO REAL ──
+      const formFields = ['co-nombre','co-apellido','co-email','co-phone','co-doc','co-doc-type',
+                          'co-departamento','co-ciudad','co-direccion','co-barrio','co-terms'];
+      
+      formFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          const eventType = el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input';
+          el.addEventListener(eventType, () => {
+            saveFormData();
+            updateMiniSummaries();
+          });
+        }
+      });
     }
 
     document.addEventListener('astro:page-load', init);

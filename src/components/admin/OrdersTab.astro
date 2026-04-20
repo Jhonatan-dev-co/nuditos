@@ -6,6 +6,7 @@ import Icon from '../Icon.astro';
   <div class="pedidos-toolbar">
     <button class="pedido-filter active" onclick="filterPedidos('todos',this)">Todos</button>
     <button class="pedido-filter" onclick="filterPedidos('pendiente',this)">⏳ Pendientes</button>
+    <button class="pedido-filter" onclick="filterPedidos('pagado',this)">💰 Pagados</button>
     <button class="pedido-filter" onclick="filterPedidos('proceso',this)">🔄 En proceso</button>
     <button class="pedido-filter" onclick="filterPedidos('entregado',this)">✅ Entregados</button>
     <button class="btn-new-pedido" onclick="openNewPedido()">

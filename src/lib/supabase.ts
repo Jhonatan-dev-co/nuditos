@@ -1,6 +1,13 @@
-const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
-const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+// Clean values helper
+const clean = (v: any) => (typeof v === 'string' ? v.replace(/['"]/g, '').trim() : v);
 
+// Static access for reliable bundling
+const SB_URL = clean(import.meta.env.PUBLIC_SUPABASE_URL) || (typeof process !== 'undefined' ? clean(process.env.PUBLIC_SUPABASE_URL) : undefined);
+const SB_ANON = clean(import.meta.env.PUBLIC_SUPABASE_ANON_KEY) || (typeof process !== 'undefined' ? clean(process.env.PUBLIC_SUPABASE_ANON_KEY) : undefined);
+
+if (!SB_URL || !SB_ANON) {
+  console.error('[supabase.ts] ERROR: Supabase credentials missing!');
+}
 import { slugify, type Product, products as fallbackProducts } from '../data/datos';
 
 async function fetchWithTimeout(url: string, options: any, timeout = 4000) {
@@ -18,6 +25,8 @@ async function fetchWithTimeout(url: string, options: any, timeout = 4000) {
 
 export async function getLiveProducts(): Promise<Product[]> {
   try {
+    if (!SB_URL || !SB_ANON) throw new Error('Missing credentials');
+    
     const res = await fetchWithTimeout(`${SB_URL}/rest/v1/productos?activo=eq.true&order=id.desc`, {
       headers: { 
         apikey: SB_ANON, 
@@ -25,9 +34,17 @@ export async function getLiveProducts(): Promise<Product[]> {
       }
     });
     
-    if (!res.ok) throw new Error('Error al conectar con Supabase');
+    if (!res.ok) {
+        console.error('[supabase-fetcher] Response NOT OK:', res.status, res.statusText);
+        throw new Error('Error al conectar con Supabase');
+    }
     
     const rows = await res.json();
+    if (!rows || rows.length === 0) {
+      console.warn('[supabase-fetcher] No active products found in DB. Returning fallback.');
+      return fallbackProducts;
+    }
+
     return rows.map((p: any) => {
       // Manejar imgs dinámicamente (puede ser array, string o null)
       let imgsArr: string[] = [];
@@ -37,10 +54,31 @@ export async function getLiveProducts(): Promise<Product[]> {
         imgsArr = p.imgs.split(',').map((s: string) => s.trim());
       }
 
-      // Manejar cats (múltiples categorías separadas por coma)
+      // Manejar categorías con normalización inteligente
+      // Ej: "flores-amarillas" -> ["flores-amarillas", "amarillas"]
       let catsArr: string[] = [];
       if (p.categoria) {
         catsArr = p.categoria.split(',').map((s: string) => s.trim().toLowerCase()).filter((s: string) => s);
+        
+        // Mapeos inteligentes para que coincidan con los fallbacks o IDs comunes
+        const smartMappings: Record<string, string[]> = {
+          'flores-amarillas': ['amarillas', 'girasoles'],
+          'flores-rosas':     ['rosas'],
+          'personajes':       ['amigurumis'],
+          'amigurumis':       ['personajes'],
+          'macetas':          ['plantas'],
+          'rosas-eternas':    ['rosas']
+        };
+
+        const extraCats: string[] = [];
+        catsArr.forEach(c => {
+          if (smartMappings[c]) extraCats.push(...smartMappings[c]);
+          // Si contiene una palabra clave, añadirla
+          if (c.includes('amarilla')) extraCats.push('amarillas');
+          if (c.includes('rosa'))     extraCats.push('rosas');
+        });
+        
+        catsArr = [...new Set([...catsArr, ...extraCats])];
       }
 
       return {
@@ -71,7 +109,7 @@ export async function getLiveProducts(): Promise<Product[]> {
 
   } catch (e) {
     console.error('[supabase-fetcher] Error conectando a Supabase:', e.message || e);
-    return [];
+    return fallbackProducts; // Always return something to avoid empty store
   }
 }
 

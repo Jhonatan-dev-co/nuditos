@@ -85,6 +85,9 @@ const ref = Astro.url.searchParams.get('ref') || '';
       } else {
         localStorage.removeItem('nuditos_discount');
       }
+
+      // 4. Limpiar datos de checkout persistentes
+      localStorage.removeItem('nuditos_checkout_data_v2');
     });
   </script>
 </Layout>

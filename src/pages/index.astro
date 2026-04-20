@@ -99,18 +99,56 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
       .filter(c => c.id !== 'todos' && c.showInHome !== false)
       .sort((a,b) => (a.orden||0) - (b.orden||0));
 
-    // 3. Unir todo (Selección Nuditos siempre va de primero)
+    // 3. Mapear secciones (Categorías + Selección)
     const allSections = [selectionCat, ...realCategories];
     const activeProds = liveProducts.filter(p => p.activo !== false);
 
-    return allSections.map((section, idx) => {
-      // Obtener items (si es virtual ya los tiene, si no, filtrar por cat)
-      const items = section.isVirtual 
-        ? section.items 
-        : activeProds.filter(p => ((p.cats || []).includes(section.id?.toLowerCase()) || p.cat?.toLowerCase() === section.id?.toLowerCase())).sort((a,b) => (a.orden||0) - (b.orden||0)).slice(0, 4);
-      
+    const sections = allSections.map((section, idx) => {
+      let items = [];
+      if (section.isVirtual) {
+        items = section.items;
+      } else {
+        const sId = section.id?.toLowerCase();
+        items = activeProds.filter(p => {
+          const pCat = p.cat?.toLowerCase();
+          const pCats = (p.cats || []).map(c => c.toLowerCase());
+          return pCat === sId || pCats.includes(sId);
+        });
+      }
+
+      // Ordenar items
+      items.sort((a,b) => (a.orden||0) - (b.orden||0));
+
       if (items.length === 0) return null;
 
+      return {
+        ...section,
+        items: items.slice(0, 4),
+        hasBanner: idx === 0 && homeBanner2 // Ejemplo: banner tras la selección
+      };
+    }).filter(Boolean);
+
+    // 4. SECCIÓN DE SEGURIDAD: Si no hay casi secciones o hay muy pocos productos en total, 
+    // añadir "Novedades" con los últimos productos activos.
+    const totalShown = sections.reduce((acc, s) => acc + (s.items?.length || 0), 0);
+    
+    if (totalShown < 4 && activeProds.length > 0) {
+      // Evitar duplicar si ya existe una sección con muchos productos
+      const existingIds = new Set(sections.flatMap(s => s.items.map(p => p.id)));
+      const freshProducts = activeProds.filter(p => !existingIds.has(p.id)).slice(0, 8);
+      
+      if (freshProducts.length > 0) {
+        sections.push({
+          id: 'novedades',
+          name: 'Recién Llegados',
+          isVirtual: true,
+          items: freshProducts,
+          hasBanner: false
+        });
+      }
+    }
+
+    return sections.map((section, idx) => {
       // Banner que va ANTES de esta categoría
       const banner = liveBanners.find(b => b.afterCat === section.id);
 
