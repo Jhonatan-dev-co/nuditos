@@ -11,17 +11,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Obtener variables de entorno de Cloudflare de forma robusta
     const env = (locals as any).runtime?.env || {};
     
-    // Diagnóstico refinado (Tratamos de buscar en todas las fuentes posibles)
-    const rawUrl = env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL || 'https://fpyhkxikxdwjhukltmqf.supabase.co';
-    const rawKey = env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY || env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    // Función de limpieza para ignorar valores basura como "undefined" o "null" en string
+    const clean = (val: any) => {
+      if (!val || val === 'undefined' || val === 'null') return null;
+      return String(val).trim();
+    };
 
-    // Limpieza de llaves (Elminamos espacios que se pudieron colar al pegar en Cloudflare)
-    const SB_URL = rawUrl?.trim();
-    const SB_KEY = rawKey?.trim();
+    // Diagnóstico refinado buscando en todas las fuentes
+    const SB_URL = clean(env.PUBLIC_SUPABASE_URL) || clean(import.meta.env.PUBLIC_SUPABASE_URL) || 'https://fpyhkxikxdwjhukltmqf.supabase.co';
+    const SB_KEY = clean(env.SUPABASE_SERVICE_ROLE_KEY) || clean(import.meta.env.SUPABASE_SERVICE_ROLE_KEY) || clean(env.PUBLIC_SUPABASE_ANON_KEY) || clean(import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 
     // Verificación de diagnóstico para el desarrollador
-    if (!SB_KEY || SB_KEY.length < 10) {
-       console.error('[init-wompi] ERROR: La llave de Supabase llegó vacía o muy corta.');
+    if (!SB_KEY || SB_KEY.length < 20) {
+       console.error('[init-wompi] ERROR: La llave de Supabase no es válida o está ausente.');
        return new Response(JSON.stringify({ 
          error: 'key_missing', 
          message: 'No se detectó una llave de acceso válida en el servidor.',
