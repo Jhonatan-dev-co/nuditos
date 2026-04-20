@@ -10,8 +10,24 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Obtener variables de entorno de Cloudflare de forma robusta
     const env = (locals as any).runtime?.env || {};
-    const SB_URL = env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL || 'https://fpyhkxikxdwjhukltmqf.supabase.co';
-    const SB_KEY = env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY || env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY; 
+    
+    // Diagnóstico refinado (Tratamos de buscar en todas las fuentes posibles)
+    const rawUrl = env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL || 'https://fpyhkxikxdwjhukltmqf.supabase.co';
+    const rawKey = env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY || env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+    // Limpieza de llaves (Elminamos espacios que se pudieron colar al pegar en Cloudflare)
+    const SB_URL = rawUrl?.trim();
+    const SB_KEY = rawKey?.trim();
+
+    // Verificación de diagnóstico para el desarrollador
+    if (!SB_KEY || SB_KEY.length < 10) {
+       console.error('[init-wompi] ERROR: La llave de Supabase llegó vacía o muy corta.');
+       return new Response(JSON.stringify({ 
+         error: 'key_missing', 
+         message: 'No se detectó una llave de acceso válida en el servidor.',
+         diag: { url_exists: !!SB_URL, key_len: SB_KEY?.length || 0 }
+       }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
 
     if (!fullname || !email || !items || !Array.isArray(items)) {
       return new Response(JSON.stringify({ error: 'Datos incompletos', message: 'Faltan campos obligatorios' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
