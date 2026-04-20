@@ -25,19 +25,7 @@ import SettingsTab from '../components/admin/SettingsTab.astro';
 import Modals from '../components/admin/Modals.astro';
 
 Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-
-const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
-const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-const CLOUDINARY_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
-const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 ---
-
-<script is:inline define:vars={{ SB_URL, SB_ANON, CLOUDINARY_NAME, CLOUDINARY_PRESET }}>
-  window.NUDITOS_SB_URL = SB_URL;
-  window.NUDITOS_SB_ANON = SB_ANON;
-  window.NUDITOS_CL_NAME = CLOUDINARY_NAME;
-  window.NUDITOS_CL_PRESET = CLOUDINARY_PRESET;
-</script>
 
 <AdminLayout title="Nuditos — Panel Admin">
   <!-- LOGIN SECTION -->
@@ -66,6 +54,7 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
         <ProductsTab />
         <DashboardTab />
         <OrdersTab />
+        <!-- <CategoriesTab /> -->
         <VitrinaTab />
         <CampañasTab />
         <BannersTab />
@@ -92,18 +81,6 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
        NUDITOS Admin Logic — Core JS
        ══════════════════════════════════════════ -->
   <script is:inline>
-    // Inicialización del Namespace Global para componentes modulares
-    window.NuditosAdmin = window.NuditosAdmin || {
-      Products: {},
-      Orders: {},
-      Settings: {},
-      Dashboard: {},
-      Vitrina: {},
-      Banners: {},
-      Blog: {},
-      SEO: {}
-    };
-
     let adminCfg={}, heroSelection=[], momentoSelection=null;
     let adminProducts=[], selectedId=null, pendingDeleteId=null;
     let editorialBannersAdmin=[], sideFilterCat='';
@@ -116,7 +93,113 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
     let selectedProducts = new Set();
     let isDraftLoading = false;
 
-    // DRAFT SYSTEM MOVED TO ProductsTab.astro
+    /* ── DRAFT SYSTEM (AUTOSAVE) ── */
+    function saveProductDraft() {
+      if (isDraftLoading) return;
+      const editor = document.getElementById('tab-productos');
+      if (!editor || !document.getElementById('fNombre')) return;
+
+      const draft = {
+        id: document.getElementById('editingId').value,
+        name: document.getElementById('fNombre').value,
+        price: document.getElementById('fPrecio').value,
+        cat: document.getElementById('fCat').value,
+        emoji: document.getElementById('fEmoji').value,
+        desc: document.getElementById('fDesc').value,
+        activo: document.getElementById('fActivo').value === 'true',
+        stock: document.getElementById('fStock').value,
+        stockUnlimited: document.getElementById('fStockUnlimited').checked,
+        badge: getSelectedBadge(),
+        oferta: document.getElementById('fTagOferta').checked,
+        precioOriginal: document.getElementById('fPrecioOriginal').value,
+        precioOferta: document.getElementById('fPrecioOferta').value,
+        imgs: document.getElementById('fImgs').value.split('\n').filter(s=>s.trim()),
+        img: document.getElementById('fImg').value,
+        metaTitle: document.getElementById('fMetaTitle').value,
+        seoKeywords: document.getElementById('fSeoKeywords').value,
+        metaDescription: document.getElementById('fMetaDesc').value,
+        altText: document.getElementById('fAltText').value,
+        timestamp: Date.now()
+      };
+
+      localStorage.setItem('nuditos_product_draft', JSON.stringify(draft));
+      const indicator = document.getElementById('draftIndicator');
+      if (indicator) {
+        indicator.textContent = '✓ Borrador guardado localmente';
+        indicator.style.opacity = '1';
+        setTimeout(() => { if (indicator) indicator.style.opacity = '0.5'; }, 2000);
+      }
+    }
+
+    function getSelectedBadge() {
+       if(document.getElementById('fTagNuevo')?.checked) return 'Nuevo';
+       if(document.getElementById('fTagPopular')?.checked) return 'Popular';
+       if(document.getElementById('fTagEspecial')?.checked) return 'Especial';
+       return '';
+    }
+
+    function clearProductDraft() {
+      localStorage.removeItem('nuditos_product_draft');
+      const indicator = document.getElementById('draftIndicator');
+      if (indicator) indicator.textContent = '';
+    }
+
+    function checkAndRestoreDraft() {
+      const saved = localStorage.getItem('nuditos_product_draft');
+      if (!saved) return;
+      
+      const draft = JSON.parse(saved);
+      const diff = Date.now() - draft.timestamp;
+      const minutes = Math.floor(diff / 60000);
+      
+      if (confirm(`📦 Se encontró un borrador de "${draft.name || 'Sin nombre'}" guardado hace ${minutes} min. ¿Deseas recuperarlo?`)) {
+        isDraftLoading = true;
+        
+        // Si el draft tiene ID, seleccionamos ese producto primero
+        if (draft.id) {
+          selectProduct(parseInt(draft.id));
+        } else {
+          newProduct();
+        }
+
+        // Poblar campos (darle un pequeño delay para que el HTML se renderice si fue newProduct)
+        setTimeout(() => {
+          if (document.getElementById('fNombre')) document.getElementById('fNombre').value = draft.name || '';
+          if (document.getElementById('fPrecio')) document.getElementById('fPrecio').value = draft.price || 0;
+          if (document.getElementById('fCat')) document.getElementById('fCat').value = draft.cat || '';
+          if (document.getElementById('fEmoji')) document.getElementById('fEmoji').value = draft.emoji || '🌸';
+          if (document.getElementById('fDesc')) document.getElementById('fDesc').value = draft.desc || '';
+          if (document.getElementById('fActivo')) document.getElementById('fActivo').value = draft.activo ? 'true' : 'false';
+          if (document.getElementById('fStock')) document.getElementById('fStock').value = draft.stock || 99;
+          if (document.getElementById('fStockUnlimited')) document.getElementById('fStockUnlimited').checked = draft.stockUnlimited;
+          
+          if (document.getElementById('fTagNuevo')) document.getElementById('fTagNuevo').checked = (draft.badge === 'Nuevo');
+          if (document.getElementById('fTagPopular')) document.getElementById('fTagPopular').checked = (draft.badge === 'Popular');
+          if (document.getElementById('fTagEspecial')) document.getElementById('fTagEspecial').checked = (draft.badge === 'Especial');
+          
+          if (document.getElementById('fTagOferta')) {
+            document.getElementById('fTagOferta').checked = draft.oferta;
+            toggleOfertaFields();
+          }
+          if (document.getElementById('fPrecioOriginal')) document.getElementById('fPrecioOriginal').value = draft.precioOriginal || 0;
+          if (document.getElementById('fPrecioOferta')) document.getElementById('fPrecioOferta').value = draft.precioOferta || 0;
+          
+          if (document.getElementById('fImgs')) document.getElementById('fImgs').value = (draft.imgs || []).join('\n');
+          if (document.getElementById('fImg')) document.getElementById('fImg').value = draft.img || '';
+          
+          if (document.getElementById('fMetaTitle')) document.getElementById('fMetaTitle').value = draft.metaTitle || '';
+          if (document.getElementById('fSeoKeywords')) document.getElementById('fSeoKeywords').value = draft.seoKeywords || '';
+          if (document.getElementById('fMetaDesc')) document.getElementById('fMetaDesc').value = draft.metaDescription || '';
+          if (document.getElementById('fAltText')) document.getElementById('fAltText').value = draft.altText || '';
+          
+          isDraftLoading = false;
+          updatePreview();
+          showToast('✓ Borrador restaurado');
+        }, 100);
+      } else {
+        clearProductDraft();
+      }
+    }
 
     /* ── AUTH / LOGIN ── */
     async function doLogin(){
@@ -154,57 +237,112 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
     });
 
     /* ── UI HELPERS ── */
-    window.showTab = function(tabId, btn) {
-      // Ocultar todos los contenidos de pestañas
-      document.querySelectorAll('.tab-content').forEach(t => {
-        t.classList.remove('active');
-        t.style.display = 'none';
-      });
+    function toggleSidebar(){
+      document.getElementById('leftCol').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
 
-      // Mostrar la pestaña seleccionada
-      const target = document.getElementById('tab-' + tabId);
-      if(target) {
-        target.classList.add('active');
-        target.style.display = 'block';
+    function showTab(name,btn){
+      document.getElementById('leftCol').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+      const leftVisible=(name==='productos');
+      document.getElementById('leftCol').style.display=window.innerWidth>768?(leftVisible?'flex':'none'):'';
+      document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+      document.querySelectorAll('.a-tab').forEach(el=>el.classList.remove('active'));
+      document.getElementById('tab-'+name).classList.add('active');
+      if(btn)btn.classList.add('active');
+      if(name==='blog')loadPosts();
+      if(name==='campanas')renderCampaignsList();
+      if(name==='vitrina') renderVitrina();
+    }
+
+    /* ── CLOUDINARY ── */
+    function getCloudinaryConfig(){
+      const DEFAULT={cloudName:'dzxgu27wr',preset:'ssjghh9e'};
+      try{const s=localStorage.getItem('nuditos_cloudinary');const saved=s?JSON.parse(s):{};
+        return{cloudName:saved.cloudName||DEFAULT.cloudName,preset:saved.preset||DEFAULT.preset};}
+      catch{return DEFAULT;}
+    }
+    function saveCloudinaryConfig(){
+      const cfg={cloudName:document.getElementById('ccCloudName').value.trim(),preset:document.getElementById('ccPreset').value.trim()};
+      localStorage.setItem('nuditos_cloudinary',JSON.stringify(cfg));
+      showToast('✓ Cloudinary configurado');
+    }
+
+    function slugifyClient(text){
+      return (text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim() || 'nuditos-foto';
+    }
+
+    async function uploadToCloudinary(file, baseNameOverride = null, idx = 0){
+      showUploadProgress(0);
+      try{
+        // Renombre Dinámico para SEO con inyección de palabras clave avanzadas
+        const nombreInput = document.getElementById('fNombre');
+        const metaTitleInput = document.getElementById('fMetaTitle');
+        const keywordsInput = document.getElementById('fSeoKeywords');
+        
+        let baseText = (metaTitleInput && metaTitleInput.value.trim()) ? metaTitleInput.value : (nombreInput ? nombreInput.value : '');
+        if (keywordsInput && keywordsInput.value.trim()) {
+          // Extraemos las primeras palabras clave para no hacer el nombre de archivo excesivamente largo
+          const kws = keywordsInput.value.split(',').map(s=>s.trim()).slice(0,3).join('-');
+          baseText += '-' + kws;
+        }
+        
+        const defaultBaseName = slugifyClient(baseText);
+        const baseName = baseNameOverride ? slugifyClient(baseNameOverride) : defaultBaseName;
+        
+        // Agregamos palabras clave universales a la URL de la foto automáticamente
+        const seoSuffix = 'ramo-tejido-crochet';
+        const randomId = Math.random().toString(36).substring(2, 6);
+        
+        // Limitar tamaño final del publicId para evitar errores en SO
+        let publicId = `${baseName}-${seoSuffix}-${randomId}${idx > 0 ? ('-'+idx) : ''}`;
+        if (publicId.length > 200) publicId = publicId.substring(0, 200);
+
+        const signRes=await fetch('/api/cloudinary-sign',{
+          method:'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ public_id: publicId })
+        });
+        if(!signRes.ok) {
+           const err = await signRes.json();
+           throw new Error(err.error || 'Fallo en la firma del servidor');
+        }
+        const{signature,timestamp,apiKey,cloudName,uploadPreset,folder,publicId:signedPublicId}=await signRes.json();
+        const fd=new FormData();
+        fd.append('file',file);fd.append('upload_preset',uploadPreset);
+        fd.append('folder',folder);fd.append('timestamp',timestamp);
+        fd.append('api_key',apiKey);fd.append('signature',signature);
+        if(signedPublicId) fd.append('public_id', signedPublicId);
+        showUploadProgress(30);
+        const res=await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,{method:'POST',body:fd});
+        if(!res.ok) {
+          const cloudErr = await res.json();
+          throw new Error(cloudErr.error?.message || 'Error en Cloudinary');
+        }
+        const data=await res.json();
+        let url = data.secure_url;
+        if (data.resource_type === 'video') {
+         // Aseguramos que el video tenga extensión .mp4 y prefijo de video
+         url = url.replace('/image/upload/', '/video/upload/');
+         url = url.replace('/upload/', '/upload/q_auto,vc_auto/');
+         if (!url.toLowerCase().endsWith('.mp4')) url += '.mp4';
+        } else {
+         // Transformación para imagen
+         url = url.replace('/upload/', '/upload/w_1200,q_auto,f_auto/');
+        }
+        showUploadProgress(100);setTimeout(()=>hideUploadProgress(),800);
+        addToHistory(`📸 Foto subida: ${data.original_filename||'imagen'}`);
+        return url;
+      }catch(e){
+        hideUploadProgress();
+        showToast(`❌ ${e.message}`);
+        console.error('[Cloudinary Upload Error]', e);
+        return null;
       }
-
-      // Actualizar estado visual de los botones
-      document.querySelectorAll('.a-tab').forEach(b => b.classList.remove('active'));
-      if(btn) btn.classList.add('active');
-
-      // Cerrar sidebar en móvil al cambiar
-      if (window.innerWidth < 1024) toggleSidebar(false);
-    };
-
-    window.toggleSidebar = function(force) {
-      const sidebar = document.getElementById('leftCol');
-      const overlay = document.getElementById('sidebarOverlay');
-      if(!sidebar || !overlay) return;
-
-      const isShowing = force !== undefined ? force : !sidebar.classList.contains('show');
-      
-      if(isShowing) {
-        sidebar.classList.add('show');
-        overlay.classList.add('show');
-      } else {
-        sidebar.classList.remove('show');
-        overlay.classList.remove('show');
-      }
-    };
-
-    window.saveCloudinaryConfig = function() {
-      const name = document.getElementById('ccCloudName')?.value.trim();
-      const preset = document.getElementById('ccPreset')?.value.trim();
-      if(!name || !preset) {
-        showToast('⚠️ Completa Cloud Name y Preset');
-        return;
-      }
-      localStorage.setItem('cloudinary_name', name);
-      localStorage.setItem('cloudinary_preset', preset);
-      showToast('✅ Cloudinary guardado localmente');
-    };
-
-    /* ── UI & CLOUDINARY HELPERS MOVED TO COMPONENTS ── */
+    }
+    function showUploadProgress(pct){const p=document.getElementById('uploadProgress');const b=document.getElementById('uploadProgressBar');if(p)p.style.display='block';if(b)b.style.width=pct+'%';}
+    function hideUploadProgress(){const p=document.getElementById('uploadProgress');if(p)p.style.display='none';}
 
     /* ── INITIAL LOAD ── */
     async function loadAll(){
@@ -216,6 +354,11 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
         const sbCfg=await sbAdminGetConfig_();adminCfg=sbCfg||{...CONFIG_DEFAULT};
         try{
           const rows=await sbAdminGetBanners_();
+          const defaults = [
+            {afterCat:'home1',title:'Pétalos que <em>guardan</em> historias',subtitle:'Creamos ramos que no se marchitan para momentos que deben durar por siempre.',imgUrl:'https://images.unsplash.com/photo-1583209814683-c023dd293cc6',ctaText:'Ver Colección',ctaUrl:'/catalogo'},
+            {afterCat:'home2',title:'Regala un <em>pedacito</em> de arte',subtitle:'Cada puntada es un detalle pensado en la persona que amas.',imgUrl:'https://images.unsplash.com/photo-1599307767316-776533da941c',ctaText:'Personalizar',ctaUrl:'/#personalizado'}
+          ];
+          
           editorialBannersAdmin = rows && rows.length ? rows : [];
         }catch{editorialBannersAdmin=[];}
         try{pedidos=await sbAdminGetPedidos();}catch{pedidos=[];}
@@ -237,96 +380,56 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
       seleccionSelection=[...(adminCfg.seleccionNuditos||[])];
       momentoSelection=adminCfg.ramoDestacado;
 
-      // Sync settings UI (moved from monolithic block)
-      syncSettingsUI();
+      document.getElementById('descCodigo').value=adminCfg.descuentoCodigo||'';
+      document.getElementById('descPorcentaje').value=adminCfg.descuentoPorcentaje||10;
+      document.getElementById('descTexto').value=adminCfg.descuentoTexto||'';
+      if(adminCfg.descuentoActivo)document.getElementById('toggleDescuento').classList.add('on');
+      if(adminCfg.wompiActivo)document.getElementById('toggleWompi').classList.add('on');
+      if(adminCfg.wompiKey)document.getElementById('wompiKey').value=adminCfg.wompiKey;
+      if(adminCfg.wompiIntegrity)document.getElementById('wompiIntegrity').value=adminCfg.wompiIntegrity;
+      if(adminCfg.wompiEvents)document.getElementById('wompiEvents').value=adminCfg.wompiEvents;
+      if(adminCfg.metaPixelActivo)document.getElementById('toggleMetaPixel').classList.add('on');
+      if(adminCfg.metaPixelId)document.getElementById('metaPixelId').value=adminCfg.metaPixelId;
       
-      // Renderizar UI inicial
-      renderSidebar();
-      renderStats();
-      
-      // Initialize Modular Components
-      Object.keys(window.NuditosAdmin || {}).forEach(key => {
-        if(typeof window.NuditosAdmin[key].init === 'function') window.NuditosAdmin[key].init();
-      });
+      // SEO Fields initialization
+      if(adminCfg.seoTitle) document.getElementById('seoTitle').value = adminCfg.seoTitle;
+      if(adminCfg.seoDescription) document.getElementById('seoDescription').value = adminCfg.seoDescription;
+      if(adminCfg.seoOgImage) document.getElementById('seoOgImage').value = adminCfg.seoOgImage;
+      if(adminCfg.socialInstagram) document.getElementById('socialInsta').value = adminCfg.socialInstagram;
+      if(adminCfg.socialWhatsapp) document.getElementById('socialWhasapp').value = adminCfg.socialWhatsapp;
+      if(adminCfg.gaId) document.getElementById('seoGAId').value = adminCfg.gaId;
+      if(adminCfg.gaActive) document.getElementById('toggleGASEO').classList.add('on');
+      if(adminCfg.metaPixelId) document.getElementById('seoMetaPixelId').value = adminCfg.metaPixelId;
+      if(adminCfg.metaPixelActivo) document.getElementById('toggleMetaPixelSEO').classList.add('on');
+      if(typeof updateSEOPreview === 'function') updateSEOPreview();
 
+      const cc=getCloudinaryConfig();
+      if(cc.cloudName)document.getElementById('ccCloudName').value=cc.cloudName;
+      if(cc.preset)document.getElementById('ccPreset').value=cc.preset;
+      
+      buildSideFilters();renderSidebar();renderStats();showEditorEmpty();renderCategoriasList();
+      renderHeroSlots();renderMomentoSelected();renderMomentoList(adminProducts);renderHeroList(adminProducts);
+      renderCatViewsList();renderBannerList();
+      
+      // Populate Sortable Filter
+      const sf = document.getElementById('sortCatFilter');
+      if (sf) {
+        sf.innerHTML = '<option value="todos">Todas las categorías</option>' + 
+          adminCategories.filter(c=>c.id!=='todos').map(c=>`<option value="${c.id}">${c.icon||''} ${c.nombre||c.name}</option>`).join('');
+      }
+      if(window.renderSortableList) window.renderSortableList();
+      
+      // Inicializar campañas temporales
+      renderCampaignsList();
+      if(window._applyCampaigns) window._applyCampaigns();
+      
       const statusLabel = window._isLiveMode ? '✅ Conectado a Supabase' : '⚠️ Usando datos locales (Fallback)';
       showToast(statusLabel);
       console.log(`[Admin] Modo: ${window._isLiveMode ? 'LIVE' : 'FALLBACK'}`);
-      
-      // Check for drafts in ProductsTab
-      if(window.NuditosAdmin.Products?.checkAndRestoreDraft) {
-         setTimeout(() => window.NuditosAdmin.Products.checkAndRestoreDraft(), 1000);
-      }
+
+      // Verificar si hay borradores pendientes al cargar
+      setTimeout(checkAndRestoreDraft, 1000);
     }
-
-    function syncSettingsUI(){
-      if(!adminCfg) return;
-      ['descCodigo','descPorcentaje','descTexto','wompiKey','wompiIntegrity','wompiEvents','metaPixelId','seoTitle','seoDescription','seoOgImage','socialInsta','socialWhasapp','seoGAId','seoMetaPixelId'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.value = adminCfg[id] || '';
-      });
-      if(adminCfg.descuentoActivo) document.getElementById('toggleDescuento')?.classList.add('on');
-      if(adminCfg.wompiActivo) document.getElementById('toggleWompi')?.classList.add('on');
-      if(adminCfg.metaPixelActivo) document.getElementById('toggleMetaPixel')?.classList.add('on');
-      if(adminCfg.gaActive) document.getElementById('toggleGASEO')?.classList.add('on');
-
-      // Auto-completar Cloudinary priorizando ENV
-      const clNameInput = document.getElementById('ccCloudName');
-      const clPresetInput = document.getElementById('ccPreset');
-      
-      if (clNameInput) {
-        clNameInput.value = window.NUDITOS_CL_NAME || adminCfg.cloudinaryCloudName || '';
-      }
-      if (clPresetInput) {
-        clPresetInput.value = window.NUDITOS_CL_PRESET || adminCfg.cloudinaryUploadPreset || '';
-      }
-    }
-
-    /* ── RENDERING FUNCTIONS ── */
-    function renderSidebar() {
-      const list = document.getElementById('sideList');
-      if(!list) return;
-      const query = document.getElementById('sideSearch')?.value.toLowerCase() || '';
-      
-      const filtered = adminProducts.filter(p => 
-        p.name.toLowerCase().includes(query) || 
-        (p.cat && p.cat.toLowerCase().includes(query))
-      );
-
-      if(filtered.length === 0) {
-        list.innerHTML = '<div style="padding:2rem;text-align:center;color:#666;font-size:0.8rem">No se encontraron ramos</div>';
-        return;
-      }
-
-      list.innerHTML = filtered.map(p => `
-        <div class="prod-item ${selectedId === p.id ? 'selected' : ''} ${p.activo === false ? 'inactive' : ''}" onclick="selectProduct(${p.id})">
-          <div class="pi-thumb">
-            ${p.img ? `<img src="${p.img}">` : `<span>${p.emoji || '🌸'}</span>`}
-          </div>
-          <div class="pi-info">
-            <div class="pi-name">${p.name}</div>
-            <div class="pi-meta">$${(p.price || 0).toLocaleString('es-CO')} COP</div>
-          </div>
-          <div class="pi-dot ${p.activo !== false ? 'on' : 'off'}" onclick="event.stopPropagation(); quickToggleVis(${p.id})" title="${p.activo !== false ? 'Visible' : 'Oculto'}"></div>
-        </div>
-      `).join('');
-    }
-
-    function renderStats() {
-      const stats = document.getElementById('sideStats');
-      if(!stats) return;
-      const total = adminProducts.length;
-      const active = adminProducts.filter(p => p.activo !== false).length;
-      const hidden = total - active;
-      stats.innerHTML = `
-        <div class="stat-pill"><b>${total}</b> Total</div>
-        <div class="stat-pill"><b>${active}</b> Visibles</div>
-        <div class="stat-pill"><b>${hidden}</b> Ocultos</div>
-      `;
-    }
-
-    function renderMomentoList(prods) {} 
-    function renderHeroList(prods) {}
 
     async function sbAdminGetConfig_(){
       try{const rows=await fetch(`${SB_URL}/rest/v1/config?select=clave,valor`,{headers:_h(true)}).then(r=>r.json());return sbToConfig(rows);}
@@ -337,18 +440,304 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
       catch{return[];}
     }
 
-    /* ── ROUTING FACADE ── */
-    // These functions act as a bridge for legacy onclick handlers in components
-    function selectProduct(id){ window.NuditosAdmin.Products?.selectProduct(id); }
-    function newProduct(){ window.NuditosAdmin.Products?.newProduct(); }
-    function saveProduct(){ window.NuditosAdmin.Products?.saveProduct(); }
-    function quickToggleVis(id){ window.NuditosAdmin.Products?.quickToggleVis(id); }
-    
-    /* ── PRUNED REMAINING LOGIC (MOVED TO COMPONENTS) ── */
-    // All renderSidebar, renderStats, bulk actions, category management, etc. 
-    // are now handled within src/components/admin/*.astro
+    function buildSideFilters(){
+      const src = adminCategories.length ? adminCategories : categories.filter(c=>c.id!=='todos');
+      const opts=[{id:'',name:'Todos',icon:'🌸'},...src.filter(c=>c.id!=='todos')];
+      document.getElementById('sideFilters').innerHTML=opts.map(c=>
+        `<span class="lf-chip ${sideFilterCat===c.id?'active':''}" onclick="setSideFilter('${c.id}',this)">${c.icon} ${c.nombre||c.name}</span>`
+      ).join('');
+    }
+    function setSideFilter(id,el){
+      sideFilterCat=id;
+      selectedProducts.clear();
+      document.querySelectorAll('.lf-chip').forEach(c=>c.classList.remove('active'));
+      el.classList.add('active');
+      renderSidebar();
+      updateBulkBar();
+    }
 
-    /* ── EDITOR LOGIC MOVED TO ProductsTab.astro ── */
+    function renderStats(){
+      const t=adminProducts.length,v=adminProducts.filter(p=>p.activo!==false).length;
+      const f=adminProducts.filter(p=>p.img&&p.img.trim()).length,o=t-v;
+      document.getElementById('sideStats').innerHTML=`
+        <div class="ls-stat"><div class="ls-num">${t}</div><div class="ls-label">Total</div></div>
+        <div class="ls-stat"><div class="ls-num green">${v}</div><div class="ls-label">Visibles</div></div>
+        <div class="ls-stat"><div class="ls-num ${(t-f)>0?'red':'green'}">${f}</div><div class="ls-label">Con foto</div></div>
+        <div class="ls-stat"><div class="ls-num red">${o}</div><div class="ls-label">Ocultos</div></div>`;
+    }
+
+    function renderSidebar(){
+      const q=document.getElementById('sideSearch').value.toLowerCase();
+      let list=adminProducts.filter(p=>{
+        const mQ=!q||p.name.toLowerCase().includes(q)||(adminCategories.find(c=>c.id===p.cat)?.nombre?.toLowerCase().includes(q));
+        const mC=!sideFilterCat||p.cat===sideFilterCat; return mQ&&mC;
+      });
+      const groups={};list.forEach(p=>{if(!groups[p.cat])groups[p.cat]=[];groups[p.cat].push(p);});
+      let html='';
+      Object.entries(groups).forEach(([catId,items])=>{
+          const cat=adminCategories.find(c=>c.id===catId);
+          const count = items.length;
+          html+=`<div class="cat-group-label">
+            <span>${cat?.icon||'📁'} ${cat?.nombre||cat?.name||catId} <strong style="opacity:0.6;font-size:0.7rem;margin-left:4px">(${count})</strong></span>
+            <button class="cat-group-del" onclick="deleteCategoryFromSidebar('${catId}')" title="Eliminar esta categoría y sus productos">🗑️</button>
+          </div>`;
+        items.forEach(p=>{
+          const isActive=p.activo!==false;
+          const isSel=selectedProducts.has(p.id);
+          const tags=[];
+          if(!isActive)tags.push(`<span class="pi-tag pit-oculto">Oculto</span>`);
+          if(p.badge)tags.push(`<span class="pi-tag pit-badge">${p.badge}</span>`);
+          if(p.oferta)tags.push(`<span class="pi-tag pit-oferta">Oferta</span>`);
+          if(p.envioGratis)tags.push(`<span class="pi-tag pit-envio">Envío</span>`);
+          html+=`
+            <div class="prod-item ${selectedId===p.id?'selected':''} ${isActive?'':'inactive'} ${isSel?'bulk-selected':''}">
+              <input type="checkbox" class="prod-check" ${isSel?'checked':''}
+                onclick="event.stopPropagation();toggleProductSelection(${p.id},this.checked)"
+                title="Seleccionar">
+              <div class="pi-thumb" onclick="selectProduct(${p.id})">${p.img?`<img src="${p.img}" onerror="this.parentNode.innerHTML='${p.emoji}'">`:(p.emoji||'🌸')}</div>
+              <div class="pi-info" onclick="selectProduct(${p.id})">
+                <div class="pi-name">${p.name}</div>
+                <div class="pi-meta">${p.price>0?'$'+p.price.toLocaleString('es-CO')+' COP':'Consultar'}</div>
+                ${tags.length?`<div class="pi-tags">${tags.join('')}</div>`:''}
+              </div>
+              <div class="pi-dot ${isActive?'on':'off'}" onclick="event.stopPropagation();quickToggleVis(${p.id})" title="${isActive?'Ocultar':'Mostrar'}"></div>
+            </div>`;
+        });
+      });
+      document.getElementById('sideList').innerHTML=html||`<div style="padding:1.5rem;text-align:center;color:rgba(255,255,255,.3);font-size:.76rem">No hay ramos</div>`;
+    }
+
+    // ── SELECCIÓN MÚLTIPLE (Bulk) ──
+    function toggleProductSelection(id, checked){
+      if(checked) selectedProducts.add(id); else selectedProducts.delete(id);
+      updateBulkBar();
+      renderSidebar();
+    }
+    function toggleSelectAll(checked){
+      const q=document.getElementById('sideSearch').value.toLowerCase();
+      const visible=adminProducts.filter(p=>{
+        const mQ=!q||p.name.toLowerCase().includes(q);
+        const mC=!sideFilterCat||p.cat===sideFilterCat; return mQ&&mC;
+      });
+      visible.forEach(p=>{ if(checked) selectedProducts.add(p.id); else selectedProducts.delete(p.id); });
+      updateBulkBar();
+      renderSidebar();
+    }
+    function updateBulkBar(){
+      const n=selectedProducts.size;
+      const bar=document.getElementById('bulkBar');
+      const cnt=document.getElementById('bulkCount');
+      if(n>0){ bar.classList.add('active'); cnt.textContent=`${n} seleccionado${n>1?'s':''}`; }
+      else { bar.classList.remove('active'); }
+      const allCheck=document.getElementById('selectAllCheck');
+      if(allCheck){ const visible=adminProducts.filter(p=>!sideFilterCat||p.cat===sideFilterCat); allCheck.checked=visible.length>0&&visible.every(p=>selectedProducts.has(p.id)); }
+    }
+    async function bulkDeleteProducts(){
+      if(!selectedProducts.size) return;
+      const n=selectedProducts.size;
+      if(!confirm(`¿Eliminar definitivamente ${n} ramo${n>1?'s':''}? Esta acción no se puede deshacer.`)) return;
+      const btn=document.querySelector('.bulk-delete'); if(btn){btn.disabled=true;btn.textContent='⏳ Eliminando...';}
+      const ids=[...selectedProducts];
+      let ok=0,err=0;
+      for(const id of ids){
+        try{ await sbAdminDeleteProduct(id); adminProducts=adminProducts.filter(p=>p.id!==id); ok++; }
+        catch{ err++; }
+      }
+      selectedProducts.clear();
+      if(selectedId&&!adminProducts.find(p=>p.id===selectedId)){ selectedId=null; showEditorEmpty(); }
+      renderSidebar(); renderStats(); updateBulkBar();
+      if(btn){btn.disabled=false;btn.textContent='🗑️ Eliminar';}
+      showToast(err?`✓ ${ok} eliminados, ${err} errores`:`🗑️ ${ok} eliminado${ok>1?'s':''}`);
+      addToHistory(`🗑️ Eliminados: ${ok} ramos`);
+    }
+    async function bulkToggleVisibility(makeVisible){
+      if(!selectedProducts.size) return;
+      const ids=[...selectedProducts];
+      const label=makeVisible?'visibles':'ocultos';
+      showToast(`⏳ Procesando ${ids.length} productos...`);
+      for(const id of ids){
+        const idx=adminProducts.findIndex(p=>p.id===id); if(idx===-1) continue;
+        try{ adminProducts[idx].activo=makeVisible; await sbAdminSaveProduct({...adminProducts[idx],_isNew:false}); }
+        catch{}
+      }
+      selectedProducts.clear();
+      renderSidebar(); renderStats(); updateBulkBar();
+      showToast(`✓ ${ids.length} ramos ${label}`);
+      addToHistory(`👁 ${ids.length} ramos ${label}`);
+    }
+
+    function openBulkMoveModal() {
+      if(!selectedProducts.size) return;
+      const moves = adminCategories.filter(c=>c.id!=='todos').map(c=>`
+        <button class="move-cat-option" onclick="bulkMoveTo('${c.id}')">
+          <span class="mco-icon">${c.icon||'🌸'}</span>
+          <span class="mco-name">${c.nombre||c.name}</span>
+        </button>
+      `).join('');
+      document.getElementById('moveOptionsList').innerHTML=moves;
+      document.getElementById('moveModal').classList.add('open');
+    }
+
+    async function bulkMoveTo(catId) {
+      if(!selectedProducts.size) return;
+      const ids=[...selectedProducts];
+      const cat = adminCategories.find(c=>c.id===catId);
+      const catLabel = cat?.nombre || cat?.name || catId;
+      
+      document.getElementById('moveModal').classList.remove('open');
+      showToast(`🚚 Moviendo ${ids.length} ramos a ${catLabel}...`);
+      
+      for(const id of ids){
+        const idx=adminProducts.findIndex(p=>p.id===id); if(idx===-1) continue;
+        try{ 
+          adminProducts[idx].cat=catId; 
+          await sbAdminSaveProduct({...adminProducts[idx],_isNew:false}); 
+        } catch{}
+      }
+      selectedProducts.clear();
+      renderSidebar(); renderStats(); updateBulkBar();
+      showToast(`✓ Movid@s a ${catLabel}`);
+      addToHistory(`📂 ${ids.length} ramos movidos a ${catLabel}`);
+    }
+
+    function selectProduct(id){
+      selectedId=id;renderSidebar();
+      const p=adminProducts.find(x=>x.id===id);
+      if(p)renderEditor(p);
+      if(window.innerWidth<=768){document.getElementById('leftCol').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
+    }
+    function newProduct(){
+      selectedId=null;renderSidebar();clearEditor();
+      document.getElementById('tab-productos').innerHTML=buildEditorHTML(null);
+      document.getElementById('editingId').value='';
+      if(window.innerWidth<=768){document.getElementById('leftCol').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
+    }
+
+    function showEditorEmpty(){
+      document.getElementById('tab-productos').innerHTML=`
+        <div class="editor-empty">
+          <div class="editor-empty-icon">🌸</div>
+          <h3>Selecciona un ramo</h3>
+          <p>Elige un ramo de la lista para editar sus detalles, precio o fotos.</p>
+        </div>`;
+    }
+    function clearEditor(){uploadedImgs=[];currentEditingImgs=[];}
+
+    function buildEditorHTML(p){
+      const isNew=!p;
+      const catSource = adminCategories.length ? adminCategories : (window.categories||[]).filter(c=>c.id!=='todos');
+      const cats=catSource.filter(c=>c.id!=='todos').map(c=>{
+         const isSelected = p?.cats ? p.cats.includes(c.id.toLowerCase()) : (p?.cat === c.id);
+         return `<label class="chip-check" style="font-size:0.75rem; padding: 4px 10px"><input type="checkbox" name="fCatMult" value="${c.id}" ${isSelected?'checked':''} onchange="updatePreview();saveProductDraft()"> ${c.icon||'🌸'} ${c.nombre||c.name}</label>`;
+      }).join('');
+      return `
+        <input type="hidden" id="editingId" value="${p?.id||''}">
+        <div class="editor-card">
+          <div class="ec-header">
+            <div>
+              <div class="ec-title">${isNew?'Nuevo ramo':'Editando ramo'}</div>
+              <div class="ec-sub" id="editorSub">${p?p.name:''}</div>
+            </div>
+            <div class="ec-actions">
+              ${!isNew?`
+                <button class="btn-vis ${p.activo!==false?'on':'off'}" id="visBtn" onclick="quickToggleVis(${p?.id})">${p.activo!==false?'👁 Visible':'🚫 Oculto'}</button>
+                <button class="btn-delete" onclick="askDeleteId(${p?.id})">🗑️ Eliminar</button>
+              `:''}
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="field field-full"><label>Nombre del producto *</label><input type="text" id="fNombre" value="${p?.name||''}" oninput="updatePreview();saveProductDraft()" placeholder="Ramo de rosas con mariposas"></div>
+            <div class="field"><label>Precio (COP)</label><input type="number" id="fPrecio" value="${p?.price||0}" oninput="updatePreview();saveProductDraft()" min="0"></div>
+            <div class="field field-full"><label>Categorías (puedes elegir varias) *</label><div class="chips-row" style="margin-top:0.3rem">${cats}</div></div>
+            <div class="field"><label>Emoji (si no hay foto)</label><input type="text" id="fEmoji" value="${p?.emoji||'🌸'}" oninput="updatePreview();saveProductDraft()"></div>
+            <div class="field field-full">
+              <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: .3rem">
+                <label style="margin-bottom:0">Descripción / detalles</label>
+                <select id="descTemplate" onchange="if(this.value){ document.getElementById('fDesc').value=getDescTemplate(this.value); updatePreview(); saveProductDraft(); this.value=''; }" style="width:auto; padding:.25rem .5rem; font-size:.65rem; border-radius:6px; border:1px solid var(--lila-light); background:var(--lila-xlight); color:var(--lila-dark); cursor:pointer; font-weight:600">
+                  <option value="">✨ Plantillas rápidas...</option>
+                  <option value="ramo">💐 Ramo clásico</option>
+                  <option value="amigurumi">🧸 Amigurumi / Personaje</option>
+                  <option value="maceta">🪴 Maceta</option>
+                  <option value="especial">✨ Edición Especial</option>
+                </select>
+              </div>
+              <textarea id="fDesc" oninput="updatePreview();saveProductDraft()" rows="3" placeholder="Escribe aquí o elige una plantilla arriba...">${p?.desc||''}</textarea>
+            </div>
+            <div class="field field-full"><label>Estado</label>
+              <select id="fActivo" onchange="updatePreview();saveProductDraft()">
+                <option value="true" ${p?.activo!==false?'selected':''}>✅ Visible en tienda</option>
+                <option value="false" ${p?.activo===false?'selected':''}>🚫 Oculto</option>
+              </select>
+            </div>
+          </div>
+          <div class="img-upload-section">
+            <div class="img-upload-header"><span class="img-upload-title">📸 Fotos del producto</span></div>
+            <div class="upload-zone" 
+                 onclick="document.getElementById('fileInput').click()"
+                 ondragover="event.preventDefault(); this.classList.add('dragover')"
+                 ondragleave="event.preventDefault(); this.classList.remove('dragover')"
+                 ondrop="event.preventDefault(); this.classList.remove('dragover'); if(event.dataTransfer.files.length) handleFileUpload(event.dataTransfer.files)">
+              <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleFileUpload(this.files)">
+              <div class="upload-zone-icon">📤</div>
+              <div class="upload-zone-text">Arrastra fotos aquí o haz clic para subir</div>
+              <div class="upload-zone-sub">JPG, PNG, WEBP · Se renombran y optimizan automáticamente para SEO</div>
+            </div>
+            <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
+            <div class="img-preview-row" id="imgPreviewRow"></div>
+            <label style="font-size:.65rem;font-weight:600;color:var(--soft);text-transform:uppercase;letter-spacing:.5px;display:block;margin:.5rem 0 .25rem">O pega links de Cloudinary</label>
+            <textarea class="img-url-input" id="fImgs" rows="3" placeholder="https://res.cloudinary.com/... (uno por línea)">${(p?.imgs||[]).join('\n')}</textarea>
+            <div class="field" style="margin-top:.5rem"><label>Foto principal (URL)</label><input type="text" id="fImg" value="${p?.img||''}" oninput="updatePreview()" placeholder="https://res.cloudinary.com/..."></div>
+          </div>
+          <div class="stock-row">
+            <span class="stock-icon">📦</span>
+            <div class="stock-info"><div class="stock-label">Stock</div><div class="stock-sub">Cuántas unidades disponibles</div></div>
+            <div class="stock-input-wrap">
+              <input class="stock-num" type="number" id="fStock" value="${p?.stock??99}" min="0" max="999">
+              <label class="stock-unlimited"><input type="checkbox" id="fStockUnlimited" ${p?.stock===undefined||p?.stock===null?'checked':''}> Sin límite</label>
+            </div>
+          </div>
+          <div class="tags-label">Etiquetas</div>
+          <div class="chips-row">
+            <label class="chip-check"><input type="checkbox" id="fTagNuevo" ${p?.badge==='Nuevo'?'checked':''}> 🟢 Nuevo</label>
+            <label class="chip-check chip-popular"><input type="checkbox" id="fTagPopular" ${p?.badge==='Popular'?'checked':''}> 🔥 Popular</label>
+            <label class="chip-check chip-especial"><input type="checkbox" id="fTagEspecial" ${p?.badge==='Especial'?'checked':''}> ⭐ Especial</label>
+            <label class="chip-check chip-oferta"><input type="checkbox" id="fTagOferta" ${p?.oferta?'checked':''} onchange="toggleOfertaFields()"> 🏷️ Oferta</label>
+            <label class="chip-check chip-envio"><input type="checkbox" id="fTagEnvio" ${p?.envioGratis?'checked':''}> 🚚 Envío gratis</label>
+          </div>
+          <div id="ofertaFields" style="${p?.oferta?'display:block':''}">
+            <div class="form-grid">
+              <div class="field"><label>Precio original (tachado)</label><input type="number" id="fPrecioOriginal" value="${p?.precioOriginal||0}" min="0"></div>
+              <div class="field"><label>Precio con oferta</label><input type="number" id="fPrecioOferta" value="${p?.precioOferta||0}" min="0"></div>
+            </div>
+          </div>
+          <details class="t-card" style="padding:1rem; margin-top: 1rem; margin-bottom: 0; border:1px solid var(--border); box-shadow:none;">
+            <summary style="font-weight:700; font-size:0.75rem; cursor:pointer; color:var(--lila-dark); display:flex; align-items:center; gap:.4rem">🔍 Ajustes Avanzados de Búsqueda (SEO Google)</summary>
+            <div class="form-grid" style="margin-top:0.8rem;">
+              <div class="field field-full"><label>Título en Google (Meta Title)</label><input type="text" id="fMetaTitle" value="${p?.metaTitle||''}" oninput="saveProductDraft()" placeholder="Ej: Ramo de Girasoles a Crochet - Sueño de Van Gogh"></div>
+              <div class="field field-full"><label>Palabras clave (Keywords)</label><input type="text" id="fSeoKeywords" value="${p?.seoKeywords||''}" oninput="saveProductDraft()" placeholder="Ej: girasoles amarillos, regalo novia, flores tejidas"></div>
+              <div class="field field-full"><label>Descripción para Google</label><textarea id="fMetaDesc" rows="2" oninput="saveProductDraft()" placeholder="Dejar vacío para que Google use la descripción principal...">${p?.metaDescription||''}</textarea></div>
+              <div class="field field-full"><label>Texto foto (Alt Text)</label><input type="text" id="fAltText" value="${p?.altText||''}" oninput="saveProductDraft()" placeholder="Descripción de la foto para invidentes y SEO"></div>
+            </div>
+          </details>
+          <div class="preview-panel">
+            <div class="preview-label">Vista previa en tienda</div>
+            <div class="preview-card-wrap"><div class="preview-card" id="livePreview"></div></div>
+          </div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem; align-items:center;">
+            <button class="btn-save" id="saveProdBtn" onclick="saveProduct()">
+              💾 <span>${isNew?'Crear producto':'Guardar cambios'}</span>
+            </button>
+            <button class="btn-cancel" onclick="showEditorEmpty()">Cancelar</button>
+            <span id="draftIndicator" style="font-size:0.65rem; color:var(--soft); font-weight:600; text-transform:uppercase; margin-left:auto; opacity:0; transition:opacity 0.3s"></span>
+          </div>
+        </div>`;
+    }
+
+    function renderEditor(p){
+      currentEditingImgs=p.imgs?[...p.imgs]:[];uploadedImgs=[];
+      document.getElementById('tab-productos').innerHTML=buildEditorHTML(p);
+      renderImgPreviews();updatePreview();
+    }
     
     function getDescTemplate(type) {
       const templates = {
@@ -486,8 +875,642 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
       adminProducts[idx].activo=!(adminProducts[idx].activo!==false);
       try{await sbAdminSaveProduct({...adminProducts[idx],_isNew:false});renderSidebar();renderStats();const p=adminProducts[idx];const btn=document.getElementById('visBtn');if(btn){btn.className=`btn-vis ${p.activo!==false?'on':'off'}`;btn.textContent=p.activo!==false?'👁 Visible':'🚫 Oculto';}showToast(p.activo!==false?'✓ Visible':'🚫 Oculto');}catch{showToast('❌ Error');}
     }
+    function askDeleteId(id){pendingDeleteId=id;const p=adminProducts.find(x=>x.id===id);document.getElementById('confirmMsg').textContent=`¿Eliminar "${p?.name||''}"?`;document.getElementById('confirmOverlay').classList.add('open');}
+    function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');}
+    async function confirmDelete(){
+      if(!pendingDeleteId)return;
+      const idx=adminProducts.findIndex(p=>p.id===pendingDeleteId);const name=adminProducts[idx]?.name;
+      try{await sbAdminDeleteProduct(pendingDeleteId);if(idx!==-1)adminProducts.splice(idx,1);selectedId=null;renderSidebar();renderStats();showEditorEmpty();closeConfirm();showToast(`🗑️ Eliminado`);}catch{showToast('❌ Error');}
+    }
 
-    /* ── CORE MANAGEMENT ── */
+    /* ── PEDIDOS ── */
+    function openNewPedido(){document.getElementById('pedidoEditId').value='';document.getElementById('pedidoModalTitle').textContent='Nuevo pedido';['pCliente','pTel','pItems','pTotal','pNotas'].forEach(id=>document.getElementById(id).value='');document.getElementById('pEstado').value='pendiente';document.getElementById('pedidoModal').classList.add('open');}
+    function openEditPedido(id){const p=pedidos.find(x=>x.id===id);if(!p)return;document.getElementById('pedidoEditId').value=p.id;document.getElementById('pCliente').value=p.cliente||'';document.getElementById('pTel').value=p.tel||'';document.getElementById('pItems').value=p.items||'';document.getElementById('pTotal').value=p.total||'';document.getElementById('pEstado').value=p.estado||'pendiente';document.getElementById('pNotas').value=p.notas||'';document.getElementById('pedidoModal').classList.add('open');}
+    function closePedidoModal(){document.getElementById('pedidoModal').classList.remove('open');}
+    async function savePedido(){
+      const editId=document.getElementById('pedidoEditId').value;
+      const data={cliente:document.getElementById('pCliente').value.trim(),tel:document.getElementById('pTel').value.trim(),items:document.getElementById('pItems').value.trim(),total:parseInt(document.getElementById('pTotal').value)||0,estado:document.getElementById('pEstado').value,notas:document.getElementById('pNotas').value.trim()};
+      if(!data.cliente)return;
+      try{
+        if(editId){await sbAdminSavePedido({...data,id:parseInt(editId),_isNew:false});const idx=pedidos.findIndex(p=>p.id===parseInt(editId));if(idx!==-1)pedidos[idx]={...pedidos[idx],...data,id:parseInt(editId)};}
+        else{const saved=await sbAdminSavePedido({...data,_isNew:true});if(saved)pedidos.unshift(saved);}
+        closePedidoModal();renderPedidosList();showToast('✓ Pedido guardado');
+      }catch{showToast('❌ Error');}
+    }
+    async function cambiarEstadoPedido(id,estado){const idx=pedidos.findIndex(p=>p.id===id);if(idx===-1)return;try{await sbAdminUpdateEstadoPedido(id,estado);pedidos[idx].estado=estado;renderPedidosList();showToast('✓ Estado actualizado');}catch{showToast('❌ Error');}}
+    async function deletePedido(id){try{await sbAdminDeletePedido(id);pedidos=pedidos.filter(p=>p.id!==id);renderPedidosList();showToast('🗑️ Eliminado');}catch{showToast('❌ Error');}}
+    function filterPedidos(f,btn){pedidoFilter=f;document.querySelectorAll('.pedido-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPedidosList();}
+    function renderPedidosList(){
+      const list=pedidoFilter==='todos'?pedidos:pedidos.filter(p=>p.estado===pedidoFilter);
+      const eLabels={pendiente:'⏳ Pendiente',proceso:'🔄 En proceso',entregado:'✅ Entregado',cancelado:'❌ Cancelado'};
+      const eCls={pendiente:'estado-pendiente',proceso:'estado-proceso',entregado:'estado-entregado',cancelado:'estado-cancelado'};
+      document.getElementById('pedidosList').innerHTML=list.length?list.map(p=>`
+        <div class="pedido-card">
+          <div class="pedido-top"><div class="pedido-id">#${String(p.id).slice(-6)}</div><span class="pedido-estado ${eCls[p.estado]||'estado-pendiente'}">${eLabels[p.estado]||p.estado}</span></div>
+          <div class="pedido-cliente">${p.cliente}</div>
+          <div class="pedido-items">${p.items||'—'}</div>
+          <div class="pedido-bottom"><div class="pedido-total">${p.total>0?'$'+p.total.toLocaleString('es-CO'):''}</div><div class="pedido-fecha">${p.fecha||''}</div></div>
+          <div class="pedido-actions">
+            <button class="p-action-btn" onclick="openEditPedido(${p.id})">✏️ Editar</button>
+            <button class="p-action-btn" onclick="cambiarEstadoPedido(${p.id},'entregado')">✅ Entregado</button>
+            <button class="p-action-btn" style="color:var(--red)" onclick="deletePedido(${p.id})">🗑️</button>
+          </div>
+        </div>`).join(''):`<div style="text-align:center;padding:2rem;color:var(--soft)">No hay pedidos</div>`;}
+    /* ── CATEGORY MANAGER desde el panel de Productos ── */
+    function showCategoryManager(){
+      document.getElementById('tab-productos').innerHTML=`
+        <div class="editor-card">
+          <div class="ec-header">
+            <div>
+              <div class="ec-title">📁 Gestionar Categorías</div>
+              <div class="ec-sub">Crea, edita u elimina las categorías de tu catálogo</div>
+            </div>
+            <div class="ec-actions">
+              <button class="btn-vis on" onclick="newCategory()">+ Nueva categoría</button>
+              <button class="btn-cancel" onclick="showEditorEmpty()">Volver</button>
+            </div>
+          </div>
+          <div class="cat-admin-grid" id="catAdminList" style="margin-top:1rem"></div>
+        </div>`;
+      renderCategoriasList();
+    }
+    async function deleteCategoryFromSidebar(id) {
+      // Reutiliza la misma lógica robusta del modal
+      await deleteCategory(id);
+    }
+
+    /* ── CATEGORÍAS (modal) ── */
+    function renderCategoriasList() {
+      const el = document.getElementById('catAdminList');
+      if (!el) return;
+      el.innerHTML = adminCategories.length ? adminCategories.map(c => {
+        const total = adminProducts.filter(p=>p.cat===c.id).length;
+        const vis   = adminProducts.filter(p=>p.cat===c.id&&p.activo!==false).length;
+        return `
+        <div class="cat-admin-card">
+          <div class="ca-icon">${c.icon||'🌸'}</div>
+          <div class="ca-info">
+            <div class="ca-name">${c.nombre||c.name} ${c.showInHome !== false ? '<span style="font-size:0.6rem; background:#dcfce7; color:#166534; padding:2px 6px; border-radius:4px; margin-left:8px;">🏠 Home</span>' : ''}</div>
+            <div class="ca-slug">ID: ${c.id} · <strong style="color:var(--lila)">${total}</strong> producto${total!==1?'s':''} (${vis} visible${vis!==1?'s':''})</div>
+          </div>
+          <div class="ca-actions">
+            <button class="ca-btn" onclick="editCategory('${c.id}')" title="Editar">✏️</button>
+            <button class="ca-btn ca-del" onclick="deleteCategory('${c.id}')" title="Eliminar">🗑️</button>
+          </div>
+        </div>`;
+      }).join('') : '<div style="padding:2rem;text-align:center;color:var(--soft)">Sin categorías. Crea una nueva.</div>';
+    }
+
+    function newCategory() {
+      document.getElementById('catModalTitle').textContent = 'Nueva categoría';
+      document.getElementById('catModalSub').textContent = 'Crea una nueva sección en tu catálogo';
+      document.getElementById('catEditId').value = '';
+      document.getElementById('catId').value = '';
+      document.getElementById('catId').disabled = false;
+      document.getElementById('catNombre').value = '';
+      document.getElementById('catIcon').value = '🌸';
+      document.getElementById('catOrden').value = adminCategories.length + 1;
+      document.getElementById('catShowInHome').value = 'true';
+      document.getElementById('catStatsRow').style.display = 'none';
+      document.getElementById('emojiPickerPanel').classList.remove('open');
+      loadEmojiGrid('flores');
+      document.getElementById('catModal').classList.add('open');
+    }
+
+    function editCategory(id) {
+      const c = adminCategories.find(x => x.id === id);
+      if (!c) return;
+      const total   = adminProducts.filter(p=>p.cat===id).length;
+      const visibles = adminProducts.filter(p=>p.cat===id&&p.activo!==false).length;
+      document.getElementById('catModalTitle').textContent = 'Editar categoría';
+      document.getElementById('catModalSub').textContent = `Actualizando: ${c.nombre||c.name}`;
+      document.getElementById('catEditId').value = id;
+      document.getElementById('catId').value = id;
+      document.getElementById('catId').disabled = true;
+      document.getElementById('catNombre').value = c.nombre || c.name || '';
+      document.getElementById('catIcon').value = c.icon || '🌸';
+      document.getElementById('catOrden').value = c.orden || 1;
+      document.getElementById('catShowInHome').value = c.showInHome !== false ? 'true' : 'false';
+      // Mostrar stats de productos
+      document.getElementById('catStatsRow').style.display = 'flex';
+      document.getElementById('catStatTotal').textContent = total;
+      document.getElementById('catStatVisible').textContent = visibles;
+      document.getElementById('catStatOcultos').textContent = total - visibles;
+      document.getElementById('emojiPickerPanel').classList.remove('open');
+      loadEmojiGrid('flores');
+      document.getElementById('catModal').classList.add('open');
+    }
+
+    function closeCatModal() {
+      document.getElementById('catModal').classList.remove('open');
+      document.getElementById('emojiPickerPanel').classList.remove('open');
+    }
+
+    async function saveCategory() {
+      const id = document.getElementById('catId').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-');
+      const nombre = document.getElementById('catNombre').value.trim();
+      const icon   = document.getElementById('catIcon').value.trim();
+      const orden  = parseInt(document.getElementById('catOrden').value) || adminCategories.length + 1;
+      const showInHome = document.getElementById('catShowInHome').value === 'true';
+      if (!id || !nombre) { showToast('⚠️ ID y nombre son obligatorios'); return; }
+      const data = { id, nombre, icon, orden, showInHome, activo: true };
+      const isNew = !document.getElementById('catEditId').value;
+      const btn = document.getElementById('catSaveBtn');
+      if(btn){btn.disabled=true;btn.textContent='⏳ Guardando...';}
+      try {
+        await sbAdminSaveCategory(data, isNew);
+        if (isNew) {
+          adminCategories.push(data);
+        } else {
+          const idx = adminCategories.findIndex(c=>c.id===id);
+          if(idx!==-1) adminCategories[idx] = {...adminCategories[idx], ...data};
+        }
+        adminCategories.sort((a,b)=>(a.orden||0)-(b.orden||0));
+        buildSideFilters();
+        renderCategoriasList();
+        closeCatModal();
+        showToast(`✓ Categoría ${isNew?'creada':'actualizada'}`);
+        addToHistory(`📁 Categoría ${isNew?'creada':'editada'}: ${nombre}`);
+      } catch {
+        showToast('❌ Error al guardar');
+      } finally {
+        if(btn){btn.disabled=false;btn.textContent='Guardar categoría';}
+      }
+    }
+    async function deleteCategory(id) {
+      const cat = adminCategories.find(c=>c.id===id);
+      const label = cat?.nombre || cat?.name || id;
+      const prods = adminProducts.filter(p=>p.cat===id);
+      const msg = prods.length
+        ? `¿Eliminar la categoría "${label}" y sus ${prods.length} producto${prods.length>1?'s':''}? Todo se borrará permanentemente.`
+        : `¿Eliminar la categoría vacía "${label}"?`;
+      if(!confirm(msg)) return;
+
+      // Eliminar productos con progreso visible
+      if(prods.length > 0){
+        for(let i=0; i<prods.length; i++){
+          showToast(`⏳ Eliminando productos ${i+1} de ${prods.length}...`);
+          const p = prods[i];
+          try{ await sbAdminDeleteProduct(p.id); adminProducts=adminProducts.filter(x=>x.id!==p.id); }catch{}
+        }
+      }
+
+      // Eliminar la categoría
+      try {
+        await sbAdminDeleteCategory(id);
+        adminCategories = adminCategories.filter(c=>c.id!==id);
+        if(sideFilterCat===id) { sideFilterCat=''; selectedProducts.clear(); }
+        buildSideFilters();
+        renderCategoriasList();
+        renderSidebar(); renderStats(); updateBulkBar();
+        if(selectedId && !adminProducts.find(p=>p.id===selectedId)) { selectedId=null; showEditorEmpty(); }
+        const msg2 = prods.length ? `🗑️ Categoría y ${prods.length} producto${prods.length>1?'s':''} eliminados` : '🗑️ Categoría eliminada';
+        showToast(msg2);
+        addToHistory(`🗑️ Eliminada: ${label} (${prods.length} productos)`);
+      } catch { showToast('❌ Error al eliminar la categoría'); }
+    }
+
+    /* ── EMOJI PICKER ── */
+    const EMOJI_CATS = {
+      flores:     ['🌸','🌹','🌺','🌻','🌼','🌷','🏵️','🌶️','🌽','🌾','🎐','🍂','🍃','🍁','🌱','🍲','🌳','🌲','🍀','🌿'],
+      animales:   ['🐶','🐱','🐇','🐼','🐻','🦚','🐦','🦋','🐝','🦊','🐄','🧿','🐔','🐪','🦧','🐠','🐟','🐈‍⬛','🐑','🦄'],
+      objetos:    ['🎁','🎀','🎂','💍','💎','🎉','🥰','💖','💝','💟','🎨','😀','😍','📸','🛒','📦','🇨🇴','💌','🧧','🧶'],
+      corazones:  ['❤️','🧡','💛','💚','💙','💜','🤍','🤎','🖤','💞','💕','💟','💔','💓','💖','💗','💘','💝','♥️','🇨🇴'],
+      naturaleza: ['🌎','🌟','✨','💫','🌙','☀️','🌈','⚡','❄️','🌊','🏔️','🇬🏾','🌌','🏡','🌾','🏕️','🏞️','🎅','🎄','⛄'],
+    };
+
+    function toggleEmojiPicker() {
+      const panel = document.getElementById('emojiPickerPanel');
+      panel.classList.toggle('open');
+    }
+
+    function loadEmojiGrid(cat) {
+      const grid = document.getElementById('emojiGrid');
+      let list = cat === 'todos'
+        ? Object.values(EMOJI_CATS).flat()
+        : (EMOJI_CATS[cat] || EMOJI_CATS.flores);
+      
+      const noEmojiBtn = `<button type="button" class="ep-emoji-btn no-emoji-btn" onclick="selectEmoji('')" title="Quitar emoji" style="background:#fff1f0; border:2px solid #ffa39e; border-radius:12px; font-weight:bold; color:#cf1322; order:-1">✕</button>`;
+      
+      grid.innerHTML = noEmojiBtn + list.map(e =>
+        `<button type="button" class="ep-emoji-btn" onclick="selectEmoji('${e}')">${e}</button>`
+      ).join('');
+    }
+
+    function showEmojiCat(cat) {
+      document.querySelectorAll('.ep-categories button').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      loadEmojiGrid(cat);
+    }
+
+    function filterEmojis(q) {
+      const all = Object.values(EMOJI_CATS).flat();
+      const list = q ? all.filter(e => e.includes(q)) : all;
+      const grid = document.getElementById('emojiGrid');
+      grid.innerHTML = list.map(e =>
+        `<button type="button" class="ep-emoji-btn" onclick="selectEmoji('${e}')">${e}</button>`
+      ).join('');
+    }
+
+    function selectEmoji(emoji) {
+      const input = document.getElementById('catIcon');
+      if (input) {
+        input.value = emoji;
+        input.dispatchEvent(new Event('input')); // Disparar evento para que detecte el cambio
+      }
+      const panel = document.getElementById('emojiPickerPanel');
+      if (panel) panel.classList.remove('open');
+    }
+
+    // Inicializar picker al cargar
+    document.addEventListener('DOMContentLoaded', () => loadEmojiGrid('flores'));
+
+    // Cerrar picker al clic fuera
+    document.addEventListener('click', (e) => {
+      const panel = document.getElementById('emojiPickerPanel');
+      const btn   = document.querySelector('.btn-emoji-picker');
+      if (panel && !panel.contains(e.target) && btn && !btn.contains(e.target)) {
+        panel.classList.remove('open');
+      }
+    });
+
+    /* ── DASHBOARD ── */
+    function renderDashboard(){
+      const total=adminProducts.length,visibles=adminProducts.filter(p=>p.activo!==false).length;
+      document.getElementById('dashStats').innerHTML=`
+        <div class="dash-stat"><div class="dash-num">${total}</div><div class="dash-label">Ramos</div></div>
+        <div class="dash-stat"><div class="dash-num green">${visibles}</div><div class="dash-label">Visibles</div></div>
+        <div class="dash-stat"><div class="dash-num">${pedidos.length}</div><div class="dash-label">Pedidos</div></div>`;
+      document.getElementById('histList').innerHTML=changeHistory.length?[...changeHistory].reverse().slice(0,10).map(h=>`
+        <div class="hist-item"><div class="hist-dot"></div><div><div class="hist-action">${h.action}</div><div class="hist-time">${h.time}</div></div></div>`).join(''):'';
+    }
+    function addToHistory(action){ changeHistory.push({action,time:new Date().toLocaleString('es-CO')}); if(changeHistory.length>50)changeHistory.shift(); localStorage.setItem('nuditos_history',JSON.stringify(changeHistory)); }
+
+    /* ── VITRINA & METADATA ── */
+    /* ── VITRINA & ESTRUCTURA TIENDA ── */
+    function renderVitrina() {
+      renderMomentoSelected();
+      renderHeroSlots();
+      renderSeleccionSlots();
+      renderVitrinaCategories();
+      searchHeroProducts();
+      searchSeleccionProducts();
+      searchMomentoProducts();
+      // Poblar filtros en vitrina
+      const sortSel = document.getElementById('sortCatFilter');
+      if (sortSel) {
+        sortSel.innerHTML = '<option value="todos">Todas las categorías</option>' + 
+          adminCategories.filter(c => c.id !== 'todos').map(c => `<option value="${c.id}">${c.nombre || c.name}</option>`).join('');
+      }
+    }
+
+    function renderVitrinaCategories() {
+      const el = document.getElementById('vitrinaCategoriesList');
+      if (!el) return;
+      
+      const sorted = [...adminCategories].filter(c => c.id !== 'todos').sort((a,b) => (a.orden||0) - (b.orden||0));
+      
+      el.innerHTML = sorted.map((c, i) => {
+        const isVisible = c.showInHome !== false;
+        return `
+          <div class="cat-admin-card" style="padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; gap: 1rem; transition: all 0.2s ease;">
+            <div style="font-size: 1.5rem; width: 40px; text-align: center;">${c.icon || '🌸'}</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; color: var(--text); font-size: 0.9rem;">${c.nombre || c.name}</div>
+              <div style="font-size: 0.75rem; color: var(--soft);">Orden: ${c.orden || 0}</div>
+            </div>
+            
+            <div style="display: flex; gap: 0.4rem; align-items:center;">
+              <!-- Toggle Home -->
+              <button onclick="toggleCatHome('${c.id}')" 
+                style="padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s;
+                ${isVisible ? 'background: #dcfce7; color: #166534;' : 'background: #f1f5f9; color: #64748b;'}">
+                ${isVisible ? '🏠 visible' : '🙈 oculto'}
+              </button>
+              
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <button onclick="moveCat('${c.id}', -1)" class="ca-btn" style="padding: 2px 6px; font-size: 10px;" ${i===0?'disabled opacity-30':''}>▲</button>
+                <button onclick="moveCat('${c.id}', 1)" class="ca-btn" style="padding: 2px 6px; font-size: 10px;" ${i===sorted.length-1?'disabled opacity-30':''}>▼</button>
+              </div>
+
+              <button class="ca-btn" onclick="editCategory('${c.id}')" style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:8px;">✏️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.toggleCatHome = async function(id) {
+      const idx = adminCategories.findIndex(c => c.id === id);
+      if (idx === -1) return;
+      adminCategories[idx].showInHome = (adminCategories[idx].showInHome === false ? true : false);
+      showToast(`${adminCategories[idx].showInHome ? '✅ Visible' : '🙈 Oculto'} en Home`);
+      renderVitrinaCategories();
+      await sbAdminSaveCategory(adminCategories[idx], false);
+      renderBannerList(); // Para actualizar los dropdows de banners
+    }
+
+    window.moveCat = async function(id, direction) {
+      const sorted = [...adminCategories].filter(c => c.id !== 'todos').sort((a,b) => (a.orden||0) - (b.orden||0));
+      const idx = sorted.findIndex(c => c.id === id);
+      if (idx === -1) return;
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= sorted.length) return;
+      
+      const current = sorted[idx];
+      const target = sorted[targetIdx];
+      
+      // Swap orden values
+      const temp = current.orden;
+      current.orden = target.orden;
+      target.orden = temp;
+      
+      // Si son iguales o faltan, forzar correlativo
+      if (current.orden === target.orden) {
+        current.orden = idx + direction + 1;
+        target.orden = idx + 1;
+      }
+
+      showToast('⏳ Sincronizando orden...');
+      renderVitrinaCategories();
+      
+      await sbAdminSaveCategory(current, false);
+      await sbAdminSaveCategory(target, false);
+      
+      renderVitrinaCategories();
+      renderBannerList();
+    }
+
+    function renderMomentoSelected(){ const p=momentoSelection?adminProducts.find(x=>x.id===momentoSelection):null; document.getElementById('momentoSelected').textContent=p?`✅: ${p.name}`:'Sin seleccionar'; }
+    function renderMomentoList(list){ document.getElementById('momentoList').innerHTML=list.slice(0,50).map(p=>`<div class="v-prod-row"><div class="v-info">${p.name} <span style="font-size:0.6rem;opacity:0.6;">(${p.cat})</span></div><button class="btn-select" onclick="selectMomento(${p.id})">Seleccionar</button></div>`).join(''); }
+    function selectMomento(id){ momentoSelection=id; renderMomentoSelected(); }
+    
+    function renderHeroSlots(){ document.getElementById('heroSlots').innerHTML=heroSelection.map(id=>{ const p=adminProducts.find(x=>x.id===id); return `<div class="hero-slot filled" onclick="toggleHero(${id})" title="Click para quitar">${p?.name.slice(0,10)}</div>`; }).join(''); }
+    function renderHeroList(list){ document.getElementById('heroList').innerHTML=list.slice(0,50).map(p=>`<div class="v-prod-row"><div class="v-info">${p.name} <span style="font-size:0.6rem;opacity:0.6;">(${p.cat})</span></div><button class="btn-select" onclick="toggleHero(${p.id})">${heroSelection.includes(p.id)?'Quitar':'+ Agregar'}</button></div>`).join(''); }
+    function toggleHero(id){ 
+      if(heroSelection.includes(id)) {
+        heroSelection = heroSelection.filter(x => x !== id);
+      } else {
+        if(heroSelection.length >= 6) return showToast('Máximo 6 productos');
+        heroSelection.push(id); 
+      }
+      renderHeroSlots(); 
+      searchHeroProducts();
+    }
+    window.searchHeroProducts = function() {
+      const q = document.getElementById('searchHero').value.toLowerCase();
+      const list = adminProducts.filter(p => !q || p.name.toLowerCase().includes(q));
+      renderHeroList(list);
+    }
+
+    /* Selección Nuditos */
+    function renderSeleccionSlots(){ document.getElementById('seleccionSlots').innerHTML=seleccionSelection.map(id=>{ const p=adminProducts.find(x=>x.id===id); return `<div class="hero-slot filled" onclick="toggleSeleccion(${id})" title="Click para quitar">${p?.name.slice(0,10)}</div>`; }).join(''); }
+    function renderSeleccionList(list){ document.getElementById('seleccionList').innerHTML=list.slice(0,50).map(p=>`<div class="v-prod-row"><div class="v-info">${p.name} <span style="font-size:0.6rem;opacity:0.6;">(${p.cat})</span></div><button class="btn-select" onclick="toggleSeleccion(${p.id})">${seleccionSelection.includes(p.id)?'Quitar':'+ Agregar'}</button></div>`).join(''); }
+    function toggleSeleccion(id){ 
+      if(seleccionSelection.includes(id)) {
+        seleccionSelection = seleccionSelection.filter(x => x !== id);
+      } else {
+        if(seleccionSelection.length >= 4) return showToast('Máximo 4 productos');
+        seleccionSelection.push(id); 
+      }
+      renderSeleccionSlots(); 
+      searchSeleccionProducts();
+    }
+    window.searchSeleccionProducts = function() {
+      const q = document.getElementById('searchSeleccion').value.toLowerCase();
+      const list = adminProducts.filter(p => !q || p.name.toLowerCase().includes(q));
+      renderSeleccionList(list);
+    }
+
+    function renderBannerList(){ 
+      const editorialList = editorialBannersAdmin.filter(b => b.afterCat === 'home1' || b.afterCat === 'home2');
+      const collectionsList = editorialBannersAdmin.filter(b => b.afterCat !== 'home1' && b.afterCat !== 'home2');
+
+      // Construir opciones de posición desde categorías (Solo las visibles en Home)
+      const catOpts = [
+        `<option value="home_selection">⭐ Selección Nuditos (Sección Superior)</option>`,
+        ...adminCategories.filter(c => c.id !== 'todos' && c.showInHome !== false)
+          .sort((a,b) => (a.orden||0) - (b.orden||0))
+          .map(c => `<option value="${c.id}">${c.icon||'📁'} Antes de "${c.nombre || c.name}"</option>`)
+      ].join('');
+
+      const buildCard = (b, i) => {
+        const realIdx = editorialBannersAdmin.findIndex(x => x === b);
+        const isHome = b.afterCat === 'home1' || b.afterCat === 'home2';
+        
+        // Etiqueta de posición legible
+        let posLabel = '📍 Sin asignar';
+        if (b.afterCat === 'home1') posLabel = '🏠 Portada Principal';
+        else if (b.afterCat === 'home2') posLabel = '🏠 Segundo Banner Inicio';
+        else if (b.afterCat === 'home_selection') posLabel = '⭐ Antes de la Selección Nuditos';
+        else if (b.afterCat) {
+          const cat = adminCategories.find(c => c.id === b.afterCat);
+          posLabel = cat ? `📍 Antes de "${cat.nombre || cat.name}"` : `📍 ${b.afterCat}`;
+        }
+
+        return `
+          <div style="margin-bottom: 1rem; border: 1px solid #e5e7eb; padding: 1rem; border-radius: 1rem; background: #fff;">
+            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+               <div>
+                 <span style="font-size: 0.7rem; color: #6d28d9; background: #f3e8ff; padding: 3px 10px; border-radius: 99px; font-weight: 700;">${posLabel}</span>
+               </div>
+               <button onclick="removeBanner(${realIdx})" style="background: none; color: #ef4444; border:none; padding: 5px; cursor:pointer; font-size: 1rem;">🗑️</button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.8rem;">
+              ${!isHome ? `
+              <div class="field" style="grid-column: 1/-1;">
+                <label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">📍 ¿Dónde aparece?</label>
+                <select onchange="updateBanner(${realIdx},'afterCat',this.value)" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ddd; font-size:0.8rem;">
+                  <option value="">— Elige posición —</option>
+                  ${catOpts.replace(`value="${b.afterCat}"`, `value="${b.afterCat}" selected`)}
+                </select>
+              </div>` : ''}
+              
+              <div class="field"><label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">Título (opcional)</label><input type="text" value="${b.title||''}" oninput="updateBanner(${realIdx},'title',this.value)" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></div>
+              <div class="field"><label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">Subtítulo (opcional)</label><input type="text" value="${b.subtitle||''}" oninput="updateBanner(${realIdx},'subtitle',this.value)" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></div>
+              <div class="field"><label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">Texto botón (vacío = sin botón)</label><input type="text" value="${b.ctaText||''}" oninput="updateBanner(${realIdx},'ctaText',this.value)" placeholder="Dejar vacío para no mostrar" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></div>
+              <div class="field"><label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">URL del botón / link</label><input type="text" value="${b.ctaUrl||'/catalogo'}" oninput="updateBanner(${realIdx},'ctaUrl',this.value)" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid #ddd;"></div>
+              
+              <div class="field" style="grid-column: 1/-1;">
+                <label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">🖼️ Fondo Web (Escritorio)</label>
+                <div style="display:flex; gap: 5px; flex-wrap: wrap;">
+                  <input type="text" id="bImg-${realIdx}" value="${b.imgUrl||b.videoUrl||''}" style="flex:1; min-width: 150px; font-size: 0.7rem; padding:6px 8px; border-radius:8px; border:1px solid #ddd;" oninput="updateBannerMedia(${realIdx},this.value,'desktop')" placeholder="URL de imagen/video .mp4">
+                  <button onclick="document.getElementById('bFile-${realIdx}').click()" style="background:#6d28d9; color:white; border:none; padding: 0 12px; border-radius: 8px; cursor:pointer; font-size: 0.7rem;">📸 Subir Web</button>
+                  <input type="file" id="bFile-${realIdx}" style="display:none" accept="image/*,video/*" onchange="uploadBannerImg(${realIdx}, this.files, 'desktop')">
+                </div>
+              </div>
+
+              <div class="field" style="grid-column: 1/-1;">
+                <label style="font-size:0.7rem; font-weight:600; color:#666; margin-bottom:3px; display:block;">📱 Fondo Móvil</label>
+                <div style="display:flex; gap: 5px; flex-wrap: wrap;">
+                  <input type="text" id="bImgMob-${realIdx}" value="${b.mobileImgUrl||b.mobileVideoUrl||''}" style="flex:1; min-width: 150px; font-size: 0.7rem; padding:6px 8px; border-radius:8px; border:1px solid #ddd;" oninput="updateBannerMedia(${realIdx},this.value,'mobile')" placeholder="URL de imagen/video móvil .mp4">
+                  <button onclick="document.getElementById('bFileMob-${realIdx}').click()" style="background:#ec4899; color:white; border:none; padding: 0 12px; border-radius: 8px; cursor:pointer; font-size: 0.7rem;">📱 Subir Móvil</button>
+                  <input type="file" id="bFileMob-${realIdx}" style="display:none" accept="image/*,video/*" onchange="uploadBannerImg(${realIdx}, this.files, 'mobile')">
+                </div>
+              </div>
+            </div>
+            
+            ${b.videoUrl ? `<div style="margin-top:0.6rem; padding: 0.5rem; background: #e0e7ff; color: #4338ca; font-size: 0.7rem; border-radius: 0.5rem; text-align: center; font-weight: 600;">🎬 Video configurado</div>` : ''}
+            ${!b.videoUrl && b.imgUrl ? `<img src="${b.imgUrl}" style="width:100%; height: 70px; object-fit: cover; border-radius: 0.6rem; margin-top: 0.6rem; border: 1px solid #eee;">` : ''}
+          </div>
+        `;
+      };
+
+      document.getElementById('editorialBannersList').innerHTML = editorialList.map(b => buildCard(b)).join('') || '<div style="padding:1rem; text-align:center; color:#999; font-size: 0.8rem;">No hay banners de inicio</div>';
+      document.getElementById('bannerList').innerHTML = collectionsList.map(b => buildCard(b)).join('') || '<div style="padding:1rem; text-align:center; color:#999; font-size: 0.8rem;">No hay banners de categoría — ¡Agrega uno!</div>';
+    }
+    window.updateBanner = function(i,key,val){ 
+      editorialBannersAdmin[i][key]=val; 
+    };
+    window.updateBannerMedia = function(i, val, type = 'desktop') {
+      console.log(`[Banner] Intento de actualización de media en banner ${i} (${type}): ${val}`);
+      
+      const imgKey = type === 'desktop' ? 'imgUrl' : 'mobileImgUrl';
+      const videoKey = type === 'desktop' ? 'videoUrl' : 'mobileVideoUrl';
+
+      if (!val) {
+        editorialBannersAdmin[i][videoKey] = '';
+        editorialBannersAdmin[i][imgKey] = '';
+        renderBannerList();
+        return;
+      }
+
+      const isVideo = val.toLowerCase().endsWith('.mp4') || val.includes('/video/') || val.includes('video-upload');
+      
+      if (isVideo) {
+        let cleanVideo = val.replace('/image/upload/', '/video/upload/');
+        if (!cleanVideo.toLowerCase().endsWith('.mp4') && cleanVideo.includes('cloudinary')) {
+          cleanVideo += '.mp4';
+        }
+        editorialBannersAdmin[i][videoKey] = cleanVideo;
+        editorialBannersAdmin[i][imgKey] = '';
+      } else {
+        editorialBannersAdmin[i][imgKey] = val;
+        if (!editorialBannersAdmin[i][videoKey]) {
+           editorialBannersAdmin[i][videoKey] = '';
+        }
+      }
+      renderBannerList();
+    };
+    window.removeBanner = function(i){ 
+      editorialBannersAdmin.splice(i,1); 
+      renderBannerList(); 
+    };
+    window.uploadBannerImg = async function(i, files, type = 'desktop') {
+      if(!files.length) return;
+      const file = files[0];
+      const imgKey = type === 'desktop' ? 'imgUrl' : 'mobileImgUrl';
+      const videoKey = type === 'desktop' ? 'videoUrl' : 'mobileVideoUrl';
+      const bTitle = slugify(editorialBannersAdmin[i].title) || 'fondo-portada';
+      const url = await uploadToCloudinary(file, bTitle + (type === 'mobile' ? '-movil' : '-web'), 0);
+      if(url) {
+        if (file.type.startsWith('video/')) {
+          editorialBannersAdmin[i][videoKey] = url;
+          editorialBannersAdmin[i][imgKey] = '';
+          showToast(`🎬 Video (${type}) subido`);
+        } else {
+          editorialBannersAdmin[i][imgKey] = url;
+          editorialBannersAdmin[i][videoKey] = '';
+        }
+        renderBannerList();
+      }
+    };
+    window.addNewBanner = function() {
+      editorialBannersAdmin.push({ title: '', afterCat: '', imgUrl: '', videoUrl: '', mobileImgUrl: '', mobileVideoUrl: '', subtitle: '', ctaText: '', ctaUrl: '/catalogo' });
+      renderBannerList();
+    };
+    function renderCatViewsList(){ document.getElementById('catViewsList').innerHTML=categories.filter(c=>c.id!=='todos').map(c=>`<div>${c.name}</div>`).join(''); }
+
+    /* ── D&D ORDEN CUSTOM ── */
+    let draggedRow = null;
+    window.renderSortableList = function() {
+      const cat = document.getElementById('sortCatFilter')?.value || 'todos';
+      const list = document.getElementById('sortableCatalogList');
+      if(!list) return;
+
+      const items = [...adminProducts]
+        .filter(p => p.activo !== false && (cat === 'todos' || (p.cats||[]).includes(cat) || p.cat === cat))
+        .sort((a,b) => (a.orden||0) - (b.orden||0) || (b.id - a.id));
+
+      if (items.length === 0) {
+        list.innerHTML = '<div style="padding:10px;text-align:center;color:#999;font-size:0.8rem;">No hay productos en esta categoría</div>';
+        return;
+      }
+
+      list.innerHTML = items.map((p, i) => `
+        <div class="v-prod-row sortable-item" draggable="true" data-id="${p.id}" data-orden="${i}" style="cursor:grab; background:#fff; margin-bottom:4px; padding:8px; border-radius:6px; border:1px solid var(--border); display:flex; align-items:center;">
+          <div style="margin-right:10px; opacity:0.3; cursor:grab;">☰</div>
+          <img src="${p.img||''}" style="width:30px;height:30px;border-radius:4px;object-fit:cover;margin-right:10px;background:#eee">
+          <div class="v-info" style="flex:1;">
+            <div style="font-weight:600; font-size:0.85rem">${p.name}</div>
+            <div style="font-size:0.65rem; color:#999; text-transform:uppercase">${p.cats?.join(', ') || p.cat || 'General'}</div>
+          </div>
+          <div style="font-size:0.7rem; color:var(--lila); font-weight:bold">Orden: ${p.orden||0}</div>
+        </div>
+      `).join('');
+
+      // Add Native Drag Events
+      const rows = list.querySelectorAll('.sortable-item');
+      rows.forEach(row => {
+        row.addEventListener('dragstart', function(e) {
+          draggedRow = this;
+          e.dataTransfer.effectAllowed = 'move';
+          setTimeout(() => this.style.opacity = '0.4', 0);
+        });
+        row.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        });
+        row.addEventListener('dragenter', function(e) { this.style.border = '1px dashed var(--lila)'; });
+        row.addEventListener('dragleave', function(e) { this.style.border = '1px solid var(--border)'; });
+        row.addEventListener('drop', function(e) {
+          e.stopPropagation();
+          this.style.border = '1px solid var(--border)';
+          if (draggedRow !== this) {
+            const allItems = Array.from(list.children);
+            const draggedIdx = allItems.indexOf(draggedRow);
+            const thisIdx = allItems.indexOf(this);
+            if (draggedIdx < thisIdx) {
+              list.insertBefore(draggedRow, this.nextSibling);
+            } else {
+              list.insertBefore(draggedRow, this);
+            }
+          }
+          return false;
+        });
+        row.addEventListener('dragend', function() {
+          this.style.opacity = '1';
+          rows.forEach(r => r.style.border = '1px solid var(--border)');
+          draggedRow = null;
+        });
+      });
+    }
+
+    window.saveCatalogOrder = async function() {
+      const btn = document.getElementById('saveOrderBtn');
+      if(btn) { btn.disabled = true; btn.textContent = '⏳ Guardando...'; }
+      const items = Array.from(document.querySelectorAll('#sortableCatalogList .sortable-item'));
+      let err=0;
+      
+      showToast(`⏳ Guardando orden de ${items.length} productos...`);
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const id = parseInt(item.dataset.id);
+        const newOrden = i + 1; // 1-based order
+        const pIdx = adminProducts.findIndex(p => p.id === id);
+        if (pIdx !== -1 && adminProducts[pIdx].orden !== newOrden) {
+           adminProducts[pIdx].orden = newOrden;
+           try {
+             await sbAdminSaveProduct({ ...adminProducts[pIdx], _isNew: false });
+           } catch { err++; }
+        }
+      }
+      showToast(err ? `⚠️ Guardado con ${err} errores` : '✅ Orden guardado con éxito');
+      if(btn) { btn.disabled = false; btn.textContent = '💾 Guardar Orden'; }
+      renderSortableList(); // refresh UI
+    }
+
     async function saveConfig(){
       const pixelId = document.getElementById('seoMetaPixelId')?.value.trim() || document.getElementById('metaPixelId')?.value.trim();
       const pixelActivo = document.getElementById('toggleMetaPixelSEO')?.classList.contains('on') || document.getElementById('toggleMetaPixel')?.classList.contains('on');
@@ -516,21 +1539,9 @@ const CLOUDINARY_PRESET = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
         gaId: document.getElementById('seoGAId')?.value.trim() || '',
         gaActive: !!document.getElementById('toggleGASEO')?.classList.contains('on')
       };
-      try{ 
-        await sbAdminSaveConfig(newCfg); 
-        await sbAdminSaveBanners(editorialBannersAdmin); 
-        showToast('✅ Guardado'); 
-      }catch{ 
-        showToast('❌ Error');
-      }
+      try{ await sbAdminSaveConfig(newCfg); await sbAdminSaveBanners(editorialBannersAdmin); showToast('✅ Guardado'); }catch{ showToast('❌ Error');}
     }
-
-    function showToast(msg){ 
-      const t=document.getElementById('toastAdmin'); 
-      if(!t) return;
-      t.textContent=msg; t.classList.add('show'); 
-      setTimeout(()=>t.classList.remove('show'),2000); 
-    }
+    function showToast(msg){ const t=document.getElementById('toastAdmin'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
 
     /* ══════════════════════════════════════════
        SISTEMA DE CAMPAÑAS TEMPORALES

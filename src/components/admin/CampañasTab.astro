@@ -162,120 +162,38 @@ import Icon from '../Icon.astro';
 
 </div>
 
-<script is:inline>
-  window.loadCampaigns = function() {
-    try {
-      const saved = localStorage.getItem('nuditos_campaigns');
-      window.adminCampaigns = saved ? JSON.parse(saved) : [];
-    } catch { window.adminCampaigns = []; }
-  };
-
-  window.saveCampaignsToStorage = function() {
-    localStorage.setItem('nuditos_campaigns', JSON.stringify(window.adminCampaigns));
-  };
-
-  window.getCampaignStatus = function(camp) {
-    if (!camp.fechaInicio && !camp.fechaFin) return 'draft';
-    const now = new Date();
-    const start = camp.fechaInicio ? new Date(camp.fechaInicio + 'T00:00:00') : null;
-    const end   = camp.fechaFin   ? new Date(camp.fechaFin   + 'T23:59:59') : null;
-    if (start && now < start) return 'upcoming';
-    if (end && now > end) return 'expired';
-    return 'active';
-  };
-
-  window.getActiveCampaign = function() {
-    return (window.adminCampaigns || []).find(c => window.getCampaignStatus(c) === 'active') || null;
-  };
-
-  window.renderCampaignsList = function() {
-    window.loadCampaigns();
-    const active = window.getActiveCampaign();
-    const statusEl = document.getElementById('activeCampaignStatus');
-    
-    if (statusEl) {
-      if (active) {
-        statusEl.innerHTML = `
-          <div style="display:flex; align-items:center; gap:10px; justify-content:center; flex-wrap:wrap;">
-            <span style="font-size:1.5rem">${active.emoji || '🎪'}</span>
-            <div style="text-align:left;">
-              <div style="font-weight:700; color: ${active.color || '#6d28d9'}; font-size:0.9rem;">${active.nombre}</div>
-              <div style="color:#666; font-size:0.75rem;">Activa hasta: ${active.fechaFin || 'sin fin'}</div>
-            </div>
-            <span style="background:#d1fae5; color:#065f46; font-size:0.65rem; font-weight:700; padding:4px 12px; border-radius:99px;">✅ ACTIVA AHORA</span>
-          </div>`;
-      } else {
-        statusEl.innerHTML = `<span style="color:#aaa;">⚡ No hay campaña activa.</span>`;
-      }
-    }
-
-    const listEl = document.getElementById('campaignsList');
-    if (!listEl) return;
-    
-    if (!window.adminCampaigns || !window.adminCampaigns.length) {
-      listEl.innerHTML = `<div style="text-align:center; padding:2rem; color:#bbb;">No hay campañas.</div>`;
-      return;
-    }
-
-    const statusLabels = {
-      active: { text: '✅ Activa', cls: 'camp-status-active' },
-      upcoming: { text: '⏰ Próxima', cls: 'camp-status-upcoming' },
-      expired: { text: '⌛ Expirada', cls: 'camp-status-expired' },
-      draft: { text: '📝 Borrador', cls: 'camp-status-draft' },
-    };
-
-    listEl.innerHTML = window.adminCampaigns.map((camp, i) => {
-      const status = window.getCampaignStatus(camp);
-      const lbl = statusLabels[status];
-      return `
-        <div class="campaign-card ${status === 'active' ? 'active-camp' : ''}">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-             <div style="font-weight:700;">${camp.emoji} ${camp.nombre}</div>
-             <span class="camp-badge-status ${lbl.cls}">${lbl.text}</span>
-          </div>
-          <div style="margin-top:10px;">
-            <button onclick="window.editCampaign(${i})" class="ca-btn">Editar</button>
-            <button onclick="window.deleteCampaign(${i})" class="ca-btn" style="color:red">Eliminar</button>
-          </div>
-        </div>`;
-    }).join('');
-  };
-
-  window.newCampaign = function() {
-    document.getElementById('campEditId').value = '';
-    document.getElementById('campaignEditorTitle').textContent = 'Nueva Campaña';
-    document.getElementById('campaignEditor').style.display = 'block';
-  };
-
-  window.saveCampaign = function() {
-    const nombre = document.getElementById('campNombre').value.trim();
-    if (!nombre) return window.showToast('Nombre obligatorio');
-    
-    const camp = {
-      nombre,
-      emoji: document.getElementById('campEmoji').value,
-      color: document.getElementById('campColor').value,
-      fechaInicio: document.getElementById('campFechaInicio').value,
-      fechaFin: document.getElementById('campFechaFin').value,
-      bannerMsg: document.getElementById('campBannerMsg').value,
-      descCodigo: document.getElementById('campDescCodigo').value.toUpperCase(),
-      descPct: parseInt(document.getElementById('campDescPct').value) || 0,
-    };
-    
-    const editIdx = document.getElementById('campEditId').value;
-    if (editIdx !== '') {
-      window.adminCampaigns[parseInt(editIdx)] = camp;
-    } else {
-      window.adminCampaigns.push(camp);
-    }
-    
-    window.saveCampaignsToStorage();
-    document.getElementById('campaignEditor').style.display = 'none';
-    window.renderCampaignsList();
-    window.showToast('✅ Campaña guardada');
-  };
-
-  window.closeCampaignEditor = function() {
-    document.getElementById('campaignEditor').style.display = 'none';
-  };
-</script>
+<style>
+  .campaign-card {
+    border: 1.5px solid #e5e7eb;
+    border-radius: 1.2rem;
+    padding: 1.2rem;
+    background: #fff;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.2s;
+  }
+  .campaign-card:hover {
+    box-shadow: 0 4px 16px rgba(109,40,217,0.1);
+  }
+  .campaign-card.active-camp {
+    border-color: #6d28d9;
+    background: linear-gradient(135deg, #f9f5ff, #fff);
+  }
+  .camp-badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: 99px;
+  }
+  .camp-status-active { background: #d1fae5; color: #065f46; }
+  .camp-status-upcoming { background: #fef3c7; color: #92400e; }
+  .camp-status-expired { background: #fee2e2; color: #991b1b; }
+  .camp-status-draft { background: #f3f4f6; color: #6b7280; }
+  .color-chip.active {
+    box-shadow: 0 0 0 2.5px #fff, 0 0 0 4px var(--c-color, #6d28d9) !important;
+  }
+</style>

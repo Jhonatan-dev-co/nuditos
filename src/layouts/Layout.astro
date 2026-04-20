@@ -306,10 +306,31 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   .nav-wrap.nav-scrolled {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
   }
+  .nav-wrap.nav-hidden {
+    transform: translateY(-100%);
+  }
+  
+  @keyframes cartBump {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2) translateY(-2px); }
+    100% { transform: scale(1); }
+  }
+  .cart-bump-animation {
+    animation: cartBump 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  }
   @media (max-width: 768px) {
+    :root {
+      /* OPTIMIZACIÓN EXTREMA MÓVIL: Reducir blur para no asfixiar la GPU de celulares antiguos */
+      --glass-blur: 8px;
+      --glass-bg: rgba(255, 255, 255, 0.92);
+    }
     .nav-center .logo {
       font-size: 1.2rem;
       letter-spacing: 3px;
+    }
+    /* Forzar al celular a preparar la memoria gráfica para que el menú no laguee al iniciar */
+    .menu-panel, .cart-panel {
+      will-change: transform;
     }
   }
   /* Estilos para el Acordeón del Menú */
@@ -578,7 +599,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <!-- ════════ CARRITO PREMIUM GLASS ════════ -->
   <div class="cart-overlay fixed inset-0 z-[200] bg-stone-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" id="cartOverlay" onclick="toggleCart()"></div>
-  <div class="cart-panel fixed top-0 right-0 w-full max-w-[100vw] md:max-w-md border-l border-white/50 z-[201] translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col shadow-2xl" id="cartPanel" style="background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));">
+  <div class="cart-panel fixed top-0 right-0 w-full max-w-[100vw] md:max-w-md border-l border-white/50 z-[201] translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col shadow-2xl" id="cartPanel" style="height: 100svh; background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));">
     <div class="p-4 md:p-6 border-b border-stone-200/60 flex items-center justify-center shrink-0 relative z-10 min-h-[60px] md:min-h-[80px]">
       <span class="font-sans text-xl md:text-2xl font-bold tracking-[0.1em] text-stone-800 uppercase">Carrito</span>
       <button class="absolute right-4 md:right-6 w-10 h-10 rounded-2xl border border-stone-200/60 bg-white/40 shadow-sm flex items-center justify-center hover:bg-white transition-colors z-[203]" onclick="toggleCart()" aria-label="Cerrar carrito">
@@ -613,7 +634,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
         <a href="/checkout" class="w-full bg-stone-900 text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="toggleCart()">
           <Icon name="bank-card" class="text-lg leading-none" />
-          <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Pagar</span>
+          <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Ir a Pagar</span>
         </a>
       </div>
     </div>
@@ -649,6 +670,18 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   </div>
 
   <SearchOverlay />
+
+  <!-- ════════ WHATSAPP FLOTANTE ════════ -->
+  <div class="wa-float-wrap">
+    <a
+      href={`${whatsappLink}?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸`}
+      class="wa-float"
+      target="_blank"
+      aria-label="WhatsApp"
+    >
+      <Icon name="whatsapp"  />
+    </a>
+  </div>
 
   <div class="toast" id="toast"></div>
 

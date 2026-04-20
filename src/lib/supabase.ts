@@ -157,8 +157,8 @@ export async function getLiveConfig() {
       ramoDestacado:        parseInt(m.ramo_destacado)  || 0,
       wompiActivo:          m.wompi_activo        === 'true',
       wompiKey:             m.wompi_key           || '',
-      wompiIntegrity:       m.wompi_integrity_secret || '',
-      wompiEvents:          m.wompi_events_secret || '',
+      wompiIntegrity:       m.wompi_integrity_secret || m.wompiIntegrity || '',
+      wompiEvents:          m.wompi_events_secret    || m.wompiEvents    || '',
       catViews:             JSON.parse(m.cat_views || '{}'),
       seleccionNuditos:     JSON.parse(m.seleccion_nuditos || '[]'),
       metaPixelActivo:      m.meta_pixel_activo === 'true',
@@ -184,12 +184,9 @@ export async function getPublicConfig() {
   const config = await getLiveConfig();
   if (!config) return null;
   
-  // Clonar y eliminar campos sensibles
-  const publicConfig = { ...config };
-  delete (publicConfig as any).wompiIntegrity;
-  delete (publicConfig as any).wompiEvents;
-  
-  return publicConfig;
+  // Eliminamos de forma segura las llaves privadas antes de enviar al frontend
+  const { wompiIntegrity, wompiEvents, ...safeConfig } = config;
+  return safeConfig;
 }
 
 export async function getLiveProductBySlug(slug: string) {

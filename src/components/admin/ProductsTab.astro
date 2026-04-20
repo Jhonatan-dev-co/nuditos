@@ -1,34 +1,8 @@
+<!-- ÁREA DE PRODUCTOS -->
 <div class="right-col tab-content active" id="tab-productos">
-  <div class="editor-empty" id="products-empty-state">
+  <div class="editor-empty">
     <div class="editor-empty-icon">🌸</div>
     <h3>Selecciona un ramo</h3>
     <p>Elige un ramo de la lista para editar sus detalles, precio o fotos.</p>
   </div>
-  <div id="products-editor-container" class="hidden"></div>
 </div>
-
-<script is:inline>
-  // El código de renderizado y editores se manejará aquí
-  // Pero necesitamos acceso a las variables globales definidas en admin.astro
-  
-  window.renderProductsEditor = function(p) {
-    const container = document.getElementById('products-editor-container');
-    const empty = document.getElementById('products-empty-state');
-    
-    if (!p) {
-      container.classList.add('hidden');
-      empty.classList.remove('hidden');
-      return;
-    }
-    
-    container.classList.remove('hidden');
-    empty.classList.add('hidden');
-    
-    // Aquí iría la lógica de construcción del HTML del editor (buildEditorHTML)
-    // Para no duplicar, la mantendremos accesible globalmente por ahora
-    container.innerHTML = window.buildEditorHTML(p);
-    
-    if (typeof window.renderImgPreviews === 'function') window.renderImgPreviews();
-    if (typeof window.updatePreview === 'function') window.updatePreview();
-  };
-</script>

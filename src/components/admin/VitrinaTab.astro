@@ -1,176 +1,51 @@
-<div class="right-col tab-content" id="tab-vitrina" style="display:none">
-  <!-- ESTRUCTURA DE LA TIENDA -->
+<!-- VITRINA -->
+<div class="tab-content" id="tab-vitrina">
+  
   <div class="t-card">
     <div class="t-title">🏬 Estructura de la Tienda</div>
     <div class="t-sub">Controla qué categorías son visibles en el Inicio y el orden en que aparecen.</div>
+    
     <div id="vitrinaCategoriesList" class="cat-admin-grid" style="margin-top:1.5rem; gap: 0.8rem;">
       <!-- Se llena dinámicamente -->
     </div>
   </div>
-
-  <!-- ORDENAR CATÁLOGO -->
   <div class="t-card">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <div>
         <div class="t-title">🔀 Ordenar Catálogo Público</div>
-        <div class="t-sub">Arrastra los productos para decidir el orden (clic y arrastra para reordenar).</div>
+        <div class="t-sub">Arrastra los productos para decidir en qué orden se muestran en la tienda. El catálogo primero organizará por productos "Destacados" y luego respetará este orden custom.</div>
       </div>
-      <button class="btn-save" onclick="window.saveCatalogOrder()" id="saveOrderBtn" style="padding:0.4rem 1rem;font-size:0.75rem;">💾 Guardar Orden</button>
+      <div>
+         <button class="btn-save" onclick="saveCatalogOrder()" id="saveOrderBtn" style="padding:0.4rem 1rem;font-size:0.75rem;">💾 Guardar Orden</button>
+      </div>
     </div>
     <div style="margin: 1rem 0;">
-      <select id="sortCatFilter" onchange="window.renderSortableList()" style="width:100%; max-width:300px; padding:0.5rem; border-radius:6px; border:1px solid var(--border);">
+      <select id="sortCatFilter" onchange="renderSortableList()" style="width:100%; max-width:300px; padding:0.5rem; border-radius:6px; border:1px solid var(--border);">
         <option value="todos">Todas las categorías</option>
       </select>
     </div>
-    <div class="v-prod-list" id="sortableCatalogList" style="max-height:450px; overflow-y:auto; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:0.5rem;"></div>
+    <div class="v-prod-list" id="sortableCatalogList" style="max-height:400px;overflow-y:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:0.5rem;"></div>
   </div>
-
-  <!-- RAMO DEL MOMENTO -->
   <div class="t-card">
     <div class="t-title">⭐ Ramo del momento</div>
     <div class="t-sub">Se muestra destacado justo debajo del carrusel.</div>
     <div id="momentoSelected" class="selected-tag"></div>
-    <input class="v-search" type="text" id="searchMomento" placeholder="Buscar ramo..." oninput="window.searchMomentoProducts()">
+    <input class="v-search" type="text" id="searchMomento" placeholder="Buscar ramo..." oninput="searchMomentoProducts()">
     <div class="v-prod-list" id="momentoList"></div>
   </div>
-
-  <!-- CARRUSEL PRINCIPAL -->
   <div class="t-card">
     <div class="t-title">🎠 Carrusel principal</div>
-    <div class="t-sub">Elige hasta 6 ramos para el carrusel de portada.</div>
+    <div class="t-sub">Elige hasta 5 ramos para el carrusel de portada.</div>
     <div class="hero-slots" id="heroSlots"></div>
-    <input class="v-search" type="text" id="searchHero" placeholder="Buscar ramo..." oninput="window.searchHeroProducts()">
+    <input class="v-search" type="text" id="searchHero" placeholder="Buscar ramo..." oninput="searchHeroProducts()">
     <div class="v-prod-list" id="heroList"></div>
   </div>
 
-  <!-- SELECCIÓN NUDITOS -->
   <div class="t-card">
-    <div class="t-title">✨ Selección Nuditos</div>
-    <div class="t-sub">Sección de 4 productos destacados en el inicio.</div>
+    <div class="t-title">⭐ Selección Nuditos (Sección Superior)</div>
+    <div class="t-sub">Estructura de 4 productos que aparece al inicio después del carrusel.</div>
     <div class="hero-slots" id="seleccionSlots"></div>
-    <input class="v-search" type="text" id="searchSeleccion" placeholder="Buscar ramo..." oninput="window.searchSeleccionProducts()">
+    <input class="v-search" type="text" id="searchSeleccion" placeholder="Buscar ramo..." oninput="searchSeleccionProducts()">
     <div class="v-prod-list" id="seleccionList"></div>
   </div>
 </div>
-
-<script is:inline>
-  window.renderVitrina = function() {
-    window.renderMomentoSelected();
-    window.renderHeroSlots();
-    window.renderSeleccionSlots();
-    window.renderVitrinaCategories();
-    window.searchHeroProducts();
-    window.searchSeleccionProducts();
-    window.searchMomentoProducts();
-    
-    const sortSel = document.getElementById('sortCatFilter');
-    if (sortSel) {
-      sortSel.innerHTML = '<option value="todos">Todas las categorías</option>' + 
-        window.adminCategories.filter(c => c.id !== 'todos').map(c => `<option value="${c.id}">${c.nombre || c.name}</option>`).join('');
-    }
-  };
-
-  window.renderVitrinaCategories = function() {
-    const el = document.getElementById('vitrinaCategoriesList');
-    if (!el) return;
-    const sorted = [...window.adminCategories].filter(c => c.id !== 'todos').sort((a,b) => (a.orden||0) - (b.orden||0));
-    el.innerHTML = sorted.map((c, i) => `
-      <div class="cat-admin-card">
-        <div class="cac-icon">${c.icon || '🌸'}</div>
-        <div class="cac-info">
-          <div class="cac-name">${c.nombre || c.name}</div>
-          <div class="cac-ord">Posición: ${c.orden || 0}</div>
-        </div>
-        <div class="cac-actions">
-          <button onclick="window.toggleCatHome('${c.id}')" class="btn-home-toggle ${c.showInHome!==false?'active':''}">
-            ${c.showInHome!==false?'🏠 visible':'🙈 oculto'}
-          </button>
-          <div class="move-btns">
-            <button onclick="window.moveCat('${c.id}', -1)" ${i===0?'disabled':''}>▲</button>
-            <button onclick="window.moveCat('${c.id}', 1)" ${i===sorted.length-1?'disabled':''}>▼</button>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  };
-
-  window.renderMomentoSelected = function() {
-    const p = window.momentoSelection ? window.adminProducts.find(x => x.id === window.momentoSelection) : null;
-    document.getElementById('momentoSelected').textContent = p ? `✅ Seleccionado: ${p.name}` : '❌ Ninguno seleccionado';
-  };
-
-  window.searchMomentoProducts = function() {
-    const q = document.getElementById('searchMomento').value.toLowerCase();
-    const list = window.adminProducts.filter(p => !q || p.name.toLowerCase().includes(q));
-    document.getElementById('momentoList').innerHTML = list.slice(0,20).map(p => `
-      <div class="v-prod-row">
-        <span>${p.name}</span>
-        <button onclick="window.selectMomento(${p.id})">Seleccionar</button>
-      </div>
-    `).join('');
-  };
-
-  window.selectMomento = function(id) {
-    window.momentoSelection = id;
-    window.renderMomentoSelected();
-  };
-
-  window.renderHeroSlots = function() {
-    document.getElementById('heroSlots').innerHTML = window.heroSelection.map(id => {
-      const p = window.adminProducts.find(x => x.id === id);
-      return `<div class="hero-slot filled" onclick="window.toggleHero(${id})">${p?.name.slice(0,8)}..</div>`;
-    }).join('');
-  };
-
-  window.toggleHero = function(id) {
-    if (window.heroSelection.includes(id)) {
-      window.heroSelection = window.heroSelection.filter(x => x !== id);
-    } else {
-      if (window.heroSelection.length >= 6) return window.showToast('Máximo 6 productos');
-      window.heroSelection.push(id);
-    }
-    window.renderHeroSlots();
-    window.searchHeroProducts();
-  };
-
-  window.searchHeroProducts = function() {
-    const q = document.getElementById('searchHero').value.toLowerCase();
-    const list = window.adminProducts.filter(p => !q || p.name.toLowerCase().includes(q));
-    document.getElementById('heroList').innerHTML = list.slice(0,20).map(p => `
-      <div class="v-prod-row">
-        <span>${p.name}</span>
-        <button onclick="window.toggleHero(${p.id})">${window.heroSelection.includes(p.id)?'Quitar':'Agregar'}</button>
-      </div>
-    `).join('');
-  };
-
-  // Lógica similar para Selección Nuditos
-  window.renderSeleccionSlots = function() {
-    document.getElementById('seleccionSlots').innerHTML = window.seleccionSelection.map(id => {
-      const p = window.adminProducts.find(x => x.id === id);
-      return `<div class="hero-slot filled" onclick="window.toggleSeleccion(${id})">${p?.name.slice(0,8)}..</div>`;
-    }).join('');
-  };
-
-  window.toggleSeleccion = function(id) {
-    if (window.seleccionSelection.includes(id)) {
-      window.seleccionSelection = window.seleccionSelection.filter(x => x !== id);
-    } else {
-      if (window.seleccionSelection.length >= 4) return window.showToast('Máximo 4 productos');
-      window.seleccionSelection.push(id);
-    }
-    window.renderSeleccionSlots();
-    window.searchSeleccionProducts();
-  };
-
-  window.searchSeleccionProducts = function() {
-    const q = document.getElementById('searchSeleccion').value.toLowerCase();
-    const list = window.adminProducts.filter(p => !q || p.name.toLowerCase().includes(q));
-    document.getElementById('seleccionList').innerHTML = list.slice(0,20).map(p => `
-      <div class="v-prod-row">
-        <span>${p.name}</span>
-        <button onclick="window.toggleSeleccion(${p.id})">${window.seleccionSelection.includes(p.id)?'Quitar':'Agregar'}</button>
-      </div>
-    `).join('');
-  };
-</script>

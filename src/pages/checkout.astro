@@ -7,8 +7,8 @@ import { getLiveConfig } from '../lib/supabase';
 import { COLOMBIA_DATA } from '../data/colombia';
 
 const config = await getLiveConfig();
-const wompiKey = import.meta.env.PUBLIC_WOMPI_KEY || config?.wompiKey || 'pub_test_XXXXXXXXXXXXXXXX';
-const wompiActivo = config?.wompiActivo || (!!import.meta.env.PUBLIC_WOMPI_KEY);
+const wompiKey = config?.wompiKey || 'pub_test_XXXXXXXXXXXXXXXX';
+const wompiActivo = config?.wompiActivo || false;
 
 const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
 const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
@@ -25,7 +25,12 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
     <!-- ════ HEADER ════ -->
     <header class="co-header">
-      <div class="co-header-left"></div>
+      <div class="co-header-left">
+        <a href="/catalogo" class="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-[11px] font-bold text-stone-500 hover:text-violet-600 transition-colors uppercase tracking-[0.1em] decoration-none">
+          <Icon name="arrow-left-s" class="text-lg md:text-xl leading-none" />
+          <span class="hidden sm:inline">Volver</span>
+        </a>
+      </div>
       <a href="/" class="logo logo-centered">NUDITOS<em>.</em></a>
       <div class="co-header-right">
         <div class="co-secure">
@@ -221,8 +226,8 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
                 VOLVER A LA BOLSA
               </a>
 
-              <button class="co-btn-pay-premium" id="btn-pay-wompi" onclick="window.finalizarPedido()" style="width: 100%; display: flex; justify-center: center; align-items: center; gap: 0.5rem; padding: 1rem;">
-                <Icon name="shield-user" style="color: white; width: 14px; height: 14px;" /> PAGAR
+              <button class="co-btn-pay-premium" id="btn-pay-wompi" onclick="window.finalizarPedido()" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 1rem;">
+                <Icon name="shield-user" style="color: white; width: 14px; height: 14px;" /> PAGO SEGURO
               </button>
             </div>
 
@@ -595,36 +600,10 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     };
 
 
-    // ── Guardar pedido en Supabase vía API Segura ──
-    async function savePedidoToSupabase(orderData) {
-      try {
-        const res = await fetch('/api/create-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fullname: orderData.fullname,
-            email: orderData.email,
-            phone: orderData.phone,
-            items: orderData.cart,
-            total: orderData.total,
-            discount: orderData.discount,
-            address: `${orderData.direccion}, ${orderData.barrio}, ${orderData.ciudad}, ${orderData.departamento}${orderData.codigoPostal ? ' CP:' + orderData.codigoPostal : ''}`,
-            notes: orderData.notas,
-          }),
-        });
+    // La lógica de guardado en base de datos y firmado se movió completamante al Backend
+    // para garantizar seguridad y evitar fraudes.
 
-        if (res.ok) {
-          const data = await res.json();
-          return data.pedido;
-        }
-        return null;
-      } catch(e) {
-        console.warn('Error guardando pedido:', e);
-        return null;
-      }
-    }
-
-    // ── Finalizar: guardar en Supabase → abrir Wompi ──
+    // ── Finalizar pedido: Validar y llamar al Backend ──
     window.finalizarPedido = async function() {
       if (_cart.length === 0) {
         alert('Tu carrito está vacío. Agrega productos antes de continuar.');
@@ -634,97 +613,70 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       const btn = document.getElementById('btn-pay-wompi');
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<span class="co-spinner"></span> Procesando...';
+        btn.innerHTML = '<span class="co-spinner"></span> Procesando seguro...';
       }
 
       const o = buildOrderData();
-      const isPlaceholder = !wompiKey || wompiKey.includes('XXXX') || wompiKey === '';
       
-      // ✅ Si no hay llave configurada, bloquear el pago con mensaje claro
-      if (isPlaceholder) {
-        alert('⚠️ Los pagos en línea aún no están configurados. Por favor intenta más tarde.');
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = 'PAGAR';
-        }
-        return;
-      }
-      
-      const finalWompiKey = wompiKey;
-
       try {
-        // 1. Guardar en Supabase primero
-        const pedido = await savePedidoToSupabase(o);
-        const pedidoId = pedido && pedido.id ? pedido.id : Date.now();
-        const ref = `NUDITOS-${pedidoId}`;
-        const amountCents = o.total * 100;
-        const currency = 'COP';
+        // 1. Inicializar pago seguro en el backend
+        const res = await fetch('/api/payments/init-wompi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+             fullname: o.fullname,
+             email: o.email,
+             phone: o.phone,
+             items: o.cart,
+             discount: o.discount,
+             address: `${o.direccion}, ${o.barrio}, ${o.ciudad}, ${o.departamento}${o.codigoPostal ? ' CP:' + o.codigoPostal : ''}`,
+             notes: o.notas
+          })
+        });
 
-        // 2. Obtener firma de integridad desde nuestro servidor (seguro)
-        let signature = null;
-        try {
-          const signRes = await fetch('/api/wompi-sign', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reference: ref, amountInCents: amountCents, currency: currency })
-          });
-          if (signRes.ok) {
-            const signData = await signRes.json();
-            signature = signData.signature;
-          }
-        } catch (e) {
-          console.warn('Error obteniendo firma, procediendo sin ella:', e);
+        const data = await res.json();
+
+        if (!res.ok) {
+           console.error('[checkout] Error devuelto por servidor:', data);
+           if (data.error === 'gateway_inactive') {
+              alert('⚠️ Los pagos en línea no están configurados. Contáctanos por WhatsApp.');
+           } else {
+              alert('Hubo un problema al crear tu pedido. Intenta nuevamente.');
+           }
+           if (btn) { btn.disabled = false; btn.innerHTML = '🔒 PAGO SEGURO'; }
+           return;
         }
 
-        // 3. Iniciar Widget de Wompi
-        if (window.WidgetCheckout) {
-          const checkoutConfig = {
-            currency: currency,
-            amountInCents: amountCents,
-            reference: ref,
-            publicKey: finalWompiKey,
-            redirectUrl: window.location.origin + '/gracias'
-          };
-          
-          if (signature) {
-            checkoutConfig.signature = { integrity: signature };
-          }
+        const checkoutConfig = data.widgetConfig;
+        checkoutConfig.redirectUrl = window.location.origin + '/gracias';
 
+        // 2. Iniciar Widget de Wompi de manera impecable
+        if (window.WidgetCheckout) {
           const checkout = new window.WidgetCheckout(checkoutConfig);
 
-          checkout.open(function ( result ) {
+          checkout.open(function (result) {
             const transaction = result.transaction;
             if (transaction.status === 'APPROVED') {
               window.location.href = '/gracias?ref=' + transaction.id;
-            } else if (transaction.status === 'DECLINED') {
-              alert('El pago fue declinado. Por favor intenta con otro medio.');
-              if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = 'INTENTAR DE NUEVO';
-              }
+            } else {
+              alert(`El pago fue ${transaction.status === 'DECLINED' ? 'declinado' : 'cancelado'}. Por favor intenta nuevamente o con otro medio de pago.`);
+              if (btn) { btn.disabled = false; btn.innerHTML = 'INTENTAR DE NUEVO'; }
             }
           });
           
-          // Restaurar botón después de un tiempo si no se abrió o se cerró
           setTimeout(() => {
-            if (btn) {
-              btn.disabled = false;
-              btn.innerHTML = 'PAGAR';
-            }
+            if (btn) { btn.disabled = false; btn.innerHTML = 'PAGO SEGURO'; }
           }, 5000);
 
         } else {
-          // Fallback a redirección si el script no cargó
-          const wompiUrl = `https://checkout.wompi.co/l/?public-key=${finalWompiKey}&currency=${currency}&amount-in-cents=${amountCents}&reference=${ref}${signature ? '&signature:integrity=' + signature : ''}&redirect-url=${encodeURIComponent(window.location.origin + '/gracias')}`;
+          // Fallback silencioso si no carga el widget
+          const wompiUrl = `https://checkout.wompi.co/l/?public-key=${checkoutConfig.publicKey}&currency=${checkoutConfig.currency}&amount-in-cents=${checkoutConfig.amountInCents}&reference=${checkoutConfig.reference}&signature:integrity=${checkoutConfig.signature.integrity}&redirect-url=${encodeURIComponent(checkoutConfig.redirectUrl)}`;
           window.location.href = wompiUrl;
         }
       } catch (err) {
-        console.error('Error al procesar pedido:', err);
-        alert('Hubo un error al procesar tu pedido. Intenta nuevamente.');
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = 'PAGAR';
-        }
+        console.error('[checkout] Error de red / backend:', err);
+        alert('Hubo un error de conexión. Verifica tu internet e intenta de nuevo.');
+        if (btn) { btn.disabled = false; btn.innerHTML = 'PAGO SEGURO'; }
       }
     };
 

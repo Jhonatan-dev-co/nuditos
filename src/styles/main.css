@@ -1977,7 +1977,7 @@ footer { background:var(--text); color:white; padding:5rem 1.5rem 3rem; }
   grid-template-columns: repeat(4, 1fr);
   align-items: center;
   border-top: 0.5px solid rgba(0, 0, 0, 0.06);
-  z-index: 2000; /* Asegura estar sobre todo */
+  z-index: 150; /* Permite que el menú y carrito (z:200+) lo cubran */
   box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
   padding-bottom: env(safe-area-inset-bottom);
 }

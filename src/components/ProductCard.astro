@@ -19,9 +19,6 @@ const hasMultiple = allImgs.length > 1;
 
 const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replace(/<[^>]*>?/gm, '').toLowerCase();
 const allCats = [...new Set([p.cat, ...(p.cats || [])].filter(Boolean))].join(',');
-
-// Normalización de seguridad para p.price (si viene de Supabase directamente sin pasar por getLiveProducts)
-const displayPrice = p.price || p.precio || 0;
 ---
 
 <article 
@@ -38,13 +35,7 @@ const displayPrice = p.price || p.precio || 0;
 >
   <div class="card-media">
     <div class="media-viewport">
-      <a 
-        href={`/ramo/${productSlug}`} 
-        class="media-link" 
-        data-astro-prefetch="hover"
-        data-product-id={p.id}
-        onclick={`this.querySelector('.main-img').style.viewTransitionName = 'p-img-' + this.dataset.productId`}
-      >
+      <a href={`/ramo/${productSlug}`} class="media-link" data-astro-prefetch="hover">
         <div class="img-track" data-imgs={allImgs.map(img => clUrl(img, 480)).join('|')}>
           <img 
             src={clUrl(allImgs[0], 480)} 
@@ -52,7 +43,7 @@ const displayPrice = p.price || p.precio || 0;
             class="main-img"
             loading={imgLoading}
             width="400" height="500"
-            style={`view-transition-name: p-img-${p.id}-card-${Math.random().toString(36).substr(2, 4)}`}
+            style={`view-transition-name: p-img-${p.id}`}
           />
           {hasMultiple && (
             <img 
@@ -92,8 +83,8 @@ const displayPrice = p.price || p.precio || 0;
     </div>
 
     {/* Quick Add icon */}
-    {displayPrice > 0 && (
-      <button class="quick-add" id={`padd-${p.id}`} onclick={`event.preventDefault(); event.stopPropagation(); window.addToCart(${p.id})`}>
+    {p.price > 0 && (
+      <button class="quick-add" onclick={`event.preventDefault(); window.addToCart(${p.id})`}>
         <Icon name="shopping-bag-3" class="w-5 h-5" />
       </button>
     )}
@@ -105,7 +96,7 @@ const displayPrice = p.price || p.precio || 0;
       <h3 class="product-name">{p.name}</h3>
     </a>
     <div class="price-container">
-      <span class="price">${displayPrice.toLocaleString('es-CO')}</span>
+      <span class="price">${p.price.toLocaleString('es-CO')}</span>
     </div>
   </div>
 </article>

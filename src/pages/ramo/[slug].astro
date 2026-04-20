@@ -153,17 +153,6 @@ const productSchema = {
         </div>
 
         <div class="swiper-pagination !bottom-6"></div>
-        
-        {allImgs.length > 1 && (
-          <div class="hidden md:block">
-            <button class="gallery-nav-btn prev absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-stone-100 flex items-center justify-center text-stone-600 hover:bg-white hover:scale-110 active:scale-95 transition-all shadow-sm group">
-              <Icon name="arrow-left-s" class="text-2xl group-hover:-translate-x-0.5 transition-transform" />
-            </button>
-            <button class="gallery-nav-btn next absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-stone-100 flex items-center justify-center text-stone-600 hover:bg-white hover:scale-110 active:scale-95 transition-all shadow-sm group">
-              <Icon name="arrow-right-s" class="text-2xl group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </div>
-        )}
 
         {product.badge && (
           <div class="absolute top-6 left-6 z-10 hidden md:flex bg-white/90 backdrop-blur-md border border-stone-100 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider items-center gap-2 shadow-sm">
@@ -195,164 +184,156 @@ const productSchema = {
 
     <!-- INFO -->
     <div class="px-4 pt-4 md:px-0 md:pt-0">
-      <div class="space-y-0.5 md:space-y-4">
-        <div class="text-[9px] md:text-[10px] font-bold tracking-[0.4em] uppercase text-stone-400 flex items-center gap-2">
-          <span class="opacity-40 hidden md:inline">{cat.icon}</span> {cat.name}
+      <div class="space-y-1 md:space-y-4">
+        <div class="text-[9px] md:text-[10px] font-bold tracking-[0.3em] uppercase text-stone-400 flex items-center gap-2">
+           Colección {cat.name}
         </div>
         
-        <h1 class="font-serif text-2xl md:text-5xl font-light text-stone-800 leading-tight">
+        <h1 class="font-serif text-3xl md:text-[3.25rem] font-light text-stone-800 leading-[1.1]">
           {product.name}
         </h1>
 
-        <div class="flex items-baseline gap-3">
+        <div class="flex items-baseline gap-3 mt-2 md:mt-4 mb-6">
           {showPrice > 0 ? (
             <>
-              <span class="font-sans text-xl md:text-3xl font-bold text-violet-700 tracking-tight">
-                ${showPrice.toLocaleString('es-CO')} <span class="text-[9px] font-sans text-stone-400 font-medium tracking-normal">COP</span>
+              <span class="font-sans text-2xl md:text-[2.2rem] font-bold text-violet-700 tracking-tight">
+                ${showPrice.toLocaleString('es-CO')} <span class="text-[10px] font-sans text-stone-400 font-medium tracking-normal ml-0.5 relative -top-1">COP</span>
               </span>
               {origPrice && (
-                <span class="text-sm md:text-lg text-stone-300 line-through font-light decoration-stone-200">
+                <span class="text-sm md:text-xl text-stone-300 line-through font-light decoration-stone-200">
                   ${origPrice.toLocaleString('es-CO')}
                 </span>
               )}
             </>
           ) : (
-             <span class="text-violet-600 font-bold uppercase tracking-widest text-[9px] italic">Precio a consultar</span>
+             <span class="text-violet-600 font-bold uppercase tracking-widest text-[11px] italic">Precio a consultar</span>
           )}
         </div>
       </div>
 
-        {inStock && showPrice > 0 && (
-          <div class="flex flex-col gap-4 mt-8">
-            <button 
-              class="w-full h-[3.25rem] bg-stone-900 text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 hover:bg-violet-700 transition-all active:scale-95 shadow-md"
-              onclick={`addToCartFromPage(${product.id})`} 
-              id="ramoCartBtn"
-            >
-              <Icon name="shopping-bag-3" class="text-xl leading-none" /> Agregar al Carrito
-            </button>
-
-            <div class="flex items-center gap-2">
-              <span class={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5 border ${inStock ? 'bg-stone-50 text-stone-500 border-stone-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
-                <Icon name={inStock ? 'checkbox-circle' : 'close-circle'} />
+      {inStock && showPrice > 0 && (
+        <div class="flex flex-col gap-4 mt-8">
+          <button 
+            class="w-full h-14 bg-[#1f1d1d] text-white rounded-[0.8rem] font-bold uppercase tracking-[0.1em] text-[11px] flex items-center justify-center gap-3 hover:bg-violet-700 transition-all active:scale-95 shadow-lg shadow-[#1f1d1d]/10 border border-[#141212]"
+            onclick={`addToCartFromPage(${product.id})`} 
+            id="ramoCartBtn"
+          >
+            <Icon name="shopping-bag-3" class="text-[1.35rem] leading-none mb-0.5" /> AGREGAR AL CARRITO
+          </button>
+          
+          <div class="flex items-start">
+             <span class={`text-[9px] font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full flex items-center gap-2 border ${inStock ? 'bg-white text-stone-500 border-stone-200 shadow-sm' : 'bg-rose-50 text-rose-600 border-rose-100 shadow-sm'}`}>
+                <Icon name={inStock ? 'checkbox-circle' : 'close-circle'} class="text-sm opacity-80" />
                 {inStock ? 'Disponible' : 'Bajo Pedido'}
-              </span>
-            </div>
+             </span>
           </div>
-        )}
+        </div>
+      )}
 
-        {product.desc && (
-          <div class="pt-6 border-t border-stone-100 mt-6">
-             <h4 class="text-[10px] uppercase font-bold tracking-widest text-stone-400 mb-2">Descripción</h4>
-             <p class="text-stone-500 leading-relaxed text-xs md:text-base max-w-lg">
-               {product.desc}
-             </p>
-          </div>
-        )}
+      {product.desc && (
+        <div class="mt-8 pt-8 border-t border-stone-100/80">
+           <div class="text-[9px] font-bold text-stone-300 uppercase tracking-[0.25em] mb-4">Descripción</div>
+           <p class="text-stone-500 leading-relaxed text-[13px] md:text-[14px] font-light max-w-[480px]">
+             {product.desc}
+           </p>
+        </div>
+      )}
 
-        <!-- COMPROMISO NUDITOS -->
-        <div class="flex flex-col gap-4 mt-6 border-t border-stone-100 pt-6">
-          <div class="flex items-start gap-4">
-            <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
-              <Icon name="truck" class="text-lg" />
-            </div>
-            <div class="space-y-0.5">
-              <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Envíos Nacionales</div>
-              <p class="text-[11px] text-stone-400 font-medium">Enviamos con amor a toda Colombia.</p>
-            </div>
+      <!-- COMPROMISO NUDITOS -->
+      <div class="flex flex-col gap-6 mt-8 border-t border-stone-100/80 pt-8 pb-4">
+        <div class="flex items-center gap-5">
+          <div class="w-11 h-11 rounded-full bg-white flex-shrink-0 flex items-center justify-center border border-stone-100 shadow-sm text-stone-500">
+            <Icon name="truck" class="text-[1.35rem]" />
           </div>
-          <div class="flex items-start gap-4">
-            <div class="w-10 h-10 rounded-full bg-stone-50 flex-shrink-0 flex items-center justify-center text-stone-500">
-              <Icon name="history" class="text-lg" />
-            </div>
-            <div class="space-y-0.5">
-              <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.2em] leading-none">Te llega pronto</div>
-              <p class="text-[11px] text-stone-400 font-medium">Cada ramo se teje especialmente para ti.</p>
-            </div>
+          <div class="space-y-1">
+            <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.25em] leading-none">Envíos Nacionales</div>
+            <p class="text-[12px] text-stone-500 font-light">Enviamos con amor a toda Colombia.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-5">
+          <div class="w-11 h-11 rounded-full bg-white flex-shrink-0 flex items-center justify-center border border-stone-100 shadow-sm text-stone-500">
+            <Icon name="history" class="text-[1.35rem]" />
+          </div>
+          <div class="space-y-1">
+            <div class="text-[10px] font-bold text-stone-800 uppercase tracking-[0.25em] leading-none">Te llega pronto</div>
+            <p class="text-[12px] text-stone-500 font-light">Cada ramo se teje especialmente para ti.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SECCIÓN DE DETALLES ADICIONALES (ACORDEÓN PREMIUM) -->
+  <!-- SECCIÓN DE DETALLES ADICIONALES (ACORDEÓN SEO DINÁMICO) -->
   {product.desc && (
-    <section class="border-t border-stone-100 bg-white">
-      <div class="max-w-[1200px] mx-auto px-6 py-12 md:py-20">
-        <button 
-          onclick="document.getElementById('seoDetails').classList.toggle('hidden'); this.querySelector('.icon-unfold').classList.toggle('rotate-180');"
-          class="w-full relative overflow-hidden p-8 md:p-12 rounded-[2.5rem] bg-gradient-to-br from-violet-50/50 to-white border border-violet-100 group transition-all hover:border-violet-200 hover:shadow-xl hover:shadow-violet-900/5 active:scale-[0.99] text-left"
-        >
-          <!-- Decoración sutil -->
-          <div class="absolute -right-10 -top-10 w-40 h-40 bg-violet-100/30 rounded-full blur-3xl group-hover:bg-violet-200/40 transition-colors"></div>
-          
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+    <section class="bg-[#fafaf9] pt-8 pb-16">
+      <div class="max-w-[1200px] mx-auto px-6">
+        <div class="bg-white rounded-[2.5rem] border border-stone-100/80 shadow-sm px-6 md:px-10 overflow-hidden">
+          <button 
+            onclick="document.getElementById('seoDetails').classList.toggle('hidden'); this.querySelector('.icon-unfold').classList.toggle('-rotate-180');"
+            class="w-full flex items-center justify-between py-8 group"
+          >
             <div class="flex items-center gap-6">
-              <div class="w-16 h-16 rounded-[1.25rem] bg-white border border-violet-100 flex items-center justify-center text-violet-600 shadow-sm group-hover:bg-violet-600 group-hover:text-white group-hover:rotate-6 transition-all duration-500">
-                <Icon name="flower" class="text-2xl" />
-              </div>
-              <div class="space-y-1">
-                <div class="text-[10px] uppercase font-bold tracking-[0.3em] text-violet-400">Artesanía Pura</div>
-                <h2 class="font-serif text-2xl md:text-3xl text-stone-900 leading-none">
-                  Detalles <em>especiales</em> y cuidados
-                </h2>
-              </div>
+               <div class="hidden md:flex w-14 h-14 rounded-2xl border border-stone-100 items-center justify-center text-stone-300">
+                  <Icon name="leaf" class="text-2xl" />
+               </div>
+               <div class="text-left">
+                  <div class="text-[9px] font-bold uppercase tracking-[0.3em] text-violet-500 mb-2">Artesanía Pura</div>
+                  <h2 class="font-serif text-2xl md:text-3xl text-stone-900 group-hover:text-violet-600 transition-colors">
+                    Detalles <em>especiales</em> y cuidados
+                  </h2>
+               </div>
             </div>
-            
-            <div class="flex items-center gap-4">
-              <span class="hidden md:inline text-[10px] uppercase font-bold tracking-widest text-stone-400 group-hover:text-violet-500 transition-colors">Explorar más</span>
-              <div class="icon-unfold transition-transform duration-700 w-12 h-12 rounded-full border border-violet-100 flex items-center justify-center group-hover:bg-stone-900 group-hover:border-stone-900 group-hover:text-white shadow-sm">
-                <Icon name="arrow-down-s" class="text-3xl" />
-              </div>
+            <div class="icon-unfold transition-transform duration-500 w-10 h-10 rounded-full border border-stone-100 flex items-center justify-center shadow-sm text-stone-600 bg-stone-50 group-hover:bg-violet-50 group-hover:text-violet-600 group-hover:border-violet-100">
+              <Icon name="arrow-down-s" class="text-xl" />
             </div>
-          </div>
-        </button>
+          </button>
 
-        <div id="seoDetails" class="hidden pt-8 pb-4 animate-fade-in">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20">
-            <div class="md:col-span-2 space-y-8">
-              <div>
-                <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Sobre este ramo</h3>
-                <div class="prose prose-stone max-w-none text-stone-600 leading-relaxed space-y-4">
-                  <p>{product.desc}</p>
-                  <p>Cada ramo de <strong>Nuditos Tejidos</strong> es una obra de arte única. Diseñado para perdurar, este ramo combina la calidez de lo artesanal con la belleza eterna de las flores que no se marchitan.</p>
+          <div id="seoDetails" class="hidden pt-4 pb-12 animate-fade-in border-t border-stone-100">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20 pt-6">
+              <div class="md:col-span-2 space-y-8">
+                <div>
+                  <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Sobre este ramo</h3>
+                  <div class="prose prose-stone max-w-none text-stone-600 leading-relaxed space-y-4">
+                    <p>{product.desc}</p>
+                    <p>Cada ramo de <strong>Nuditos Tejidos</strong> es una obra de arte única. Diseñado para perdurar, este ramo combina la calidez de lo artesanal con la belleza eterna de las flores que no se marchitan.</p>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-stone-100">
+                  <div>
+                    <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-800 mb-4 flex items-center gap-2">
+                      <Icon name="plant" class="text-violet-500" /> Materiales Premium
+                    </h3>
+                    <p class="text-xs text-stone-500 leading-relaxed">
+                      Tejido con hilos de algodón premium de alta resistencia. Utilizamos rellenos hipoalergénicos y estructuras internas que mantienen la forma perfecta de cada pétalo y hoja.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-800 mb-4 flex items-center gap-2">
+                      <Icon name="history" class="text-violet-500" /> Cuidados de tu Ramo
+                    </h3>
+                    <ul class="text-xs text-stone-500 leading-relaxed space-y-2">
+                      <li>• Mantener alejado de la humedad directa.</li>
+                      <li>• Limpiar el polvo con un cepillo de cerdas suaves.</li>
+                      <li>• Evitar la exposición solar prolongada.</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-stone-200">
-                <div>
-                  <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-800 mb-4 flex items-center gap-2">
-                    <Icon name="plant" class="text-violet-500" /> Materiales Premium
-                  </h3>
-                  <p class="text-xs text-stone-500 leading-relaxed">
-                    Tejido con hilos de algodón premium de alta resistencia. Utilizamos rellenos hipoalergénicos y estructuras internas que mantienen la forma perfecta de cada pétalo y hoja.
-                  </p>
+              <div class="bg-stone-50 p-8 rounded-[2rem] border border-stone-100 h-fit">
+                <h3 class="font-serif text-xl border-b border-stone-200 pb-4 mb-4">Envío Seguro</h3>
+                <p class="text-xs text-stone-500 leading-relaxed mb-6">
+                  Empacamos cada pedido con protección especial para que llegue intacto a su destino.
+                </p>
+                <div class="space-y-4">
+                   <div class="flex items-center gap-3 text-xs font-medium text-stone-600">
+                     <Icon name="truck" class="text-violet-500" /> Todo el país
+                   </div>
+                   <div class="flex items-center gap-3 text-xs font-medium text-stone-600">
+                     <Icon name="checkbox-circle" class="text-emerald-500" /> Empaque premium
+                   </div>
                 </div>
-                <div>
-                  <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-800 mb-4 flex items-center gap-2">
-                    <Icon name="history" class="text-violet-500" /> Cuidados de tu Ramo
-                  </h3>
-                  <ul class="text-xs text-stone-500 leading-relaxed space-y-2">
-                    <li>• Mantener alejado de la humedad directa.</li>
-                    <li>• Limpiar el polvo con un cepillo de cerdas suaves.</li>
-                    <li>• Evitar la exposición solar prolongada para conservar los colores.</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            
-            <div class="bg-white p-8 rounded-[2rem] border border-stone-100 shadow-sm h-fit">
-              <h3 class="font-serif text-xl border-b border-stone-100 pb-4 mb-4">Envío Seguro</h3>
-              <p class="text-xs text-stone-400 leading-relaxed mb-6">
-                Empacamos cada pedido con protección especial para que llegue intacto a su destino.
-              </p>
-              <div class="space-y-4">
-                 <div class="flex items-center gap-3 text-xs font-medium text-stone-600">
-                   <Icon name="truck" class="text-violet-400" /> Colombia (Toda la nación)
-                 </div>
-                 <div class="flex items-center gap-3 text-xs font-medium text-stone-600">
-                   <Icon name="checkbox-circle" class="text-emerald-400" /> Empaque premium incluido
-                 </div>
               </div>
             </div>
           </div>
@@ -411,7 +392,7 @@ const productSchema = {
 
 </Layout>
 
-<script define:vars={{ allImgs, clUrl, product, showPrice, mainImg, related }}>
+<script define:vars={{ allImgs, clUrl, product, showPrice, mainImg }}>
   let currentImg = 0;
   window.gallerySwiper = null;
   window.lightboxSwiper = null;
@@ -424,11 +405,7 @@ const productSchema = {
       slidesPerView: 1,
       spaceBetween: 0,
       speed: 800,
-      loop: allImgs.length >= 3,
-      navigation: {
-        nextEl: '.gallery-nav-btn.next',
-        prevEl: '.gallery-nav-btn.prev',
-      },
+      loop: allImgs.length > 1,
       pagination: { 
         el: '.swiper-pagination', 
         clickable: true, 
@@ -446,7 +423,6 @@ const productSchema = {
       slidesPerView: 1,
       spaceBetween: 40,
       speed: 800,
-      loop: allImgs.length >= 3,
       zoom: {
         maxRatio: 3,
         minRatio: 1,
@@ -462,20 +438,26 @@ const productSchema = {
   }
 
   function updateThumbs(idx) {
-    document.querySelectorAll('.thumb-btn').forEach((btn, i) => {
-      btn.classList.toggle('active', i === idx);
+    document.querySelectorAll('.ramo-thumb').forEach((t, i) => {
+      const isActive = i === idx;
+      t.classList.toggle('border-violet-300', isActive);
+      t.classList.toggle('border-transparent', !isActive);
+      t.classList.toggle('opacity-60', !isActive);
+      t.classList.toggle('opacity-100', isActive);
     });
   }
 
-  window.moveGallery = function(idx) {
-    if (window.gallerySwiper) window.gallerySwiper.slideToLoop(idx);
-  }
-
-  window.openLightbox = function() {
+  window.openLightbox = function(idx) {
     const box = document.getElementById('ramoLightbox');
-    if (box) box.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
+    if (box) { 
+      box.classList.add('open'); 
+      document.body.style.overflow = 'hidden';
+      if (window.lightboxSwiper) {
+        window.lightboxSwiper.slideTo(idx, 0);
+        window.lightboxSwiper.update();
+      }
+    }
+  };
 
   window.closeLightbox = function() {
     const box = document.getElementById('ramoLightbox');
@@ -483,31 +465,35 @@ const productSchema = {
     document.body.style.overflow = '';
   };
 
-  // ─── LÓGICA DE INICIALIZACIÓN ───
+  // Carrito logic
+  const currentProduct = { id: Number(product.id), name: product.name, price: Number(showPrice), img: mainImg, emoji: product.emoji || '🌸' };
+  window.NUDITOS_LIVE_PRODUCTS = [currentProduct, ...(window.NUDITOS_LIVE_PRODUCTS || [])];
+
+  window.addToCartFromPage = function(id) {
+    if (typeof addToCart !== 'function') return;
+    addToCart(id);
+    const btn = document.getElementById('ramoCartBtn');
+    if (btn) {
+      const original = btn.innerHTML;
+      btn.innerHTML = '¡Agregado!';
+      btn.classList.add('bg-emerald-600');
+      setTimeout(() => { btn.innerHTML = original; btn.classList.remove('bg-emerald-600'); }, 2000);
+    }
+    
+    // Facebook Pixel Track - AddToCart
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'AddToCart', {
+        content_ids: [currentProduct.id.toString()],
+        content_name: currentProduct.name,
+        content_type: 'product',
+        value: currentProduct.price,
+        currency: 'COP'
+      });
+    }
+  };
+
   document.addEventListener('astro:page-load', () => {
     initSwipers();
-
-    // Inyectar productos en el pool "live" para que funcionen los botones de agregar (ProductCard)
-    const currentProduct = { 
-      id: Number(product.id), 
-      name: product.name, 
-      price: Number(showPrice), 
-      img: mainImg, 
-      emoji: product.emoji || '🌸' 
-    };
-    
-    const relatedPool = (related || []).map(p => ({
-      ...p,
-      id: Number(p.id),
-      price: Number(p.price || 0)
-    }));
-
-    window.NUDITOS_LIVE_PRODUCTS = [
-      currentProduct, 
-      ...relatedPool, 
-      ...(window.NUDITOS_LIVE_PRODUCTS || [])
-    ];
-
     // Facebook Pixel Track - ViewContent
     if (typeof window.fbq === 'function') {
       window.fbq('track', 'ViewContent', {
@@ -519,37 +505,9 @@ const productSchema = {
       });
     }
   });
-
-  // ─── ACCIÓN AGREGAR AL CARRITO ───
-  window.addToCartFromPage = function(id) {
-    if (typeof window.addToCart !== 'function') return;
-    
-    // El objeto addToCart global busca en window.NUDITOS_LIVE_PRODUCTS
-    window.addToCart(id);
-    
-    // Feedback visual en el botón principal
-    const btn = document.getElementById('ramoCartBtn');
-    if (btn) {
-      const original = btn.innerHTML;
-      btn.innerHTML = '¡Agregado!';
-      btn.classList.add('bg-emerald-600');
-      setTimeout(() => { 
-        btn.innerHTML = original; 
-        btn.classList.remove('bg-emerald-600'); 
-      }, 2000);
-    }
-    
-    // Facebook Pixel Track - AddToCart
-    if (typeof window.fbq === 'function') {
-      window.fbq('track', 'AddToCart', {
-        content_ids: [product.id.toString()],
-        content_name: product.name,
-        content_type: 'product',
-        value: Number(showPrice),
-        currency: 'COP'
-      });
-    }
-  };
+  
+  // Inicialización de respaldo
+  if (document.readyState === 'complete') initSwipers();
 </script>
 
 <style is:global>

@@ -165,32 +165,29 @@ document.addEventListener('astro:page-load', () => {
 
 
 // Exponer funciones al objeto window para compatibilidad con onclick
-(window as any).addToCart = (id: number | string) => {
-  const nid = Number(id);
+(window as any).addToCart = (id: number) => {
   const live = (window as any).NUDITOS_LIVE_PRODUCTS || [];
-  const p = live.find((x: any) => Number(x.id) === nid) || products.find(x => Number(x.id) === nid);
+  const p = live.find((x: any) => x.id === id) || products.find(x => x.id === id);
 
   if (p && p.price > 0) {
     addToCart(p);
     showToast(`${getIconSvg('check')} ${p.name} agregado`);
     
-    /* Comentado para evitar que sea incómodo abrirlo siempre
-    setTimeout(() => {
-        const cartPanel = document.getElementById('cartPanel');
-        const cartOverlay = document.getElementById('cartOverlay');
-        if (cartPanel && !cartPanel.classList.contains('open')) {
-            cartPanel.classList.add('open');
-            cartOverlay?.classList.add('open');
-            const lockFn = (window as any).toggleScrollLock;
-            if (lockFn) lockFn(true);
-        }
-    }, 100);
-    */
+    // Forzar aparición de la Navbar si estaba oculta
+    const nav = document.querySelector('.nav-wrap');
+    if (nav) nav.classList.remove('nav-hidden');
+    
+    // Animar ícono del carrito en la Navbar
+    const navCartBtns = document.querySelectorAll('.nav-right .nav-icon-btn');
+    navCartBtns.forEach(btn => {
+      btn.classList.add('cart-bump-animation');
+      setTimeout(() => btn.classList.remove('cart-bump-animation'), 400);
+    });
 
     const fn = (window as any).sbTrackCartEvent;
-    if (fn) fn(getOrCreateSessionId(), 'add_to_cart', { product_id: nid, product_name: p.name, quantity: 1, cart_total: getCartTotal() });
+    if (fn) fn(getOrCreateSessionId(), 'add_to_cart', { product_id: id, product_name: p.name, quantity: 1, cart_total: getCartTotal() });
 
-    document.querySelectorAll(`[id="padd-${nid}"]`).forEach(btn => {
+    document.querySelectorAll(`#padd-${id}`).forEach(btn => {
       btn.classList.add('added');
       const originalHTML = btn.innerHTML;
       btn.innerHTML = getIconSvg('check');
@@ -200,7 +197,7 @@ document.addEventListener('astro:page-load', () => {
       }, 1300);
     });
   } else {
-    console.warn('[cart] Producto no encontrado o sin precio:', id, 'Pool:', live);
+    console.warn('[cart] Producto no encontrado o sin precio:', id);
   }
 };
 
