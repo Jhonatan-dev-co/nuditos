@@ -254,7 +254,6 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       if(name==='blog')loadPosts();
       if(name==='campanas')renderCampaignsList();
       if(name==='vitrina') renderVitrina();
-      if(name==='pedidos') renderPedidosList();
     }
 
     /* ── CLOUDINARY ── */
@@ -410,7 +409,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       
       buildSideFilters();renderSidebar();renderStats();showEditorEmpty();renderCategoriasList();
       renderHeroSlots();renderMomentoSelected();renderMomentoList(adminProducts);renderHeroList(adminProducts);
-      renderCatViewsList();renderBannerList();renderPedidosList();
+      renderCatViewsList();renderBannerList();
       
       // Populate Sortable Filter
       const sf = document.getElementById('sortCatFilter');
