@@ -903,8 +903,8 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
     function filterPedidos(f,btn){pedidoFilter=f;document.querySelectorAll('.pedido-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPedidosList();}
     function renderPedidosList(){
       const list=pedidoFilter==='todos'?pedidos:pedidos.filter(p=>p.estado===pedidoFilter);
-      const eLabels={pendiente:'⏳ Pendiente',pagado:'💰 Pagado',proceso:'🔄 En proceso',entregado:'✅ Entregado',cancelado:'❌ Cancelado'};
-      const eCls={pendiente:'estado-pendiente',pagado:'estado-pagado',proceso:'estado-proceso',entregado:'estado-entregado',cancelado:'estado-cancelado'};
+      const eLabels={pendiente:'⏳ Pendiente',proceso:'🔄 En proceso',entregado:'✅ Entregado',cancelado:'❌ Cancelado'};
+      const eCls={pendiente:'estado-pendiente',proceso:'estado-proceso',entregado:'estado-entregado',cancelado:'estado-cancelado'};
       document.getElementById('pedidosList').innerHTML=list.length?list.map(p=>`
         <div class="pedido-card">
           <div class="pedido-top"><div class="pedido-id">#${String(p.id).slice(-6)}</div><span class="pedido-estado ${eCls[p.estado]||'estado-pendiente'}">${eLabels[p.estado]||p.estado}</span></div>
