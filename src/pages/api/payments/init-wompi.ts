@@ -3,13 +3,15 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { getLiveProducts, getLiveConfig } from '../../../lib/supabase';
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const payload = await request.json();
     const { fullname, email, phone, items, discount, address, notes } = payload;
 
-    // Log de entrada para depuración
-    console.log('[init-wompi] Recibiendo solicitud para:', email);
+    // Obtener variables de entorno de Cloudflare de forma robusta
+    const env = (locals as any).runtime?.env || {};
+    const SB_URL = env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL || 'https://fpyhkxikxdwjhukltmqf.supabase.co';
+    const SB_KEY = env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY || env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY; 
 
     if (!fullname || !email || !items || !Array.isArray(items)) {
       return new Response(JSON.stringify({ error: 'Datos incompletos', message: 'Faltan campos obligatorios' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
@@ -24,13 +26,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     let subtotal = 0;
     items.forEach((item: any) => {
-      // Búsqueda robusta por ID numérico o string
       const p = allProducts.find(x => String(x.id) === String(item.id));
       if (p) {
-        // En nuestro mapeo de supabase.ts, 'price' ya es el precio final (oferta o normal)
         subtotal += (p.price || 0) * item.qty;
-      } else {
-        console.warn(`[init-wompi] Producto ID ${item.id} no encontrado en catálogo vivo.`);
       }
     });
 
@@ -54,9 +52,6 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // 3. Crear pedido en Supabase
-    // Priorizamos variables de entorno de Cloudflare (Runtime) sobre import.meta.env si es necesario
-    const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL || 'https://fpyhkxikxdwjhukltmqf.supabase.co';
-    const SB_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY; 
     
     if (!SB_KEY) {
        console.error('[init-wompi] No se encontró SB_KEY para persistir el pedido.');
