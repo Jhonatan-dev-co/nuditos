@@ -6,19 +6,29 @@ export const POST: APIRoute = async ({ request }) => {
     const payload = await request.json();
     const { fullname, email, phone, items, discount, address, notes } = payload;
 
+    // Log de entrada para depuración
+    console.log('[init-wompi] Recibiendo solicitud para:', email);
+
     if (!fullname || !email || !items || !Array.isArray(items)) {
       return new Response(JSON.stringify({ error: 'Datos incompletos', message: 'Faltan campos obligatorios' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
     // 1. Recalcular total real desde la base de datos (Prevención Fraude)
     const allProducts = await getLiveProducts();
+    if (!allProducts || allProducts.length === 0) {
+       console.error('[init-wompi] No se pudieron cargar los productos de Supabase.');
+       return new Response(JSON.stringify({ error: 'server_error', message: 'Error de conexión con el catálogo.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+
     let subtotal = 0;
-    
     items.forEach((item: any) => {
-      const p = allProducts.find(x => x.id === item.id);
+      // Búsqueda robusta por ID numérico o string
+      const p = allProducts.find(x => String(x.id) === String(item.id));
       if (p) {
-        const price = p.oferta && p.precioOferta > 0 ? p.precioOferta : p.price;
-        subtotal += price * item.qty;
+        // En nuestro mapeo de supabase.ts, 'price' ya es el precio final (oferta o normal)
+        subtotal += (p.price || 0) * item.qty;
+      } else {
+        console.warn(`[init-wompi] Producto ID ${item.id} no encontrado en catálogo vivo.`);
       }
     });
 
@@ -27,30 +37,35 @@ export const POST: APIRoute = async ({ request }) => {
       finalTotal = subtotal - Math.round(subtotal * (discount.pct / 100));
     }
 
-    // 2. Determinar configuración de Wompi (Directamente desde servidor)
+    // 2. Determinar configuración de Wompi
     const config = await getLiveConfig();
     if (!config || !config.wompiActivo) {
        return new Response(JSON.stringify({ error: 'gateway_inactive', message: 'Los pagos en línea no están activos' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Usar claves seguras
     const wompiIntegrity = config.wompiIntegrity;
     const wompiKey = config.wompiKey;
 
     if (!wompiIntegrity || !wompiKey) {
-        console.error('[init-wompi] ERROR: Llaves de Wompi incompletas en la Base de Datos.');
-        return new Response(JSON.stringify({ error: 'gateway_error', message: 'Error de configuración de pagos en el servidor.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        console.error('[init-wompi] ERROR: Llaves de Wompi incompletas en config.');
+        return new Response(JSON.stringify({ error: 'gateway_error', message: 'Configuración de pagos incompleta.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // 3. Crear pedido como "pendiente" en Supabase de forma segura
-    const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+    // 3. Crear pedido en Supabase
+    // Priorizamos variables de entorno de Cloudflare (Runtime) sobre import.meta.env si es necesario
+    const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL || 'https://fpyhkxikxdwjhukltmqf.supabase.co';
     const SB_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY; 
     
+    if (!SB_KEY) {
+       console.error('[init-wompi] No se encontró SB_KEY para persistir el pedido.');
+       return new Response(JSON.stringify({ error: 'server_auth_error', message: 'Error de autenticación interna.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+
     const dbPayload = {
       cliente_nombre: fullname,
       cliente_email: email,
       cliente_telefono: phone,
-      items: JSON.stringify(items.map(i => `${i.qty}x ${i.name}`).join(', ')),
+      items: items.map(i => `${i.qty}x ${i.name}`).join(', '),
       total: finalTotal,
       estado: 'pendiente',
       notas: `${address}${notes ? ' | ' + notes : ''}`,
@@ -68,19 +83,24 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     if (!res.ok) {
-      console.error('[init-wompi] Error al guardar pedido en BD:', await res.text());
-      return new Response(JSON.stringify({ error: 'db_error', message: 'No se pudo registrar el pedido.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      const errorText = await res.text();
+      console.error('[init-wompi] Error Supabase:', errorText);
+      return new Response(JSON.stringify({ error: 'db_error', message: 'Error al registrar pedido.', detail: errorText }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const savedOrder = (await res.json())[0];
+    const orders = await res.json();
+    if (!orders || orders.length === 0) {
+       return new Response(JSON.stringify({ error: 'db_empty', message: 'El pedido fue rechazado por la base de datos.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+    
+    const savedOrder = orders[0];
     const orderId = savedOrder.id;
 
-    // 4. Generar Firma de Integridad para Wompi (SHA256)
+    // 4. Generar Firma de Integridad
     const reference = `NUDITOS-${orderId}`;
     const amountInCents = Math.round(finalTotal * 100);
     const currency = 'COP';
 
-    // sha256(referencia + monto_en_centavos + moneda + secreto_integridad)
     const rawString = `${reference}${amountInCents}${currency}${wompiIntegrity}`;
     const encoder = new TextEncoder();
     const dataUint8 = encoder.encode(rawString);
@@ -88,9 +108,6 @@ export const POST: APIRoute = async ({ request }) => {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    console.log(`[init-wompi] Inicializado pago OK para Orden ${orderId} | Total: ${finalTotal}`);
-
-    // 5. Responder al cliente estrictamente con la data procesada
     return new Response(JSON.stringify({
         ok: true,
         widgetConfig: {
@@ -103,7 +120,17 @@ export const POST: APIRoute = async ({ request }) => {
     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
   } catch (err: any) {
-    console.error('[init-wompi] Excepción Crítica:', err.message);
-    return new Response(JSON.stringify({ error: 'server_error', message: 'Error interno o red caída' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    // CAPTURADOR GLOBAL DE ERRORES: Evita devolver HTML 500
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error('[init-wompi] EXCEPCIÓN CRÍTICA:', errorMsg);
+    
+    return new Response(JSON.stringify({ 
+        error: 'server_exception', 
+        message: 'Ocurrió un error inesperado en el servidor',
+        debug: errorMsg
+    }), { 
+        status: 500, 
+        headers: { 'Content-Type': 'application/json' } 
+    });
   }
 };
