@@ -61,7 +61,28 @@ function updateCartUI(cart: readonly any[]) {
     } else {
       body.className = "flex-1 overflow-y-auto w-full pb-4";
       if (foot) { foot.classList.remove('hidden'); foot.classList.add('block'); }
-      body.innerHTML = cart.map((item, idx) => {
+      
+      const shippingBar = `
+        <div class="px-6 mb-4 animate-cart-item" style="animation-delay: 0ms">
+          <div class="bg-stone-50 border border-stone-200/50 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-stone-500 flex items-center gap-2">
+                ${getIconSvg('truck', 'text-stone-400')}
+                Envío nacional
+              </span>
+              <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Incluido</span>
+            </div>
+            <div class="h-1.5 w-full bg-stone-200 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full w-full" style="transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1); width: 100%;"></div>
+            </div>
+            <p class="mt-2.5 text-[11px] text-stone-600 leading-relaxed">
+              ¡Felicidades! Tu pedido ya califica para <strong>envío gratis</strong> a todo Colombia 🌸
+            </p>
+          </div>
+        </div>
+      `;
+
+      body.innerHTML = shippingBar + cart.map((item, idx) => {
         const isUrl = item.img && item.img.startsWith('http');
         const imgUrl = isUrl ? item.img.replace('/upload/', '/upload/w_200,q_auto,f_auto/') : item.img;
         const thumb = item.img ? `<img src="${imgUrl}" alt="${item.name}" class="w-full h-full object-cover rounded-xl shadow-inner">` : `<span class="text-3xl opacity-50 drop-shadow-sm">${item.emoji || '🌸'}</span>`;

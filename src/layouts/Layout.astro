@@ -2,6 +2,7 @@
 import Icon from '../components/Icon.astro';
 import '../styles/main.css';
 import SearchOverlay from '../components/SearchOverlay.astro';
+import BoutiqueHighlights from '../components/BoutiqueHighlights.astro';
 import { ViewTransitions } from 'astro:transitions';
 import { categories as FALLBACK_CATEGORIES, clUrl } from '../data/datos';
 import { getLiveConfig, getPublicConfig, getLiveCategories } from '../lib/supabase';
@@ -61,6 +62,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="facebook-domain-verification" content="klq9w8ypl5a07xxn6pwjtni92v2afa" />
 
   <!-- SEO básico -->
   <title>{fullTitle}</title>
@@ -545,57 +547,195 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <!-- ════════ FOOTER ════════ -->
 
   {!hideFooter && (
-    <footer>
-    <div class="footer-logo-wrap">
-      <div class="footer-logo">NUDITOS<em>.</em></div>
-      <div class="footer-social">
-        <a href={instaUrl} target="_blank" aria-label="Instagram">
-          <Icon name="instagram"  />
-        </a>
-        <a href="#" aria-label="TikTok"><Icon name="tiktok"  /></a>
-        <a href={whatsappLink} aria-label="WhatsApp">
-          <Icon name="whatsapp"  />
-        </a>
-        <a href="#" aria-label="Facebook"><Icon name="facebook"  /></a>
-      </div>
-    </div>
-    <div class="footer-accordion">
-      <div class="footer-acc-item">
-        <button class="footer-acc-btn" onclick="toggleAcc(this)">
-          Sobre la marca <Icon name="add"  />
-        </button>
-        <div class="footer-acc-content">
-          <a class="footer-acc-link" href="/sobre-nosotros">Nuestra historia</a>
-          <a class="footer-acc-link" href="/blog">Blog</a>
-          <a class="footer-acc-link" href="/#personalizado">Ramos personalizados</a>
-          <a class="footer-acc-link" href="/#resenas">Reseñas</a>
+    <>
+    <BoutiqueHighlights />
+    <footer class="main-footer">
+      <div class="footer-grid">
+        
+        <!-- Col 1: Marca (Accordion Item 1) -->
+        <div class="footer-col brand-col accordion-item">
+          <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+            <span class="footer-logo">NUDITOS<em>.</em></span>
+            <Icon name="add" class="acc-icon" />
+          </button>
+          <div class="accordion-content">
+            <p class="footer-motto">Ramos de crochet hechos a mano con amor en Colombia. El regalo eterno que nunca se marchita.</p>
+            <div class="footer-social-new">
+              <a href={instaUrl} target="_blank" aria-label="Instagram"><Icon name="instagram" /></a>
+              <a href="#" aria-label="TikTok"><Icon name="tiktok" /></a>
+              <a href={whatsappLink} aria-label="WhatsApp"><Icon name="whatsapp" /></a>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="footer-acc-item">
-        <button class="footer-acc-btn" onclick="toggleAcc(this)">
-          Contacto <Icon name="add"  />
-        </button>
-        <div class="footer-acc-content">
-          <a class="footer-acc-link" href={whatsappLink} target="_blank">WhatsApp</a>
-          <a class="footer-acc-link" href={instaUrl} target="_blank">Instagram</a>
+
+        <!-- Col 2: Ayuda (Accordion Item 2) -->
+        <div class="footer-col accordion-item">
+          <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+            <h4 class="footer-title">Ayuda y Soporte</h4>
+            <Icon name="add" class="acc-icon" />
+          </button>
+          <nav class="footer-links accordion-content">
+            <a href="/politicas">Envíos y entregas</a>
+            <a href="/preguntas-frecuentes">Preguntas frecuentes</a>
+            <a href="/politicas">Cambios y Garantías</a>
+            <a href={whatsappLink}>Escríbenos tus PQRS</a>
+          </nav>
         </div>
-      </div>
-      <div class="footer-acc-item">
-        <button class="footer-acc-btn" onclick="toggleAcc(this)">
-          Ayuda <Icon name="add"  />
-        </button>
-        <div class="footer-acc-content">
-          <a class="footer-acc-link" href="/politicas">Envíos y entregas</a>
-          <a class="footer-acc-link" href="/preguntas-frecuentes">Preguntas frecuentes</a>
-          <a class="footer-acc-link" href="/politicas">Política de privacidad</a>
+
+        <!-- Col 3: Legal (Accordion Item 3) -->
+        <div class="footer-col accordion-item">
+          <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+            <h4 class="footer-title">Información Legal</h4>
+            <Icon name="add" class="acc-icon" />
+          </button>
+          <nav class="footer-links accordion-content">
+            <a href="/politicas">Términos y Condiciones</a>
+            <a href="/politicas">Política de Privacidad</a>
+            <a href="/politicas">Tratamiento de Datos</a>
+            <a href="https://www.sic.gov.co/" target="_blank">Superintendencia de Industria y Comercio (SIC)</a>
+          </nav>
         </div>
+
+        <!-- Col 4: Transparencia (Static/Always visible) -->
+        <div class="footer-col transparency-col">
+          <h4 class="footer-title">Confianza y Pagos</h4>
+          <div class="transparency-box">
+            <p><strong>Origen:</strong> El Dorado, Meta 🇨🇴</p>
+            <div class="pay-trust-logos">
+              <span class="pay-label">Pagos procesados por:</span>
+              <div class="pay-icons-row">
+                <Icon name="visa" class="w-7 h-4 opacity-100" />
+                <Icon name="mastercard" class="w-7 h-4 opacity-100" />
+                <Icon name="pse" class="w-4 h-4 opacity-100" />
+                <Icon name="nequi" class="w-4 h-4 opacity-100" />
+                <Icon name="wompi" class="w-8 h-4 opacity-100" />
+              </div>
+              <p class="pay-hint">Grupo Bancolombia</p>
+            </div>
+          </div>
+        </div>
+
       </div>
-    </div>
-    <div class="footer-bottom">
-      <div class="footer-copy">© 2025 Nuditos Tejidos · Hecho con 💜 en El Dorado, Meta 🇨🇴</div>
-    </div>
+
+      <div class="footer-bottom-bar">
+        <div class="footer-copy">© 2025 NUDITOS. Todos los derechos reservados. Hecho con 💜 en Colombia.</div>
+      </div>
     </footer>
+    </>
   )}
+
+  <style is:global>
+    .main-footer {
+      background: #111111; /* Negro Boutique Profundo */
+      padding: 4rem 1.5rem 2rem;
+      color: white;
+    }
+    .footer-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3rem;
+    }
+
+    .footer-col { display: flex; flex-direction: column; gap: 1.25rem; }
+    .footer-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.5rem;
+    }
+    .footer-logo { font-size: 1.6rem; font-family: 'Cormorant Garamond', serif; letter-spacing: 6px; color: white; }
+    .footer-logo em { color: #a78bfa; font-style: normal; }
+    .footer-motto { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.6; max-width: 250px; }
+    
+    .footer-links { display: flex; flex-direction: column; gap: 0.75rem; }
+    .footer-links a {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+      transition: color 0.3s;
+    }
+    .footer-links a:hover { color: #a78bfa; }
+
+    .footer-social-new { display: flex; gap: 1.25rem; color: rgba(255,255,255,0.8); }
+    .footer-social-new a:hover { color: #a78bfa; }
+
+    .transparency-box { font-size: 0.8rem; color: rgba(255,255,255,0.5); display: flex; flex-direction: column; gap: 0.75rem; }
+    .pay-trust-logos {
+      margin-top: 0.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .pay-label { font-size: 0.65rem; font-weight: 700; display: block; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .pay-icons-row { 
+      display: flex; 
+      align-items: center; 
+      gap: 1.25rem; 
+      margin-bottom: 0.5rem; 
+      filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.1));
+    }
+    .pay-hint { font-size: 0.7rem; font-style: italic; opacity: 0.4; }
+
+    .footer-bottom-bar {
+      max-width: 1200px;
+      margin: 4rem auto 0;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      text-align: center;
+    }
+    .footer-copy { font-size: 0.7rem; color: rgba(255,255,255,0.3); letter-spacing: 0.5px; }
+
+    /* Lógica de Acordeón en Móvil */
+    .accordion-trigger {
+      display: none; /* Oculto en desktop */
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 1.25rem 0;
+      text-align: left;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .acc-icon { transition: transform 0.3s; opacity: 0.5; }
+    .accordion-item.active .acc-icon { transform: rotate(45deg); opacity: 1; color: #a78bfa; }
+
+    @media (max-width: 1023px) {
+      .footer-grid { grid-template-columns: 1fr; gap: 0; }
+      .accordion-trigger { display: flex; }
+      .accordion-content { 
+        max-height: 0; 
+        overflow: hidden; 
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 0;
+      }
+      .accordion-item.active .accordion-content { 
+        max-height: 300px; 
+        padding: 1.5rem 0 2rem;
+      }
+      .footer-col { gap: 0; }
+      .transparency-col { padding: 2rem 0; }
+    }
+  </style>
+
+  <script is:inline>
+    window.toggleFooterAcc = (btn) => {
+      if (window.innerWidth >= 1024) return;
+      const item = btn.closest('.accordion-item');
+      const isActive = item.classList.contains('active');
+      
+      // Cerrar otros
+      document.querySelectorAll('.accordion-item').forEach(el => el.classList.remove('active'));
+      
+      if (!isActive) {
+        item.classList.add('active');
+      }
+    };
+  </script>
+
 
   <!-- ════════ CARRITO PREMIUM GLASS ════════ -->
   <div class="cart-overlay fixed inset-0 z-[200] bg-stone-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" id="cartOverlay" onclick="toggleCart()"></div>
@@ -631,6 +771,13 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       </div>
       
       <div class="flex flex-col gap-3">
+        <div class="flex justify-center items-center gap-4 py-2 opacity-50 mb-1">
+          <Icon name="visa" class="w-7 h-4" />
+          <Icon name="mastercard" class="w-7 h-4" />
+          <Icon name="pse" class="w-4 h-4" />
+          <Icon name="nequi" class="w-4 h-4" />
+          <Icon name="wompi" class="w-7 h-4" />
+        </div>
 
         <a href="/checkout" class="w-full bg-stone-900 text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="toggleCart()">
           <Icon name="bank-card" class="text-lg leading-none" />

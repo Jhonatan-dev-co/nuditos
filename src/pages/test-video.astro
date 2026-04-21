@@ -1,6 +1,8 @@
 ---
-// Página de prueba aislada para diagnosticar el video
+// Página de prueba — solo para desarrollo local
+// Redirige a /catalogo en producción
 export const prerender = false;
+return Astro.redirect('/catalogo', 301);
 ---
 
 <!DOCTYPE html>

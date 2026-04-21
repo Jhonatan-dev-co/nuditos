@@ -2221,9 +2221,12 @@ footer {
   to   { opacity: 0; transform: translateY(-8px); }
 }
 @keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+.animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+.animate-cart-item { animation: fadeSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
 /* Evitar que la navbar y el bottom nav participen en la animación */
 ::view-transition-group(nav-wrap),

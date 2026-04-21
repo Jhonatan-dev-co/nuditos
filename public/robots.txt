@@ -5,3 +5,4 @@ Disallow: /api
 
 Sitemap: https://nuditos.com.co/sitemap-index.xml
 Sitemap: https://nuditos.com.co/sitemap-images.xml
+Sitemap: https://nuditos.com.co/sitemap-products.xml

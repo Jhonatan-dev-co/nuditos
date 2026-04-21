@@ -229,6 +229,15 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
               <button class="co-btn-pay-premium" id="btn-pay-wompi" onclick="window.finalizarPedido()" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 1rem;" disabled>
                 <Icon name="shield-user" style="color: white; width: 14px; height: 14px;" /> PAGO SEGURO
               </button>
+
+              <!-- Sello Wompi -->
+              <div class="wompi-seal-wrap">
+                <div class="wompi-seal">
+                  <Icon name="wompi" class="w-10 h-5" />
+                  <span>Procesado por <strong>Wompi</strong></span>
+                </div>
+                <div class="bancolombia-label">Grupo Bancolombia</div>
+              </div>
             </div>
 
           </div>
@@ -257,7 +266,7 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
           <Icon name="truck" class="co-hi-icon" />
           <div class="co-hi-text">
             <strong>ENVÍOS GRATIS</strong>
-            <span>En compras mayores a $150.000.</span>
+            <span>Incluido en todos tus ramos.</span>
           </div>
         </div>
         <div class="co-hi-item">
