@@ -152,33 +152,29 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <meta name="twitter:image" content={ogImage} />
 
   <!-- Facebook Pixel (Meta Pixel) -->
-  {config?.metaPixelActivo && config?.metaPixelId && (
-    <script is:inline define:vars={{ id: config.metaPixelId }}>
-      !(function (f, b, e, v, n, t, s) {
-        if (f.fbq) return;
-        n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
-        if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
-        n.queue = []; t = b.createElement(e); t.async = !0; t.src = v;
-        s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', id);
-      fbq('track', 'PageView');
-    </script>
-    <noscript><img height="1" width="1" style="display:none" src={`https://www.facebook.com/tr?id=${config.metaPixelId}&ev=PageView&noscript=1`} /></noscript>
-  )}
+  <script is:inline>
+    !(function (f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+      n.queue = []; t = b.createElement(e); t.async = !0; t.src = v;
+      s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '919518317518571');
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=919518317518571&ev=PageView&noscript=1" /></noscript>
 
 
 
   <!-- Google Analytics -->
-  {config?.gaActive && config?.gaId && (
-    <script async src={`https://www.googletagmanager.com/gtag/js?id=${config.gaId}`}></script>
-    <script is:inline define:vars={{ id: config.gaId }}>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', id);
-    </script>
-  )}
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KWMVM0GSZM"></script>
+  <script is:inline>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-KWMVM0GSZM');
+  </script>
 
   <!-- Preconexiones críticas para acelerar terceros y base de datos -->
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
