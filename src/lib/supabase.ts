@@ -201,13 +201,53 @@ export async function getLiveProductBySlug(slug: string) {
 
 export async function getLivePosts(): Promise<any[]> {
   try {
-    const res = await fetchWithTimeout(`${SB_URL}/rest/v1/posts?order=created_at.desc`, {
-      headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
-    });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
+    // Usamos select=* para no fallar si faltan columnas SEO aún
+    const res = await fetchWithTimeout(
+      `${SB_URL}/rest/v1/posts?select=*&order=created_at.desc`,
+      { headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` } }
+    );
+    if (!res.ok) {
+      console.error('[supabase-posts] Error:', res.status, await res.text());
+      return [];
+    }
+    const rows = await res.json();
+    // Normalizar campos — el admin guarda 'image', por si hubiera 'img'
+    return rows.map((p: any) => ({
+      ...p,
+      image: p.image || p.img || '',
+      excerpt: p.excerpt || p.content?.replace(/<[^>]*>/g, '').substring(0, 160) || '',
+      category: p.category || p.categoria || 'Nuditos',
+      meta_title: p.meta_title || p.title || '',
+      meta_description: p.meta_description || '',
+      seo_keywords: p.seo_keywords || '',
+    }));
+  } catch (e: any) {
+    console.error('[supabase-posts]', e.message || e);
     return [];
+  }
+}
+
+export async function getPostBySlug(slug: string): Promise<any | null> {
+  try {
+    const res = await fetchWithTimeout(
+      `${SB_URL}/rest/v1/posts?slug=eq.${encodeURIComponent(slug)}&select=*&limit=1`,
+      { headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` } }
+    );
+    if (!res.ok) return null;
+    const rows = await res.json();
+    if (!rows || rows.length === 0) return null;
+    const p = rows[0];
+    return {
+      ...p,
+      image: p.image || p.img || '',
+      excerpt: p.excerpt || p.content?.replace(/<[^>]*>/g, '').substring(0, 160) || '',
+      category: p.category || p.categoria || 'Nuditos',
+      meta_title: p.meta_title || p.title || '',
+      meta_description: p.meta_description || '',
+      seo_keywords: p.seo_keywords || '',
+    };
+  } catch {
+    return null;
   }
 }
 

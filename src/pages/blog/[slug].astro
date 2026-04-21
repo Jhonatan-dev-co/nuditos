@@ -1,0 +1,405 @@
+---
+/**
+ * Blog Dinámico — Nuditos Tejidos
+ * URL: /blog/[slug]
+ * Lee posts de Supabase y los renderiza con SEO completo
+ */
+export const prerender = false;
+
+import Icon from '../../components/Icon.astro';
+import Layout from '../../layouts/Layout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { getLivePosts, getPostBySlug, getLiveProducts } from '../../lib/supabase';
+import { clUrl } from '../../data/datos';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/blog');
+
+// Cache para performance
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+
+const SITE_URL = Astro.site?.toString().replace(/\/$/, '') || 'https://nuditos.com.co';
+
+// Buscar el post por slug con query directo (más eficiente)
+const [post, allPosts] = await Promise.all([
+  getPostBySlug(slug),
+  getLivePosts()
+]);
+if (!post) return Astro.redirect('/blog');
+
+// Posts relacionados (misma categoría, excluyendo el actual)
+const relatedPosts = allPosts
+  .filter(p => p.slug !== slug && p.category === post.category)
+  .slice(0, 3);
+
+// Productos para CTA (mostrar 4 productos del catálogo)
+const allProducts = await getLiveProducts();
+const ctaProducts = allProducts
+  .filter(p => p.activo !== false)
+  .sort(() => 0.5 - Math.random())
+  .slice(0, 4);
+
+// SEO
+const seoTitle = post.meta_title || post.title;
+const seoDesc = post.meta_description || post.excerpt || post.content?.substring(0, 155).replace(/<[^>]*>/g, '') + '...';
+const postImage = post.image || post.img || `${SITE_URL}/og-default.jpg`;
+const canonicalUrl = `${SITE_URL}/blog/${slug}`;
+const datePublished = post.created_at || new Date().toISOString();
+const dateModified = post.updated_at || post.created_at || new Date().toISOString();
+
+// Calcular tiempo de lectura
+const wordCount = (post.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length;
+const readTime = Math.max(1, Math.ceil(wordCount / 200));
+
+// Generar tabla de contenidos desde H2s y H3s
+const headingRegex = /<h([23])[^>]*>([^<]+)<\/h[23]>/gi;
+const headings: { level: number; text: string; id: string }[] = [];
+let match;
+let contentWithIds = post.content || '';
+
+while ((match = headingRegex.exec(post.content || '')) !== null) {
+  const level = parseInt(match[1]);
+  const text = match[2].replace(/[^\w\sáéíóúñü]/gi, '').trim();
+  const id = text.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-áéíóúñü]/g, '');
+  headings.push({ level, text, id });
+  // Agregar IDs a los headings en el contenido
+  contentWithIds = contentWithIds.replace(
+    match[0],
+    `<h${level} id="${id}">${match[2]}</h${level}>`
+  );
+}
+
+// Schema.org Article
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": post.title,
+  "image": postImage,
+  "wordCount": wordCount,
+  "author": {
+    "@type": "Organization",
+    "name": "Nuditos Tejidos",
+    "url": SITE_URL
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Nuditos Tejidos",
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${SITE_URL}/favicon.svg`
+    }
+  },
+  "datePublished": datePublished,
+  "dateModified": dateModified,
+  "description": seoDesc,
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": canonicalUrl
+  },
+  "inLanguage": "es",
+  "isPartOf": {
+    "@type": "Blog",
+    "@id": `${SITE_URL}/blog`,
+    "name": "Blog Nuditos Tejidos"
+  }
+};
+
+// Schema Breadcrumb
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Inicio", "item": SITE_URL },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${SITE_URL}/blog` },
+    { "@type": "ListItem", "position": 3, "name": post.title, "item": canonicalUrl }
+  ]
+};
+
+// Keywords para meta tag
+const keywords = post.seo_keywords || `${post.category || 'crochet'}, ramos crochet, flores eternas, nuditos tejidos, regalos Colombia, flores que no se marchitan`;
+
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+---
+
+<Layout
+  title={seoTitle}
+  description={seoDesc}
+  ogImage={postImage}
+  ogType="article"
+  canonical={canonicalUrl}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+    <meta name="keywords" content={keywords} />
+    <meta property="article:published_time" content={datePublished} />
+    <meta property="article:modified_time" content={dateModified} />
+    <meta property="article:section" content={post.category || 'Nuditos'} />
+    <meta property="article:author" content="Nuditos Tejidos" />
+  </Fragment>
+
+  <style>
+    .post-hero {
+      background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%);
+      padding: 5rem 1.5rem 4rem;
+      text-align: center;
+    }
+    .post-meta {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      color: var(--lila-dark); letter-spacing: 2px; margin-bottom: 1rem;
+      display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;
+    }
+    .post-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600;
+      line-height: 1.1; color: var(--text); max-width: 900px; margin: 0 auto 2rem;
+    }
+    .read-time {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: white; padding: 0.3rem 0.8rem; border-radius: 50px;
+      font-size: 0.7rem; color: var(--text-soft); font-weight: 500;
+      border: 1px solid var(--border);
+    }
+    .post-img {
+      max-width: 1000px; margin: -3rem auto 0;
+      aspect-ratio: 16/9; border-radius: 32px; overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .post-img img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Tabla de Contenidos */
+    .toc {
+      max-width: 720px; margin: 2rem auto 0; padding: 1.5rem 2rem;
+      background: var(--lila-xlight); border-radius: 20px;
+      border-left: 4px solid var(--lila-dark);
+    }
+    .toc-title {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--lila-dark); margin-bottom: 0.8rem;
+    }
+    .toc-list { list-style: none; padding: 0; margin: 0; }
+    .toc-list li { margin-bottom: 0.4rem; }
+    .toc-list a {
+      color: var(--text-soft); font-size: 0.9rem;
+      text-decoration: none; transition: color 0.2s;
+    }
+    .toc-list a:hover { color: var(--lila-dark); }
+    .toc-list .toc-h3 { padding-left: 1.2rem; }
+
+    /* Contenido */
+    .post-content {
+      max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 4rem;
+      color: var(--text-mid); font-size: 1.1rem; line-height: 1.85;
+    }
+    .post-content :global(h2) {
+      font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 600;
+      color: var(--text); margin: 3rem 0 1.5rem; scroll-margin-top: 100px;
+    }
+    .post-content :global(h3) {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600;
+      color: var(--text); margin: 2.5rem 0 1rem; scroll-margin-top: 100px;
+    }
+    .post-content :global(p) { margin-bottom: 1.5rem; }
+    .post-content :global(ul), .post-content :global(ol) {
+      margin-bottom: 2rem; padding-left: 1.5rem;
+    }
+    .post-content :global(li) { margin-bottom: 0.8rem; }
+    .post-content :global(strong) { color: var(--text); }
+    .post-content :global(a) { color: var(--lila-dark); text-decoration: underline; }
+    .post-content :global(blockquote),
+    .post-content :global(.post-tip) {
+      background: var(--lila-xlight); border-radius: 20px; padding: 1.5rem 2rem;
+      border-left: 4px solid var(--lila-dark); margin: 2rem 0; font-style: italic;
+      color: var(--text);
+    }
+    .post-content :global(img) {
+      width: 100%; border-radius: 16px; margin: 2rem 0;
+    }
+
+    /* CTA Inline */
+    .post-cta {
+      background: linear-gradient(135deg, #f3edf9, #fce7f3);
+      border-radius: 24px; padding: 2.5rem; text-align: center; margin: 3rem 0;
+      border: 1px solid rgba(180, 150, 204, 0.2);
+    }
+    .post-cta h3 {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.8rem;
+      font-weight: 400; margin-bottom: 0.6rem; color: var(--text);
+    }
+    .post-cta h3 em { font-style: italic; color: var(--lila-dark); }
+    .post-cta p { color: var(--text-soft); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .post-cta a {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--text); color: white; padding: 0.8rem 2rem;
+      border-radius: 50px; font-weight: 600; font-size: 0.85rem;
+      text-decoration: none; transition: background 0.2s, transform 0.2s;
+    }
+    .post-cta a:hover { background: var(--lila-dark); transform: scale(1.03); }
+
+    /* Footer del post */
+    .post-footer-section {
+      max-width: 720px; margin: 0 auto; padding: 0 1.5rem 6rem;
+    }
+    .post-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 3rem 0;
+    }
+
+    /* Posts Relacionados */
+    .related-section {
+      background: var(--cream); padding: 4rem 1.5rem;
+    }
+    .related-inner { max-width: 1100px; margin: 0 auto; }
+    .related-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 2rem;
+      text-align: center; margin-bottom: 2.5rem; color: var(--text);
+    }
+    .related-title em { font-style: italic; color: var(--lila-dark); }
+    .related-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;
+    }
+    .related-card {
+      background: white; border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s;
+      text-decoration: none; display: flex; flex-direction: column;
+    }
+    .related-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+    .related-card-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+    .related-card-body { padding: 1.5rem; }
+    .related-card-cat {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--lila-dark); margin-bottom: 0.5rem;
+    }
+    .related-card-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.3rem;
+      font-weight: 600; color: var(--text); line-height: 1.3;
+    }
+
+    /* Productos CTA */
+    .products-cta {
+      background: white; padding: 4rem 1.5rem; border-top: 1px solid var(--border);
+    }
+    .products-cta-inner { max-width: 1200px; margin: 0 auto; }
+    .products-cta-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 2rem;
+      text-align: center; margin-bottom: 2.5rem; color: var(--text);
+    }
+    .products-cta-title em { font-style: italic; color: var(--lila-dark); }
+
+    @media (max-width: 768px) {
+      .post-hero { padding: 4rem 1.2rem 3rem; }
+      .post-img { margin: -1.5rem 1rem 0; border-radius: 20px; }
+      .post-content { font-size: 1rem; }
+      .toc { margin: 1.5rem 1rem 0; }
+      .related-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <!-- HERO -->
+  <div class="post-hero">
+    <div class="post-meta">
+      {post.category || 'Nuditos'} <span style="opacity:0.4">•</span> {formatDate(datePublished)}
+      <span class="read-time">
+        <Icon name="time" /> {readTime} min de lectura
+      </span>
+    </div>
+    <h1>{post.title}</h1>
+  </div>
+
+  <!-- IMAGEN PRINCIPAL -->
+  {postImage && (
+    <div class="post-img">
+      <img
+        src={clUrl(postImage, 1200)}
+        alt={post.title}
+        width="1200"
+        height="675"
+        loading="eager"
+      />
+    </div>
+  )}
+
+  <!-- TABLA DE CONTENIDOS -->
+  {headings.length > 2 && (
+    <nav class="toc" aria-label="Tabla de contenidos">
+      <div class="toc-title">📋 Contenido</div>
+      <ol class="toc-list">
+        {headings.map(h => (
+          <li class={h.level === 3 ? 'toc-h3' : ''}>
+            <a href={`#${h.id}`}>{h.text}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )}
+
+  <!-- CONTENIDO DEL ARTÍCULO -->
+  <article class="post-content" set:html={contentWithIds} />
+
+  <!-- CTA INLINE -->
+  <div class="post-footer-section">
+    <div class="post-cta">
+      <h3>¿Te inspiraste? Mira nuestros <em>ramos</em></h3>
+      <p>Cada ramo está tejido a mano con hilos premium. Envío a toda Colombia.</p>
+      <a href="/catalogo">
+        <Icon name="store-2" /> Ver Catálogo Completo
+      </a>
+    </div>
+
+    <hr class="post-divider" />
+
+    <!-- Navegación -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <a href="/blog" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--lila-dark); font-weight: 600; text-decoration: none; font-size: 0.9rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateX(-5px)'" onmouseout="this.style.transform=''">
+        <Icon name="arrow-left" /> Volver al Blog
+      </a>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href={`https://wa.me/?text=${encodeURIComponent(post.title + ' ' + canonicalUrl)}`} target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #25D366; color: white; text-decoration: none;" aria-label="Compartir en WhatsApp">
+          <Icon name="whatsapp" />
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- POSTS RELACIONADOS -->
+  {relatedPosts.length > 0 && (
+    <section class="related-section">
+      <div class="related-inner">
+        <h2 class="related-title">También te puede <em>interesar</em></h2>
+        <div class="related-grid">
+          {relatedPosts.map(rp => (
+            <a href={`/blog/${rp.slug}`} class="related-card">
+              {(rp.image || rp.img) && (
+                <img src={clUrl(rp.image || rp.img, 600)} alt={rp.title} class="related-card-img" loading="lazy" />
+              )}
+              <div class="related-card-body">
+                <div class="related-card-cat">{rp.category || 'Nuditos'}</div>
+                <h3 class="related-card-title">{rp.title}</h3>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- PRODUCTOS CTA (INTERNAL LINKING) -->
+  {ctaProducts.length > 0 && (
+    <section class="products-cta">
+      <div class="products-cta-inner">
+        <h2 class="products-cta-title">Explora nuestros <em>ramos eternos</em></h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem;">
+          {ctaProducts.map(p => <ProductCard p={p} parentView="grid" idScope="blog-cta" />)}
+        </div>
+        <div style="text-align: center; margin-top: 2rem;">
+          <a href="/catalogo" style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--text); color: white; padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; transition: background 0.2s;">
+            Ver todo el catálogo <Icon name="arrow-right" />
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+</Layout>

@@ -1,0 +1,142 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Icon from '../components/Icon.astro';
+import { getLiveProducts } from '../lib/supabase';
+
+export const prerender = false;
+
+const products = await getLiveProducts();
+
+// Filtrar flores eternas o más populares
+const eternaProducts = products.filter(p => 
+  p.activo !== false && 
+  (p.name.toLowerCase().includes('eterna') || 
+   p.desc.toLowerCase().includes('eterna') || 
+   p.cat === 'flores-individuales')
+).slice(0, 8);
+
+const seoTitle = "Flores Eternas de Crochet Colombia | Ramos que No se Marchitan";
+const seoDesc = "Descubre la magia de las flores eternas. Ramos tejidos a mano en crochet que conservan su belleza por años. El regalo perfecto y sostenible con envío a toda Colombia.";
+const keywords = "flores eternas, flores de crochet, flores que no se marchitan, ramos eternos colombia, flores tejidas centro de mesa, regalo ecológico flores";
+---
+
+<Layout title={seoTitle} description={seoDesc} keywords={keywords}>
+  <style>
+    .hero-landing {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      padding: 6rem 1.5rem 5rem;
+      text-align: center;
+      border-bottom: 1px solid #dcfce7;
+    }
+    .hero-landing h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      line-height: 1;
+      color: #111;
+      margin-bottom: 1.5rem;
+    }
+    .hero-landing h1 em { font-style: italic; color: #166534; }
+    .hero-landing p {
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      font-size: 1.1rem;
+      color: #666;
+      line-height: 1.6;
+    }
+    .btn-main {
+      background: #111;
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .btn-main:hover { background: #166534; transform: translateY(-2px); }
+
+    .section-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
+    }
+    .grid-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .seo-content {
+      background: #fafaf9;
+      padding: 5rem 1.5rem;
+    }
+    .seo-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .seo-inner h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .seo-inner p {
+      margin-bottom: 1.5rem;
+      line-height: 1.8;
+      color: #444;
+    }
+  </style>
+
+  <header class="hero-landing">
+    <div class="max-w-4xl mx-auto">
+      <span class="text-[0.7rem] uppercase tracking-[4px] text-green-700 font-bold mb-4 block">Belleza perdurable</span>
+      <h1>Flores <em>Eternas</em></h1>
+      <p>Redefinimos el arte de regalar flores. Diseños artesanales en crochet que no necesitan agua ni luz, solo amor.</p>
+      <a href="#catalogo" class="btn-main">Ver Colección <Icon name="arrow-right" /></a>
+    </div>
+  </header>
+
+  <main id="catalogo" class="section-grid">
+    <h2 class="grid-title">Nuestras flores más <em>populares</em></h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {eternaProducts.map(p => <ProductCard p={p} />)}
+    </div>
+  </main>
+
+  <section class="seo-content">
+    <div class="seo-inner">
+      <h2>¿Qué son las flores eternas de Nuditos?</h2>
+      <p>Nuestras flores eternas son piezas únicas tejidas a mano con hilos premium. A diferencia de las flores naturales o preservadas, estas no pasan por procesos químicos y conservan su forma y color por tiempo indefinido. Son la opción perfecta para quienes buscan un regalo sostenible y con gran valor sentimental.</p>
+      
+      <h2>Ventajas de las flores tejidas</h2>
+      <ul class="space-y-4 mb-8">
+        <li class="flex gap-4">
+           <span class="text-green-600 font-bold">✓</span>
+           <span><strong>Sin mantenimiento:</strong> No requieren agua, abono ni cuidados especiales.</span>
+        </li>
+        <li class="flex gap-4">
+           <span class="text-green-600 font-bold">✓</span>
+           <span><strong>Hipoalergénicas:</strong> Ideales para personas con alergias al polen.</span>
+        </li>
+        <li class="flex gap-4">
+           <span class="text-green-600 font-bold">✓</span>
+           <span><strong>Sostenibles:</strong> Una alternativa duradera que evita el desperdicio de las flores cortadas tradicionales.</span>
+        </li>
+      </ul>
+
+      <h2>Regalos para toda la vida</h2>
+      <p>Ya sea para decorar tu hogar o para sorprender a alguien especial en una fecha importante, las flores de crochet de Nuditos Tejidos representan un lazo que no se rompe. Cada puntada es un gesto de cariño que perdura en el tiempo.</p>
+    </div>
+  </section>
+
+  <div class="py-20 text-center bg-white border-t border-stone-100">
+     <h2 class="font-serif text-3xl mb-8">Lleva flores que <em>nunca mueren</em></h2>
+     <a href="/catalogo" class="btn-main">Explorar Catálogo</a>
+  </div>
+</Layout>

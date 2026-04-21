@@ -7,12 +7,14 @@ interface Props {
   catName?: string;
   class?: string;
   parentView?: 'carousel' | 'grid' | 'list';
+  idScope?: string; // Nuevo: para evitar duplicados en view-transition-name
   eager?: boolean;
 }
 
-const { p, catName = 'Nuditos', class: className, parentView = 'grid', eager = false } = Astro.props;
+const { p, catName = 'Nuditos', class: className, parentView = 'grid', idScope = 'default', eager = false } = Astro.props;
 const imgLoading = eager ? 'eager' : 'lazy';
 
+const vtScope = `${idScope}-${parentView}`;
 const productSlug = slugify(p.name);
 const allImgs = [p.img, ...(p.imgs || [])].filter((u, i, arr) => u && arr.indexOf(u) === i);
 const hasMultiple = allImgs.length > 1;
@@ -31,11 +33,11 @@ const allCats = [...new Set([p.cat, ...(p.cats || [])].filter(Boolean))].join(',
   data-cats={allCats}
   data-price={p.price}
   data-search={searchStr}
-  id={`pcard-${p.id}`}
+  id={`pcard-${p.id}-${vtScope}`}
 >
   <div class="card-media">
     <div class="media-viewport">
-      <a href={`/ramo/${productSlug}`} class="media-link" data-astro-prefetch="hover">
+      <a href={`/ramo/${productSlug}?from=${vtScope}`} class="media-link" data-astro-prefetch="hover">
         <div class="img-track" data-imgs={allImgs.map(img => clUrl(img, 480)).join('|')}>
           <img 
             src={clUrl(allImgs[0], 480)} 
@@ -43,7 +45,7 @@ const allCats = [...new Set([p.cat, ...(p.cats || [])].filter(Boolean))].join(',
             class="main-img"
             loading={imgLoading}
             width="400" height="500"
-            style={`view-transition-name: p-img-${p.id}`}
+            style={`view-transition-name: p-img-${p.id}-${vtScope}`}
           />
           {hasMultiple && (
             <img 

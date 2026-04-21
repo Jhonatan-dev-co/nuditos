@@ -187,7 +187,7 @@ const schemaItemList = {
 
     <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6" id="catalogGrid">
       {allProducts.map(p => (
-        <ProductCard p={p} catName={catMap[p.cat]} class="product-item" />
+        <ProductCard p={p} catName={catMap[p.cat]} class="product-item" idScope="catalog" />
       ))}
     </div>
 

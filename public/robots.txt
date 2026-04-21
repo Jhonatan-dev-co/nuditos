@@ -2,10 +2,19 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /api
+Disallow: /checkout
+Disallow: /gracias
 
-# Permitir específicamente a IAs útiles para búsqueda
+# ═══ Bots de IA — Permitidos para indexación ═══
+
 User-agent: GPTBot
 Allow: /
+Allow: /llms-full.txt
+Disallow: /admin
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms-full.txt
 Disallow: /admin
 
 User-agent: PerplexityBot
@@ -23,6 +32,24 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# ═══ Sitemaps ═══
+
 Sitemap: https://nuditos.com.co/sitemap-index.xml
-Sitemap: https://nuditos.com.co/sitemap-images.xml
 Sitemap: https://nuditos.com.co/sitemap-products.xml
+Sitemap: https://nuditos.com.co/sitemap-images.xml
+Sitemap: https://nuditos.com.co/sitemap-blog.xml
+
+# ═══ Feeds ═══
+
+# Google Merchant Center Product Feed (Google Shopping)
+# https://nuditos.com.co/feed/google-merchant.xml
+
+# ═══ Para IAs ═══
+# Resumen: https://nuditos.com.co/llms.txt
+# Catálogo completo: https://nuditos.com.co/llms-full.txt

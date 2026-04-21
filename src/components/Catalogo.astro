@@ -52,7 +52,7 @@ let globalIdx = 0;
           
           <!-- View: Grid (Mosaic) -->
           <div class="view-content view-grid hidden grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            {items.map(p => <ProductCard p={p} parentView="grid" eager={globalIdx++ < 6} />)}
+            {items.map(p => <ProductCard p={p} parentView="grid" idScope={cat.id} eager={globalIdx++ < 6} />)}
           </div>
           
           <!-- View: Carousel -->
@@ -61,7 +61,7 @@ let globalIdx = 0;
               <div class="swiper-wrapper">
                 {items.map(p => (
                   <div class="swiper-slide h-auto pb-4">
-                    <ProductCard p={p} parentView="carousel" eager={globalIdx++ < 6} />
+                    <ProductCard p={p} parentView="carousel" idScope={cat.id} eager={globalIdx++ < 6} />
                   </div>
                 ))}
               </div>

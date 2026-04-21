@@ -37,6 +37,7 @@ interface Props {
   preloadImage?: string;
   hideNav?: boolean;
   hideFooter?: boolean;
+  keywords?: string;
 }
 
 const {
@@ -48,7 +49,8 @@ const {
   noIndex = false,
   preloadImage,
   hideNav = false,
-  hideFooter = false
+  hideFooter = false,
+  keywords = ''
 } = Astro.props;
 
 // Combinar título de la página con el título del sitio
@@ -90,26 +92,74 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       opacity: 0;
       transition: transform 0.3s ease-out, opacity 0.3s 0.3s;
     }
+    
+    /* Pantalla de carga superpuesta */
+    #page-transition-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    #page-transition-overlay.active {
+      opacity: 1; pointer-events: all;
+    }
+    .spinner-flower {
+      font-size: 3rem;
+      animation: spin-pulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      filter: drop-shadow(0 4px 10px rgba(167, 139, 250, 0.3));
+    }
+    @keyframes spin-pulse {
+      0% { transform: scale(0.9) rotate(0deg); opacity: 0.8; }
+      50% { transform: scale(1.1) rotate(180deg); opacity: 1; }
+      100% { transform: scale(0.9) rotate(360deg); opacity: 0.8; }
+    }
+    .loading-text {
+      margin-top: 1rem;
+      font-family: var(--font-serif);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      animation: pulse-text 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-text {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
   </style>
   <script>
     document.addEventListener('astro:before-preparation', () => {
       const bar = document.getElementById('loading-bar');
+      const overlay = document.getElementById('page-transition-overlay');
       if (bar) {
         bar.style.transform = 'scaleX(0)';
         bar.style.opacity = '1';
         bar.classList.remove('done');
         bar.classList.add('loading');
       }
+      if (overlay) {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Evita scrollear mientras carga
+      }
     });
 
     document.addEventListener('astro:page-load', () => {
       const bar = document.getElementById('loading-bar');
+      const overlay = document.getElementById('page-transition-overlay');
       if (bar) {
         bar.classList.add('done');
         setTimeout(() => {
           bar.classList.remove('loading', 'done');
           bar.style.transform = 'scaleX(0)';
         }, 600);
+      }
+      if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
       }
       
       // Global helpers
@@ -128,7 +178,9 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   </script>
 
   <meta name="description" content={description} />
+  {keywords && <meta name="keywords" content={keywords} />}
   <link rel="canonical" href={canonicalURL} />
+  <link rel="alternate" type="text/plain" title="Datos para IAs" href="/llms.txt" />
   {noIndex && <meta name="robots" content="noindex, nofollow" />}
   {!noIndex && <meta name="robots" content="index, follow" />}
 
@@ -152,29 +204,45 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <meta name="twitter:image" content={ogImage} />
 
   <!-- Facebook Pixel (Meta Pixel) -->
-  <script is:inline>
-    !(function (f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
-      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
-      n.queue = []; t = b.createElement(e); t.async = !0; t.src = v;
-      s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '919518317518571');
-    fbq('track', 'PageView');
-  </script>
-  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=919518317518571&ev=PageView&noscript=1" /></noscript>
+  {config?.metaPixelActivo && (
+    <>
+      <script is:inline define:vars={{ pixelId: config.metaPixelId || '919518317518571' }}>
+        !(function (f, b, e, v, n, t, s) {
+          if (f.fbq) return;
+          n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+          if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+          n.queue = []; t = b.createElement(e); t.async = !0; t.src = v;
+          s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+        })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', pixelId);
+        fbq('track', 'PageView');
+
+        document.addEventListener('astro:after-swap', () => {
+          fbq('track', 'PageView');
+        });
+      </script>
+      <noscript><img height="1" width="1" style="display:none" src={`https://www.facebook.com/tr?id=${config.metaPixelId || '919518317518571'}&ev=PageView&noscript=1`} /></noscript>
+    </>
+  )}
 
 
 
   <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KWMVM0GSZM"></script>
-  <script is:inline>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-KWMVM0GSZM');
-  </script>
+  {config?.gaActive && (
+    <>
+      <script async src={`https://www.googletagmanager.com/gtag/js?id=${config.gaId || 'G-KWMVM0GSZM'}`}></script>
+      <script is:inline define:vars={{ gaId: config.gaId || 'G-KWMVM0GSZM' }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', gaId);
+
+        document.addEventListener('astro:after-swap', () => {
+          gtag('config', gaId, { page_path: window.location.pathname });
+        });
+      </script>
+    </>
+  )}
 
   <!-- Preconexiones críticas para acelerar terceros y base de datos -->
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
@@ -270,12 +338,20 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
 <body>
   <div id="loading-bar"></div>
+  
+  <!-- Overlay Premium de Carga -->
+  <div id="page-transition-overlay">
+    <div class="spinner-flower">🌸</div>
+    <div class="loading-text">Cargando</div>
+  </div>
 
   <!-- ════════ NAVBAR ════════ -->
 <style is:global>
   :root {
-    --nav-h:       72px;
-    --nav-h-mob:   64px;
+    --nav-h:       56px;
+    --nav-h-mob:   50px;
+    --nav-h-mini:  48px;
+    --nav-h-mini-mob: 42px;
     --glass-bg:    rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.3);
     --glass-blur:  25px;
@@ -286,27 +362,73 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     font-family: var(--font-sans);
     background: var(--bg);
     color: var(--text);
+    padding-top: var(--nav-h);
+  }
+  @media (max-width: 768px) {
+    body {
+      padding-top: var(--nav-h-mob);
+    }
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
     font-weight: 400;
   }
   .nav-wrap {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    width: 100%;
     z-index: 100;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: var(--nav-h);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+  }
+  @media (max-width: 768px) {
+    .nav-wrap { height: var(--nav-h-mob); }
   }
   .nav-wrap.nav-scrolled {
+    height: var(--nav-h-mini);
+    background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
   }
-  .nav-wrap.nav-hidden {
-    transform: translateY(-100%);
+  @media (max-width: 768px) {
+    .nav-wrap.nav-scrolled { height: var(--nav-h-mini-mob); }
   }
+  .nav-wrap nav { height: 100%; width: 100%; }
+
+  .nav-wrap.nav-scrolled .logo {
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+  }
+  @media (max-width: 768px) {
+    .nav-wrap.nav-scrolled .logo {
+      font-size: 1rem;
+      letter-spacing: 2px;
+    }
+    .nav-wrap.nav-scrolled .nav-icon-btn {
+      transform: scale(0.85);
+    }
+  }
+
+  /* Ajuste para la barra de categorías sticky si existe en la página */
+  .nav-wrap.nav-scrolled + * .cat-sticky,
+  .nav-wrap.nav-scrolled ~ .cat-sticky,
+  .nav-wrap.nav-scrolled ~ * .cat-sticky {
+    top: var(--nav-h-mini) !important;
+  }
+  @media (max-width: 768px) {
+    .nav-wrap.nav-scrolled + * .cat-sticky,
+    .nav-wrap.nav-scrolled ~ .cat-sticky,
+    .nav-wrap.nav-scrolled ~ * .cat-sticky {
+      top: var(--nav-h-mini-mob) !important;
+    }
+  }
+
   
   @keyframes cartBump {
     0% { transform: scale(1); }
@@ -513,21 +635,10 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
         const currentScroll = window.pageYOffset;
 
         if (currentScroll <= 15) {
-          nav.classList.remove('nav-hidden');
           nav.classList.remove('nav-scrolled');
-          lastScroll = currentScroll;
-          return;
-        }
-
-        nav.classList.add('nav-scrolled');
-
-        if (currentScroll > lastScroll) {
-          if (currentScroll > 80) nav.classList.add('nav-hidden');
         } else {
-          nav.classList.remove('nav-hidden');
+          nav.classList.add('nav-scrolled');
         }
-        
-        lastScroll = currentScroll;
       }
 
       document.addEventListener('astro:page-load', () => {
@@ -564,7 +675,37 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
           </div>
         </div>
 
-        <!-- Col 2: Ayuda (Accordion Item 2) -->
+        <!-- Col 2: Explora (NUEVA PARA SEO) -->
+        <div class="footer-col accordion-item">
+          <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+            <h4 class="footer-title">Explora Nuditos</h4>
+            <Icon name="add" class="acc-icon" />
+          </button>
+          <nav class="footer-links accordion-content">
+            <a href="/catalogo">Nuestra Tienda</a>
+            <a href="/regalos-para-novia">Regalos para Novia</a>
+            <a href="/regalos-dia-de-la-madre">Día de la Madre</a>
+            <a href="/flores-eternas">Flores Eternas</a>
+            <a href="/blog">Blog & Consejos</a>
+          </nav>
+        </div>
+
+        <!-- Col 3: Ciudades (NUEVA PARA SEO LOCAL) -->
+        <div class="footer-col accordion-item">
+          <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+            <h4 class="footer-title">Envíos Locales</h4>
+            <Icon name="add" class="acc-icon" />
+          </button>
+          <nav class="footer-links accordion-content">
+            <a href="/ramos-de-flores-bogota">Bogotá</a>
+            <a href="/ramos-de-flores-medellin">Medellín</a>
+            <a href="/ramos-de-flores-cali">Cali</a>
+            <a href="/ramos-de-flores-barranquilla">Barranquilla</a>
+            <a href="/ramos-de-flores-bucaramanga">Bucaramanga</a>
+          </nav>
+        </div>
+
+        <!-- Col 4: Ayuda (Accordion Item 2) -->
         <div class="footer-col accordion-item">
           <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
             <h4 class="footer-title">Ayuda y Soporte</h4>
@@ -574,11 +715,10 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
             <a href="/politicas">Envíos y entregas</a>
             <a href="/preguntas-frecuentes">Preguntas frecuentes</a>
             <a href="/politicas">Cambios y Garantías</a>
-            <a href={whatsappLink}>Escríbenos tus PQRS</a>
           </nav>
         </div>
 
-        <!-- Col 3: Legal (Accordion Item 3) -->
+        <!-- Col 5: Legal (Accordion Item 3) -->
         <div class="footer-col accordion-item">
           <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
             <h4 class="footer-title">Información Legal</h4>
@@ -586,9 +726,8 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
           </button>
           <nav class="footer-links accordion-content">
             <a href="/politicas">Términos y Condiciones</a>
-            <a href="/politicas">Política de Privacidad</a>
-            <a href="/politicas">Tratamiento de Datos</a>
-            <a href="https://www.sic.gov.co/" target="_blank">Superintendencia de Industria y Comercio (SIC)</a>
+            <a href="/politicas">Privacidad</a>
+            <a href="https://www.sic.gov.co/" target="_blank">Portal SIC</a>
           </nav>
         </div>
 
@@ -597,24 +736,14 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
           <h4 class="footer-title">Confianza y Pagos</h4>
           <div class="transparency-box">
             <p><strong>Origen:</strong> El Dorado, Meta 🇨🇴</p>
-            <div class="pay-trust-logos">
-              <span class="pay-label">Pagos procesados por:</span>
-              <div class="pay-icons-row">
-                <Icon name="visa" class="w-7 h-4 opacity-100" />
-                <Icon name="mastercard" class="w-7 h-4 opacity-100" />
-                <Icon name="pse" class="w-4 h-4 opacity-100" />
-                <Icon name="nequi" class="w-4 h-4 opacity-100" />
-                <Icon name="wompi" class="w-8 h-4 opacity-100" />
-              </div>
-              <p class="pay-hint">Grupo Bancolombia</p>
-            </div>
+
           </div>
         </div>
 
       </div>
 
       <div class="footer-bottom-bar">
-        <div class="footer-copy">© 2025 NUDITOS. Todos los derechos reservados. Hecho con 💜 en Colombia.</div>
+        <div class="footer-copy">© 2026 NUDITOS. Todos los derechos reservados. Hecho con 💜 en Colombia.</div>
       </div>
     </footer>
     </>
@@ -630,8 +759,8 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       max-width: 1200px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 3rem;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1.5rem;
     }
 
     .footer-col { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -767,12 +896,12 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       </div>
       
       <div class="flex flex-col gap-3">
-        <div class="flex justify-center items-center gap-4 py-2 opacity-50 mb-1">
-          <Icon name="visa" class="w-7 h-4" />
-          <Icon name="mastercard" class="w-7 h-4" />
-          <Icon name="pse" class="w-4 h-4" />
-          <Icon name="nequi" class="w-4 h-4" />
-          <Icon name="wompi" class="w-7 h-4" />
+        <div class="flex items-center justify-between bg-emerald-50/50 border border-emerald-100 rounded-xl px-3 py-2 mb-2">
+          <div class="flex items-center gap-2">
+            <Icon name="truck" class="text-emerald-500 w-4 h-4" />
+            <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-700">Envío Gratis</span>
+          </div>
+          <span class="text-[10px] font-medium text-emerald-600">A todo Colombia</span>
         </div>
 
         <a href="/checkout" class="w-full bg-stone-900 text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="toggleCart()">

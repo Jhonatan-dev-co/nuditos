@@ -53,7 +53,7 @@ const breadcrumbSchema = {
   <main class="max-w-[1400px] mx-auto px-6 md:px-12 py-12">
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
       {items.map(p => (
-        <ProductCard p={p} catName={catMap[p.cat]} />
+        <ProductCard p={p} catName={catMap[p.cat]} idScope={`cat-${categoria}`} />
       ))}
     </div>
 

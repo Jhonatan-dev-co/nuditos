@@ -42,6 +42,14 @@ async function verifyWebhookSignature(body: any, eventsSecret: string) {
   return hashHex === signature.checksum;
 }
 
+export const GET: APIRoute = async () => {
+  return new Response(JSON.stringify({ 
+    status: 'online', 
+    message: 'Nuditos Webhook está activo. Esperando eventos POST de Wompi.',
+    timestamp: new Date().toISOString()
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const env = (locals as any).runtime?.env || {};
@@ -49,7 +57,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const SB_KEY = env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY || env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
     const body = await request.json();
-    console.log('[wompi-webhook] Evento recibido. ID Transacción:', body?.data?.transaction?.id);
+    const eventId = body?.data?.transaction?.id || 'unknown';
+    console.log(`[wompi-webhook] Evento recibido. ID Transacción: ${eventId}`);
+
+    if (!SB_URL || !SB_KEY) {
+      console.error('[wompi-webhook] ❌ Error: Faltan variables de entorno de Supabase (URL/KEY).');
+    }
 
     const config = await getLiveConfig();
     const eventSecret = config?.wompiEvents;

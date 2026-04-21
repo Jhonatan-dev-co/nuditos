@@ -1,0 +1,52 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Icon from '../components/Icon.astro';
+import { getLiveProducts } from '../lib/supabase';
+
+export const prerender = false;
+
+const products = await getLiveProducts();
+const cityProducts = products.filter(p => p.activo !== false).slice(0, 8);
+
+const city = "Bucaramanga";
+const seoTitle = `Ramos de Flores en ${city} | Envío a Domicilio Nuditos Tejidos`;
+const seoDesc = `Regalos únicos en la Ciudad de los Parques. Ramos de flores de crochet en ${city} con envío a domicilio. Flores eternas tejidas a mano para emocionar a tus seres queridos.`;
+const keywords = `ramos de flores ${city.toLowerCase()}, floristerias ${city.toLowerCase()}, regalos a domicilio ${city.toLowerCase()}, flores eternas ${city.toLowerCase()}, nuditos tejidos ${city.toLowerCase()}`;
+---
+
+<Layout title={seoTitle} description={seoDesc} keywords={keywords}>
+  <style>
+    .hero-city { background: #fafaf9; padding: 6rem 1.5rem 5rem; text-align: center; position: relative; overflow: hidden; }
+    .hero-city::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://images.unsplash.com/photo-1594911776100-34863004bb61?q=80&w=2000'); background-size: cover; background-position: center; opacity: 0.05; z-index: 0; }
+    .hero-city .content { position: relative; z-index: 1; }
+    .hero-city h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 8vw, 4rem); color: #111; margin-bottom: 1.5rem; }
+    .hero-city h1 em { font-style: italic; color: #4f46e5; }
+    .section-grid { max-width: 1200px; margin: 0 auto; padding: 5rem 1.5rem; }
+  </style>
+
+  <header class="hero-city">
+    <div class="content max-w-4xl mx-auto">
+      <span class="text-[0.7rem] uppercase tracking-[4px] text-indigo-600 font-bold mb-4 block">Envíos a la ciudad de los parques</span>
+      <h1>Ramos de Flores en <em>{city}</em></h1>
+      <p class="text-stone-500 max-w-xl mx-auto mb-8 text-lg">Belleza artesanal para Santander. Nuestras flores de crochet son el detalle eterno que combina con la elegancia de los hogares santandereanos.</p>
+      <a href="#catalogo" class="bg-black text-white px-8 py-3 rounded-full font-bold text-sm tracking-widest uppercase hover:bg-indigo-600 transition-all">Ver Favoritos</a>
+    </div>
+  </header>
+
+  <main id="catalogo" class="section-grid">
+    <div class="flex justify-between items-end mb-12">
+      <div><h2 class="font-serif text-3xl">Favoritos en {city}</h2><p class="text-stone-400 text-sm">Los ramos más deseados en Bucaramanga y Floridablanca.</p></div>
+      <a href="/catalogo" class="text-xs font-bold tracking-widest uppercase border-b-2 border-indigo-100 pb-1 hover:border-indigo-600 transition-all">Ir al catálogo</a>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">{cityProducts.map(p => <ProductCard p={p} />)}</div>
+  </main>
+
+  <section class="bg-stone-50 py-20 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+       <h2 class="font-serif text-3xl mb-6">Detalles con alma en <em>Santander</em></h2>
+       <p class="text-stone-600 leading-relaxed max-w-2xl mx-auto mb-10">Sorprender en Bucaramanga nunca fue tan fácil. Con Nuditos Tejidos, envías más que flores: envías una pieza de arte hecha a mano que durará para siempre. Servicio a domicilio en toda Bucaramanga, Floridablanca, Girón y Piedecuesta.</p>
+       <a href="https://wa.me/573144931525" class="inline-block bg-indigo-600 text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-indigo-700 transition-all">Atención Personalizada</a>
+    </div>
+  </section>
+</Layout>

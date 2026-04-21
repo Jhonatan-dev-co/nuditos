@@ -138,7 +138,7 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
               </a>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-x-2 gap-y-6 md:gap-6">
-              {items.map(p => <ProductCard p={p} parentView="grid" />)}
+              {items.map(p => <ProductCard p={p} parentView="grid" idScope={section.id} />)}
             </div>
           </section>
         </>

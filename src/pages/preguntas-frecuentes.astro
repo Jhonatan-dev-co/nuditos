@@ -3,11 +3,42 @@ import Icon from '../components/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 
 const faqs = [
-  { q: "¿De qué están hechos los ramos de crochet Nuditos?", a: "Todos nuestros ramos están tejidos con hilos premium en técnica crochet. Las flores no se marchitan, no necesitan agua y pueden durar años." },
-  { q: "¿Cuánto tiempo tarda en llegar mi pedido?", a: "El tiempo de elaboración es de 1 a 3 días hábiles, más 2 a 5 días hábiles de envío según tu ciudad en Colombia." },
-  { q: "¿Hacen envíos a toda Colombia?", a: "Sí, enviamos a toda Colombia desde El Dorado, Meta. El costo base es de $17.000 COP." },
-  { q: "¿Puedo personalizar mi ramo de crochet?", a: "Sí, podemos personalizar colores, diseño y tamaño. Escríbenos por WhatsApp al +57 314 493 1525." },
-  { q: "¿Cuáles son los métodos de pago?", a: "Aceptamos tarjeta de crédito, débito, Nequi, Daviplata y PSE a través de Wompi." },
+  // ═══ Sobre los productos ═══
+  { q: "¿De qué están hechos los ramos de crochet Nuditos?", a: "Todos nuestros ramos están tejidos con <strong>hilos de algodón premium</strong> utilizando la técnica de crochet. Las flores no se marchitan, no necesitan agua y pueden durar años con cuidados básicos.", category: "productos" },
+  { q: "¿Cuánto tiempo dura un ramo de crochet?", a: "Con los cuidados básicos (evitar humedad directa y sol prolongado), un ramo de crochet puede durar <strong>muchos años</strong>. Tenemos clientas con ramos de más de 3 años que siguen perfectos.", category: "productos" },
+  { q: "¿Los colores son exactamente como en las fotos?", a: "Hacemos todo lo posible para que las fotos representen fielmente los colores reales. Si tienes dudas, escríbenos por <a href='https://wa.me/573144931525'>WhatsApp</a> y te enviamos fotos adicionales del producto.", category: "productos" },
+  { q: "¿Qué tan grandes son los ramos?", a: "Tenemos diferentes tamaños: <strong>mini ramos</strong> (15-20 cm), <strong>medianos</strong> (25-35 cm) y <strong>grandes</strong> (40-50 cm). Cada producto indica sus dimensiones aproximadas en la descripción.", category: "productos" },
+  { q: "¿Las flores de crochet huelen?", a: "Por sí solas no tienen olor, pero puedes <strong>rociarles tu perfume favorito</strong> o una esencia textil a 30 cm de distancia. El algodón absorbe muy bien los aromas y los libera suavemente.", category: "productos" },
+  { q: "¿Es mejor un ramo de crochet que flores naturales?", a: "¡Definitivamente! Las flores de crochet <strong>no se marchitan</strong>, no causan alergias, son personalizables al 100%, duran años y son un recuerdo permanente. Son la evolución del regalo de flores.", category: "productos" },
+  { q: "¿Qué puedo regalar si no sé qué regalar?", a: "Un ramo de crochet es perfecto porque es <strong>original, duradero y significativo</strong>. A diferencia de otros regalos, nunca se marchita y siempre recuerda el momento especial. Es ideal para novia, mamá, amiga, hermana o cualquier persona especial.", category: "productos" },
+
+  // ═══ Personalización ═══
+  { q: "¿Puedo personalizar mi ramo de crochet?", a: "¡Sí! Personalizamos <strong>colores, tipo de flores, tamaño</strong> y diseño. Escríbenos por <a href='https://wa.me/573144931525'>WhatsApp</a> con tu idea y te hacemos una cotización.", category: "personalizado" },
+  { q: "¿Puedo pedir un ramo con los colores de mi equipo de fútbol?", a: "¡Claro! Podemos combinar cualquier color que necesites. Hemos hecho ramos con combinaciones de equipos, universidades y colores corporativos.", category: "personalizado" },
+  { q: "¿Hacen ramos para bodas?", a: "Sí, creamos <strong>bouquets de novia</strong> eternos tejidos a crochet. Son la tendencia perfecta para novias que quieren conservar su ramo para siempre sin que se marchite.", category: "personalizado" },
+  { q: "¿Hacen amigurumis personalizados?", a: "Sí, aparte de flores, también tejemos <strong>amigurumis</strong> (muñecos tejidos) personalizados. Desde mascotas hasta personajes favoritos.", category: "personalizado" },
+
+  // ═══ Pedidos y pagos ═══
+  { q: "¿Cómo hago un pedido?", a: "Puedes hacer tu pedido de dos formas: <strong>1)</strong> Agrega el producto al carrito y paga directamente en la web, o <strong>2)</strong> Escríbenos por <a href='https://wa.me/573144931525'>WhatsApp</a> para atención personalizada.", category: "pedidos" },
+  { q: "¿Qué métodos de pago aceptan?", a: "Aceptamos todos los métodos de pago colombianos a través de <strong>Wompi</strong>: tarjetas de crédito/débito (Visa, Mastercard), PSE (transferencia bancaria), Nequi y Daviplata.", category: "pedidos" },
+  { q: "¿Puedo pagar con Nequi?", a: "Sí, <strong>Nequi</strong> es uno de nuestros métodos de pago disponibles a través de la pasarela Wompi. ¡Súper fácil y rápido!", category: "pedidos" },
+  { q: "¿Se puede pagar contra entrega?", a: "Actualmente no manejamos pago contra entrega. Nuestros pagos son <strong>100% seguros</strong> a través de Wompi (certificado por la Superintendencia Financiera de Colombia).", category: "pedidos" },
+  { q: "¿Cuánto tiempo tarda en elaborarse mi pedido?", a: "<strong>1 a 3 días hábiles</strong> de elaboración, porque cada ramo se teje desde cero al recibir tu pedido. Es artesanía pura, no producción en serie.", category: "pedidos" },
+  { q: "¿Aceptan pedidos al por mayor?", a: "Sí, manejamos pedidos al por mayor para <strong>empresas, eventos y revendedores</strong>. Contáctanos por WhatsApp para cotización especial.", category: "pedidos" },
+
+  // ═══ Envíos y entregas ═══
+  { q: "¿A dónde hacen envíos?", a: "Hacemos envíos a <strong>toda Colombia</strong> desde El Dorado, Meta. Bogotá, Medellín, Cali, Barranquilla, Bucaramanga, Cartagena y cualquier municipio del país.", category: "envios" },
+  { q: "¿Cuánto cuesta el envío?", a: "El envío es <strong>gratis</strong> en la mayoría de nuestros productos. El costo exacto se muestra al finalizar tu compra.", category: "envios" },
+  { q: "¿Cuánto tarda en llegar a Bogotá?", a: "A Bogotá normalmente llega en <strong>3-5 días hábiles</strong> después de elaborado (1-3 días de elaboración + 2-3 días de envío).", category: "envios" },
+  { q: "¿Cuánto tarda en llegar a Medellín?", a: "A Medellín normalmente llega en <strong>4-6 días hábiles</strong> después de elaborado (1-3 días de elaboración + 2-4 días de envío).", category: "envios" },
+  { q: "¿Se puede enviar como sorpresa?", a: "¡Sí! Enviamos a la dirección que nos indiques con una <strong>tarjeta personalizada</strong> incluida. Solo escríbenos el mensaje que quieres incluir.", category: "envios" },
+  { q: "¿Qué pasa si mi ramo llega dañado?", a: "Empacamos con protección premium, pero si algo sale mal, <strong>te lo solucionamos</strong>. Envíanos fotos por WhatsApp y lo resolvemos inmediatamente.", category: "envios" },
+
+  // ═══ Sobre Nuditos ═══
+  { q: "¿Tienen tienda física?", a: "Somos una <strong>marca 100% digital</strong>. Atendemos por nuestra web, WhatsApp e Instagram desde El Dorado, Meta, Colombia.", category: "marca" },
+  { q: "¿Desde cuándo existe Nuditos Tejidos?", a: "Nuditos nació en <strong>2022</strong> desde El Dorado (Meta), impulsado por la pasión por el crochet y el deseo de crear flores que duraran para siempre.", category: "marca" },
+  { q: "¿Los ramos sirven como decoración?", a: "¡Sí! Muchas clientas usan nuestros ramos como <strong>centros de mesa, decoración de estantes o como elemento decorativo</strong> en su hogar u oficina. Al no marchitarse, siempre se ven hermosos.", category: "marca" },
+  { q: "¿Cómo limpio mi ramo de crochet?", a: "Usa un <strong>cepillo de cerdas suaves</strong> o un secador en modo frío a distancia para quitar el polvo. Para manchas puntuales, un paño ligeramente húmedo con jabón neutro. Nunca sumergir en agua.", category: "marca" },
 ];
 
 const faqSchema = {
@@ -16,17 +47,27 @@ const faqSchema = {
   "mainEntity": faqs.map(f => ({
     "@type": "Question",
     "name": f.q,
-    "acceptedAnswer": { "@type": "Answer", "text": f.a }
+    "acceptedAnswer": { "@type": "Answer", "text": f.a.replace(/<[^>]*>/g, '') }
   }))
 };
+
+// Agrupar FAQs por categoría
+const categories = [
+  { id: 'productos', name: 'Sobre los productos', icon: 'leaf' },
+  { id: 'personalizado', name: 'Personalización', icon: 'magic' },
+  { id: 'pedidos', name: 'Pedidos y pagos', icon: 'shopping-bag' },
+  { id: 'envios', name: 'Envíos y entregas', icon: 'truck' },
+  { id: 'marca', name: 'Sobre Nuditos', icon: 'heart-3' },
+];
 ---
 
 <Layout
-  title="Preguntas Frecuentes — Nuditos Tejidos"
-  description="Todo lo que necesitas saber sobre envíos, materiales y pedidos de flores de crochet en Nuditos Tejidos."
+  title="Preguntas Frecuentes — Nuditos Tejidos | Ramos de Crochet Colombia"
+  description="Resolvemos todas tus dudas: envíos a toda Colombia, materiales premium, personalización, métodos de pago (Nequi, PSE, tarjeta), tiempos de entrega y más."
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+    <meta name="keywords" content="preguntas frecuentes nuditos, envío flores crochet Colombia, ramos crochet personalizados, pagar con Nequi flores, regalo novia Colombia, flores eternas Colombia" />
   </Fragment>
 
   <style>
@@ -42,80 +83,59 @@ const faqSchema = {
     .faq-item { border-bottom: 1px solid var(--border-dark); }
     .faq-q { width: 100%; background: none; border: none; display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 0; text-align: left; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 0.95rem; font-weight: 500; color: var(--text); gap: 1rem; transition: color 0.2s; }
     .faq-q:hover { color: var(--lila-dark); }
-    .faq-q i { font-size: 1.2rem; color: var(--lila-dark); transition: transform 0.3s; flex-shrink: 0; }
-    .faq-q.open i { transform: rotate(45deg); }
+    .faq-q i, .faq-q :global(svg) { font-size: 1.2rem; color: var(--lila-dark); transition: transform 0.3s; flex-shrink: 0; }
+    .faq-q.open :global(svg) { transform: rotate(45deg); }
     .faq-a { display: none; padding: 0 0 1.2rem; color: var(--text-soft); font-size: 0.9rem; line-height: 1.75; }
     .faq-a.open { display: block; }
-    .faq-a strong { color: var(--text); }
-    .faq-a a { color: var(--lila-dark); text-decoration: underline; }
+    .faq-a :global(strong) { color: var(--text); }
+    .faq-a :global(a) { color: var(--lila-dark); text-decoration: underline; }
     .faq-cta { background: var(--lila-xlight); border-radius: 20px; padding: 2.5rem; text-align: center; margin-top: 3rem; }
     .faq-cta h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 400; margin-bottom: 0.6rem; }
     .faq-cta h3 em { font-style: italic; color: var(--lila-dark); }
     .faq-cta p { color: var(--text-soft); font-size: 0.88rem; margin-bottom: 1.5rem; }
-    .faq-wa { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--lila-dark); color: white; padding: 0.8rem 1.8rem; border-radius: 50px; font-size: 0.9rem; font-weight: 500; transition: background 0.2s, transform 0.2s; }
+    .faq-wa { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--lila-dark); color: white; padding: 0.8rem 1.8rem; border-radius: 50px; font-size: 0.9rem; font-weight: 500; transition: background 0.2s, transform 0.2s; text-decoration: none; }
     .faq-wa:hover { background: var(--lila); transform: scale(1.03); }
+    
+    .faq-count { 
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: white; border: 1px solid var(--border);
+      padding: 0.3rem 0.8rem; border-radius: 50px;
+      font-size: 0.72rem; color: var(--text-soft); font-weight: 600;
+      margin-top: 1rem;
+    }
   </style>
 
   <div class="page-hero">
     <div class="page-eyebrow">Centro de ayuda</div>
     <h1>Preguntas <em>frecuentes</em></h1>
-    <p>Todo lo que necesitas saber sobre nuestros productos, envíos y pedidos personalizados.</p>
+    <p>Todo lo que necesitas saber sobre nuestros productos, envíos, pagos y pedidos personalizados.</p>
+    <div class="faq-count">
+      <Icon name="checkbox-circle" /> {faqs.length} preguntas respondidas
+    </div>
   </div>
 
   <div class="faq-wrap">
-    <div class="faq-category">
-      <div class="faq-cat-title"><Icon name="leaf"  /> Sobre los productos</div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿De qué están hechos los ramos? <Icon name="add"  /></button>
-        <div class="faq-a">Todos nuestros ramos están tejidos con <strong>hilos de alta calidad</strong> en técnica crochet. Las flores no se marchitan, no necesitan agua y pueden durar años.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto tiempo dura un ramo de crochet? <Icon name="add"  /></button>
-        <div class="faq-a">Con los cuidados básicos, un ramo de crochet puede durar <strong>muchos años</strong>. Mantenlo alejado de la humedad y la luz solar directa prolongada.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Los colores son exactamente como en las fotos? <Icon name="add"  /></button>
-        <div class="faq-a">Hacemos todo lo posible para que las fotos representen fielmente los colores reales. Si tienes dudas escríbenos por <a href="https://wa.me/573144931525">WhatsApp</a>.</div>
-      </div>
-    </div>
-
-    <div class="faq-category">
-      <div class="faq-cat-title"><Icon name="shopping-bag"  /> Pedidos y pagos</div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo hago un pedido? <Icon name="add"  /></button>
-        <div class="faq-a">Agrega el producto al carrito y paga directo, o escríbenos por <a href="https://wa.me/573144931525" target="_blank">WhatsApp</a>.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Qué métodos de pago aceptan? <Icon name="add"  /></button>
-        <div class="faq-a">Aceptamos <strong>Wompi</strong> — tarjetas de crédito/débito, PSE, Nequi, Daviplata.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto tiempo tarda en elaborarse mi pedido? <Icon name="add"  /></button>
-        <div class="faq-a"><strong>1 a 3 días hábiles</strong> de elaboración. Luego se despacha ese mismo día o al siguiente día hábil.</div>
-      </div>
-    </div>
-
-    <div class="faq-category">
-      <div class="faq-cat-title"><Icon name="truck"  /> Envíos y entregas</div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿A dónde hacen envíos? <Icon name="add"  /></button>
-        <div class="faq-a">Hacemos envíos a <strong>todo Colombia</strong> desde El Dorado, Meta.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto cuesta el envío? <Icon name="add"  /></button>
-        <div class="faq-a">Desde <strong>$17.000</strong> hasta <strong>gratis</strong> en pedidos de mayor valor. El costo exacto se muestra al finalizar tu compra.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto tarda en llegar? <Icon name="add"  /></button>
-        <div class="faq-a">Al tiempo de elaboración (1–3 días) se suman <strong>2 a 5 días hábiles</strong> de envío según tu ciudad.</div>
-      </div>
-    </div>
+    {categories.map(cat => {
+      const catFaqs = faqs.filter(f => f.category === cat.id);
+      if (catFaqs.length === 0) return null;
+      return (
+        <div class="faq-category">
+          <div class="faq-cat-title"><Icon name={cat.icon} /> {cat.name}</div>
+          {catFaqs.map(faq => (
+            <div class="faq-item">
+              <button class="faq-q" onclick="toggleFaq(this)">{faq.q} <Icon name="add" /></button>
+              <div class="faq-a" set:html={faq.a} />
+            </div>
+          ))}
+        </div>
+      );
+    })}
 
     <div class="faq-cta">
       <h3>¿Tu pregunta no está <em>aquí?</em></h3>
       <p>Escríbenos por WhatsApp y te respondemos lo antes posible.</p>
       <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸" class="faq-wa" target="_blank">
-        <Icon name="whatsapp"  /> Escribir por WhatsApp
+        <Icon name="whatsapp" /> Escribir por WhatsApp
       </a>
     </div>
   </div>

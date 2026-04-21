@@ -1,0 +1,52 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Icon from '../components/Icon.astro';
+import { getLiveProducts } from '../lib/supabase';
+
+export const prerender = false;
+
+const products = await getLiveProducts();
+const cityProducts = products.filter(p => p.activo !== false).slice(0, 8);
+
+const city = "Barranquilla";
+const seoTitle = `Ramos de Flores en ${city} | Envío a Domicilio Nuditos Tejidos`;
+const seoDesc = `Flores que resisten el calor de la Puerta de Oro. Ramos de flores de crochet en ${city} con envío a domicilio. El regalo más original y duradero de Barranquilla.`;
+const keywords = `ramos de flores ${city.toLowerCase()}, floristerias ${city.toLowerCase()}, regalos a domicilio ${city.toLowerCase()}, flores eternas ${city.toLowerCase()}, nuditos tejidos ${city.toLowerCase()}`;
+---
+
+<Layout title={seoTitle} description={seoDesc} keywords={keywords}>
+  <style>
+    .hero-city { background: #fafaf9; padding: 6rem 1.5rem 5rem; text-align: center; position: relative; overflow: hidden; }
+    .hero-city::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://images.unsplash.com/photo-1598967534938-f90374e3044a?q=80&w=2000'); background-size: cover; background-position: center; opacity: 0.05; z-index: 0; }
+    .hero-city .content { position: relative; z-index: 1; }
+    .hero-city h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 8vw, 4rem); color: #111; margin-bottom: 1.5rem; }
+    .hero-city h1 em { font-style: italic; color: #0284c7; }
+    .section-grid { max-width: 1200px; margin: 0 auto; padding: 5rem 1.5rem; }
+  </style>
+
+  <header class="hero-city">
+    <div class="content max-w-4xl mx-auto">
+      <span class="text-[0.7rem] uppercase tracking-[4px] text-sky-600 font-bold mb-4 block">Envíos a la puerta de oro</span>
+      <h1>Ramos de Flores en <em>{city}</em></h1>
+      <p class="text-stone-500 max-w-xl mx-auto mb-8 text-lg">Regalos frescos y eternos para la Arenosa. Nuestras flores de crochet no se marchitan con el sol costero, decoran con alegría para siempre.</p>
+      <a href="#catalogo" class="bg-black text-white px-8 py-3 rounded-full font-bold text-sm tracking-widest uppercase hover:bg-sky-600 transition-all">Ver la Colección</a>
+    </div>
+  </header>
+
+  <main id="catalogo" class="section-grid">
+    <div class="flex justify-between items-end mb-12">
+      <div><h2 class="font-serif text-3xl">Favoritos en Barranquilla</h2><p class="text-stone-400 text-sm">Los detalles más pedidos en la costa colombiana.</p></div>
+      <a href="/catalogo" class="text-xs font-bold tracking-widest uppercase border-b-2 border-sky-100 pb-1 hover:border-sky-600 transition-all">Ver todo</a>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">{cityProducts.map(p => <ProductCard p={p} />)}</div>
+  </main>
+
+  <section class="bg-stone-50 py-20 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+       <h2 class="font-serif text-3xl mb-6">Artesanía premium en <em>Quilla</em></h2>
+       <p class="text-stone-600 leading-relaxed max-w-2xl mx-auto mb-10">Sabemos que en Barranquilla amamos celebrar. Por eso, en Nuditos Tejidos te ofrecemos flores que duran tanto como el Carnaval. Envía hoy un ramo de crochet y sorprende con algo totalmente nuevo y hecho con amor.</p>
+       <a href="https://wa.me/573144931525" class="inline-block bg-sky-600 text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-sky-700 transition-all">WhatsApp de Ventas</a>
+    </div>
+  </section>
+</Layout>

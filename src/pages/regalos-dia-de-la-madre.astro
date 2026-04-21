@@ -1,0 +1,198 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Icon from '../components/Icon.astro';
+import { getLiveProducts } from '../lib/supabase';
+
+export const prerender = false;
+
+const products = await getLiveProducts();
+
+// Filtrar por la categoría 'madres' o palabras clave relacionadas
+const mamaProducts = products.filter(p => 
+  p.activo !== false && 
+  (
+    p.cat?.toLowerCase().includes('madre') || 
+    p.cat?.toLowerCase().includes('mama') || 
+    p.name.toLowerCase().includes('mamá') || 
+    p.name.toLowerCase().includes('madre') ||
+    p.desc.toLowerCase().includes('madre')
+  )
+).slice(0, 12);
+
+const seoTitle = "Regalos para el Día de la Madre | Flores Eternas Nuditos Tejidos";
+const seoDesc = "Celebra a mamá con un regalo tan eterno como su amor. Ramos de flores de crochet tejidos a mano con envío a toda Colombia. El detalle perfecto para el Día de la Madre.";
+const keywords = "regalos dia de la madre colombia, que regalar a mi mama, flores para mama, ramos de flores eternas madre, detalles originales mama bogota, nuditos tejidos madres";
+---
+
+<Layout title={seoTitle} description={seoDesc} keywords={keywords}>
+  <style>
+    .hero-mom {
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+      padding: 7rem 1.5rem 6rem;
+      text-align: center;
+      border-bottom: 1px solid #ddd6fe;
+    }
+    .hero-mom h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 9vw, 5rem);
+      line-height: 1;
+      color: #2e1065;
+      margin-bottom: 1.5rem;
+    }
+    .hero-mom h1 em { font-style: italic; color: #7c3aed; }
+    .hero-mom p {
+      max-width: 650px;
+      margin: 0 auto 3rem;
+      font-size: 1.2rem;
+      color: #5b21b6;
+      line-height: 1.6;
+      opacity: 0.8;
+    }
+    
+    .btn-mom {
+      background: #7c3aed;
+      color: white;
+      padding: 1.2rem 3rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-size: 0.9rem;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+    }
+    .btn-mom:hover { 
+      background: #2e1065; 
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 30px rgba(124, 58, 237, 0.4);
+    }
+
+    .section-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 6rem 1.5rem;
+    }
+    .grid-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 4rem;
+      color: #1e1b4b;
+    }
+
+    .seo-mom-content {
+      background: white;
+      padding: 6rem 1.5rem;
+      border-top: 1px solid #f3f4f6;
+    }
+    .seo-mom-inner {
+      max-width: 850px;
+      margin: 0 auto;
+    }
+    .seo-mom-inner h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      margin-top: 3rem;
+      margin-bottom: 1.5rem;
+      color: #4c1d95;
+    }
+    .seo-mom-inner p {
+      margin-bottom: 1.8rem;
+      line-height: 1.9;
+      color: #4b5563;
+      font-size: 1.05rem;
+    }
+
+    .quote-box {
+      background: #fdf4ff;
+      border-left: 4px solid #d946ef;
+      padding: 2.5rem;
+      margin: 3rem 0;
+      border-radius: 0 20px 20px 0;
+      font-style: italic;
+      color: #701a75;
+    }
+
+    .service-banner {
+      background: #1e1b4b;
+      color: white;
+      padding: 4rem 1.5rem;
+      border-radius: 30px;
+      margin: 4rem 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 3rem;
+      text-align: center;
+    }
+    .service-item h4 { font-weight: 700; margin-bottom: .5rem; color: #ddd6fe; }
+    .service-item p { font-size: 0.85rem; opacity: 0.8; }
+  </style>
+
+  <header class="hero-mom">
+    <div class="max-w-5xl mx-auto">
+      <span class="text-[0.75rem] uppercase tracking-[6px] text-violet-600 font-bold mb-6 block">Colección Especial 2024</span>
+      <h1>Un regalo eterno para <em>Mamá</em></h1>
+      <p>Porque el amor de mamá no tiene fecha de vencimiento, regálale flores que conserven su belleza para siempre. Tejidas a mano con la delicadeza que ella merece.</p>
+      <a href="#catalogo" class="btn-mom">Ver Colección Mamá <Icon name="arrow-right" /></a>
+    </div>
+  </header>
+
+  <main id="catalogo" class="section-grid">
+    <h2 class="grid-title">Favoritos de <em>Mamá</em></h2>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+      {mamaProducts.length > 0 ? (
+        mamaProducts.map(p => <ProductCard p={p} />)
+      ) : (
+        <div class="col-span-full text-center py-20 text-stone-400">
+           Cargando los mejores ramos para mamá...
+        </div>
+      )}
+    </div>
+    
+    <div class="service-banner">
+      <div class="service-item">
+        <Icon name="truck" class="mx-auto mb-4 text-violet-300" />
+        <h4>Envío Prioritario</h4>
+        <p>Llegamos a tiempo para su día especial en toda Colombia.</p>
+      </div>
+      <div class="service-item">
+        <Icon name="verified" class="mx-auto mb-4 text-violet-300" />
+        <h4>Calidad Artesanal</h4>
+        <p>Cada pétalo es tejido con hilos de algodón premium.</p>
+      </div>
+      <div class="service-item">
+        <Icon name="heart" class="mx-auto mb-4 text-violet-300" />
+        <h4>Empaque de Regalo</h4>
+        <p>Todos nuestros ramos incluyen caja y tarjeta personalizada.</p>
+      </div>
+    </div>
+  </main>
+
+  <section class="seo-mom-content">
+    <div class="seo-mom-inner">
+      <h2>El detalle perfecto para mamá: Flores que no se marchitan</h2>
+      <p>A menudo nos encontramos en la duda de qué regalarle a esa mujer que nos lo ha dado todo. Las flores naturales son hermosas, pero su belleza es fugaz. En <strong>Nuditos Tejidos</strong>, hemos creado una alternativa que une la elegancia de la floristería tradicional con la durabilidad del arte manual.</p>
+      
+      <div class="quote-box">
+        "Nuestros ramos de crochet no son solo decoración; son recuerdos tangibles. Cada vez que mamá vea su ramo en la sala, recordará quién se lo dio y por qué."
+      </div>
+
+      <h2>¿Por qué elegir Nuditos este Día de la Madre?</h2>
+      <p>Primero, por el <strong>valor sentimental</strong>. Un ramo tejido representa horas de trabajo manual, lo mismo que mamá ha dedicado a cuidarnos. Segundo, por la <strong>practicidad</strong>; no necesitan agua ni cuidados, por lo que son ideales para decorar cualquier rincón del hogar sin complicaciones.</p>
+      
+      <h2>Envíos a domicilio en todo Colombia</h2>
+      <p>Sabemos que la distancia no debe ser un impedimento para celebrar a mamá. Por eso, contamos con un sistema de envíos robusto que asegura que tu regalo llegue en perfectas condiciones a Bogotá, Medellín, Cali y cualquier rincón del país. Cada ramo viaja protegido en un empaque diseñado para que la sorpresa sea total al abrir la caja.</p>
+
+      <div class="mt-16 p-10 bg-violet-600 rounded-[40px] text-white text-center">
+         <h3 class="font-serif text-3xl mb-4">¿Buscas algo aún más especial?</h3>
+         <p class="mb-8 opacity-90">Podemos personalizar el ramo con sus colores favoritos. ¡Habla con nosotros!</p>
+         <a href="https://wa.me/573144931525" class="bg-white text-violet-600 px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:scale-105 transition-transform inline-block">Asesoría por WhatsApp</a>
+      </div>
+    </div>
+  </section>
+</Layout>

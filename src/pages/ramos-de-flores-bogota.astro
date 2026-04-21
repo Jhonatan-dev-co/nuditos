@@ -1,0 +1,94 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Icon from '../components/Icon.astro';
+import { getLiveProducts } from '../lib/supabase';
+
+export const prerender = false;
+
+const products = await getLiveProducts();
+const bogotaProducts = products.filter(p => p.activo !== false).slice(0, 8);
+
+const seoTitle = "Ramos de Flores en Bogotá | Envío a Domicilio Nuditos Tejidos";
+const seoDesc = "Encuentra los ramos de flores más originales en Bogotá. Flores de crochet tejidas a mano con envío rápido a toda la capital. Sorprende hoy mismo con Nuditos.";
+const keywords = "ramos de flores bogota, floristerias bogota, regalo a domicilio bogota, detalles bogota, flores eternas bogota, ramos tejidos bogota";
+---
+
+<Layout title={seoTitle} description={seoDesc} keywords={keywords}>
+  <style>
+    .hero-city {
+      background: #fafaf9;
+      padding: 6rem 1.5rem 5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-city::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url('https://images.unsplash.com/photo-1599427303058-f06cb18db47a?q=80&w=2000');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.05;
+      z-index: 0;
+    }
+    .hero-city .content { position: relative; z-index: 1; }
+    
+    .hero-city h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      color: #111;
+      margin-bottom: 1.5rem;
+    }
+    .hero-city h1 em { font-style: italic; color: var(--lila-dark); }
+    
+    .section-grid { max-width: 1200px; margin: 0 auto; padding: 5rem 1.5rem; }
+  </style>
+
+  <header class="hero-city">
+    <div class="content max-w-4xl mx-auto">
+      <span class="text-[0.7rem] uppercase tracking-[4px] text-violet-600 font-bold mb-4 block">Envíos a toda la capital</span>
+      <h1>Ramos de Flores en <em>Bogotá</em></h1>
+      <p class="text-stone-500 max-w-xl mx-auto mb-8 text-lg">Llevamos la calidez de nuestros hilos a cada rincón de Bogotá y alrededores. Detalles eternos para momentos inolvidables.</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="#catalogo" class="bg-black text-white px-8 py-3 rounded-full font-bold text-sm tracking-widest uppercase hover:bg-violet-600 transition-all">Ver Favoritos</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="catalogo" class="section-grid">
+    <div class="flex justify-between items-end mb-12">
+      <div>
+        <h2 class="font-serif text-3xl">Favoritos en Bogotá</h2>
+        <p class="text-stone-400 text-sm">Los ramos más pedidos esta semana en la capital.</p>
+      </div>
+      <a href="/catalogo" class="text-xs font-bold tracking-widest uppercase border-b-2 border-violet-100 pb-1 hover:border-violet-600 transition-all">Ver catálogo completo</a>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+      {bogotaProducts.map(p => <ProductCard p={p} />)}
+    </div>
+  </main>
+
+  <section class="bg-stone-50 py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+       <div class="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 class="font-serif text-3xl mb-6">Tu floristería artesanal en <em>Bogotá</em></h2>
+            <p class="text-stone-600 leading-relaxed mb-6">Sabemos que Bogotá es una ciudad que nunca duerme, por eso en Nuditos Tejidos nos encargamos de que tu regalo llegue perfecto a su destino. Nuestros ramos de crochet son la solución ideal para evitar las flores marchitas por el frío de la sabana.</p>
+            <ul class="space-y-3 text-sm text-stone-500">
+              <li class="flex items-center gap-2">✨ Entrega segura en toda la ciudad</li>
+              <li class="flex items-center gap-2">✨ Empaque de lujo listo para regalo</li>
+              <li class="flex items-center gap-2">✨ Personalización total disponible</li>
+            </ul>
+          </div>
+          <div class="bg-white p-8 rounded-3xl shadow-sm border border-stone-100">
+             <h3 class="font-serif text-xl mb-4">¿Buscas algo urgente?</h3>
+             <p class="text-sm text-stone-400 mb-6">Contáctanos por WhatsApp para consultar disponibilidad de entrega hoy mismo en Bogotá.</p>
+             <a href="https://wa.me/573144931525" class="block text-center border-2 border-black py-3 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all">Consultar WhatsApp</a>
+          </div>
+       </div>
+    </div>
+  </section>
+</Layout>

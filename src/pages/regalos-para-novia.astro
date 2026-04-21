@@ -1,0 +1,171 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Icon from '../components/Icon.astro';
+import { getLiveProducts } from '../lib/supabase';
+
+export const prerender = false;
+
+const products = await getLiveProducts();
+
+// Filtrar productos ideales para novia (o mostrar destacados si no hay específicos)
+const noviaProducts = products.filter(p => 
+  p.activo !== false && 
+  (p.name.toLowerCase().includes('novia') || 
+   p.desc.toLowerCase().includes('novia') || 
+   p.destacado || 
+   p.cat === 'ramos-premium')
+).slice(0, 8);
+
+const seoTitle = "Regalos para Novia Originales | Flores Eternas Nuditos Tejidos";
+const seoDesc = "¿Buscando el regalo perfecto para tu novia? Sorpréndela con ramos de flores eternas tejidos a mano. Un detalle que no se marchita, como tu amor. Envío a toda Colombia.";
+const keywords = "regalos para novia, detalle para mi novia, regalo original novia, flores eternas novia, ramos de crochet novia, regalos románticos colombia";
+---
+
+<Layout title={seoTitle} description={seoDesc} keywords={keywords}>
+  <style>
+    .hero-landing {
+      background: linear-gradient(135deg, #fff5f7 0%, #fce7f3 100%);
+      padding: 6rem 1.5rem 5rem;
+      text-align: center;
+      border-bottom: 1px solid #fce7f3;
+    }
+    .hero-landing h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      line-height: 1;
+      color: #111;
+      margin-bottom: 1.5rem;
+    }
+    .hero-landing h1 em { font-style: italic; color: #db2777; }
+    .hero-landing p {
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      font-size: 1.1rem;
+      color: #666;
+      line-height: 1.6;
+    }
+    .btn-main {
+      background: #111;
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .btn-main:hover { background: #db2777; transform: translateY(-2px); }
+
+    .section-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
+    }
+    .grid-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .seo-content {
+      background: #fafaf9;
+      padding: 5rem 1.5rem;
+    }
+    .seo-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .seo-inner h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .seo-inner p {
+      margin-bottom: 1.5rem;
+      line-height: 1.8;
+      color: #444;
+    }
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin: 4rem 0;
+    }
+    .benefit-item {
+      text-align: center;
+      padding: 2rem;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    .benefit-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .benefit-item h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .benefit-item p { font-size: 0.9rem; color: #888; }
+  </style>
+
+  <header class="hero-landing">
+    <div class="max-w-4xl mx-auto">
+      <span class="text-[0.7rem] uppercase tracking-[4px] text-pink-600 font-bold mb-4 block">Detalles que enamoran</span>
+      <h1>Regalos para <em>Novia</em></h1>
+      <p>Sorprende a la mujer que amas con un detalle tan eterno como tus sentimientos. Ramos hechos a mano con amor en Colombia.</p>
+      <a href="#productos" class="btn-main">Explorar Regalos <Icon name="arrow-right" /></a>
+    </div>
+  </header>
+
+  <main id="productos" class="section-grid">
+    <h2 class="grid-title">Nuestra selección para <em>ella</em></h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {noviaProducts.map(p => <ProductCard p={p} />)}
+    </div>
+    
+    <div class="mt-16 text-center">
+      <a href="/catalogo" class="text-stone-400 font-medium hover:text-pink-600 transition-colors uppercase text-[0.7rem] tracking-widest">Ver todo el catálogo →</a>
+    </div>
+  </main>
+
+  <section class="seo-content">
+    <div class="seo-inner">
+      <h2>¿Por qué regalar flores de crochet a tu novia?</h2>
+      <p>A diferencia de las flores naturales que se marchitan en pocos días, nuestros ramos de crochet son <strong>eternos</strong>. Funcionan como un recordatorio permanente de ese momento especial, ya sea un aniversario, un cumpleaños o simplemente un "te quiero" inesperado.</p>
+      
+      <div class="benefits-grid">
+        <div class="benefit-item">
+          <div class="benefit-icon">🌸</div>
+          <h3>Nunca mueren</h3>
+          <p>Un regalo que durará años en su mesa de noche o escritorio.</p>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon">🧶</div>
+          <h3>Hecho a mano</h3>
+          <p>Cada ramo es único y tejido con dedicación artesanal.</p>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon">🚚</div>
+          <h3>Envío Seguro</h3>
+          <p>Llegamos a toda Colombia con empaque premium protector.</p>
+        </div>
+      </div>
+
+      <h2>Ideas de regalos personalizados</h2>
+      <p>¿Tienes una idea específica? En Nuditos Tejidos podemos crear ramos personalizados con sus colores favoritos o flores que tengan un significado especial para ambos. Escribenos por WhatsApp para una asesoría personalizada.</p>
+      
+      <div class="mt-12 p-8 bg-pink-50 rounded-3xl border border-pink-100 text-center">
+        <h3 class="font-serif text-xl mb-4">¿Quieres algo 100% único?</h3>
+        <p class="text-sm mb-6">Personalizamos colores, tipos de flores y tamaños. ¡Hagamos el regalo de sus sueños!</p>
+        <a href="https://wa.me/573144931525" class="bg-pink-600 text-white px-8 py-3 rounded-full font-bold text-sm hover:bg-pink-700 transition-colors">Personalizar por WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="py-20 text-center bg-white">
+     <h2 class="font-serif text-3xl mb-8">¿Listo para <em>sorprenderla?</em></h2>
+     <a href="/catalogo" class="btn-main">Ir a la tienda</a>
+  </div>
+</Layout>

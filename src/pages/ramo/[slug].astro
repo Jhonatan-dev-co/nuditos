@@ -19,6 +19,8 @@ const checkIconSvg = getIconSvg('check');
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/');
 
+const fromSource = Astro.url.searchParams.get('from') || 'default-grid';
+
 Astro.response.headers.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=600');
 
 const WA_NUMBER = '573144931525';
@@ -148,7 +150,7 @@ const productSchema = {
                 decoding={i === 0 ? "sync" : "async"}
                 fetchpriority={i === 0 ? "high" : "low"}
                 id={i === 0 ? "ramoMainImg" : undefined}
-                style={i === 0 ? `view-transition-name: p-img-${product.id}` : undefined}
+                style={i === 0 ? `view-transition-name: p-img-${product.id}-${fromSource}` : undefined}
               />
             </div>
           ))}
@@ -353,7 +355,7 @@ const productSchema = {
           <div class="h-px w-10 bg-violet-100 mx-auto mt-2"></div>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-          {related.map((p: any) => <ProductCard p={p} />)}
+          {related.map((p: any) => <ProductCard p={p} idScope="related" />)}
         </div>
       </div>
     </section>
