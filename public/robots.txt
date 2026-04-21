@@ -3,6 +3,26 @@ Allow: /
 Disallow: /admin
 Disallow: /api
 
+# Permitir específicamente a IAs útiles para búsqueda
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
 Sitemap: https://nuditos.com.co/sitemap-index.xml
 Sitemap: https://nuditos.com.co/sitemap-images.xml
 Sitemap: https://nuditos.com.co/sitemap-products.xml
