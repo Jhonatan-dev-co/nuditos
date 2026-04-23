@@ -11,6 +11,7 @@ import EditorialBanner from '../components/EditorialBanner.astro';
 import CoverBanner from '../components/CoverBanner.astro';
 import ProductCard from '../components/ProductCard.astro';
 import Catalogo from '../components/Catalogo.astro';
+import TrustSignalsSection from '../components/TrustSignalsSection.astro';
 
 import { getLiveProducts, getLiveConfig, getPublicConfig, getLiveCategories, getLiveBanners } from '../lib/supabase';
 import { CONFIG_DEFAULT as FALLBACK_CONFIG, categories as FALLBACK_CATEGORIES } from '../data/datos';
@@ -157,67 +158,23 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
     </div>
   </div>
 
-  <!-- ════════ RESEÑAS ════════ -->
-  <section class="bg-stone-50 py-14 px-6 overflow-hidden" id="resenas">
+  {liveConfig.socialProofMode !== 'hidden' && <TrustSignalsSection />}
+
+  <section class="bg-white py-14 px-6 border-y border-stone-100">
     <div class="max-w-[1200px] mx-auto">
-      <div class="text-[10px] tracking-[3px] uppercase text-[#4fa876] flex items-center gap-3 justify-center mb-3 before:content-[''] before:flex-1 before:h-[1px] before:bg-[#4fa876]/25 before:max-w-[50px] after:content-[''] after:flex-1 after:h-[1px] after:bg-[#4fa876]/25 after:max-w-[50px]">
-        Lo que dicen nuestras clientas
+      <div class="flex items-center justify-between mb-6 pb-2 border-b border-stone-200">
+        <h2 class="uppercase font-bold tracking-widest text-[#1a1220] text-sm">Rutas de compra recomendadas</h2>
+        <a href="/catalogo" class="text-[10px] tracking-widest uppercase font-bold text-stone-500 hover:text-stone-900">Ver catalogo</a>
       </div>
-      <h2 class="font-serif text-[clamp(1.75rem,4vw,2.75rem)] font-light text-center text-[#1a1220] mb-6 leading-[1.15]">
-        Amor tejido, <em class="italic text-[#8c5fad] font-normal not-italic tracking-tight">amor recibido</em>
-      </h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Reseña 1 -->
-        <div class="bg-white rounded-[2rem] p-7 shadow-sm border border-[#b496cc]/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-md relative before:content-['\201C'] before:absolute before:top-3 before:right-5 before:font-serif before:text-6xl before:text-[#f3edf9] before:leading-none">
-          <div class="text-amber-400 text-[13px] tracking-[2px] mb-3">★★★★★</div>
-          <p class="text-[13.5px] text-[#4a3d52] leading-[1.75] mb-5 italic">
-            "Me llegó súper bien empacado y la calidad es increíble. Mi mamá lloró cuando lo vio 🌸 definitivamente vuelvo a pedir."
-          </p>
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-[13px] flex-shrink-0">
-              S
-            </div>
-            <div>
-              <div class="text-[13px] font-semibold text-[#1a1220]">Sara M.</div>
-              <div class="text-[11px] text-[#8a7592]">Bogotá</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Reseña 2 -->
-        <div class="bg-white rounded-[2rem] p-7 shadow-sm border border-[#b496cc]/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-md relative before:content-['\201C'] before:absolute before:top-3 before:right-5 before:font-serif before:text-6xl before:text-[#f3edf9] before:leading-none">
-          <div class="text-amber-400 text-[13px] tracking-[2px] mb-3">★★★★★</div>
-          <p class="text-[13.5px] text-[#4a3d52] leading-[1.75] mb-5 italic">
-            "Lo pedí para el grado de mi hija y quedó hermoso. Exactamente como en las fotos y llegó rapidísimo. 100% recomendado."
-          </p>
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-[13px] flex-shrink-0">
-              L
-            </div>
-            <div>
-              <div class="text-[13px] font-semibold text-[#1a1220]">Lucía R.</div>
-              <div class="text-[11px] text-[#8a7592]">Medellín</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Reseña 3 -->
-        <div class="bg-white rounded-[2rem] p-7 shadow-sm border border-[#b496cc]/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-md relative before:content-['\201C'] before:absolute before:top-3 before:right-5 before:font-serif before:text-6xl before:text-[#f3edf9] before:leading-none">
-          <div class="text-amber-400 text-[13px] tracking-[2px] mb-3">★★★★★</div>
-          <p class="text-[13.5px] text-[#4a3d52] leading-[1.75] mb-5 italic">
-            "Pedí un ramo personalizado con los colores favoritos de mi novia y quedó perfecto. El servicio fue muy atento y el envío llegó a tiempo."
-          </p>
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[13px] flex-shrink-0">
-              C
-            </div>
-            <div>
-              <div class="text-[13px] font-semibold text-[#1a1220]">Carlos V.</div>
-              <div class="text-[11px] text-[#8a7592]">Cali</div>
-            </div>
-          </div>
-        </div>
+      <div class="flex flex-wrap gap-2 md:gap-3">
+        <a href="/regalo-para-esposa" class="px-4 py-2 rounded-full border border-stone-200 text-[10px] uppercase tracking-widest font-bold text-stone-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">Regalo para Esposa</a>
+        <a href="/regalo-para-novia" class="px-4 py-2 rounded-full border border-stone-200 text-[10px] uppercase tracking-widest font-bold text-stone-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">Regalo para Novia</a>
+        <a href="/regalos-para-amiga" class="px-4 py-2 rounded-full border border-stone-200 text-[10px] uppercase tracking-widest font-bold text-stone-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">Regalos para Amiga</a>
+        <a href="/flores-amarillas" class="px-4 py-2 rounded-full border border-stone-200 text-[10px] uppercase tracking-widest font-bold text-stone-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">Flores Amarillas</a>
+        <a href="/regalos-amor-y-amistad" class="px-4 py-2 rounded-full border border-stone-200 text-[10px] uppercase tracking-widest font-bold text-stone-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">Amor y Amistad</a>
+        <a href="/regalos-san-valentin" class="px-4 py-2 rounded-full border border-stone-200 text-[10px] uppercase tracking-widest font-bold text-stone-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">San Valentin</a>
+        <a href="/flores-tejidas-a-crochet" class="px-4 py-2 rounded-full border border-stone-200 text-[10px] uppercase tracking-widest font-bold text-stone-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">Flores Tejidas</a>
+        <a href="/regalos-originales-colombia" class="px-4 py-2 rounded-full border border-stone-200 text-[10px] uppercase tracking-widest font-bold text-stone-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">Regalos Originales</a>
       </div>
     </div>
   </section>

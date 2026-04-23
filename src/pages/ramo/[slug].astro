@@ -91,13 +91,6 @@ const productSchema = {
     availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
     url: pageUrl,
     seller: { '@type': 'Organization', name: 'Nuditos Tejidos' },
-  },
-  aggregateRating: {
-    "@type": "AggregateRating",
-    "ratingValue": "5",
-    "bestRating": "5",
-    "worstRating": "1",
-    "reviewCount": 12
   }
 };
 ---

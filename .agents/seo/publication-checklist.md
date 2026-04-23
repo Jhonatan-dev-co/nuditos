@@ -1,0 +1,11 @@
+# Checklist de Publicacion SEO
+- H1 unico por pagina
+- Title en rango 50-60 caracteres
+- Meta description en rango 140-160
+- Canonical correcto
+- FAQ util (preguntas reales)
+- Entre 2 y 5 enlaces internos
+- CTA principal a catalogo o WhatsApp
+- Alt text descriptivo
+- No usar ratings o reviews no verificadas
+- Verificar enlazado desde home/footer/hub

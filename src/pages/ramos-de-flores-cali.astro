@@ -1,52 +1,12 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import ProductCard from '../components/ProductCard.astro';
-import Icon from '../components/Icon.astro';
+import CitySeoLanding from '../components/CitySeoLanding.astro';
 import { getLiveProducts } from '../lib/supabase';
+import { CITY_LANDINGS } from '../data/seo-landings';
 
 export const prerender = false;
 
 const products = await getLiveProducts();
-const cityProducts = products.filter(p => p.activo !== false).slice(0, 8);
-
-const city = "Cali";
-const seoTitle = `Ramos de Flores en ${city} | Envío a Domicilio Nuditos Tejidos`;
-const seoDesc = `Regala alegría en la Sucursal del Cielo. Ramos de flores de crochet en ${city} con envío a domicilio. Flores eternas hechas a mano, el detalle original que no se marchita.`;
-const keywords = `ramos de flores ${city.toLowerCase()}, floristerias ${city.toLowerCase()}, regalos a domicilio ${city.toLowerCase()}, flores eternas ${city.toLowerCase()}, nuditos tejidos ${city.toLowerCase()}`;
+const config = CITY_LANDINGS['ramos-de-flores-cali'];
 ---
 
-<Layout title={seoTitle} description={seoDesc} keywords={keywords}>
-  <style>
-    .hero-city { background: #fafaf9; padding: 6rem 1.5rem 5rem; text-align: center; position: relative; overflow: hidden; }
-    .hero-city::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://images.unsplash.com/photo-1544983391-f19338ccc40d?q=80&w=2000'); background-size: cover; background-position: center; opacity: 0.05; z-index: 0; }
-    .hero-city .content { position: relative; z-index: 1; }
-    .hero-city h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 8vw, 4rem); color: #111; margin-bottom: 1.5rem; }
-    .hero-city h1 em { font-style: italic; color: #f59e0b; }
-    .section-grid { max-width: 1200px; margin: 0 auto; padding: 5rem 1.5rem; }
-  </style>
-
-  <header class="hero-city">
-    <div class="content max-w-4xl mx-auto">
-      <span class="text-[0.7rem] uppercase tracking-[4px] text-amber-600 font-bold mb-4 block">Envíos a toda la sucursal del cielo</span>
-      <h1>Ramos de Flores en <em>{city}</em></h1>
-      <p class="text-stone-500 max-w-xl mx-auto mb-8 text-lg">Ponemos sabor y arte en cada tejido. Flores eternas que resisten el calor del Valle y decoran con elegancia cada hogar caleño.</p>
-      <a href="#catalogo" class="bg-black text-white px-8 py-3 rounded-full font-bold text-sm tracking-widest uppercase hover:bg-amber-600 transition-all">Explorar Regalos</a>
-    </div>
-  </header>
-
-  <main id="catalogo" class="section-grid">
-    <div class="flex justify-between items-end mb-12">
-      <div><h2 class="font-serif text-3xl">Favoritos en {city}</h2><p class="text-stone-400 text-sm">Los ramos que están enamorando al Valle del Cauca.</p></div>
-      <a href="/catalogo" class="text-xs font-bold tracking-widest uppercase border-b-2 border-amber-100 pb-1 hover:border-amber-600 transition-all">Catálogo completo</a>
-    </div>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">{cityProducts.map(p => <ProductCard p={p} />)}</div>
-  </main>
-
-  <section class="bg-stone-50 py-20 px-6">
-    <div class="max-w-4xl mx-auto text-center">
-       <h2 class="font-serif text-3xl mb-6">Detalles inolvidables en <em>Cali</em></h2>
-       <p class="text-stone-600 leading-relaxed max-w-2xl mx-auto mb-10">¿Buscas algo diferente para regalar en Cali? Olvídate de las flores que se secan. Nuestros ramos de crochet son la nueva tendencia para aniversarios, grados y cumpleaños. Hacemos envíos garantizados a toda la ciudad de Cali y alrededores.</p>
-       <a href="https://wa.me/573144931525" class="inline-block bg-amber-600 text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-amber-700 transition-all">Personalizar Ramo</a>
-    </div>
-  </section>
-</Layout>
+<CitySeoLanding config={config} products={products} />

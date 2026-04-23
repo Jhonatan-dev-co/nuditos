@@ -245,6 +245,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);heig
 .pedido-id{font-size:.65rem;font-weight:700;color:var(--soft);letter-spacing:.5px}
 .pedido-estado{font-size:.63rem;font-weight:700;padding:.18rem .55rem;border-radius:20px;}
 .estado-pendiente{background:#fef3c7;color:#92400e}
+.estado-pagado{background:#dcfce7;color:#166534}
 .estado-proceso{background:#dbeafe;color:#1e40af}
 .estado-entregado{background:#d1fae5;color:#065f46}
 .estado-cancelado{background:#fee2e2;color:#991b1b}

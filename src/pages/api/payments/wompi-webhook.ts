@@ -82,6 +82,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const { event, data } = body;
     if (event === 'transaction.updated') {
       const trans = data.transaction;
+      const baseURL = request.url.split('/api')[0];
       
       const reference = trans.reference; // Ej: NUDITOS-123456789
       const match = reference.match(/NUDITOS-(\d+)/);
@@ -91,9 +92,82 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const finalStatus = trans.status === 'APPROVED' ? 'pagado' : (trans.status === 'DECLINED' || trans.status === 'ERROR' ? 'cancelado' : 'pendiente');
         
         console.log(`[wompi-webhook] Actualizando pedido ${pedidoId} a estado [${finalStatus}]`);
-        const success = await updatePedidoStatus(pedidoId, finalStatus, SB_KEY, SB_URL);
+        // Usar Prefer: return=representation para obtener los datos del cliente
+        const updateRes = await fetch(`${SB_URL}/rest/v1/pedidos?id=eq.${pedidoId}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SB_KEY,
+            'Authorization': `Bearer ${SB_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({ estado: finalStatus })
+        });
         
-        if (!success) console.error(`[wompi-webhook] ❌ Falló actualización en BD para el pedido ${pedidoId}`);
+        const updatedData = await updateRes.json();
+        const pedido = updatedData[0];
+
+        // 3. NOTIFICACIONES (Solo si el pago fue aprobado)
+        if (finalStatus === 'pagado' && pedido) {
+          console.log(`[wompi-webhook] 📧 Disparando notificaciones para pedido ${pedidoId}`);
+          
+          try {
+            // Notificar al cliente (Email)
+            await fetch(`${baseURL}/api/send-email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                type: 'compra_confirmada', 
+                data: {
+                  pedidoId: pedido.id,
+                  clienteNombre: pedido.cliente_nombre,
+                  clienteEmail: pedido.cliente_email,
+                  total: pedido.total,
+                  items: pedido.items
+                }
+              })
+            });
+
+            // Notificar al admin (Email)
+            await fetch(`${baseURL}/api/send-email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                type: 'notificacion_admin', 
+                data: {
+                  pedidoId: pedido.id,
+                  clienteNombre: pedido.cliente_nombre,
+                  clienteEmail: pedido.cliente_email,
+                  tel: pedido.cliente_telefono,
+                  total: pedido.total,
+                  items: pedido.items,
+                  notas: pedido.notas
+                }
+              })
+            });
+
+            // Notificación opcional a TELEGRAM (para aviso inmediato al celular)
+            const TG_TOKEN = env.TELEGRAM_BOT_TOKEN;
+            const TG_CHAT = env.TELEGRAM_CHAT_ID;
+            if (TG_TOKEN && TG_CHAT) {
+              const text = `💰 *¡NUEVA VENTA!* 🌸\n\n` +
+                           `📦 *Pedido:* #${pedido.id}\n` +
+                           `👤 *Cliente:* ${pedido.cliente_nombre}\n` +
+                           `🏷️ *Items:* ${pedido.items}\n` +
+                           `💵 *Total:* $${pedido.total.toLocaleString('es-CO')}\n\n` +
+                           `👉 [Ver panel Admin](${baseURL}/admin)`;
+              
+              await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: TG_CHAT, text, parse_mode: 'Markdown' })
+              });
+            }
+
+          } catch (err: any) {
+            console.error('[wompi-webhook] Error enviando notificaciones:', err.message);
+          }
+        }
       } else {
           console.log(`[wompi-webhook] Referencia ignorada o faltan llaves: ${reference}`);
       }

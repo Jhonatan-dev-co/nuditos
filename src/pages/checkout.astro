@@ -479,6 +479,12 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       });
       localStorage.setItem('nuditos_checkout_data_v2', JSON.stringify(data));
       checkGlobalValidity();
+      
+      // Abandoned cart trigger (solo si hay email y el carrito tiene items)
+      if (data['co-email'] && data['co-email'].includes('@') && typeof iniciarTimerCarritoAbandonado === 'function') {
+        const fullname = `${data['co-nombre'] || ''} ${data['co-apellido'] || ''}`.trim();
+        iniciarTimerCarritoAbandonado(data['co-email'], fullname, window._cart);
+      }
     }
 
     function restoreFormData() {
@@ -695,6 +701,7 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
           checkout.open(function (result) {
             const transaction = result.transaction;
             if (transaction.status === 'APPROVED') {
+              if (typeof cancelarTimerCarritoAbandonado === 'function') cancelarTimerCarritoAbandonado();
               window.location.href = '/gracias?ref=' + transaction.id;
             } else {
               alert(`El pago fue ${transaction.status === 'DECLINED' ? 'declinado' : 'cancelado'}. Por favor intenta nuevamente o con otro medio de pago.`);
@@ -708,6 +715,7 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
         } else {
           // Fallback silencioso si no carga el widget
+          if (typeof cancelarTimerCarritoAbandonado === 'function') cancelarTimerCarritoAbandonado();
           const wompiUrl = `https://checkout.wompi.co/l/?public-key=${checkoutConfig.publicKey}&currency=${checkoutConfig.currency}&amount-in-cents=${checkoutConfig.amountInCents}&reference=${checkoutConfig.reference}&signature:integrity=${checkoutConfig.signature.integrity}&redirect-url=${encodeURIComponent(checkoutConfig.redirectUrl)}`;
           window.location.href = wompiUrl;
         }

@@ -6,8 +6,16 @@ import Icon from '../Icon.astro';
   <div class="pedidos-toolbar">
     <button class="pedido-filter active" onclick="filterPedidos('todos',this)">Todos</button>
     <button class="pedido-filter" onclick="filterPedidos('pendiente',this)">⏳ Pendientes</button>
+    <button class="pedido-filter" onclick="filterPedidos('pagado',this)">💰 Pagados</button>
     <button class="pedido-filter" onclick="filterPedidos('proceso',this)">🔄 En proceso</button>
     <button class="pedido-filter" onclick="filterPedidos('entregado',this)">✅ Entregados</button>
+    
+    <div style="flex-grow: 1;"></div>
+
+    <button class="btn-vis on" style="gap:0.4rem; font-size:0.75rem; background: var(--lila-soft); color: var(--lila-dark); border: 1px solid var(--lila-border);" onclick="copyCustomerEmails()">
+      <Icon name="mail" /> Remarketing
+    </button>
+    
     <button class="btn-new-pedido" onclick="openNewPedido()">
       <Icon name="add"  /> Nuevo pedido
     </button>

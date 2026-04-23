@@ -1,0 +1,95 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from './ProductCard.astro';
+import Icon from './Icon.astro';
+import type { CityLandingConfig } from '../data/seo-landings';
+
+interface Props {
+  config: CityLandingConfig;
+  products: any[];
+}
+
+const { config, products } = Astro.props as Props;
+const cityProducts = (products || []).filter((p) => p.activo !== false).slice(0, 8);
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: config.localFaq.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.a,
+    },
+  })),
+};
+---
+
+<Layout title={config.title} description={config.description} keywords={config.keywords}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <section class="bg-gradient-to-br from-stone-50 via-white to-sky-50/40 pt-24 pb-20 px-6 border-b border-stone-100">
+    <div class="max-w-5xl mx-auto text-center">
+      <div class="text-[10px] uppercase tracking-[4px] font-bold text-sky-600 mb-4">Cobertura local</div>
+      <h1 class="font-serif text-[clamp(2.1rem,6vw,4.2rem)] leading-[1.05] text-stone-900 mb-6">{config.h1}</h1>
+      <p class="max-w-3xl mx-auto text-stone-600 text-base md:text-lg leading-relaxed mb-8">{config.heroCopy}</p>
+      <a href="https://wa.me/573144931525" class="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-stone-900 text-white uppercase tracking-widest text-xs font-bold hover:bg-sky-700 transition-colors">
+        <Icon name="whatsapp" />
+        Coordinar envio en {config.city}
+      </a>
+    </div>
+  </section>
+
+  <section class="max-w-[1200px] mx-auto px-6 py-14">
+    <div class="grid md:grid-cols-3 gap-6">
+      <article class="md:col-span-2 bg-white border border-stone-100 rounded-3xl p-7 shadow-sm">
+        <h2 class="font-serif text-3xl text-stone-900 mb-4">Cobertura y tiempos</h2>
+        <p class="text-stone-600 leading-relaxed text-sm md:text-base">{config.coverageCopy}</p>
+      </article>
+      <article class="bg-white border border-stone-100 rounded-3xl p-7 shadow-sm">
+        <h3 class="font-serif text-2xl text-stone-900 mb-3">Compra guiada</h3>
+        <p class="text-stone-600 text-sm leading-relaxed mb-4">Te ayudamos a escoger segun ocasion, presupuesto y destinatario.</p>
+        <a href="/catalogo" class="text-[11px] uppercase tracking-widest font-bold text-sky-700">Ir al catalogo</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="max-w-[1200px] mx-auto px-6 pb-16">
+    <div class="flex items-end justify-between mb-7 border-b border-stone-200 pb-3">
+      <h2 class="font-serif text-3xl text-stone-900">Favoritos en {config.city}</h2>
+      <a href="/catalogo" class="text-[10px] uppercase tracking-widest font-bold text-stone-500 hover:text-stone-900">Ver todo</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+      {cityProducts.map((p) => <ProductCard p={p} />)}
+    </div>
+  </section>
+
+  <section class="bg-stone-50 py-16 px-6 border-y border-stone-100">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="font-serif text-4xl text-center text-stone-900 mb-10">Preguntas frecuentes en {config.city}</h2>
+      <div class="grid gap-4">
+        {config.localFaq.map((item) => (
+          <article class="bg-white border border-stone-100 rounded-2xl p-6">
+            <h3 class="font-bold text-stone-800 mb-2 text-sm md:text-base">{item.q}</h3>
+            <p class="text-stone-600 text-sm leading-relaxed">{item.a}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-6 py-14 text-center">
+    <h2 class="font-serif text-4xl text-stone-900 mb-4">Rutas relacionadas</h2>
+    <div class="flex flex-wrap justify-center gap-3">
+      {config.relatedLinks.map((l) => (
+        <a href={l.href} class="px-5 py-2 rounded-full border border-stone-200 text-xs uppercase tracking-widest font-bold text-stone-600 hover:border-sky-500 hover:text-sky-700 transition-colors">
+          {l.label}
+        </a>
+      ))}
+    </div>
+  </section>
+</Layout>
+

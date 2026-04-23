@@ -3,109 +3,155 @@ import Icon from '../Icon.astro';
 ---
 <div id="tab-seo" class="tab-content" style="padding:1.5rem">
   <div class="editor-header" style="margin-bottom:2rem">
-    <h2 style="font-size:1.5rem;font-weight:700;color:var(--negro)">🔍 Optimización SEO</h2>
-    <p style="color:var(--soft);font-size:.875rem">Configura cómo aparece tu tienda en Google, redes sociales y WhatsApp.</p>
+    <h2 style="font-size:1.5rem;font-weight:700;color:var(--negro)">SEO y Posicionamiento</h2>
+    <p style="color:var(--soft);font-size:.875rem">Controla SEO global, confianza publica y flujo de produccion con IA.</p>
   </div>
 
-  <div class="admin-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:1.5rem">
-    
-    <!-- GOOGLE PREVIEW & SETTINGS -->
+  <div class="admin-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:1.5rem">
     <div class="admin-card" style="background:#fff;padding:1.5rem;border-radius:12px;border:1px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,0.02)">
       <h3 style="font-size:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
-        <Icon name="google"  /> Configuración de Google
+        <Icon name="google" /> Configuracion SEO global
       </h3>
-      
+
       <div class="field" style="margin-bottom:1rem">
-        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Título del Sitio (Meta Title)</label>
-        <input type="text" id="seoTitle" placeholder="Nuditos — Ramos de Crochet y Flores Eternas" 
+        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Titulo del sitio (Meta title)</label>
+        <input
+          type="text"
+          id="seoTitle"
+          placeholder="Nuditos - Ramos de Crochet y Regalos Eternos"
           style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem"
-          oninput="updateSEOPreview()">
-        <small style="color:#999;font-size:.7rem">Máximo 60 caracteres recomendado.</small>
+          oninput="updateSEOPreview()"
+        />
+        <small id="seoTitleCount" style="color:#999;font-size:.7rem">0/60 caracteres</small>
       </div>
 
       <div class="field" style="margin-bottom:1rem">
-        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Meta Descripción</label>
-        <textarea id="seoDescription" rows="3" placeholder="Encuentra los mejores regalos personalizados y flores que nunca se marchitan..." 
+        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Meta descripcion</label>
+        <textarea
+          id="seoDescription"
+          rows="3"
+          placeholder="Regalos eternos en Colombia: flores tejidas, ramos de crochet y detalles personalizados."
           style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem;resize:none"
-          oninput="updateSEOPreview()"></textarea>
-        <small style="color:#999;font-size:.7rem">Máximo 160 caracteres recomendado.</small>
+          oninput="updateSEOPreview()"
+        ></textarea>
+        <small id="seoDescCount" style="color:#999;font-size:.7rem">0/160 caracteres</small>
       </div>
 
-      <!-- GOOGLE PREVIEW -->
       <div class="google-preview" style="background:#f9f9f9;padding:1rem;border-radius:8px;margin-top:1rem;border:1px solid #eee">
-        <div style="color:#1a0dab;font-size:1.1rem;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="preSEOTitle">Título de tu tienda</div>
-        <div style="color:#006621;font-size:.85rem;margin-bottom:.3rem">https://nuditos.com</div>
-        <div style="color:#545454;font-size:.8rem;line-height:1.4" id="preSEODesc">Aquí aparecerá la descripción que escribas arriba...</div>
+        <div style="color:#1a0dab;font-size:1.05rem;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="preSEOTitle">Titulo SEO de ejemplo</div>
+        <div style="color:#006621;font-size:.8rem;margin-bottom:.3rem">https://nuditos.com.co</div>
+        <div style="color:#545454;font-size:.8rem;line-height:1.4" id="preSEODesc">Descripcion de ejemplo para resultados de Google.</div>
       </div>
     </div>
 
-    <!-- SOCIAL MEDIA & SHARING -->
     <div class="admin-card" style="background:#fff;padding:1.5rem;border-radius:12px;border:1px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,0.02)">
       <h3 style="font-size:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
-        <Icon name="share"  /> Redes Sociales y Compartir
+        <Icon name="shield-user" /> Confianza publica y social proof
       </h3>
 
       <div class="field" style="margin-bottom:1rem">
-        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Imagen para compartir (OG Image)</label>
+        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Modo de prueba social</label>
+        <select id="socialProofMode" style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+          <option value="trust_badges">Trust badges reales</option>
+          <option value="verified_reviews">Resenas verificadas</option>
+          <option value="hidden">Ocultar bloque de confianza</option>
+        </select>
+        <small style="color:#999;font-size:.7rem">No usar estrellas ni ratings si no hay evidencia verificable.</small>
+      </div>
+
+      <div class="field" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:.4rem">Imagen OG (1200x630)</label>
         <div style="display:flex;gap:.5rem">
-          <input type="text" id="seoOgImage" placeholder="URL de la imagen (1200x630)" 
-            style="flex:1;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+          <input type="text" id="seoOgImage" placeholder="https://..." style="flex:1;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem" />
           <button onclick="document.getElementById('seoOgFileInput').click()" style="background:#f0f0f0;border:none;padding:0 1rem;border-radius:8px;cursor:pointer">
-            <Icon name="upload-2"  />
+            <Icon name="upload-2" />
           </button>
-          <input type="file" id="seoOgFileInput" style="display:none" onchange="handleOgUpload(this.files)">
+          <input type="file" id="seoOgFileInput" style="display:none" onchange="handleOgUpload(this.files)" />
         </div>
-        <small style="color:#999;font-size:.7rem">Imagen que aparece en WhatsApp, Facebook e Instagram.</small>
       </div>
 
       <div class="field" style="margin-bottom:1rem">
         <label style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;margin-bottom:.4rem">
-          <Icon name="instagram"  /> Instagram URL
+          <Icon name="instagram" /> Instagram URL
         </label>
-        <input type="text" id="socialInsta" placeholder="https://instagram.com/nuditos" 
-          style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+        <input type="text" id="socialInsta" placeholder="https://instagram.com/nuditos_tejidos" style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem" />
       </div>
 
-      <div class="field" style="margin-bottom:1rem">
+      <div class="field">
         <label style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;margin-bottom:.4rem">
-          <Icon name="whatsapp"  /> WhatsApp (Número)
+          <Icon name="whatsapp" /> WhatsApp (numero)
         </label>
-        <input type="text" id="socialWhasapp" placeholder="573144931525" 
-          style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+        <input type="text" id="socialWhasapp" placeholder="573144931525" style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem" />
       </div>
     </div>
 
-    <!-- TRACKING & ANALYTICS -->
+    <div class="admin-card" style="background:#fff;padding:1.5rem;border-radius:12px;border:1px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,0.02)">
+      <h3 style="font-size:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+        <Icon name="list-check-2" /> Checklist de publicacion
+      </h3>
+      <div class="seo-checklist-grid">
+        <label><input type="checkbox" /> H1 unico por pagina</label>
+        <label><input type="checkbox" /> Title entre 50 y 60</label>
+        <label><input type="checkbox" /> Meta desc entre 140 y 160</label>
+        <label><input type="checkbox" /> Canonical correcto</label>
+        <label><input type="checkbox" /> FAQ util y real</label>
+        <label><input type="checkbox" /> 2-5 enlaces internos</label>
+        <label><input type="checkbox" /> CTA a catalogo o WhatsApp</label>
+        <label><input type="checkbox" /> Alt text descriptivo</label>
+      </div>
+      <small style="display:block;margin-top:.8rem;color:#777;font-size:.72rem">Usalo como puerta de salida antes de publicar landings o posts.</small>
+    </div>
+
+    <div class="admin-card" style="background:#fff;padding:1.5rem;border-radius:12px;border:1px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,0.02)">
+      <h3 style="font-size:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+        <Icon name="magic" /> Brief reusable para IA
+      </h3>
+      <textarea id="seoAIBrief" rows="9" style="width:100%;padding:.8rem;border:1.5px solid #eee;border-radius:8px;font-size:.84rem;line-height:1.5;resize:vertical" placeholder="URL:
+Keyword primaria:
+Keywords secundarias:
+Intencion:
+Audiencia:
+Objeciones:
+CTA principal:
+Productos a enlazar:
+Landings relacionadas:
+FAQ objetivo:"></textarea>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem">
+        <button class="mini-action-btn" onclick="saveAIBrief()">Guardar brief</button>
+        <button class="mini-action-btn" onclick="loadAIBrief()">Cargar brief</button>
+        <button class="mini-action-btn" onclick="copyAIBrief()">Copiar</button>
+      </div>
+    </div>
+
     <div class="admin-card" style="background:#fff;padding:1.5rem;border-radius:12px;border:1px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,0.02);grid-column: span 1">
       <h3 style="font-size:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
-        <Icon name="line-chart"  /> Medición y Tracking
+        <Icon name="line-chart" /> Medicion y tracking
       </h3>
 
-      <div class="field" style="margin-bottom:1.5rem">
+      <div class="field" style="margin-bottom:1.2rem">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
-          <label style="font-size:.75rem;font-weight:600">Facebook Pixel (Meta Pixel)</label>
+          <label style="font-size:.75rem;font-weight:600">Facebook Pixel</label>
           <div class="toggle-btn" id="toggleMetaPixelSEO" onclick="this.classList.toggle('on')"></div>
         </div>
-        <input type="text" id="seoMetaPixelId" placeholder="ID del Píxel" 
-          style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+        <input type="text" id="seoMetaPixelId" placeholder="ID del Pixel" style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem" />
       </div>
 
-      <div class="field" style="margin-bottom:1rem">
+      <div class="field" style="margin-bottom:.9rem">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
           <label style="font-size:.75rem;font-weight:600">Google Analytics ID</label>
           <div class="toggle-btn" id="toggleGASEO" onclick="this.classList.toggle('on')"></div>
         </div>
-        <input type="text" id="seoGAId" placeholder="G-XXXXXXXXXX" 
-          style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem">
+        <input type="text" id="seoGAId" placeholder="G-XXXXXXXXXX" style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem" />
       </div>
-    </div>
 
+      <small style="color:#777;font-size:.72rem">Revision semanal recomendada: indexacion, CTR, consultas y cobertura por landing.</small>
+    </div>
   </div>
 
   <div style="margin-top:2rem;display:flex;justify-content:flex-end">
-     <button class="btn-save" onclick="saveSEOConfig()" style="background:var(--lila);color:#fff;padding:.8rem 2rem;border:none;border-radius:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.5rem">
-       <Icon name="save"  /> Guardar Todo el SEO
-     </button>
+    <button class="btn-save" onclick="saveSEOConfig()" style="background:var(--lila);color:#fff;padding:.8rem 2rem;border:none;border-radius:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.5rem">
+      <Icon name="save" /> Guardar Todo el SEO
+    </button>
   </div>
 </div>
 
@@ -117,7 +163,7 @@ import Icon from '../Icon.astro';
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(109, 40, 217, 0.05) !important;
   }
-  .field input:focus, .field textarea:focus {
+  .field input:focus, .field textarea:focus, .field select:focus {
     border-color: var(--lila) !important;
     outline: none;
     box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
@@ -143,21 +189,8 @@ import Icon from '../Icon.astro';
     transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
-  .post-item-admin:hover { 
-    background: #fdfaff; 
-    border-left: 3px solid var(--lila);
-  }
-  .post-item-admin.active {
-    background: #f5eeff;
-    border-left: 3px solid var(--lila);
-  }
-  #postContent:focus {
-    border-color: var(--lila) !important;
-    outline: none;
-  }
   .toggle-btn.on { background: #6d28d9; }
   .toggle-btn.on::after { left: 20px; }
-
   .google-preview {
     transition: all 0.3s ease;
     cursor: default;
@@ -166,14 +199,66 @@ import Icon from '../Icon.astro';
     background: #fff !important;
     border-color: var(--lila) !important;
   }
+  .seo-checklist-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .45rem;
+    font-size: .8rem;
+    color: #4b5563;
+  }
+  .seo-checklist-grid label {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+  }
+  .mini-action-btn {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    border-radius: 8px;
+    font-size: .73rem;
+    font-weight: 600;
+    padding: .45rem .65rem;
+    cursor: pointer;
+  }
 </style>
 
 <script is:inline>
   function updateSEOPreview() {
-    const title = document.getElementById('seoTitle').value || 'Nuditos — Ramos de Crochet y Flores Eternas';
-    const desc = document.getElementById('seoDescription').value || 'Encuentra los mejores regalos personalizados y flores que nunca se marchitan...';
+    const titleInput = document.getElementById('seoTitle');
+    const descInput = document.getElementById('seoDescription');
+    const title = titleInput.value || 'Nuditos - Ramos de Crochet y Regalos Eternos';
+    const desc = descInput.value || 'Regalos eternos en Colombia: flores tejidas, ramos de crochet y detalles personalizados.';
+
     document.getElementById('preSEOTitle').textContent = title;
     document.getElementById('preSEODesc').textContent = desc;
+
+    const titleCount = titleInput.value.length;
+    const descCount = descInput.value.length;
+    const titleEl = document.getElementById('seoTitleCount');
+    const descEl = document.getElementById('seoDescCount');
+    titleEl.textContent = `${titleCount}/60 caracteres`;
+    descEl.textContent = `${descCount}/160 caracteres`;
+    titleEl.style.color = titleCount > 60 ? '#dc2626' : '#999';
+    descEl.style.color = descCount > 160 ? '#dc2626' : '#999';
+  }
+
+  function saveAIBrief() {
+    localStorage.setItem('nuditos_seo_ai_brief', document.getElementById('seoAIBrief').value || '');
+    showToast('Brief IA guardado localmente');
+  }
+
+  function loadAIBrief() {
+    const saved = localStorage.getItem('nuditos_seo_ai_brief') || '';
+    document.getElementById('seoAIBrief').value = saved;
+    showToast(saved ? 'Brief IA cargado' : 'No hay brief guardado');
+  }
+
+  async function copyAIBrief() {
+    const txt = document.getElementById('seoAIBrief').value || '';
+    if (!txt.trim()) return showToast('No hay contenido para copiar');
+    await navigator.clipboard.writeText(txt);
+    showToast('Brief copiado al portapapeles');
   }
 
   async function handleOgUpload(files) {
@@ -181,17 +266,15 @@ import Icon from '../Icon.astro';
     const url = await uploadToCloudinary(files[0]);
     if(url) {
       document.getElementById('seoOgImage').value = url;
-      showToast('✓ Imagen OG subida');
+      showToast('Imagen OG subida');
     }
   }
 
   async function saveSEOConfig() {
-    showToast('⏳ Guardando SEO...');
+    showToast('Guardando SEO...');
     try {
-      // Sincronizar el Meta Pixel con los inputs del Settings Tab para asegurar la persistencia
       const seoPixelId = document.getElementById('seoMetaPixelId').value.trim();
       const seoPixelActive = document.getElementById('toggleMetaPixelSEO').classList.contains('on');
-      
       const settingsPixelId = document.getElementById('metaPixelId');
       const settingsPixelToggle = document.getElementById('toggleMetaPixel');
 
@@ -205,13 +288,18 @@ import Icon from '../Icon.astro';
         else settingsPixelToggle.classList.remove('on');
       }
 
-      // Llamar a saveConfig global de admin.astro
       if (typeof saveConfig === 'function') {
         await saveConfig();
-        addToHistory('🔍 SEO Global actualizado');
+        addToHistory('SEO Global actualizado');
       }
     } catch(e) {
-      showToast('❌ Error al guardar SEO');
+      showToast('Error al guardar SEO');
     }
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateSEOPreview();
+    loadAIBrief();
+  });
 </script>
+

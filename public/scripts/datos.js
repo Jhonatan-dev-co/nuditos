@@ -20,6 +20,7 @@ const CONFIG_DEFAULT = {
   wompiActivo:        false,
   wompiKey:           '',
   catViews:           {},
+  socialProofMode:    'trust_badges',
 };
 
 /* ── Categorías ── */

@@ -1,0 +1,66 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+}
+
+const {
+  title = 'Confianza real para regalar sin dudas',
+  subtitle = 'Transparencia, calidad artesanal y acompañamiento humano en cada pedido.',
+} = Astro.props as Props;
+
+const trustItems = [
+  {
+    icon: 'plant',
+    title: 'Hecho a mano en Colombia',
+    copy: 'Cada ramo se teje de forma artesanal con acabado premium.',
+  },
+  {
+    icon: 'truck',
+    title: 'Envios nacionales',
+    copy: 'Cobertura en todo el pais con empaque de proteccion.',
+  },
+  {
+    icon: 'bank-card',
+    title: 'Pago seguro con Wompi',
+    copy: 'Tarjeta, PSE, Nequi y Daviplata con pasarela certificada.',
+  },
+  {
+    icon: 'whatsapp',
+    title: 'Personalizacion por WhatsApp',
+    copy: 'Asesoria directa para colores, mensaje y ocasion especial.',
+  },
+  {
+    icon: 'award',
+    title: 'Empaque premium',
+    copy: 'Presentacion lista para regalo, cuidada en cada detalle.',
+  },
+];
+---
+
+<section class="bg-stone-50 py-16 px-6 overflow-hidden" id="confianza">
+  <div class="max-w-[1200px] mx-auto">
+    <div class="text-center max-w-2xl mx-auto mb-10">
+      <div class="text-[10px] tracking-[3px] uppercase text-emerald-600 font-bold mb-3">
+        Senales de confianza
+      </div>
+      <h2 class="font-serif text-[clamp(1.85rem,4vw,2.85rem)] text-[#1a1220] mb-3">{title}</h2>
+      <p class="text-stone-500 text-sm md:text-base">{subtitle}</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-5">
+      {trustItems.map((item) => (
+        <article class="bg-white rounded-3xl border border-stone-100 p-6 shadow-sm hover:shadow-md transition-all duration-300">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+            <Icon name={item.icon} />
+          </div>
+          <h3 class="text-sm font-bold uppercase tracking-wide text-[#1a1220] mb-2">{item.title}</h3>
+          <p class="text-xs text-stone-500 leading-relaxed">{item.copy}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+

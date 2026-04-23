@@ -1,0 +1,9 @@
+---
+import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
+import { getLiveProducts } from '../lib/supabase';
+import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
+export const prerender = false;
+const products = await getLiveProducts();
+const config = COMMERCIAL_LANDINGS['regalos-originales-colombia'];
+---
+<CommercialSeoLanding config={config} products={products} />

@@ -44,6 +44,7 @@ export const CONFIG_DEFAULT = {
   catViews:           {},
   metaPixelActivo:    false,
   metaPixelId:        '',
+  socialProofMode:    'trust_badges',
 };
 
 export const categories: Category[] = [
@@ -116,4 +117,3 @@ export function clUrl(url: string, width: number = 480) {
   }
   return cleanUrl.replace('upload/', `upload/q_auto,f_auto,w_${width}/`);
 }
-

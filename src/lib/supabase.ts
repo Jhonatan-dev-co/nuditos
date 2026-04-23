@@ -163,6 +163,7 @@ export async function getLiveConfig() {
       seleccionNuditos:     JSON.parse(m.seleccion_nuditos || '[]'),
       metaPixelActivo:      m.meta_pixel_activo === 'true',
       metaPixelId:          m.meta_pixel_id || '',
+      socialProofMode:      m.social_proof_mode || 'trust_badges',
       seoTitle:             m.seo_title || '',
       seoDescription:       m.seo_description || '',
       seoOgImage:           m.seo_og_image || '',

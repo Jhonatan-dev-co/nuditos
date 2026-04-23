@@ -23,18 +23,26 @@ import Icon from '../Icon.astro';
     <div class="modal-sub">Registra el pedido recibido por WhatsApp</div>
     <input type="hidden" id="pedidoEditId">
     <div class="modal-field"><label>Nombre cliente</label><input type="text" id="pCliente" placeholder="Valentina García"></div>
-    <div class="modal-field"><label>Teléfono / WhatsApp</label><input type="text" id="pTel" placeholder="+57 300 000 0000"></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.8rem;">
+      <div class="modal-field"><label>Email (Opcional)</label><input type="email" id="pEmail" placeholder="cliente@correo.com"></div>
+      <div class="modal-field"><label>WhatsApp</label><input type="text" id="pTel" placeholder="+57 300 000 0000"></div>
+    </div>
     <div class="modal-field"><label>Productos pedidos</label><textarea id="pItems" placeholder="1x Ramo noche estrellada&#10;1x Maceta girasol"></textarea></div>
     <div class="modal-field"><label>Total (COP)</label><input type="number" id="pTotal" placeholder="135000" min="0"></div>
     <div class="modal-field"><label>Estado</label>
       <select id="pEstado">
         <option value="pendiente">⏳ Pendiente</option>
+        <option value="pagado">💰 Pagado</option>
         <option value="proceso">🔄 En proceso</option>
         <option value="entregado">✅ Entregado</option>
         <option value="cancelado">❌ Cancelado</option>
       </select>
     </div>
-    <div class="modal-field"><label>Notas</label><textarea id="pNotas" placeholder="Dirección de entrega, color preferido, etc."></textarea></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.8rem;">
+      <div class="modal-field"><label>Transportadora</label><input type="text" id="pTrans" placeholder="Servientrega / Inter"></div>
+      <div class="modal-field"><label>Número de Guía</label><input type="text" id="pGuia" placeholder="123456789"></div>
+    </div>
+    <div class="modal-field"><label>Notas / Dirección</label><textarea id="pNotas" placeholder="Dirección de entrega, indicaciones, etc."></textarea></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closePedidoModal()">Cancelar</button>
       <button class="btn-save" onclick="savePedido()"><Icon name="save"  /> Guardar</button>
