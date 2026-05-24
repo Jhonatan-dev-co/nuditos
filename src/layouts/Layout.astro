@@ -263,9 +263,9 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   )}
 
   <!-- TikTok Pixel -->
-  {config?.tiktokPixelActivo && (
+  {(config?.tiktokPixelActivo || !config?.tiktokPixelId) && (
     <>
-      <script is:inline define:vars={{ ttPixelId: config.tiktokPixelId || '' }}>
+      <script is:inline define:vars={{ ttPixelId: config.tiktokPixelId || 'D8992LJC77UDFA3HK540' }}>
         !(function (w, d, t) {
           w.TiktokAnalyticsObject = t;
           var ttq = (w[t] = w[t] || []);
