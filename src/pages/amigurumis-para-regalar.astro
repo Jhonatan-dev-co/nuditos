@@ -1,9 +1,25 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-const products = await getLiveProducts();
-const config = COMMERCIAL_LANDINGS['amigurumis-para-regalar'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Amigurumis para Regalar en Colombia | Nuditos"
+  seoDesc="Amigurumis para regalar con estilo artesanal. Ideas originales para novia, esposa, mamá o amistad."
+  seoKeywords="amigurumis para regalar, regalo amigurumi colombia, detalles crochet colombia"
+  eyebrow="Detalles que conectan"
+  h1="Amigurumis para regalar con"
+  h1Em="personalidad"
+  heroCopy="Si quieres salir del regalo típico, los amigurumis personalizados son una opción original y memorable."
+  ctaWaText="Hola Nuditos! 🧸 Quiero un amigurumi personalizado"
+  productKeywords={["amigurumi", "personaje", "tejido"]}
+  collectionTitle="Colección Amigurumis"
+  faq={[
+    { q: "¿Qué es un amigurumi?", a: "Es una figura tejida a crochet, usualmente personalizada con colores y rasgos únicos." },
+    { q: "¿Puedo pedir personajes?", a: "Sí, se evalúa viabilidad según diseño y tiempo." },
+    { q: "¿Cuánto dura un amigurumi?", a: "Con cuidados básicos puede durar años." },
+    { q: "¿Puedo combinar amigurumi y ramo?", a: "Sí, puedes armar un combo para mayor impacto." },
+  ]}
+  ctaFinalTitle="¿Quieres algo <em class='italic text-violet-600 font-normal'>único?</em>"
+  ctaFinalCopy="Escríbenos y diseñamos juntos el amigurumi perfecto para esa persona especial."
+  ctaTags={["🧸 Personalizable", "🎨 Diseño único", "🎁 Empaque boutique", "🚚 Envío nacional"]}
+/>

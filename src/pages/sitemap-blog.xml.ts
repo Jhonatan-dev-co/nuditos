@@ -52,6 +52,9 @@ export async function GET({ site }: { site: URL | undefined }) {
     <priority>${page.prio}</priority>
   </url>`).join('')}`;
 
+  const addedSlugs = new Set<string>();
+  const staticSlugs = ['cuidados-ramos-crochet', 'significado-colores-crochet'];
+
   // Agregar posts dinámicos de Supabase
   livePosts.forEach(post => {
     if (!post.slug) return;

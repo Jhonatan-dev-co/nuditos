@@ -1,96 +1,128 @@
 ---
 import Icon from '../Icon.astro';
 ---
+
 <div id="tab-blog" class="tab-content" style="padding:1.5rem">
-  <div class="editor-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;gap:1rem;flex-wrap:wrap">
-    <div>
-      <h2 style="font-size:1.5rem;font-weight:700;color:var(--negro)">Gestion del Blog</h2>
-      <p style="color:var(--soft);font-size:.875rem">Publica articulos orientados a SEO y ventas con campos completos.</p>
+
+  <!-- Header -->
+  <div class="t-card" style="margin-bottom:1.5rem; background:linear-gradient(135deg,#fdf4ff 0%,#ede9fe 100%); border:1.5px solid #d8b4fe;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <div class="t-title" style="color:#7c3aed;">✍️ Blog SEO</div>
+        <div class="t-sub">Gestiona artículos y cambia fotos de portada desde aquí.</div>
+      </div>
+      <button onclick="newPost()" style="background:#7c3aed; color:white; border:none; padding:10px 20px; border-radius:12px; cursor:pointer; font-weight:700; font-size:0.8rem; white-space:nowrap;">
+        ✨ Nuevo artículo
+      </button>
     </div>
-    <button class="btn-save" onclick="newPost()" style="background:var(--lila);border:none;color:#fff;padding:.7rem 1.2rem;border-radius:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.5rem">
-      <Icon name="add" /> Nuevo articulo
-    </button>
   </div>
 
-  <div style="display:grid;grid-template-columns:350px 1fr;gap:2rem" class="blog-admin-grid">
-    <div id="postsListAdmin" style="background:#fff;border:1px solid #eee;border-radius:12px;overflow:hidden;height:fit-content">
-      <div style="padding:1rem;border-bottom:1px solid #eee;font-weight:600;font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:1px">Articulos</div>
-      <div id="postsSidebar" style="max-height:620px;overflow-y:auto">
-        <div style="padding:2rem;text-align:center;color:#ccc;font-size:.9rem">Cargando articulos...</div>
-      </div>
+  <!-- Lista de artículos como tarjetas -->
+  <div class="t-card" style="margin-bottom:1.5rem;">
+    <div class="t-title" style="margin-bottom:1rem;">📚 Mis artículos</div>
+    <div id="blogPostsList">
+      <div style="text-align:center; padding:2rem; color:var(--soft); font-size:0.8rem;">Cargando artículos...</div>
     </div>
+  </div>
 
-    <div id="postEditor" style="background:#fff;border:1px solid #eee;border-radius:12px;padding:1.5rem;display:none">
+  <!-- Editor de artículo -->
+  <div id="postEditorWrap" style="display:none; margin-top:1.5rem;">
+    <div class="t-card" style="border:2px solid #7c3aed;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
+        <div class="t-title" id="postEditorTitle">Configuración del artículo</div>
+        <button onclick="closePostEditor()" style="background:none; border:none; cursor:pointer; color:#999; font-size:1.2rem;">✕</button>
+      </div>
+
       <input type="hidden" id="postEditingId">
 
-      <div class="field" style="margin-bottom:1rem">
-        <label class="blog-label">Titulo del articulo</label>
-        <input type="text" id="postTitle" placeholder="Ej: Que regalarle a mi esposa en Colombia"
-          style="width:100%;padding:.8rem;border:1.5px solid #eee;border-radius:8px;font-size:1.05rem;font-weight:600"
-          oninput="document.getElementById('postSlug').value = slugify(this.value); syncMetaTitleFromPostTitle(); updatePostMetaCounters();">
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div class="field" style="margin-bottom:1rem">
-          <label class="blog-label">Slug</label>
-          <input type="text" id="postSlug" placeholder="que-regalarle-a-mi-esposa" style="width:100%;padding:.6rem;border:1.5px solid #eee;border-radius:8px;font-size:.85rem;background:#f9f9f9;color:#666">
+      <!-- Foto de portada — SECCIÓN DESTACADA -->
+      <div style="background:#f5f0ff; border:2px dashed #c4b5fd; border-radius:14px; padding:1.2rem; margin-bottom:1.5rem;">
+        <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.8rem;">
+          <span style="font-size:1.1rem;">🖼️</span>
+          <strong style="font-size:0.85rem; color:#6d28d9;">Foto de portada del artículo</strong>
         </div>
-        <div class="field" style="margin-bottom:1rem">
-          <label class="blog-label">Categoria</label>
-          <input type="text" id="postCategory" placeholder="Regalos" style="width:100%;padding:.6rem;border:1.5px solid #eee;border-radius:8px;font-size:.85rem">
-        </div>
-      </div>
-
-      <div class="field" style="margin-bottom:1rem">
-        <label class="blog-label">Imagen principal</label>
-        <div style="display:flex;gap:.5rem">
-          <input type="text" id="postImg" placeholder="URL de la imagen" style="flex:1;padding:.6rem;border:1.5px solid #eee;border-radius:8px">
-          <button onclick="document.getElementById('postImgInput').click()" style="background:#f0f0f0;border:none;padding:0 1rem;border-radius:8px;cursor:pointer"><Icon name="upload-2" /></button>
-          <input type="file" id="postImgInput" style="display:none" onchange="handlePostImgUpload(this.files)">
-        </div>
-      </div>
-
-      <div class="field" style="margin-bottom:1rem">
-        <label class="blog-label">Excerpt (resumen corto)</label>
-        <textarea id="postExcerpt" rows="2" style="width:100%;padding:.65rem;border:1.5px solid #eee;border-radius:8px;font-size:.88rem;resize:vertical"></textarea>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div class="field" style="margin-bottom:1rem">
-          <label class="blog-label">Meta title</label>
-          <input type="text" id="postMetaTitle" placeholder="Titulo SEO del articulo" style="width:100%;padding:.6rem;border:1.5px solid #eee;border-radius:8px;font-size:.85rem" oninput="updatePostMetaCounters()">
-          <small id="postMetaTitleCount" class="meta-count">0/60</small>
-        </div>
-        <div class="field" style="margin-bottom:1rem">
-          <label class="blog-label">Keywords SEO</label>
-          <input type="text" id="postSeoKeywords" placeholder="regalo para esposa, flores tejidas, ..." style="width:100%;padding:.6rem;border:1.5px solid #eee;border-radius:8px;font-size:.85rem">
+        <div style="display:flex; gap:0.75rem; align-items:flex-start; flex-wrap:wrap;">
+          <!-- Preview -->
+          <div id="postImgPreview" style="width:130px; height:90px; border-radius:10px; background:#e5e7eb; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:2rem;">
+            🌸
+          </div>
+          <div style="flex:1; min-width:200px;">
+            <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+              <input type="text" id="postImg" placeholder="URL de la imagen (Cloudinary, Unsplash...)"
+                style="flex:1; padding:.6rem .8rem; border:1.5px solid #d8b4fe; border-radius:8px; font-size:0.82rem;"
+                oninput="updatePostImgPreview()">
+              <button onclick="document.getElementById('postImgFileInput').click()"
+                style="background:#7c3aed; color:white; border:none; padding:0 14px; border-radius:8px; cursor:pointer; white-space:nowrap; font-size:0.8rem; font-weight:600; display:flex; align-items:center; gap:4px;">
+                <Icon name="upload-2" /> Subir
+              </button>
+              <input type="file" id="postImgFileInput" style="display:none" accept="image/*" onchange="handlePostImgUpload(this.files)">
+            </div>
+            <div id="postImgUploadProgress" style="display:none; height:4px; background:#e5e7eb; border-radius:4px; overflow:hidden; margin-top:4px;">
+              <div id="postImgUploadBar" style="height:100%; background:#7c3aed; width:0%; transition:width .3s;"></div>
+            </div>
+            <div style="font-size:0.68rem; color:#9ca3af; margin-top:4px;">JPG, PNG o WEBP — se optimiza automáticamente para SEO</div>
+          </div>
         </div>
       </div>
 
-      <div class="field" style="margin-bottom:1rem">
-        <label class="blog-label">Meta description</label>
-        <textarea id="postMetaDescription" rows="2" style="width:100%;padding:.65rem;border:1.5px solid #eee;border-radius:8px;font-size:.85rem;resize:vertical" oninput="updatePostMetaCounters()"></textarea>
-        <small id="postMetaDescCount" class="meta-count">0/160</small>
-      </div>
+      <!-- Grid de campos -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;" class="blog-form-grid">
+        <div class="field field-full" style="grid-column:1/-1;">
+          <label>Título del artículo *</label>
+          <input type="text" id="postTitle" placeholder="Ej: Qué regalarle a mi novia en Colombia"
+            oninput="document.getElementById('postSlug').value=slugify(this.value); syncMetaTitleFromPostTitle(); updatePostMetaCounters();">
+        </div>
 
-      <div class="field" style="margin-bottom:1.5rem">
-        <label class="blog-label">Contenido del articulo (HTML permitido)</label>
-        <textarea id="postContent" rows="14" style="width:100%;padding:.8rem;border:1.5px solid #eee;border-radius:8px;font-size:.95rem;resize:vertical;font-family:inherit"></textarea>
-      </div>
+        <div class="field">
+          <label>Slug (URL)</label>
+          <input type="text" id="postSlug" placeholder="que-regalarle-novia" style="background:#f9fafb; color:#666; font-size:.82rem;">
+        </div>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:.7rem;flex-wrap:wrap">
-        <button onclick="deletePost()" style="background:transparent;border:1px solid #ff4d4f;color:#ff4d4f;padding:.7rem 1.5rem;border-radius:10px;cursor:pointer">Eliminar</button>
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <button onclick="document.getElementById('postEditor').style.display='none';document.getElementById('postEmpty').style.display='flex'" style="background:#f5f5f5;border:none;padding:.7rem 1.5rem;border-radius:10px;cursor:pointer">Cancelar</button>
-          <button onclick="savePost()" style="background:var(--lila);border:none;color:#fff;padding:.7rem 2.5rem;border-radius:10px;font-weight:600;cursor:pointer">Guardar articulo</button>
+        <div class="field">
+          <label>Categoría</label>
+          <input type="text" id="postCategory" placeholder="Regalos, Flores, Colombia...">
+        </div>
+
+        <div class="field field-full" style="grid-column:1/-1;">
+          <label>Excerpt (resumen corto para Google)</label>
+          <textarea id="postExcerpt" rows="2" placeholder="Breve descripción del artículo (aparece en listas y buscadores)..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Meta Title (Google) <small id="postMetaTitleCount" class="meta-count">0/60</small></label>
+          <input type="text" id="postMetaTitle" placeholder="Título SEO del artículo" oninput="updatePostMetaCounters()">
+        </div>
+
+        <div class="field">
+          <label>Keywords SEO</label>
+          <input type="text" id="postSeoKeywords" placeholder="regalo para novia, flores tejidas...">
+        </div>
+
+        <div class="field field-full" style="grid-column:1/-1;">
+          <label>Meta Description <small id="postMetaDescCount" class="meta-count">0/160</small></label>
+          <textarea id="postMetaDescription" rows="2" placeholder="Descripción para Google..." oninput="updatePostMetaCounters()"></textarea>
+        </div>
+
+        <div class="field field-full" style="grid-column:1/-1;">
+          <label>Contenido del artículo (HTML permitido)</label>
+          <textarea id="postContent" rows="16" style="font-family:monospace; font-size:.82rem;"></textarea>
         </div>
       </div>
-    </div>
 
-    <div id="postEmpty" style="background:#fff;border:1px dashed #ccc;border-radius:12px;padding:4rem;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
-      <div style="font-size:3rem;margin-bottom:1rem">Contenido SEO</div>
-      <h3 style="margin-bottom:.5rem">No has seleccionado ningun articulo</h3>
-      <p style="color:#999">Elige uno de la lista o crea uno nuevo para empezar a posicionar en Google.</p>
+      <!-- Botones -->
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:.7rem; flex-wrap:wrap; padding-top:1rem; border-top:1px solid #f3e8ff;">
+        <button onclick="deletePost()" style="background:transparent; border:1px solid #ff4d4f; color:#ff4d4f; padding:.7rem 1.5rem; border-radius:10px; cursor:pointer; font-size:0.82rem;">
+          🗑️ Eliminar artículo
+        </button>
+        <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+          <button onclick="closePostEditor()" style="background:#f5f5f5; border:none; padding:.7rem 1.5rem; border-radius:10px; cursor:pointer; font-size:0.82rem;">
+            Cancelar
+          </button>
+          <button onclick="savePost()" style="background:#7c3aed; border:none; color:#fff; padding:.7rem 2.5rem; border-radius:10px; font-weight:700; cursor:pointer;">
+            💾 Guardar artículo
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -98,30 +130,89 @@ import Icon from '../Icon.astro';
 <script is:inline>
   let blogPosts = [];
 
+  /* ── Carga y renderiza la lista ── */
   async function loadPosts() {
     const rows = await sbAdminGetPosts();
     blogPosts = rows || [];
-    renderPostsList();
+    renderBlogPostsList();
   }
 
-  function renderPostsList() {
-    const list = document.getElementById('postsSidebar');
+  function renderBlogPostsList() {
+    const list = document.getElementById('blogPostsList');
+    if (!list) return;
+
     if (blogPosts.length === 0) {
-      list.innerHTML = `<div style="padding:2rem;text-align:center;color:#999;font-size:.8rem">No hay articulos aun</div>`;
+      list.innerHTML = `<div style="text-align:center; padding:2rem; color:#9ca3af; font-size:.8rem;">No hay artículos aún. Haz clic en "Nuevo artículo".</div>`;
       return;
     }
-    list.innerHTML = blogPosts.map(p => `
-      <div onclick="selectPost(${p.id})" style="padding:1rem;border-bottom:1px solid #f9f9f9;cursor:pointer;transition:.2s" class="post-item-admin">
-        <div style="font-weight:600;font-size:.9rem;margin-bottom:.2rem">${p.title || 'Sin titulo'}</div>
-        <div style="font-size:.7rem;color:#999;display:flex;gap:.5rem;flex-wrap:wrap">
-          <span>${(p.created_at || '').split('T')[0] || ''}</span>
-          <span>/blog/${p.slug || ''}</span>
-          <span>${p.category || 'Nuditos'}</span>
+
+    list.innerHTML = `<div class="blog-cards-grid">` + blogPosts.map(p => {
+      const img = p.image || p.img || '';
+      const date = (p.created_at || '').split('T')[0] || '';
+      const cat = p.category || 'Nuditos';
+      return `
+        <div class="blog-card-admin">
+          <div class="blog-card-img" style="background-image:url('${img}'); background-size:cover; background-position:center; background-color:#f0ebff;">
+            ${!img ? '<span style="font-size:2rem;">🌸</span>' : ''}
+            <div class="blog-card-img-overlay">
+              <button onclick="quickChangeImg(${p.id})" class="blog-quick-img-btn">
+                📷 Cambiar foto
+              </button>
+            </div>
+          </div>
+          <div class="blog-card-body">
+            <div class="blog-card-cat">${cat}</div>
+            <div class="blog-card-title">${p.title || 'Sin título'}</div>
+            <div class="blog-card-meta">
+              <span>${date}</span>
+              <span style="color:#a78bfa">/blog/${p.slug || ''}</span>
+            </div>
+          </div>
+          <div class="blog-card-actions">
+            <button onclick="selectPost(${p.id})" class="blog-btn-edit">✏️ Editar</button>
+            <button onclick="quickDeletePost(${p.id})" class="blog-btn-del">🗑️</button>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('') + `</div>`;
   }
 
+  /* ── Cambio rápido de foto desde tarjeta ── */
+  function quickChangeImg(id) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+      if (!e.target.files.length) return;
+      showToast('⏳ Subiendo foto...');
+      const url = await uploadToCloudinary(e.target.files[0]);
+      if (!url) return;
+      const p = blogPosts.find(x => x.id === id);
+      if (!p) return;
+      try {
+        await sbAdminSavePost({ ...p, image: url }, false);
+        showToast('✅ Foto actualizada');
+        loadPosts();
+      } catch(err) {
+        showToast('❌ Error al guardar foto');
+      }
+    };
+    input.click();
+  }
+
+  /* ── Eliminar rápido desde tarjeta ── */
+  async function quickDeletePost(id) {
+    if (!confirm('¿Eliminar este artículo del blog?')) return;
+    try {
+      await sbAdminDeletePost(Number(id));
+      showToast('🗑️ Artículo eliminado');
+      loadPosts();
+    } catch(e) {
+      showToast('❌ Error al eliminar');
+    }
+  }
+
+  /* ── Seleccionar para editar ── */
   function selectPost(id) {
     const p = blogPosts.find(x => x.id === id);
     if (!p) return;
@@ -135,11 +226,12 @@ import Icon from '../Icon.astro';
     document.getElementById('postMetaDescription').value = p.meta_description || '';
     document.getElementById('postSeoKeywords').value = p.seo_keywords || '';
     document.getElementById('postContent').value = p.content || '';
-    document.getElementById('postEmpty').style.display = 'none';
-    document.getElementById('postEditor').style.display = 'block';
+    updatePostImgPreview();
     updatePostMetaCounters();
+    openPostEditor(`✏️ Editando: ${p.title}`);
   }
 
+  /* ── Nuevo artículo ── */
   function newPost() {
     document.getElementById('postEditingId').value = '';
     document.getElementById('postTitle').value = '';
@@ -151,11 +243,51 @@ import Icon from '../Icon.astro';
     document.getElementById('postMetaDescription').value = '';
     document.getElementById('postSeoKeywords').value = '';
     document.getElementById('postContent').value = '';
-    document.getElementById('postEmpty').style.display = 'none';
-    document.getElementById('postEditor').style.display = 'block';
+    updatePostImgPreview();
     updatePostMetaCounters();
+    openPostEditor('✨ Nuevo artículo');
   }
 
+  function openPostEditor(title) {
+    document.getElementById('postEditorTitle').textContent = title;
+    const wrap = document.getElementById('postEditorWrap');
+    wrap.style.display = 'block';
+    wrap.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function closePostEditor() {
+    document.getElementById('postEditorWrap').style.display = 'none';
+  }
+
+  /* ── Preview de imagen en editor ── */
+  function updatePostImgPreview() {
+    const url = document.getElementById('postImg').value.trim();
+    const preview = document.getElementById('postImgPreview');
+    if (url) {
+      preview.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentNode.innerHTML='🌸'">`;
+    } else {
+      preview.innerHTML = '🌸';
+    }
+  }
+
+  /* ── Subida de imagen desde editor ── */
+  async function handlePostImgUpload(files) {
+    if (!files.length) return;
+    const bar = document.getElementById('postImgUploadBar');
+    const prog = document.getElementById('postImgUploadProgress');
+    prog.style.display = 'block';
+    bar.style.width = '30%';
+    const url = await uploadToCloudinary(files[0]);
+    bar.style.width = '100%';
+    setTimeout(() => { prog.style.display = 'none'; bar.style.width = '0%'; }, 800);
+    if (url) {
+      document.getElementById('postImg').value = url;
+      updatePostImgPreview();
+      showToast('✅ Imagen subida correctamente');
+    }
+  }
+
+  /* ── Contadores SEO ── */
   function syncMetaTitleFromPostTitle() {
     const mt = document.getElementById('postMetaTitle');
     const title = document.getElementById('postTitle').value.trim();
@@ -169,19 +301,11 @@ import Icon from '../Icon.astro';
     const mdEl = document.getElementById('postMetaDescCount');
     mtEl.textContent = `${mt}/60`;
     mdEl.textContent = `${md}/160`;
-    mtEl.style.color = mt > 60 ? '#dc2626' : '#999';
-    mdEl.style.color = md > 160 ? '#dc2626' : '#999';
+    mtEl.style.color = mt > 60 ? '#dc2626' : '#9ca3af';
+    mdEl.style.color = md > 160 ? '#dc2626' : '#9ca3af';
   }
 
-  async function handlePostImgUpload(files) {
-    if (!files.length) return;
-    const url = await uploadToCloudinary(files[0]);
-    if (url) {
-      document.getElementById('postImg').value = url;
-      showToast('Imagen subida');
-    }
-  }
-
+  /* ── Guardar ── */
   async function savePost() {
     const data = {
       title: document.getElementById('postTitle').value.trim(),
@@ -196,44 +320,44 @@ import Icon from '../Icon.astro';
     };
 
     if (!data.title || !data.slug || !data.excerpt || !data.category || !data.meta_title || !data.meta_description || !data.content) {
-      return showToast('Completa titulo, slug, excerpt, categoria, metas y contenido');
+      return showToast('❌ Completa título, slug, excerpt, categoría, metas y contenido');
     }
 
     const id = document.getElementById('postEditingId').value;
-    showToast('Guardando...');
+    showToast('⏳ Guardando...');
     try {
       if (!id) {
         await sbAdminSavePost(data, true);
       } else {
         await sbAdminSavePost({ id: Number(id), ...data }, false);
       }
-      showToast('Articulo guardado');
+      showToast('✅ Artículo guardado');
+      closePostEditor();
       loadPosts();
-      document.getElementById('postEditor').style.display = 'none';
-      document.getElementById('postEmpty').style.display = 'flex';
-    } catch (e) {
-      showToast('Error al guardar post');
+    } catch(e) {
+      showToast('❌ Error al guardar artículo');
     }
   }
 
+  /* ── Eliminar desde editor ── */
   async function deletePost() {
     const id = document.getElementById('postEditingId').value;
-    if (!id) return showToast('Selecciona un articulo');
-    if (!confirm('Eliminar este articulo del blog?')) return;
+    if (!id) return showToast('Selecciona un artículo');
+    if (!confirm('¿Eliminar este artículo del blog?')) return;
     try {
       await sbAdminDeletePost(Number(id));
-      showToast('Articulo eliminado');
+      showToast('🗑️ Artículo eliminado');
+      closePostEditor();
       loadPosts();
-      document.getElementById('postEditor').style.display = 'none';
-      document.getElementById('postEmpty').style.display = 'flex';
-    } catch (e) {
-      showToast('Error al eliminar');
+    } catch(e) {
+      showToast('❌ Error al eliminar');
     }
   }
 
+  /* ── Slugify ── */
   function slugify(text) {
-    return text.toString().toLowerCase()
-      .trim()
+    return text.toString().toLowerCase().trim()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, '-')
       .replace(/[^\w\-]+/g, '')
       .replace(/\-\-+/g, '-');
@@ -241,23 +365,163 @@ import Icon from '../Icon.astro';
 </script>
 
 <style>
-  .post-item-admin:hover { background: #f5f0ff; }
-  .blog-label {
+  /* ── Grid de tarjetas ── */
+  .blog-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .blog-card-admin {
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .blog-card-admin:hover {
+    box-shadow: 0 6px 24px rgba(109,40,217,.12);
+    transform: translateY(-2px);
+  }
+
+  /* Imagen de portada */
+  .blog-card-img {
+    height: 160px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f0ff;
+  }
+  .blog-card-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: .2s;
+  }
+  .blog-card-admin:hover .blog-card-img-overlay {
+    background: rgba(0,0,0,.45);
+    opacity: 1;
+  }
+  .blog-quick-img-btn {
+    background: #fff;
+    color: #7c3aed;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    transition: transform .15s;
+  }
+  .blog-quick-img-btn:hover { transform: scale(1.05); }
+
+  /* Cuerpo de la tarjeta */
+  .blog-card-body {
+    padding: .85rem 1rem .5rem;
+  }
+  .blog-card-cat {
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: #a78bfa;
+    margin-bottom: .3rem;
+  }
+  .blog-card-title {
+    font-size: .88rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.3;
+    margin-bottom: .4rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .blog-card-meta {
+    font-size: .68rem;
+    color: #9ca3af;
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+  }
+
+  /* Acciones */
+  .blog-card-actions {
+    display: flex;
+    gap: .5rem;
+    padding: .6rem 1rem .8rem;
+    border-top: 1px solid #f3f4f6;
+  }
+  .blog-btn-edit {
+    flex: 1;
+    background: #f5f0ff;
+    color: #7c3aed;
+    border: none;
+    padding: 7px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: .78rem;
+    transition: background .15s;
+  }
+  .blog-btn-edit:hover { background: #ede9fe; }
+  .blog-btn-del {
+    background: #fff0f0;
+    color: #dc2626;
+    border: none;
+    padding: 7px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: .82rem;
+    transition: background .15s;
+  }
+  .blog-btn-del:hover { background: #fee2e2; }
+
+  /* Formulario editor */
+  .blog-form-grid .field label {
     display: block;
     font-size: .75rem;
     font-weight: 600;
-    margin-bottom: .4rem;
+    margin-bottom: .35rem;
+    color: #374151;
   }
+  .blog-form-grid .field input,
+  .blog-form-grid .field textarea {
+    width: 100%;
+    padding: .6rem .8rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: .85rem;
+    font-family: inherit;
+    transition: border-color .15s;
+    box-sizing: border-box;
+  }
+  .blog-form-grid .field input:focus,
+  .blog-form-grid .field textarea:focus {
+    outline: none;
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 3px rgba(167,139,250,.15);
+  }
+  .blog-form-grid .field textarea { resize: vertical; }
+
   .meta-count {
-    display: inline-block;
-    margin-top: .3rem;
-    font-size: .7rem;
-    color: #999;
+    font-size: .68rem;
+    color: #9ca3af;
+    font-weight: 600;
+    margin-left: .4rem;
   }
-  @media (max-width: 1024px) {
-    .blog-admin-grid {
-      grid-template-columns: 1fr !important;
-    }
+
+  @media (max-width: 640px) {
+    .blog-cards-grid { grid-template-columns: 1fr; }
+    .blog-form-grid { grid-template-columns: 1fr !important; }
+    .blog-form-grid .field-full { grid-column: 1 !important; }
   }
 </style>
-

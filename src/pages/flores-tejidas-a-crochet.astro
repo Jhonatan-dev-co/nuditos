@@ -1,9 +1,25 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-const products = await getLiveProducts();
-const config = COMMERCIAL_LANDINGS['flores-tejidas-a-crochet'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Flores Tejidas a Crochet en Colombia | Nuditos"
+  seoDesc="Flores tejidas a crochet para regalo y decoración. Ramos eternos hechos a mano con envío nacional."
+  seoKeywords="flores tejidas a crochet, ramos crochet colombia, flores eternas tejidas, regalo crochet"
+  eyebrow="Arte textil premium"
+  h1="Flores tejidas a crochet para"
+  h1Em="regalar o decorar"
+  heroCopy="Descubre ramos de crochet con acabado boutique para quienes quieren belleza duradera y un detalle diferente."
+  ctaWaText="Hola Nuditos! 🌸 Quiero flores tejidas a crochet"
+  productKeywords={["crochet", "tejida", "flor", "ramo"]}
+  collectionTitle="Flores Tejidas a Crochet"
+  faq={[
+    { q: "¿Las flores a crochet se dañan rápido?", a: "No, con cuidados básicos mantienen forma y color por largo tiempo." },
+    { q: "¿Puedo elegir combinación de flores?", a: "Sí, Nuditos ofrece personalización de estilo y color." },
+    { q: "¿Sirven para decorar oficina?", a: "Sí, son ideales por su durabilidad y bajo mantenimiento." },
+    { q: "¿Son una buena alternativa a flores naturales?", a: "Sí, sobre todo si quieres que el detalle perdure." },
+  ]}
+  ctaFinalTitle="¿Empecemos a <em class='italic text-violet-600 font-normal'>tejer tu regalo?</em>"
+  ctaFinalCopy="Escríbenos y te asesoramos para crear el ramo perfecto."
+  ctaTags={["🌸 Arte en crochet", "🧶 Hecho a mano", "🎁 Empaque boutique", "🚚 Envío nacional"]}
+/>

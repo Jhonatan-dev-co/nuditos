@@ -1,9 +1,25 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-const products = await getLiveProducts();
-const config = COMMERCIAL_LANDINGS['regalos-originales-colombia'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Regalos Originales en Colombia | Nuditos Tejidos"
+  seoDesc="Regalos originales en Colombia: flores tejidas, ramos de crochet y detalles personalizados con envío nacional."
+  seoKeywords="regalos originales colombia, detalles originales colombia, flores tejidas colombia"
+  eyebrow="Diferenciación real"
+  h1="Regalos originales en Colombia con"
+  h1Em="identidad artesanal"
+  heroCopy="Si quieres salir del regalo tradicional, Nuditos combina artesanía, personalización y valor emocional duradero."
+  ctaWaText="Hola Nuditos! 🌸 Busco un regalo original en Colombia"
+  productKeywords={["especial", "amigurumi", "ramo", "premium"]}
+  collectionTitle="Regalos Originales"
+  faq={[
+    { q: "¿Qué se considera un regalo original?", a: "Un regalo que combina personalización, utilidad emocional y diferenciación visual." },
+    { q: "¿Puedo pedir algo único?", a: "Sí, se puede personalizar según colores o concepto." },
+    { q: "¿Tienen envíos a toda Colombia?", a: "Sí, con cobertura nacional." },
+    { q: "¿Sirve para hombres y mujeres?", a: "Sí, depende del estilo y combinación solicitada." },
+  ]}
+  ctaFinalTitle="¿Creemos algo <em class='italic text-violet-600 font-normal'>único?</em>"
+  ctaFinalCopy="Escríbenos y diseñamos juntos el regalo más original que hayas dado."
+  ctaTags={["✨ 100% original", "🧶 Hecho a mano", "🎨 Personalizable", "🚚 Envío nacional"]}
+/>

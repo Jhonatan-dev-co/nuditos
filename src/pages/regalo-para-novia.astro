@@ -1,9 +1,24 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
+import PremiumLanding from '../components/PremiumLanding.astro';
 import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
 export const prerender = false;
-const products = await getLiveProducts();
-const config = COMMERCIAL_LANDINGS['regalo-para-novia'];
+
+const config = COMMERCIAL_LANDINGS['regalos-para-novia'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle={config.title}
+  seoDesc={config.description}
+  seoKeywords={config.keywords}
+  eyebrow={config.eyebrow}
+  h1={config.h1.split(' con ')[0]}
+  h1Em="con significado"
+  heroCopy={config.heroCopy}
+  ctaWaText={`Hola Nuditos! 🌸 Quiero un regalo especial para mi novia`}
+  productKeywords={config.productHints}
+  collectionTitle="Ramos de Amor Eterno"
+  relatedLinks={config.relatedLinks}
+  faq={config.faq}
+  ctaFinalTitle="¿Sorprendemos a tu <em class='italic text-violet-600 font-normal'>novia?</em>"
+  ctaFinalCopy="Dile lo que sientes con un detalle que pueda conservar para siempre."
+  ctaTags={["🌸 Hecho a mano", "💝 Detalle romántico", "🚚 Envío nacional"]}
+/>

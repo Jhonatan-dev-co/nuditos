@@ -69,6 +69,11 @@ while ((match = headingRegex.exec(post.content || '')) !== null) {
   );
 }
 
+// Autor dinámico con fallback humano de experto para E-E-A-T
+const authorName = post.author_name || 'Johana';
+const authorBio = post.author_bio || 'Tejedora experta en crochet y fundadora de Nuditos Tejidos. Dedicada a crear ramos eternos que transmiten emociones y duran para siempre desde El Dorado, Meta.';
+const authorInstagram = post.author_instagram || 'https://www.instagram.com/nuditos_tejidos/';
+
 // Schema.org Article
 const articleSchema = {
   "@context": "https://schema.org",
@@ -77,9 +82,9 @@ const articleSchema = {
   "image": postImage,
   "wordCount": wordCount,
   "author": {
-    "@type": "Organization",
-    "name": "Nuditos Tejidos",
-    "url": SITE_URL
+    "@type": "Person",
+    "name": authorName,
+    "url": `${SITE_URL}/sobre-nosotros`
   },
   "publisher": {
     "@type": "Organization",
@@ -138,7 +143,7 @@ function formatDate(dateStr: string) {
     <meta property="article:published_time" content={datePublished} />
     <meta property="article:modified_time" content={dateModified} />
     <meta property="article:section" content={post.category || 'Nuditos'} />
-    <meta property="article:author" content="Nuditos Tejidos" />
+    <meta property="article:author" content={authorName} />
   </Fragment>
 
   <style>
@@ -347,6 +352,35 @@ function formatDate(dateStr: string) {
       <a href="/catalogo">
         <Icon name="store-2" /> Ver Catálogo Completo
       </a>
+    </div>
+
+    <!-- CAJA DE AUTOR (E-E-A-T) -->
+    <div class="bg-gradient-to-tr from-stone-50 to-violet-50/20 rounded-[2rem] p-6 md:p-8 border border-stone-100 flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-10 mt-10 shadow-sm">
+      <div class="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-tr from-violet-100 to-rose-100 border border-stone-200/50 flex-shrink-0 shadow-md flex items-center justify-center relative group">
+        <!-- TODO: Cargar foto del avatar del autor a Cloudinary y usar:
+             Ubicación recomendada: Cloudinary folder 'autores/'
+             Dimensiones óptimas: 150x150px (Aspect ratio 1:1, circular crop)
+             Etiqueta: <img src="URL_AVATAR" alt={authorName} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-115" />
+        -->
+        <span class="text-3xl transition-transform duration-500 group-hover:scale-110">👩‍🎨</span>
+      </div>
+      <div class="text-center sm:text-left space-y-2">
+        <div class="text-[9px] uppercase font-bold tracking-[0.25em] text-violet-600 font-sans">Escrito por</div>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 justify-center sm:justify-start">
+          <h4 class="font-serif text-lg font-bold text-stone-800">{authorName}</h4>
+          <span class="inline-flex items-center gap-1 bg-violet-100/75 text-violet-700 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider self-center sm:self-auto border border-violet-200/50">
+            <Icon name="check" class="w-2.5 h-2.5" /> Tejedora Experta
+          </span>
+        </div>
+        <p class="text-xs text-stone-500 leading-relaxed font-sans max-w-xl">{authorBio}</p>
+        <div class="pt-2 text-[9px] font-sans text-stone-400 flex flex-wrap items-center justify-center sm:justify-start gap-3">
+          <span>💡 Especialista en Crochet y Flores Eternas</span>
+          <span class="opacity-30">•</span>
+          <span>📍 El Dorado, Meta</span>
+          <span class="opacity-30">•</span>
+          <a href={authorInstagram} target="_blank" class="text-violet-600 hover:underline">Instagram</a>
+        </div>
+      </div>
     </div>
 
     <hr class="post-divider" />

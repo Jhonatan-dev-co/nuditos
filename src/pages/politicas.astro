@@ -67,6 +67,73 @@ import Layout from '../layouts/Layout.astro';
         <p>Debido a que nuestros productos son artesanales y, en muchos casos, personalizados, aplicamos las siguientes reglas:</p>
         <ul>
           <li><strong>Defectos de fábrica:</strong> Tienes 15 días calendario para reportar cualquier daño estructural en el tejido.</li>
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Políticas — Nuditos Tejidos"
+  description="Consulta nuestras políticas de envío, cambios, devoluciones y privacidad en Nuditos Tejidos."
+>
+  <style>
+    .page-hero { background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%); padding: 5rem 1.5rem 4rem; text-align: center; }
+    .page-eyebrow { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem; }
+    .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 6vw, 3.5rem); font-weight: 400; line-height: 1.15; color: var(--text); margin-bottom: 1.2rem; }
+    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
+    .page-hero p { max-width: 500px; margin: 0 auto; color: var(--text-soft); font-size: 1rem; line-height: 1.7; }
+
+    .policy-wrap { max-width: 800px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+    .policy-section { margin-bottom: 4rem; }
+    .policy-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; color: var(--text); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+    .policy-title i { color: var(--lila-dark); font-size: 1.5rem; }
+    .policy-content { color: var(--text-soft); font-size: 0.95rem; line-height: 1.8; }
+    .policy-content p { margin-bottom: 1.2rem; }
+    .policy-content ul { margin-bottom: 1.5rem; padding-left: 1.2rem; }
+    .policy-content li { margin-bottom: 0.6rem; position: relative; list-style: none; }
+    .policy-content li::before { content: '🌸'; position: absolute; left: -1.5rem; font-size: 0.8rem; }
+    
+    .policy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
+    .policy-card { background: var(--white); border-radius: 20px; padding: 2rem; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+    .policy-card h4 { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; color: var(--lila-dark); }
+
+    @media (max-width: 768px) {
+      .policy-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <div class="page-hero">
+    <div class="page-eyebrow">Información legal</div>
+    <h1>Nuestras <em>políticas</em></h1>
+    <p>En Nuditos Tejidos nos importa tu confianza. Aquí detallamos cómo trabajamos para darte la mejor experiencia.</p>
+  </div>
+
+  <div class="policy-wrap">
+    
+    <!-- ENVÍOS -->
+    <section class="policy-section" id="envios">
+      <h2 class="policy-title"><Icon name="truck"  /> Envíos y Entregas</h2>
+      <div class="policy-content">
+        <p>Realizamos envíos a todo el territorio colombiano utilizando empresas de mensajería certificadas (Interrapidisimo, Servientrega, Envia).</p>
+        <div class="policy-grid">
+          <div class="policy-card">
+            <h4>Tiempos de preparación</h4>
+            <p>Cada ramo es tejido a mano. El tiempo de elaboración es de <strong>1 a 3 días hábiles</strong> tras confirmar el pago.</p>
+          </div>
+          <div class="policy-card">
+            <h4>Tiempos de transporte</h4>
+            <p>Una vez despachado, la entrega tarda de <strong>2 a 5 días hábiles</strong> según la ubicación (ciudades principales son más rápidas).</p>
+          </div>
+        </div>
+        <p style="margin-top: 1.5rem;"><strong>Costo de envío:</strong> El valor base es de $17.000 COP, pero puede variar según el peso y destino. Ofrecemos promociones de envío gratuito en pedidos superiores a cierto monto indicado en el carrito.</p>
+      </div>
+    </section>
+
+    <!-- CAMBIOS Y DEVOLUCIONES -->
+    <section class="policy-section" id="cambios">
+      <h2 class="policy-title"><Icon name="refresh"  /> Cambios y Devoluciones</h2>
+      <div class="policy-content">
+        <p>Debido a que nuestros productos son artesanales y, en muchos casos, personalizados, aplicamos las siguientes reglas:</p>
+        <ul>
+          <li><strong>Defectos de fábrica:</strong> Tienes 15 días calendario para reportar cualquier daño estructural en el tejido.</li>
           <li><strong>Productos personalizados:</strong> No se aceptan devoluciones por retracto una vez iniciada la producción del diseño a medida.</li>
           <li><strong>Proceso:</strong> Escríbenos a WhatsApp con fotos del estado del producto para iniciar el trámite de garantía.</li>
         </ul>
@@ -84,6 +151,63 @@ import Layout from '../layouts/Layout.astro';
           <li>Información sobre novedades y descuentos (siempre puedes darte de baja).</li>
         </ul>
         <p>No compartimos tu información con terceros, excepto con las transportadoras necesarias para realizar tu entrega.</p>
+      </div>
+    </section>
+
+    <!-- TRANSPARENCIA COMERCIAL Y CANALES DE PQR -->
+    <section class="policy-section" id="transparencia">
+      <h2 class="policy-title"><Icon name="award" /> Transparencia Comercial y PQR</h2>
+      <div class="policy-content">
+        <p>De acuerdo con la legislación colombiana (Ley 1480 de 2011 - Estatuto del Consumidor), a continuación presentamos la información de contacto y canales oficiales de atención al cliente de Nuditos Tejidos:</p>
+        <div class="policy-grid">
+          <div class="policy-card">
+            <h4>Información de la Empresa</h4>
+            <ul class="space-y-2 mt-2">
+              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>Propietario:</strong> [TODO: Nombre del Propietario / Representante Legal]</li>
+              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>NIT / Cédula:</strong> [TODO: NIT o Cédula del Propietario]</li>
+              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>Dirección Física:</strong> Calle Principal, El Dorado, Meta, Colombia</li>
+            </ul>
+          </div>
+          <div class="policy-card">
+            <h4>Canales de Atención (PQR)</h4>
+            <ul class="space-y-2 mt-2">
+              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>Correo Corporativo:</strong> [TODO: correo@nuditos.com.co]</li>
+              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>WhatsApp de Soporte:</strong> +57 314 493 1525</li>
+              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>Horario:</strong> Lunes a Sábado - 8:00 AM a 8:00 PM</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DERECHO DE RETRACTO (LEY 1480 DE 2011) -->
+    <section class="policy-section" id="retracto">
+      <h2 class="policy-title"><Icon name="refresh" /> Derecho de Retracto (Ley 1480 de 2011)</h2>
+      <div class="policy-content">
+        <p>Garantizamos el cumplimiento de los derechos de los consumidores en Colombia. Según el **Artículo 47 de la Ley 1480 de 2011**, el Derecho de Retracto faculta al comprador a desistir de su compra dentro de los <strong>cinco (5) días hábiles</strong> siguientes a la recepción del bien.</p>
+        
+        <div class="bg-violet-50/50 border border-violet-100/50 rounded-2xl p-5 my-4">
+          <h4 class="font-bold text-violet-900 mb-2 font-serif text-[0.95rem] tracking-wide uppercase">Excepciones al Derecho de Retracto en Bienes Artesanales</h4>
+          <p class="text-sm text-stone-600 leading-relaxed">
+            De acuerdo con las excepciones consagradas en el Artículo 47 de la Ley 1480 de 2011:
+          </p>
+          <ul class="text-sm text-stone-600 space-y-1 mt-2 pl-4">
+            <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]">
+              El derecho de retracto **no se aplicará** en contratos de suministro de bienes confeccionados conforme a las especificaciones del consumidor o claramente **personalizados** (ej. ramos tejidos con colores, iniciales o figuras solicitadas a medida).
+            </li>
+            <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]">
+              Tampoco aplicará en bienes que, por su naturaleza artesanal y al ser hechos a mano desde cero por encargo directo, ya hayan comenzado su etapa de producción física.
+            </li>
+          </ul>
+        </div>
+
+        <p>Para productos de catálogo estándar (sin personalización), puedes ejercer tu derecho de retracto bajo las siguientes condiciones:</p>
+        <ul>
+          <li>El producto debe ser devuelto en las **mismas condiciones** en que fue recibido: sin uso, con su empaque rígido original, etiquetas y accesorios completos.</li>
+          <li>Los **costos de transporte** y demás que conlleve la devolución del bien serán cubiertos en su totalidad por el comprador.</li>
+          <li>Una vez verificado el estado óptimo del ramo devuelto, procederemos al reembolso del dinero en un plazo no mayor a **treinta (30) días calendario** a través del método de pago original o transferencia acordada.</li>
+        </ul>
+        <p>Para iniciar una solicitud de retracto o aplicar una garantía, por favor comunícate a nuestro correo corporativo o WhatsApp de atención adjuntando tu número de pedido y soportes.</p>
       </div>
     </section>
 

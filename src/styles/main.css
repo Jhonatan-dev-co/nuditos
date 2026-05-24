@@ -2246,6 +2246,201 @@ footer {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.mb-nav-item i {
+  font-size: 1.4rem;
+  color: var(--text-mid);
+}
+
+.mb-nav-item:active {
+  transform: scale(0.9);
+  color: var(--lila-dark);
+}
+
+.mb-nav-item:active i {
+  color: var(--lila-dark);
+}
+
+/* Cart Badge in Bottom Nav */
+.mb-cart-icon-wrap {
+  position: relative;
+  display: flex;
+}
+
+.mb-cart-badge {
+  position: absolute;
+  top: -2px;
+  right: -8px;
+  background: var(--lila-dark);
+  color: white;
+  font-size: 0.58rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid white;
+}
+
+/* 2. Refined Category Pills (Sticky) */
+.cat-sticky {
+  background: rgba(250, 248, 245, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+  margin-top: -1px;
+}
+
+.cat-row {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cat-row::-webkit-scrollbar { display: none; }
+
+/* Pill Style */
+.cat-pill {
+  white-space: nowrap;
+  padding: 8px 18px;
+  border-radius: 50px;
+  background: white;
+  border: 1px solid var(--border-dark);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-mid);
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cat-pill.active {
+  background: var(--lila-dark);
+  color: white;
+  border-color: var(--lila-dark);
+  box-shadow: 0 4px 12px rgba(140, 95, 173, 0.2);
+  transform: translateY(-1px);
+}
+
+/* 3. Product Card Enhancements (Mobile) */
+@media (max-width: 768px) {
+  .product-card {
+    border-radius: 24px;
+    background: white;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .product-img-wrap {
+    border-radius: 0;
+    overflow: hidden;
+  }
+  
+  .p-info {
+    padding: 12px 14px 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .p-category { font-size: 0.65rem; margin-bottom: 2px; }
+
+  .p-name {
+    font-size: 0.9rem;
+    line-height: 1.35;
+    margin: 4px 0 8px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .p-price {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--lila-dark);
+  }
+  
+  .p-add-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 1.25rem;
+    bottom: 10px;
+    right: 10px;
+    background: var(--lila-dark);
+    box-shadow: 0 4px 12px rgba(140, 95, 173, 0.35);
+    border: 2.5px solid white;
+  }
+  
+  /* Hide hover overlay on mobile */
+  .card-overlay { display: none; }
+}
+
+/* ══════════════════════════════
+   OPTIMIZACIONES DE RENDERIZADO (Solo Footer)
+══════════════════════════════ */
+footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 400px;
+}
+
+
+/* 4. Section Headers & "Ver Todo" */
+.cat-section-header {
+  padding: 2.5rem 1rem 1.2rem !important;
+  display: flex;
+  align-items: flex-end;
+}
+
+.cat-section-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.cat-ver-todo {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--lila-dark);
+  background: var(--lila-light);
+  padding: 6px 14px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ══════════════════════════════
+   VIEW TRANSITIONS — Animación fluida entre páginas
+══════════════════════════════ */
+::view-transition-old(root) {
+  animation: fadeSlideOut 0.2s ease-in forwards;
+}
+::view-transition-new(root) {
+  animation: fadeSlideIn 0.25s ease-out forwards;
+}
+
+@keyframes fadeSlideOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
 .animate-cart-item { animation: fadeSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
@@ -2253,4 +2448,13 @@ footer {
 ::view-transition-group(nav-wrap),
 ::view-transition-group(mobile-bottom-nav) {
   animation: none;
+}
+
+/* UTILIDADES */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

@@ -1,0 +1,139 @@
+---
+import Icon from './Icon.astro';
+---
+
+<div class="fixed inset-0 z-[2005] bg-[#1a1220]/50 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 [&.open]:opacity-100 [&.open]:pointer-events-auto flex items-center justify-center px-4" id="newsletterOverlay">
+  <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-[0_25px_60px_-15px_rgba(167,139,250,0.25)] overflow-hidden border border-purple-50 transform scale-95 opacity-0 transition-all duration-500 ease-out [&.open]:scale-100 [&.open]:opacity-100 p-8 relative flex flex-col items-center text-center" id="newsletterBoxWrapper">
+    
+    <!-- Botón Cerrar -->
+    <button id="closeNewsletterBtn" class="absolute top-5 right-5 w-9 h-9 rounded-full border border-stone-100 flex items-center justify-center hover:bg-stone-50 active:scale-95 transition-all text-stone-500 hover:text-stone-900" aria-label="Cerrar">
+      <Icon name="close" />
+    </button>
+
+    <!-- Decoración Flor de Fondo / Icono Correo Premium -->
+    <div class="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 mb-5 relative group mt-2">
+      <div class="absolute inset-0 rounded-2xl bg-purple-100 opacity-0 group-hover:scale-110 group-hover:opacity-100 transition-all duration-500"></div>
+      <Icon name="mail" class="text-2xl relative z-10 animate-bounce" />
+    </div>
+
+    <!-- Título y Texto -->
+    <h3 class="font-serif text-2xl md:text-3xl text-stone-900 mb-2 leading-tight">
+      Club <em class="italic text-purple-600 font-normal">Nuditos</em>
+    </h3>
+    <p class="text-stone-500 text-xs md:text-sm leading-relaxed mb-6 max-w-sm">
+      Únete al Club de las Flores Eternas. Recibe lanzamientos exclusivos, preventas anticipadas, ofertas secretas y un 10% de descuento en tu primer pedido.
+    </p>
+
+    <!-- Formulario -->
+    <form id="overlayNewsletterForm" class="w-full space-y-3">
+      <div class="relative w-full">
+        <input 
+          type="email" 
+          id="overlayNewsletterEmail" 
+          required 
+          placeholder="Tu correo electrónico" 
+          class="w-full bg-stone-50 hover:bg-stone-100/70 focus:bg-white border border-stone-200/80 focus:border-purple-500 rounded-2xl px-5 py-4 text-xs font-medium focus:outline-none transition-all shadow-inner placeholder-stone-400"
+        />
+      </div>
+      <button 
+        type="submit" 
+        class="w-full h-12 bg-[#1a1220] hover:bg-purple-700 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"
+      >
+        <span>Unirse al Club</span>
+        <Icon name="arrow-right" class="w-3.5 h-3.5" />
+      </button>
+    </form>
+
+    <!-- Estado de éxito -->
+    <div id="overlayNewsletterSuccess" class="hidden w-full p-6 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex flex-col items-center animate-fade-in">
+      <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+        <Icon name="checkbox-circle" class="text-xl" />
+      </div>
+      <h4 class="text-emerald-700 font-bold text-sm">¡Bienvenido al Club! 🌸</h4>
+      <p class="text-stone-500 text-[11px] leading-relaxed mt-1">Te has suscrito con éxito. Revisa tu correo, tu regalo del 10% de descuento está en camino.</p>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  #newsletterOverlay.open #newsletterBoxWrapper {
+    opacity: 1;
+    transform: scale(1);
+  }
+</style>
+
+<script>
+  function setupNewsletterOverlay() {
+    const overlay = document.getElementById('newsletterOverlay');
+    const box = document.getElementById('newsletterBoxWrapper');
+    const closeBtn = document.getElementById('closeNewsletterBtn');
+    const form = document.getElementById('overlayNewsletterForm');
+    const success = document.getElementById('overlayNewsletterSuccess');
+
+    // Función abrir
+    window.openNewsletter = function() {
+      if (overlay && box) {
+        overlay.classList.add('open');
+        box.classList.add('open');
+        document.body.classList.add('scroll-lock');
+        
+        // Si ya está suscrito, mostrar directamente la pantalla de éxito
+        if (localStorage.getItem('nuditos_club_subscribed') === 'true') {
+          if (form) form.style.display = 'none';
+          if (success) success.classList.remove('hidden');
+        } else {
+          if (form) form.style.display = 'block';
+          if (success) success.classList.add('hidden');
+        }
+      }
+    };
+
+    // Función cerrar
+    window.closeNewsletter = function() {
+      if (overlay && box) {
+        overlay.classList.remove('open');
+        box.classList.remove('open');
+        document.body.classList.remove('scroll-lock');
+      }
+    };
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', window.closeNewsletter);
+    }
+
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) window.closeNewsletter();
+      });
+    }
+
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('overlayNewsletterEmail') as HTMLInputElement;
+        if (!emailInput || !emailInput.value) return;
+
+        // Simular llamada e interacción premium
+        form.style.opacity = '0.3';
+        form.style.pointerEvents = 'none';
+
+        setTimeout(() => {
+          form.style.display = 'none';
+          if (success) {
+            success.classList.remove('hidden');
+          }
+          localStorage.setItem('nuditos_club_subscribed', 'true');
+          
+          // Opcional: Cerrar automáticamente tras 3 segundos
+          setTimeout(() => {
+            window.closeNewsletter();
+          }, 3000);
+        }, 1000);
+      });
+    }
+  }
+
+  // Ejecutar en cada carga de página (soporte para ViewTransitions de Astro)
+  document.addEventListener('astro:page-load', setupNewsletterOverlay);
+</script>

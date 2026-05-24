@@ -48,7 +48,18 @@ document.addEventListener('astro:page-load', () => {
     );
 
     if (!found.length) {
-      results.innerHTML = `<div class="search-empty">${getIconSvg('search-eye')}<p>No encontramos "${q}"</p><small>Escríbenos por WhatsApp 🌸</small></div>`;
+      results.innerHTML = `
+        <div class="flex flex-col items-center justify-center gap-4 py-8 px-4 text-center">
+          <div class="w-10 h-10 rounded-full bg-stone-50 flex items-center justify-center text-stone-300">${getIconSvg('search-eye')}</div>
+          <p class="text-sm text-stone-500 font-medium">No encontramos resultados para <strong>"${q}"</strong></p>
+          <a
+            href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Busco%20${encodeURIComponent(q)}"
+            target="_blank"
+            class="inline-flex items-center gap-2 bg-[#1a1220] text-white px-6 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-md"
+          >
+            ${getIconSvg('whatsapp')} Atención personalizada por WhatsApp
+          </a>
+        </div>`;
       return;
     }
 

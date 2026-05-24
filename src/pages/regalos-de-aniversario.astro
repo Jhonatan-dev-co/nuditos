@@ -1,9 +1,25 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-const products = await getLiveProducts();
-const config = COMMERCIAL_LANDINGS['regalos-de-aniversario'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Regalos de Aniversario en Colombia | Nuditos"
+  seoDesc="Regalos de aniversario con flores tejidas y detalles personalizados para celebrar relaciones duraderas."
+  seoKeywords="regalos de aniversario colombia, detalle aniversario pareja, flores tejidas aniversario"
+  eyebrow="Historias que se tejen"
+  h1="Regalos de aniversario para"
+  h1Em="celebrar con intención"
+  heroCopy="Regala algo que represente continuidad. Nuestros ramos tejidos son una forma elegante de celebrar su historia."
+  ctaWaText="Hola Nuditos! 🌸 Quiero un ramo especial para aniversario"
+  productKeywords={["aniversario", "amor", "premium", "romantico"]}
+  collectionTitle="Colección Aniversario"
+  faq={[
+    { q: "¿Qué regalar en un aniversario de pareja?", a: "Un detalle personalizado y duradero suele tener mayor valor emocional." },
+    { q: "¿Puedo pedir colores de la relación?", a: "Sí, se puede personalizar según historia o preferencias." },
+    { q: "¿Incluye empaque de regalo?", a: "Sí, priorizamos presentación premium para ocasiones especiales." },
+    { q: "¿Sirve para aniversario de novios y matrimonio?", a: "Sí, funciona para ambas etapas." },
+  ]}
+  ctaFinalTitle="¿Celebremos juntos su <em class='italic text-violet-600 font-normal'>historia?</em>"
+  ctaFinalCopy="Escríbenos y creamos el regalo perfecto para este aniversario especial."
+  ctaTags={["💍 Aniversario", "🌹 Rosas eternas", "🎁 Empaque boutique", "✍️ Mensaje personal"]}
+/>

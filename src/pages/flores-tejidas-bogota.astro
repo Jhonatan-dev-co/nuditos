@@ -1,12 +1,25 @@
 ---
-import CitySeoLanding from '../components/CitySeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { CITY_LANDINGS } from '../data/seo-landings';
-
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-
-const products = await getLiveProducts();
-const config = CITY_LANDINGS['flores-tejidas-bogota'];
 ---
-
-<CitySeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Flores Tejidas en Bogotá | Nuditos"
+  seoDesc="Flores tejidas en Bogotá para regalo y decoración. Ramos de crochet con estilo premium."
+  seoKeywords="flores tejidas bogota, ramos crochet bogota, regalo artesanal bogota"
+  eyebrow="Arte textil premium en Bogotá"
+  h1="Flores tejidas en Bogotá para"
+  h1Em="regalos con identidad"
+  heroCopy="Una alternativa premium para quienes quieren regalar diferente en Bogotá. Coordinamos por WhatsApp."
+  ctaWaText="Hola Nuditos! 🌸 Quiero flores tejidas en Bogotá"
+  productKeywords={["flor", "tejida", "crochet", "ramo"]}
+  collectionTitle="Flores Tejidas para Bogotá"
+  faq={[
+    { q: "¿Puedo pedir por WhatsApp?", a: "Sí, es el canal más rápido para coordinar detalle y entrega." },
+    { q: "¿Tienen opciones de temporada?", a: "Sí, se activan según fechas comerciales." },
+    { q: "¿Se pueden mezclar colores?", a: "Sí, puedes solicitar combinaciones personalizadas." },
+    { q: "¿Sirven para decoración?", a: "Sí, son ideales para hogar u oficina." },
+  ]}
+  ctaFinalTitle="¿Te ayudamos a elegir en <em class='italic text-violet-600 font-normal'>Bogotá?</em>"
+  ctaFinalCopy="Escríbenos y encontramos el ramo perfecto para ti."
+  ctaTags={["📍 Bogotá", "🌸 Tejidas a mano", "🎁 Empaque premium", "✨ 100% artesanal"]}
+/>

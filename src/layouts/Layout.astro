@@ -2,7 +2,9 @@
 import Icon from '../components/Icon.astro';
 import '../styles/main.css';
 import SearchOverlay from '../components/SearchOverlay.astro';
+import NewsletterOverlay from '../components/NewsletterOverlay.astro';
 import BoutiqueHighlights from '../components/BoutiqueHighlights.astro';
+import Footer from '../components/Footer.astro';
 import { ViewTransitions } from 'astro:transitions';
 import { categories as FALLBACK_CATEGORIES, clUrl } from '../data/datos';
 import { getLiveConfig, getPublicConfig, getLiveCategories } from '../lib/supabase';
@@ -93,42 +95,77 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       transition: transform 0.3s ease-out, opacity 0.3s 0.3s;
     }
     
-    /* Pantalla de carga superpuesta */
+    /* Overlay premium de carga */
     #page-transition-overlay {
       position: fixed; inset: 0; z-index: 9999;
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1.25rem;
       opacity: 0; pointer-events: none;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.25s ease;
     }
     #page-transition-overlay.active {
       opacity: 1; pointer-events: all;
     }
-    .spinner-flower {
-      font-size: 3rem;
-      animation: spin-pulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-      filter: drop-shadow(0 4px 10px rgba(167, 139, 250, 0.3));
+    /* Icono flor crochet SVG animado */
+    .loader-icon {
+      width: 64px;
+      height: 64px;
+      animation: loaderSpin 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      filter: drop-shadow(0 4px 16px rgba(167, 139, 250, 0.35));
     }
-    @keyframes spin-pulse {
-      0% { transform: scale(0.9) rotate(0deg); opacity: 0.8; }
-      50% { transform: scale(1.1) rotate(180deg); opacity: 1; }
-      100% { transform: scale(0.9) rotate(360deg); opacity: 0.8; }
+    .loader-icon .petal {
+      transform-origin: 50% 50%;
+      animation: petalPulse 2s ease-in-out infinite;
+    }
+    .loader-icon .petal:nth-child(1) { animation-delay: 0s; }
+    .loader-icon .petal:nth-child(2) { animation-delay: 0.16s; }
+    .loader-icon .petal:nth-child(3) { animation-delay: 0.33s; }
+    .loader-icon .petal:nth-child(4) { animation-delay: 0.5s; }
+    .loader-icon .petal:nth-child(5) { animation-delay: 0.66s; }
+    .loader-icon .petal:nth-child(6) { animation-delay: 0.83s; }
+    @keyframes loaderSpin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes petalPulse {
+      0%, 100% { opacity: 0.55; }
+      50%       { opacity: 1; }
+    }
+    /* Puntos de carga tipo "yarn" */
+    .loader-dots {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .loader-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #a78bfa;
+      animation: dotBounce 1.2s ease-in-out infinite;
+    }
+    .loader-dots span:nth-child(1) { animation-delay: 0s; }
+    .loader-dots span:nth-child(2) { animation-delay: 0.15s; background: #c084fc; }
+    .loader-dots span:nth-child(3) { animation-delay: 0.3s; background: #f0abfc; }
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+      40%           { transform: scale(1.2); opacity: 1; }
     }
     .loading-text {
-      margin-top: 1rem;
-      font-family: var(--font-serif);
-      font-size: 0.9rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.75rem;
       font-weight: 600;
-      letter-spacing: 4px;
+      letter-spacing: 5px;
       text-transform: uppercase;
-      color: var(--accent);
-      animation: pulse-text 1.5s ease-in-out infinite;
+      color: #a78bfa;
+      animation: pulse-text 1.8s ease-in-out infinite;
     }
     @keyframes pulse-text {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
+      0%, 100% { opacity: 0.5; }
+      50%       { opacity: 1; }
     }
   </style>
   <script>
@@ -264,8 +301,6 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#b794cc" />
 
-  <ViewTransitions />
-
   <!-- Global Structured Data -->
   {Astro.url.pathname === '/' && (
     <>
@@ -339,10 +374,42 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 <body>
   <div id="loading-bar"></div>
   
-  <!-- Overlay Premium de Carga -->
+  <!-- Overlay Premium de Carga — Flor Crochet SVG Animada -->
   <div id="page-transition-overlay">
-    <div class="spinner-flower">🌸</div>
-    <div class="loading-text">Cargando</div>
+    <svg class="loader-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="lg-p" cx="50%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#e9d5ff"/>
+          <stop offset="100%" stop-color="#a855f7"/>
+        </radialGradient>
+        <radialGradient id="lg-c" cx="50%" cy="50%" r="55%">
+          <stop offset="0%" stop-color="#fde68a"/>
+          <stop offset="100%" stop-color="#f59e0b"/>
+        </radialGradient>
+      </defs>
+      <g transform="translate(50,50)">
+        <ellipse class="petal" cx="0" cy="-21" rx="9" ry="17" fill="url(#lg-p)" transform="rotate(0)"/>
+        <ellipse class="petal" cx="0" cy="-21" rx="9" ry="17" fill="url(#lg-p)" transform="rotate(60)"/>
+        <ellipse class="petal" cx="0" cy="-21" rx="9" ry="17" fill="url(#lg-p)" transform="rotate(120)"/>
+        <ellipse class="petal" cx="0" cy="-21" rx="9" ry="17" fill="url(#lg-p)" transform="rotate(180)"/>
+        <ellipse class="petal" cx="0" cy="-21" rx="9" ry="17" fill="url(#lg-p)" transform="rotate(240)"/>
+        <ellipse class="petal" cx="0" cy="-21" rx="9" ry="17" fill="url(#lg-p)" transform="rotate(300)"/>
+        <path d="M-3,-14 Q0,-7 3,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.7" transform="rotate(0)"/>
+        <path d="M-3,-14 Q0,-7 3,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.7" transform="rotate(60)"/>
+        <path d="M-3,-14 Q0,-7 3,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.7" transform="rotate(120)"/>
+        <path d="M-3,-14 Q0,-7 3,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.7" transform="rotate(180)"/>
+        <path d="M-3,-14 Q0,-7 3,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.7" transform="rotate(240)"/>
+        <path d="M-3,-14 Q0,-7 3,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.7" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="11" fill="url(#lg-c)"/>
+        <circle cx="0" cy="0" r="7.5" fill="none" stroke="#fcd34d" stroke-width="1.8" stroke-dasharray="3 2"/>
+        <circle cx="0" cy="0" r="3.5" fill="#f59e0b"/>
+        <circle cx="0" cy="0" r="1.5" fill="#fde68a"/>
+      </g>
+    </svg>
+    <div class="loading-text">Nuditos</div>
+    <div class="loader-dots">
+      <span></span><span></span><span></span>
+    </div>
   </div>
 
   <!-- ════════ NAVBAR ════════ -->
@@ -506,6 +573,9 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
         <a href="/" class="logo">NUDITOS<em>.</em></a>
       </div>
       <div class="nav-right">
+        <button class="nav-icon-btn" onclick="window.openNewsletter()" aria-label="Club Nuditos" title="Club Nuditos">
+          <Icon name="mail" />
+        </button>
         <button class="nav-icon-btn hide-mobile" onclick="toggleSearch()" aria-label="Buscar">
           <Icon name="search" />
         </button>
@@ -655,218 +725,10 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   {!hideFooter && (
     <>
-    <BoutiqueHighlights />
-    <footer class="main-footer">
-      <div class="footer-grid">
-        
-        <!-- Col 1: Marca (Accordion Item 1) -->
-        <div class="footer-col brand-col accordion-item">
-          <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
-            <span class="footer-logo">NUDITOS<em>.</em></span>
-            <Icon name="add" class="acc-icon" />
-          </button>
-          <div class="accordion-content">
-            <p class="footer-motto">Ramos de crochet hechos a mano con amor en Colombia. El regalo eterno que nunca se marchita.</p>
-            <div class="footer-social-new">
-              <a href={instaUrl} target="_blank" aria-label="Instagram"><Icon name="instagram" /></a>
-              <a href="#" aria-label="TikTok"><Icon name="tiktok" /></a>
-              <a href={whatsappLink} aria-label="WhatsApp"><Icon name="whatsapp" /></a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Col 2: Explora (NUEVA PARA SEO) -->
-        <div class="footer-col accordion-item">
-          <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
-            <h4 class="footer-title">Explora Nuditos</h4>
-            <Icon name="add" class="acc-icon" />
-          </button>
-          <nav class="footer-links accordion-content">
-            <a href="/catalogo">Nuestra Tienda</a>
-            <a href="/regalos-originales-colombia">Regalos Originales</a>
-            <a href="/regalo-para-esposa">Regalo para Esposa</a>
-            <a href="/regalos-para-novia">Regalos para Novia</a>
-            <a href="/regalos-para-amiga">Regalos para Amiga</a>
-            <a href="/regalos-dia-de-la-madre">Día de la Madre</a>
-            <a href="/flores-amarillas">Flores Amarillas</a>
-            <a href="/flores-eternas">Flores Eternas</a>
-            <a href="/blog">Blog & Consejos</a>
-          </nav>
-        </div>
-
-        <!-- Col 3: Ciudades (NUEVA PARA SEO LOCAL) -->
-        <div class="footer-col accordion-item">
-          <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
-            <h4 class="footer-title">Envíos Locales</h4>
-            <Icon name="add" class="acc-icon" />
-          </button>
-          <nav class="footer-links accordion-content">
-            <a href="/ramos-de-flores-bogota">Bogotá</a>
-            <a href="/flores-tejidas-bogota">Bogotá Tejidas</a>
-            <a href="/ramos-de-flores-medellin">Medellín</a>
-            <a href="/detalles-a-domicilio-medellin">Medellín Domicilio</a>
-            <a href="/ramos-de-flores-cali">Cali</a>
-            <a href="/detalles-a-domicilio-cali">Cali Domicilio</a>
-            <a href="/ramos-de-flores-barranquilla">Barranquilla</a>
-            <a href="/ramos-de-flores-bucaramanga">Bucaramanga</a>
-          </nav>
-        </div>
-
-        <!-- Col 4: Ayuda (Accordion Item 2) -->
-        <div class="footer-col accordion-item">
-          <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
-            <h4 class="footer-title">Ayuda y Soporte</h4>
-            <Icon name="add" class="acc-icon" />
-          </button>
-          <nav class="footer-links accordion-content">
-            <a href="/politicas">Envíos y entregas</a>
-            <a href="/preguntas-frecuentes">Preguntas frecuentes</a>
-            <a href="/politicas">Cambios y Garantías</a>
-          </nav>
-        </div>
-
-        <!-- Col 5: Legal (Accordion Item 3) -->
-        <div class="footer-col accordion-item">
-          <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
-            <h4 class="footer-title">Información Legal</h4>
-            <Icon name="add" class="acc-icon" />
-          </button>
-          <nav class="footer-links accordion-content">
-            <a href="/politicas">Términos y Condiciones</a>
-            <a href="/politicas">Privacidad</a>
-            <a href="https://www.sic.gov.co/" target="_blank">Portal SIC</a>
-          </nav>
-        </div>
-
-        <!-- Col 4: Transparencia (Static/Always visible) -->
-        <div class="footer-col transparency-col">
-          <h4 class="footer-title">Confianza y Pagos</h4>
-          <div class="transparency-box">
-            <p><strong>Origen:</strong> El Dorado, Meta 🇨🇴</p>
-
-          </div>
-        </div>
-
-      </div>
-
-      <div class="footer-bottom-bar">
-        <div class="footer-copy">© 2026 NUDITOS. Todos los derechos reservados. Hecho con 💜 en Colombia.</div>
-      </div>
-    </footer>
+      <BoutiqueHighlights />
+      <Footer />
     </>
   )}
-
-  <style is:global>
-    .main-footer {
-      background: #111111; /* Negro Boutique Profundo */
-      padding: 4rem 1.5rem 2rem;
-      color: white;
-    }
-    .footer-grid {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 1.5rem;
-    }
-
-    .footer-col { display: flex; flex-direction: column; gap: 1.25rem; }
-    .footer-title {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-      color: rgba(255,255,255,0.9);
-      margin-bottom: 0.5rem;
-    }
-    .footer-logo { font-size: 1.6rem; font-family: 'Cormorant Garamond', serif; letter-spacing: 6px; color: white; }
-    .footer-logo em { color: #a78bfa; font-style: normal; }
-    .footer-motto { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.6; max-width: 250px; }
-    
-    .footer-links { display: flex; flex-direction: column; gap: 0.75rem; }
-    .footer-links a {
-      font-size: 0.85rem;
-      color: rgba(255,255,255,0.6);
-      transition: color 0.3s;
-    }
-    .footer-links a:hover { color: #a78bfa; }
-
-    .footer-social-new { display: flex; gap: 1.25rem; color: rgba(255,255,255,0.8); }
-    .footer-social-new a:hover { color: #a78bfa; }
-
-    .transparency-box { font-size: 0.8rem; color: rgba(255,255,255,0.5); display: flex; flex-direction: column; gap: 0.75rem; }
-    .pay-trust-logos {
-      margin-top: 0.5rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(255,255,255,0.05);
-    }
-    .pay-label { font-size: 0.65rem; font-weight: 700; display: block; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
-    .pay-icons-row { 
-      display: flex; 
-      align-items: center; 
-      gap: 1.25rem; 
-      margin-bottom: 0.5rem; 
-      filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.1));
-    }
-    .pay-hint { font-size: 0.7rem; font-style: italic; opacity: 0.4; }
-
-    .footer-bottom-bar {
-      max-width: 1200px;
-      margin: 4rem auto 0;
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      text-align: center;
-    }
-    .footer-copy { font-size: 0.7rem; color: rgba(255,255,255,0.3); letter-spacing: 0.5px; }
-
-    /* Lógica de Acordeón en Móvil */
-    .accordion-trigger {
-      display: none; /* Oculto en desktop */
-      width: 100%;
-      background: none;
-      border: none;
-      padding: 1.25rem 0;
-      text-align: left;
-      align-items: center;
-      justify-content: space-between;
-      color: white;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .acc-icon { transition: transform 0.3s; opacity: 0.5; }
-    .accordion-item.active .acc-icon { transform: rotate(45deg); opacity: 1; color: #a78bfa; }
-
-    @media (max-width: 1023px) {
-      .footer-grid { grid-template-columns: 1fr; gap: 0; }
-      .accordion-trigger { display: flex; }
-      .accordion-content { 
-        max-height: 0; 
-        overflow: hidden; 
-        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        padding: 0;
-      }
-      .accordion-item.active .accordion-content { 
-        max-height: 300px; 
-        padding: 1.5rem 0 2rem;
-      }
-      .footer-col { gap: 0; }
-      .transparency-col { padding: 2rem 0; }
-    }
-  </style>
-
-  <script is:inline>
-    window.toggleFooterAcc = (btn) => {
-      if (window.innerWidth >= 1024) return;
-      const item = btn.closest('.accordion-item');
-      const isActive = item.classList.contains('active');
-      
-      // Cerrar otros
-      document.querySelectorAll('.accordion-item').forEach(el => el.classList.remove('active'));
-      
-      if (!isActive) {
-        item.classList.add('active');
-      }
-    };
-  </script>
 
 
   <!-- ════════ CARRITO PREMIUM GLASS ════════ -->
@@ -949,6 +811,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   </div>
 
   <SearchOverlay />
+  <NewsletterOverlay />
 
   <!-- ════════ WHATSAPP FLOTANTE ════════ -->
   <div class="wa-float-wrap">

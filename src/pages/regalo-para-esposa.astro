@@ -1,9 +1,24 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
+import PremiumLanding from '../components/PremiumLanding.astro';
 import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
 export const prerender = false;
-const products = await getLiveProducts();
+
 const config = COMMERCIAL_LANDINGS['regalo-para-esposa'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle={config.title}
+  seoDesc={config.description}
+  seoKeywords={config.keywords}
+  eyebrow={config.eyebrow}
+  h1={config.h1.split(' con ')[0]}
+  h1Em="con amor eterno"
+  heroCopy={config.heroCopy}
+  ctaWaText={`Hola Nuditos! 🌸 Quiero un regalo para mi esposa`}
+  productKeywords={config.productHints}
+  collectionTitle="Detalles para tu Esposa"
+  relatedLinks={config.relatedLinks}
+  faq={config.faq}
+  ctaFinalTitle="Sorprende a tu <em class='italic text-violet-600 font-normal'>esposa</em>"
+  ctaFinalCopy="Un detalle tan duradero y especial como su vida juntos."
+  ctaTags={["💍 Aniversario", "🌸 Hecho a mano", "🚚 Envío seguro"]}
+/>

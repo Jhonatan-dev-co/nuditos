@@ -1,0 +1,549 @@
+---
+import Icon from './Icon.astro';
+import { getLiveConfig, getPublicConfig } from '../lib/supabase';
+
+interface Props {
+  hideBoutiqueHighlights?: boolean;
+}
+
+const { hideBoutiqueHighlights = false } = Astro.props;
+
+// Obtener datos dinámicos de las redes de Supabase para autonomía del componente
+const [config, publicConfig] = await Promise.all([
+  getLiveConfig(),
+  getPublicConfig()
+]);
+
+const instaUrl = config?.socialInstagram || 'https://www.instagram.com/nuditos_tejidos/';
+const whatsappNum = config?.socialWhatsapp || '573144931525';
+const whatsappLink = `https://wa.me/${whatsappNum}`;
+---
+
+<!-- ════════ SUSCRIPCIÓN CLUB NUDITOS (Newsletter de Lujo) ════════ -->
+<section class="newsletter-section">
+  <div class="newsletter-container">
+    <div class="newsletter-info">
+      <div class="newsletter-title-wrap">
+        <Icon name="sparkling" class="text-violet-400 w-6 h-6 animate-pulse" />
+        <h3>Club Nuditos</h3>
+      </div>
+      <p>Únete al Club de las Flores Eternas. Recibe lanzamientos exclusivos, ofertas secretas y consejos prácticos para el cuidado de tus ramos.</p>
+    </div>
+    
+    <form id="newsletterForm" class="newsletter-form">
+      <div class="input-group">
+        <input type="email" id="newsletterEmail" required placeholder="Tu correo electrónico" class="newsletter-input" />
+        <button type="submit" class="newsletter-btn group">
+          <span>Unirse</span>
+          <Icon name="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1" />
+        </button>
+      </div>
+    </form>
+    
+    <div id="newsletterSuccess" class="newsletter-success hidden">
+      <Icon name="checkbox-circle" class="text-emerald-400 w-6 h-6 shrink-0" />
+      <div>
+        <h4 class="text-emerald-400 font-semibold text-sm">¡Bienvenido al Club!</h4>
+        <p class="text-xs text-stone-400 mt-0.5">Te has suscrito con éxito. Prepárate para recibir detalles que enamoran.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ FOOTER PRINCIPAL DE LUJO ════════ -->
+<footer class="main-footer">
+  <div class="footer-grid">
+    
+    <!-- Columna 1: Marca & Filosofía -->
+    <div class="footer-col brand-col accordion-item">
+      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+        <span class="footer-logo">NUDITOS<em>.</em></span>
+        <Icon name="add" class="acc-icon w-5 h-5" />
+      </button>
+      <div class="accordion-content">
+        <p class="footer-motto">Ramos de crochet hechos a mano con amor en Colombia. El regalo eterno que nunca se marchita y perdura para siempre.</p>
+        <div class="footer-social-new">
+          <a href={instaUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="social-icon-btn">
+            <Icon name="instagram" class="w-5 h-5" />
+          </a>
+          <a href="#" aria-label="TikTok" class="social-icon-btn">
+            <Icon name="tiktok" class="w-5 h-5" />
+          </a>
+          <a href={whatsappLink} aria-label="WhatsApp" class="social-icon-btn">
+            <Icon name="whatsapp" class="w-5 h-5" />
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna 2: Explora (SEO Comercial) -->
+    <div class="footer-col accordion-item">
+      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+        <h4 class="footer-title">Explora Nuditos</h4>
+        <Icon name="add" class="acc-icon w-5 h-5" />
+      </button>
+      <nav class="footer-links accordion-content">
+        <a href="/catalogo">Nuestra Tienda</a>
+        <a href="/regalos-originales-colombia">Regalos Originales</a>
+        <a href="/regalo-para-esposa">Regalo para Esposa</a>
+        <a href="/regalos-para-novia">Regalos para Novia</a>
+        <a href="/regalos-para-amiga">Regalos para Amiga</a>
+        <a href="/regalos-dia-de-la-madre">Día de la Madre</a>
+        <a href="/flores-amarillas">Flores Amarillas</a>
+        <a href="/flores-eternas">Flores Eternas</a>
+        <a href="/blog">Blog & Consejos</a>
+      </nav>
+    </div>
+
+    <!-- Columna 3: Envíos Locales (SEO Local) -->
+    <div class="footer-col accordion-item">
+      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+        <h4 class="footer-title">Envíos Locales</h4>
+        <Icon name="add" class="acc-icon w-5 h-5" />
+      </button>
+      <nav class="footer-links accordion-content">
+        <a href="/ramos-de-flores-bogota">Bogotá</a>
+        <a href="/flores-tejidas-bogota">Bogotá Tejidas</a>
+        <a href="/ramos-de-flores-medellin">Medellín</a>
+        <a href="/detalles-a-domicilio-medellin">Medellín Domicilio</a>
+        <a href="/ramos-de-flores-cali">Cali</a>
+        <a href="/detalles-a-domicilio-cali">Cali Domicilio</a>
+        <a href="/ramos-de-flores-barranquilla">Barranquilla</a>
+        <a href="/ramos-de-flores-bucaramanga">Bucaramanga</a>
+      </nav>
+    </div>
+
+    <!-- Columna 4: Soporte -->
+    <div class="footer-col accordion-item">
+      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+        <h4 class="footer-title">Ayuda y Soporte</h4>
+        <Icon name="add" class="acc-icon w-5 h-5" />
+      </button>
+      <nav class="footer-links accordion-content">
+        <a href="/politicas">Envíos y entregas</a>
+        <a href="/preguntas-frecuentes">Preguntas frecuentes</a>
+        <a href="/politicas">Cambios y Garantías</a>
+      </nav>
+    </div>
+
+    <!-- Columna 5: Transparencia -->
+    <div class="footer-col accordion-item">
+      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+        <h4 class="footer-title">Confianza</h4>
+        <Icon name="add" class="acc-icon w-5 h-5" />
+      </button>
+      <div class="transparency-box accordion-content">
+        <div class="trust-badge">
+          <Icon name="hand-heart" class="text-violet-400 w-5 h-5 shrink-0" />
+          <div>
+            <span class="trust-badge-title">Hecho a mano</span>
+            <span class="trust-badge-desc">El Dorado, Meta 🇨🇴</span>
+          </div>
+        </div>
+        
+        <div class="trust-badge">
+          <Icon name="truck" class="text-violet-400 w-5 h-5 shrink-0" />
+          <div>
+            <span class="trust-badge-title">Envío Gratis</span>
+            <span class="trust-badge-desc">A todo Colombia</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Barra de Copyright e Información Legal -->
+  <div class="footer-bottom-bar">
+    <div class="footer-bottom-container">
+      <div class="footer-copy">© 2026 NUDITOS. Todos los derechos reservados. Hecho con 💜 en Colombia.</div>
+      <div class="footer-legal-links">
+        <a href="/politicas">Términos y Condiciones</a>
+        <a href="/politicas">Privacidad</a>
+        <a href="https://www.sic.gov.co/" target="_blank" rel="noopener noreferrer">Portal SIC</a>
+        <span class="footer-admin"><a href="/admin">Panel Admin</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* ════════ Suscripción Club Nuditos ════════ */
+  .newsletter-section {
+    background: linear-gradient(to right, rgba(167, 139, 250, 0.03), rgba(244, 63, 94, 0.02));
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 3.5rem 1.5rem;
+    display: flex;
+    justify-content: center;
+  }
+  .newsletter-container {
+    max-width: 1200px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .newsletter-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .newsletter-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .newsletter-title-wrap h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    letter-spacing: 2px;
+    color: white;
+    font-weight: 500;
+  }
+  .newsletter-info p {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.6;
+  }
+  .newsletter-form {
+    display: flex;
+    width: 100%;
+  }
+  .input-group {
+    display: flex;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.5rem;
+    overflow: hidden;
+    padding: 0.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .input-group:focus-within {
+    border-color: rgba(167, 139, 250, 0.4);
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .newsletter-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    color: white;
+    font-size: 0.9rem;
+    outline: none;
+    width: 100%;
+  }
+  .newsletter-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+  }
+  .newsletter-btn {
+    background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%);
+    color: white;
+    border: none;
+    padding: 0 1.5rem;
+    border-radius: 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .newsletter-btn:hover {
+    background: linear-gradient(135deg, #c084fc 0%, #a78bfa 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3);
+  }
+  .newsletter-success {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(16, 185, 129, 0.04);
+    border: 1px solid rgba(16, 185, 129, 0.12);
+    padding: 1rem 1.5rem;
+    border-radius: 1.25rem;
+    width: 100%;
+    animation: newsletterFadeIn 0.5s ease forwards;
+  }
+
+  @keyframes newsletterFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ════════ Grilla Principal del Footer (Acordeón Global) ════════ */
+  .main-footer {
+    background: linear-gradient(to bottom, #0f0f0f 0%, #080808 100%);
+    padding: 3rem 1.5rem 2.5rem;
+    color: white;
+    border-top: 1px solid rgba(255, 255, 255, 0.02);
+  }
+  .footer-grid {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .footer-logo {
+    font-size: 1.5rem;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 4px;
+    color: white;
+    font-weight: 500;
+    display: block;
+  }
+  .footer-logo em {
+    color: #a78bfa;
+    font-style: normal;
+  }
+  .footer-motto {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .footer-social-new {
+    display: flex;
+    gap: 1rem;
+  }
+  .social-icon-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .social-icon-btn:hover {
+    border-color: #a78bfa;
+    color: white;
+    background: rgba(167, 139, 250, 0.1);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 10px rgba(167, 139, 250, 0.15);
+  }
+
+  .footer-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .footer-links a {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.55);
+    transition: all 0.25s ease;
+    width: fit-content;
+  }
+  .footer-links a:hover {
+    color: #a78bfa;
+    transform: translateX(3px);
+  }
+
+  /* ════════ Transparencia ════════ */
+  .transparency-box {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .trust-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    width: fit-content;
+  }
+  .trust-badge-title {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .trust-badge-desc {
+    display: block;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  /* ════════ Barra Inferior ════════ */
+  .footer-bottom-bar {
+    max-width: 800px;
+    margin: 2rem auto 0;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .footer-bottom-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  .footer-copy {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+  }
+  .footer-legal-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .footer-legal-links a {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.25s ease;
+  }
+  .footer-legal-links a:hover {
+    color: #a78bfa;
+  }
+  .footer-admin a {
+    opacity: 0.5;
+    font-size: 0.7rem;
+  }
+  .footer-admin a:hover {
+    opacity: 1;
+  }
+
+  /* ════════ Acordeón Global (Escritorio y Móvil) ════════ */
+  .accordion-trigger {
+    display: flex;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 1.5rem 0;
+    text-align: left;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    outline: none;
+    cursor: pointer;
+  }
+  .acc-icon {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.5;
+  }
+  .accordion-item.active .acc-icon {
+    transform: rotate(45deg);
+    opacity: 1;
+    color: #a78bfa;
+  }
+  .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease;
+    padding: 0;
+  }
+  .accordion-item.active .accordion-content {
+    max-height: 400px;
+    padding-bottom: 1.5rem;
+  }
+  
+  /* ════════ Responsive Adaptativo ════════ */
+  @media (max-width: 1023px) {
+    .newsletter-container {
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+      text-align: center;
+    }
+    .newsletter-title-wrap {
+      justify-content: center;
+    }
+    .newsletter-success {
+      grid-column: 1;
+    }
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    // 1. Suscripción Club Nuditos
+    const newsSection = document.querySelector('.newsletter-section');
+    const newsForm = document.getElementById('newsletterForm');
+    const newsSuccess = document.getElementById('newsletterSuccess');
+    
+    if (newsSection && localStorage.getItem('nuditos_club_subscribed') === 'true') {
+      if (newsForm) newsForm.style.display = 'none';
+      if (newsSuccess) {
+        newsSuccess.classList.remove('hidden');
+        const h4 = newsSuccess.querySelector('h4');
+        const p = newsSuccess.querySelector('p');
+        if (h4) h4.textContent = '¡Ya eres parte del Club!';
+        if (p) p.textContent = 'Gracias por tu continuo amor por el arte tejido. Disfruta de la magia eterna.';
+      }
+    }
+
+    if (newsForm) {
+      newsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('newsletterEmail');
+        if (!emailInput || !emailInput.value) return;
+
+        // Transición interactiva
+        newsForm.style.opacity = '0';
+        newsForm.style.transition = 'opacity 0.4s ease';
+        
+        setTimeout(() => {
+          newsForm.classList.add('hidden');
+          if (newsSuccess) {
+            newsSuccess.classList.remove('hidden');
+            newsSuccess.style.opacity = '0';
+            newsSuccess.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+              newsSuccess.style.opacity = '1';
+            }, 50);
+          }
+          localStorage.setItem('nuditos_club_subscribed', 'true');
+        }, 400);
+      });
+    }
+
+    // 2. Acordeones Globales
+    window.toggleFooterAcc = (btn) => {
+      const item = btn.closest('.accordion-item');
+      if (!item) return;
+
+      const isActive = item.classList.contains('active');
+      
+      // Cerrar otros abiertos
+      document.querySelectorAll('.accordion-item').forEach(el => {
+        if (el !== item) el.classList.remove('active');
+      });
+      
+      // Alternar actual
+      if (isActive) {
+        item.classList.remove('active');
+      } else {
+        item.classList.add('active');
+      }
+    };
+  });
+</script>

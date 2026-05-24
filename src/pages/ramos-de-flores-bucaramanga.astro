@@ -1,12 +1,25 @@
 ---
-import CitySeoLanding from '../components/CitySeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { CITY_LANDINGS } from '../data/seo-landings';
-
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-
-const products = await getLiveProducts();
-const config = CITY_LANDINGS['ramos-de-flores-bucaramanga'];
 ---
-
-<CitySeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Ramos de Flores en Bucaramanga | Nuditos"
+  seoDesc="Ramos de flores tejidas en Bucaramanga con envío y personalización por WhatsApp."
+  seoKeywords="ramos de flores bucaramanga, flores tejidas bucaramanga, regalo domicilio bucaramanga"
+  eyebrow="Arte artesanal en Bucaramanga"
+  h1="Ramos de flores en Bucaramanga con"
+  h1Em="propuesta artesanal"
+  heroCopy="Haz un regalo memorable en Bucaramanga con flores tejidas y presentación premium que impresiona."
+  ctaWaText="Hola Nuditos! 🌸 Quiero un ramo de flores en Bucaramanga"
+  productKeywords={["ramo", "flor", "premium"]}
+  collectionTitle="Ramos para Bucaramanga"
+  faq={[
+    { q: "¿Atienden Bucaramanga y área metropolitana?", a: "Se confirma según punto de entrega." },
+    { q: "¿Se puede programar fecha?", a: "Sí, coordinamos según disponibilidad." },
+    { q: "¿Qué opciones tienen para pareja?", a: "Hay líneas románticas y personalizadas." },
+    { q: "¿Tienen atención por WhatsApp?", a: "Sí, para asesorar pedido y tiempos." },
+  ]}
+  ctaFinalTitle="¿Te enviamos un ramo en <em class='italic text-violet-600 font-normal'>Bucaramanga?</em>"
+  ctaFinalCopy="Escríbenos y coordinamos tu pedido ahora mismo."
+  ctaTags={["📍 Bucaramanga", "🌸 Ramos tejidos", "🎁 Empaque premium", "🚚 Entrega coordinada"]}
+/>

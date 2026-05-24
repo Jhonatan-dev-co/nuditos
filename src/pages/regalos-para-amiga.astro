@@ -1,9 +1,25 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-const products = await getLiveProducts();
-const config = COMMERCIAL_LANDINGS['regalos-para-amiga'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Regalos para Amiga en Colombia | Nuditos"
+  seoDesc="Regalos para amiga con flores tejidas, amigurumis y detalles personalizados con envío nacional."
+  seoKeywords="regalos para amiga colombia, detalle para amiga, flores tejidas para amiga"
+  eyebrow="Amistad que se celebra"
+  h1="Regalos para amiga con"
+  h1Em="valor emocional"
+  heroCopy="Haz un regalo significativo para tu amiga con una pieza tejida que pueda conservar y recordar siempre."
+  ctaWaText="Hola Nuditos! 🌸 Quiero un ramo especial para mi amiga"
+  productKeywords={["amiga", "amarilla", "amigurumi", "girasol"]}
+  collectionTitle="Para tu amiga especial"
+  faq={[
+    { q: "¿Qué regalarle a una amiga especial?", a: "Un detalle personalizado y simbólico suele ser la opción más valorada." },
+    { q: "¿Puedo pedir algo no romántico?", a: "Sí, hay estilos neutros perfectos para amistad." },
+    { q: "¿Hacen envíos a otra ciudad?", a: "Sí, enviamos a nivel nacional." },
+    { q: "¿Se puede agregar mensaje?", a: "Se puede coordinar mensaje al momento de compra." },
+  ]}
+  ctaFinalTitle="¿Celebremos su <em class='italic text-violet-600 font-normal'>amistad?</em>"
+  ctaFinalCopy="Escríbenos y te ayudamos a elegir el detalle perfecto para ella."
+  ctaTags={["🌻 Girasoles", "🧶 Hecho a mano", "🎁 Empaque listo", "🚚 Envío nacional"]}
+/>

@@ -1,9 +1,32 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-const products = await getLiveProducts();
-const config = COMMERCIAL_LANDINGS['regalos-amor-y-amistad'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Regalos Amor y Amistad 2026 | Detalles Sorpresa Nuditos Colombia"
+  seoDesc="Celebra Amor y Amistad con regalos únicos que duran para siempre. Flores tejidas, arreglos florales y detalles sorpresa con envío a toda Colombia."
+  seoKeywords="regalos amor y amistad colombia, detalles amor y amistad, regalos sorpresa amor y amistad, flores para mi novia amor y amistad"
+  eyebrow="Edición Especial Septiembre"
+  h1="Los mejores Regalos para"
+  h1Em="Amor y Amistad"
+  heroCopy="¿Buscas un detalle que destaque? Redefinimos los regalos de Amor y Amistad con flores eternas tejidas a mano. Un gesto que perdura y sorprende por su originalidad. ¡Envíos nacionales seguros!"
+  ctaWaText="Hola Nuditos! 🌸 Quiero un ramo para Amor y Amistad"
+  productKeywords={["amor", "premium", "especial", "girasol"]}
+  collectionTitle="Colección Amor y Amistad"
+  collectionBadge="Detalles con Alma"
+  relatedLinks={[
+    { label: "Regalos para Novia", href: "/regalos-para-novia" },
+    { label: "Flores Amarillas", href: "/flores-amarillas" },
+    { label: "Ramos en Medellín", href: "/ramos-de-flores-medellin" },
+    { label: "Catálogo Completo", href: "/catalogo" }
+  ]}
+  faq={[
+    { q: "¿Qué regalar en amor y amistad en Colombia?", a: "Los detalles personalizados con valor emocional son los que mejor resultado generan." },
+    { q: "¿Puedo enviar a otra ciudad?", a: "Sí, gestionamos envío nacional." },
+    { q: "¿Incluye empaque para regalo?", a: "Sí, priorizamos presentación premium." },
+    { q: "¿Hay opciones para pareja y amistad?", a: "Sí, tenemos estilos románticos y estilos neutrales." },
+  ]}
+  ctaFinalTitle="¿Buscas algo <em class='italic text-violet-600 font-normal'>especial?</em>"
+  ctaFinalCopy="Escríbenos por WhatsApp y te guiamos para elegir el detalle perfecto."
+  ctaTags={["❤️ Para parejas", "🌸 Para amigas", "🎁 Empaque premium", "🚚 Envío nacional"]}
+/>

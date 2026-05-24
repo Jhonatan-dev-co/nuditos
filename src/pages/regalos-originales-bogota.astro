@@ -1,12 +1,25 @@
 ---
-import CitySeoLanding from '../components/CitySeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { CITY_LANDINGS } from '../data/seo-landings';
-
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-
-const products = await getLiveProducts();
-const config = CITY_LANDINGS['regalos-originales-bogota'];
 ---
-
-<CitySeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Regalos Originales en Bogotá | Nuditos"
+  seoDesc="Regalos originales en Bogotá con flores tejidas, amigurumis y detalles personalizados."
+  seoKeywords="regalos originales bogota, detalles originales bogota, flores tejidas bogota"
+  eyebrow="Diferenciación real en Bogotá"
+  h1="Regalos originales en Bogotá para"
+  h1Em="salir de lo común"
+  heroCopy="Descubre propuestas artesanales para sorprender en Bogotá con una estética premium y valor emocional duradero."
+  ctaWaText="Hola Nuditos! 🌸 Busco un regalo original en Bogotá"
+  productKeywords={["especial", "amigurumi", "premium", "ramo"]}
+  collectionTitle="Regalos Originales para Bogotá"
+  faq={[
+    { q: "¿Qué tipo de regalos originales manejan?", a: "Ramos tejidos, amigurumis y combinaciones personalizadas." },
+    { q: "¿Puedo pedir para empresa?", a: "Sí, se revisan requerimientos y volumen." },
+    { q: "¿Qué tan rápido responden?", a: "La asesoría por WhatsApp es directa." },
+    { q: "¿Hay opciones para pareja y amistad?", a: "Sí, según estilo deseado." },
+  ]}
+  ctaFinalTitle="¿Creemos algo <em class='italic text-violet-600 font-normal'>único en Bogotá?</em>"
+  ctaFinalCopy="Escríbenos y diseñamos juntos el regalo más original."
+  ctaTags={["📍 Bogotá", "✨ 100% original", "🎁 Empaque boutique", "🧶 Hecho a mano"]}
+/>

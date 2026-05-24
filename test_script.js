@@ -1,90 +1,4 @@
----
-import Icon from '../components/Icon.astro';
-/**
- * Panel de administración — Nuditos Tejidos v2 (Refactored)
- * URL: /admin
- * No usa el Layout principal — tiene su propio diseño modular
- * noindex para que Google no lo indexe
- */
-export const prerender = false;
 
-import AdminLayout from '../layouts/AdminLayout.astro';
-import AdminNav from '../components/admin/AdminNav.astro';
-import AdminSidebar from '../components/admin/AdminSidebar.astro';
-import ProductsTab from '../components/admin/ProductsTab.astro';
-import DashboardTab from '../components/admin/DashboardTab.astro';
-import OrdersTab from '../components/admin/OrdersTab.astro';
-// import CategoriesTab from '../components/admin/CategoriesTab.astro'; // Eliminado, ahora embebido en productos
-import VitrinaTab from '../components/admin/VitrinaTab.astro';
-import CampañasTab from '../components/admin/CampañasTab.astro';
-import LandingsTab from '../components/admin/LandingsTab.astro';
-import BannersTab from '../components/admin/BannersTab.astro';
-import DiscountsTab from '../components/admin/DiscountsTab.astro';
-import BlogTab from '../components/admin/BlogTab.astro';
-import TestimonialsTab from '../components/admin/TestimonialsTab.astro';
-import SEOTab from '../components/admin/SEOTab.astro';
-import SettingsTab from '../components/admin/SettingsTab.astro';
-import Modals from '../components/admin/Modals.astro';
-
-Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
----
-
-<AdminLayout title="Nuditos — Panel Admin">
-  <!-- LOGIN SECTION -->
-  <div id="loginScreen">
-    <div class="login-card">
-      <div class="login-logo">Nuditos<em style="color:#6d28d9">.</em></div>
-      <div class="login-sub">Panel de administración</div>
-      <input class="login-input" type="email" id="loginEmail" placeholder="tu@correo.com"
-        style="letter-spacing:0;margin-bottom:.6rem"
-        onkeydown="if(event.key==='Enter')doLogin()">
-      <input class="login-input" type="password" id="loginPwd" placeholder="••••••••"
-        onkeydown="if(event.key==='Enter')doLogin()">
-      <button class="login-btn" onclick="doLogin()">Entrar</button>
-      <div class="login-err" id="loginErr">Email o contraseña incorrectos</div>
-    </div>
-  </div>
-
-  <!-- MAIN ADMIN PANEL -->
-  <div id="adminPanel">
-    <AdminNav />
-
-    <div class="workspace" id="workspace">
-      <AdminSidebar />
-
-      <div id="rightArea" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
-        <ProductsTab />
-        <DashboardTab />
-        <OrdersTab />
-        <!-- <CategoriesTab /> -->
-        <VitrinaTab />
-        <CampañasTab />
-        <LandingsTab />
-        <BannersTab />
-        <DiscountsTab />
-        <BlogTab />
-        <TestimonialsTab />
-        <SEOTab />
-        <SettingsTab />
-      </div>
-    </div>
-
-    <!-- GLOBAL SAVE BAR -->
-    <div class="save-bar">
-      <div class="save-bar-msg">Recuerda <strong style="color:var(--lila)">guardar cambios</strong> para aplicarlos en la tienda</div>
-      <button class="btn-save" id="globalSaveBtn" onclick="saveConfig()">
-        <Icon name="save"  /> Guardar cambios
-      </button>
-    </div>
-  </div>
-
-  <!-- MODALS & FEEDBACK -->
-  <Modals />
-
-  <!-- ══════════════════════════════════════════
-       NUDITOS Admin Logic — Core JS
-       ══════════════════════════════════════════ -->
-  <script is:inline>
     let adminCfg={}, heroSelection=[], momentoSelection=null;
     let adminProducts=[], selectedId=null, pendingDeleteId=null;
     let editorialBannersAdmin=[], sideFilterCat='';
@@ -882,6 +796,200 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       finally{if(btn)btn.disabled=false;if(btn)btn.querySelector('span').textContent='Guardar cambios';}
     }
 
+    async function quickToggleVis(id){
+                 ondrop="event.preventDefault(); this.classList.remove('dragover'); if(event.dataTransfer.files.length) handleFileUpload(event.dataTransfer.files)">
+              <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleFileUpload(this.files)">
+              <div class="upload-zone-icon">📤</div>
+              <div class="upload-zone-text">Arrastra fotos aquí o haz clic para subir</div>
+              <div class="upload-zone-sub">JPG, PNG, WEBP · Se renombran y optimizan automáticamente para SEO</div>
+            </div>
+            <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
+            <div class="img-preview-row" id="imgPreviewRow"></div>
+            <label style="font-size:.65rem;font-weight:600;color:var(--soft);text-transform:uppercase;letter-spacing:.5px;display:block;margin:.5rem 0 .25rem">O pega links de Cloudinary</label>
+            <textarea class="img-url-input" id="fImgs" rows="3" placeholder="https://res.cloudinary.com/... (uno por línea)">${(p?.imgs||[]).join('\n')}</textarea>
+            <div class="field" style="margin-top:.5rem"><label>Foto principal (URL)</label><input type="text" id="fImg" value="${p?.img||''}" oninput="updatePreview()" placeholder="https://res.cloudinary.com/..."></div>
+          </div>
+          <div class="stock-row">
+            <span class="stock-icon">📦</span>
+            <div class="stock-info"><div class="stock-label">Stock</div><div class="stock-sub">Cuántas unidades disponibles</div></div>
+            <div class="stock-input-wrap">
+              <input class="stock-num" type="number" id="fStock" value="${p?.stock??99}" min="0" max="999">
+              <label class="stock-unlimited"><input type="checkbox" id="fStockUnlimited" ${p?.stock===undefined||p?.stock===null?'checked':''}> Sin límite</label>
+            </div>
+          </div>
+          <div class="tags-label">Etiquetas</div>
+          <div class="chips-row">
+            <label class="chip-check"><input type="checkbox" id="fTagNuevo" ${p?.badge==='Nuevo'?'checked':''}> 🟢 Nuevo</label>
+            <label class="chip-check chip-popular"><input type="checkbox" id="fTagPopular" ${p?.badge==='Popular'?'checked':''}> 🔥 Popular</label>
+            <label class="chip-check chip-especial"><input type="checkbox" id="fTagEspecial" ${p?.badge==='Especial'?'checked':''}> ⭐ Especial</label>
+            <label class="chip-check chip-oferta"><input type="checkbox" id="fTagOferta" ${p?.oferta?'checked':''} onchange="toggleOfertaFields()"> 🏷️ Oferta</label>
+            <label class="chip-check chip-envio"><input type="checkbox" id="fTagEnvio" ${p?.envioGratis?'checked':''}> 🚚 Envío gratis</label>
+          </div>
+          <div id="ofertaFields" style="${p?.oferta?'display:block':''}">
+            <div class="form-grid">
+              <div class="field"><label>Precio original (tachado)</label><input type="number" id="fPrecioOriginal" value="${p?.precioOriginal||0}" min="0"></div>
+              <div class="field"><label>Precio con oferta</label><input type="number" id="fPrecioOferta" value="${p?.precioOferta||0}" min="0"></div>
+            </div>
+          </div>
+          <details class="t-card" style="padding:1rem; margin-top: 1rem; margin-bottom: 0; border:1px solid var(--border); box-shadow:none;">
+            <summary style="font-weight:700; font-size:0.75rem; cursor:pointer; color:var(--lila-dark); display:flex; align-items:center; gap:.4rem">🔍 Ajustes Avanzados de Búsqueda (SEO Google)</summary>
+            <div class="form-grid" style="margin-top:0.8rem;">
+              <div class="field field-full"><label>Título en Google (Meta Title)</label><input type="text" id="fMetaTitle" value="${p?.metaTitle||''}" oninput="saveProductDraft()" placeholder="Ej: Ramo de Girasoles a Crochet - Sueño de Van Gogh"></div>
+              <div class="field field-full"><label>Palabras clave (Keywords)</label><input type="text" id="fSeoKeywords" value="${p?.seoKeywords||''}" oninput="saveProductDraft()" placeholder="Ej: girasoles amarillos, regalo novia, flores tejidas"></div>
+              <div class="field field-full"><label>Descripción para Google</label><textarea id="fMetaDesc" rows="2" oninput="saveProductDraft()" placeholder="Dejar vacío para que Google use la descripción principal...">${p?.metaDescription||''}</textarea></div>
+              <div class="field field-full"><label>Texto foto (Alt Text)</label><input type="text" id="fAltText" value="${p?.altText||''}" oninput="saveProductDraft()" placeholder="Descripción de la foto para invidentes y SEO"></div>
+            </div>
+          </details>
+          <div class="preview-panel">
+            <div class="preview-label">Vista previa en tienda</div>
+            <div class="preview-card-wrap"><div class="preview-card" id="livePreview"></div></div>
+          </div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem; align-items:center;">
+            <button class="btn-save" id="saveProdBtn" onclick="saveProduct()">
+              💾 <span>${isNew?'Crear producto':'Guardar cambios'}</span>
+            </button>
+            <button class="btn-cancel" onclick="showEditorEmpty()">Cancelar</button>
+            <span id="draftIndicator" style="font-size:0.65rem; color:var(--soft); font-weight:600; text-transform:uppercase; margin-left:auto; opacity:0; transition:opacity 0.3s"></span>
+          </div>
+        </div>`;
+    }
+
+    function renderEditor(p){
+      currentEditingImgs=p.imgs?[...p.imgs]:[];uploadedImgs=[];
+      document.getElementById('tab-productos').innerHTML=buildEditorHTML(p);
+      renderImgPreviews();updatePreview();
+    }
+    
+    function getDescTemplate(type) {
+      const templates = {
+        ramo: "Hermoso ramo tejido a mano con hilo de algodón 100% hipoalergénico. Incluye envoltura premium y tarjeta. Flores que nunca se marchitan, el detalle perfecto para sorprender.",
+        amigurumi: "Adorable amigurumi tejido a mano con atención a cada detalle. Ideal para coleccionar, decorar o dar un regalo verdaderamente único y personalizado.",
+        maceta: "Tierna maceta tejida a crochet. La alternativa perfecta para decorar tu escritorio o habitación con naturaleza eterna que no necesita riego ni cuidados especiales.",
+        especial: "Diseño especial y exclusivo elaborado a mano. Cada puntada refleja calidad y dedicación, creando un obsequio premium verdaderamente inolvidable."
+      };
+      return templates[type] || '';
+    }
+
+    function toggleOfertaFields(){document.getElementById('ofertaFields').style.display=document.getElementById('fTagOferta').checked?'block':'none';}
+
+    async function handleFileUpload(files){
+      if(!files.length)return;
+      for(let i=0; i<files.length; ++i){
+        const file = files[i];
+        const url=await uploadToCloudinary(file, null, i);
+        if(url){currentEditingImgs.push(url);if(!document.getElementById('fImg').value)document.getElementById('fImg').value=url;renderImgPreviews();updatePreview();}
+      }
+    }
+    function syncImgsFromTextarea(){const ta=document.getElementById('fImgs');if(!ta)return;const lines=ta.value.split('\n').map(l=>l.trim()).filter(l=>l.startsWith('http'));lines.forEach(url=>{if(!currentEditingImgs.includes(url))currentEditingImgs.push(url);});}
+    function updateImgsTextarea(){const ta=document.getElementById('fImgs');if(ta)ta.value=currentEditingImgs.join('\n');}
+    function renderImgPreviews(){
+      const row=document.getElementById('imgPreviewRow');if(!row)return;
+      const mainImg = document.getElementById('fImg')?.value || currentEditingImgs[0] || '';
+      row.innerHTML=currentEditingImgs.map((url,i)=>`
+        <div class="img-thumb-wrap" style="${url===mainImg?'border-color:var(--emerald)':''}">
+          ${url===mainImg?`<div style="position:absolute;top:-8px;left:-8px;background:var(--emerald);color:white;font-size:0.6rem;padding:2px 6px;border-radius:10px;font-weight:bold;z-index:10;pointer-events:none;">🌟 Portada</div>`:''}
+          <img class="img-thumb" src="${url}">
+          <div style="position:absolute;bottom:4px;left:4px;display:flex;gap:4px;z-index:10">
+            ${url!==mainImg?`<button type="button" style="background:#10b981;color:white;border:none;border-radius:4px;font-size:0.65rem;padding:3px 6px;cursor:pointer;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.1)" onclick="setMainImg('${url}')" title="Hacer foto de portada">⭐ Portada</button>`:''}
+          </div>
+          <button class="img-thumb-rm" onclick="removeImg(${i})">×</button>
+        </div>`).join('');
+    }
+    
+    function setMainImg(url){
+       document.getElementById('fImg').value = url;
+       const idx = currentEditingImgs.indexOf(url);
+       if(idx > -1) {
+         currentEditingImgs.splice(idx, 1);
+         currentEditingImgs.unshift(url);
+       }
+       renderImgPreviews();
+       updateImgsTextarea();
+       updatePreview();
+       saveProductDraft();
+    }
+    function removeImg(i){currentEditingImgs.splice(i,1);renderImgPreviews();updateImgsTextarea();updatePreview();}
+
+    function updatePreview(){
+      const name=document.getElementById('fNombre')?.value||'Nombre';
+      const price=parseInt(document.getElementById('fPrecio')?.value)||0;
+      const emoji=document.getElementById('fEmoji')?.value||'🌸';
+      const img=document.getElementById('fImg')?.value||'';
+      const isNew=document.getElementById('fTagNuevo')?.checked;
+      const isPopular=document.getElementById('fTagPopular')?.checked;
+      const isEspecial=document.getElementById('fTagEspecial')?.checked;
+      const isOferta=document.getElementById('fTagOferta')?.checked;
+      const precioOrig=parseInt(document.getElementById('fPrecioOriginal')?.value)||0;
+      const catId = Array.from(document.querySelectorAll('input[name="fCatMult"]:checked')).map(el=>el.value)[0] || '';
+      const cat=(window.categories||adminCategories).find(c=>c.id===catId);
+      const isActive=document.getElementById('fActivo')?.value==='true';
+      const badge=isNew?'Nuevo':isPopular?'Popular':isEspecial?'Especial':'';
+      const badgeCls=isNew?'nuevo':isPopular?'popular':isEspecial?'especial':'';
+      let origHtml='';
+      if(isOferta&&precioOrig>0&&price>0)origHtml=`<span class="orig">$${precioOrig.toLocaleString('es-CO')}</span>`;
+      const preview=document.getElementById('livePreview');if(!preview)return;
+      preview.innerHTML=`
+        <div class="preview-img">
+          ${img?`<img src="${img}" onerror="this.remove()">`:`<span>${emoji}</span>`}
+          ${badge?`<div class="preview-badge ${badgeCls}">${badge}</div>`:''}
+          ${!isActive?`<div class="preview-badge agotado">Oculto</div>`:''}
+        </div>
+        <div class="preview-info">
+          <div class="preview-cat">${cat?.icon||''} ${cat?.name||'Cat'}</div>
+          <div class="preview-name">${name}</div>
+          <div class="preview-price">${origHtml}${price>0?'$'+price.toLocaleString('es-CO')+' COP':'Consultar'}</div>
+        </div>`;
+    }
+
+    async function saveProduct(){
+      const nombre=document.getElementById('fNombre')?.value.trim();
+      const precio=parseInt(document.getElementById('fPrecio')?.value)||0;
+      const checkedCats=Array.from(document.querySelectorAll('input[name="fCatMult"]:checked')).map(el=>el.value);
+      const cat = checkedCats.join(',');
+      const emoji=document.getElementById('fEmoji')?.value.trim();
+      const desc=document.getElementById('fDesc')?.value.trim()||'';
+      const img=document.getElementById('fImg')?.value.trim()||'';
+      syncImgsFromTextarea();const imgs=[...currentEditingImgs];
+      const activo=document.getElementById('fActivo')?.value==='true';
+      const editId=document.getElementById('editingId')?.value;
+      const tagNuevo=document.getElementById('fTagNuevo')?.checked;
+      const tagPopular=document.getElementById('fTagPopular')?.checked;
+      const tagEspecial=document.getElementById('fTagEspecial')?.checked;
+      const tagOferta=document.getElementById('fTagOferta')?.checked;
+      const tagEnvio=document.getElementById('fTagEnvio')?.checked;
+      const stockUnlimited=document.getElementById('fStockUnlimited')?.checked;
+      const stockVal=parseInt(document.getElementById('fStock')?.value);
+      const stock=stockUnlimited?undefined:(isNaN(stockVal)?undefined:stockVal);
+      let badge='',badgeClass='';
+      if(tagNuevo){badge='Nuevo';badgeClass='nuevo';}else if(tagPopular){badge='Popular';}else if(tagEspecial){badge='Especial';}
+      const precioOriginal=parseInt(document.getElementById('fPrecioOriginal')?.value)||0;
+      const precioOferta=parseInt(document.getElementById('fPrecioOferta')?.value)||0;
+      const metaTitle=document.getElementById('fMetaTitle')?.value.trim()||'';
+      const seoKeywords=document.getElementById('fSeoKeywords')?.value.trim()||'';
+      const metaDesc=document.getElementById('fMetaDesc')?.value.trim()||'';
+      const altText=document.getElementById('fAltText')?.value.trim()||'';
+      if(!nombre){showToast('⚠️ Nombre obligatorio');return;}
+      const data={name:nombre,price:precio,cat,emoji,desc,img,imgs,badge,badgeClass,activo,oferta:tagOferta,envioGratis:tagEnvio,stock,precioOriginal:tagOferta?precioOriginal:0,precioOferta:tagOferta?precioOferta:0,metaTitle,seoKeywords,metaDescription:metaDesc,altText};
+      const btn=document.getElementById('saveProdBtn');
+      if(btn){btn.disabled=true;btn.querySelector('span').textContent='...';}
+      try{
+        if(editId&&editId!==''){
+          data.id=parseInt(editId);
+          await sbAdminSaveProduct({...data,_isNew:false});
+          const idx=adminProducts.findIndex(p=>p.id===parseInt(editId));
+          if(idx!==-1)adminProducts[idx]={...adminProducts[idx],...data};
+          showToast(`✓ Actualizado`);addToHistory(`✏️ Editado: ${nombre}`);
+          clearProductDraft();
+        }else{
+          const saved=await sbAdminSaveProduct({...data,_isNew:true});
+          if(saved){adminProducts.push({...data,id:saved.id});selectedId=saved.id;}
+          showToast(`✓ Creado`);addToHistory(`➕ Agregado: ${nombre}`);
+          clearProductDraft();
+        }
+        renderSidebar();renderStats();renderMomentoList(adminProducts);renderHeroList(adminProducts);
+      }catch(e){showToast('❌ Error');}
+      finally{if(btn)btn.disabled=false;if(btn)btn.querySelector('span').textContent='Guardar cambios';}
+    }
 
     async function quickToggleVis(id){
       const idx=adminProducts.findIndex(p=>p.id===id);if(idx===-1)return;
@@ -1874,5 +1982,4 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       }
     };
 
-  </script>
-</AdminLayout>
+  

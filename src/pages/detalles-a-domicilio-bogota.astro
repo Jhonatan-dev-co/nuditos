@@ -1,9 +1,25 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-const products = await getLiveProducts();
-const config = COMMERCIAL_LANDINGS['detalles-a-domicilio-bogota'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Detalles a Domicilio en Bogotá | Nuditos"
+  seoDesc="Detalles a domicilio en Bogotá con flores tejidas, ramos de crochet y regalos personalizados."
+  seoKeywords="detalles a domicilio bogota, regalos a domicilio bogota, flores tejidas bogota"
+  eyebrow="Entrega con estilo en Bogotá"
+  h1="Detalles a domicilio en Bogotá"
+  h1Em="sin complicaciones"
+  heroCopy="Envía un detalle distinto en Bogotá con asesoría por WhatsApp, personalización y presentación premium."
+  ctaWaText="Hola Nuditos! 🌸 Quiero un detalle a domicilio en Bogotá"
+  productKeywords={["ramo", "premium", "flor"]}
+  collectionTitle="Disponibles para Bogotá"
+  faq={[
+    { q: "¿Hacen entregas en toda Bogotá?", a: "Sí, coordinamos cobertura urbana y zonas cercanas." },
+    { q: "¿Puedo pedir para el mismo día?", a: "Se revisa disponibilidad según carga y ubicación." },
+    { q: "¿Llega listo para regalar?", a: "Sí, con empaque cuidado y presentación premium." },
+    { q: "¿Puedo personalizar colores?", a: "Sí, sujeto a disponibilidad de materiales." },
+  ]}
+  ctaFinalTitle="¿Enviamos tu detalle en <em class='italic text-violet-600 font-normal'>Bogotá?</em>"
+  ctaFinalCopy="Escríbenos por WhatsApp y coordinamos la entrega perfecta."
+  ctaTags={["📍 Bogotá", "🚚 Domicilio", "🎁 Listo para regalar", "✍️ Dedicatoria"]}
+/>

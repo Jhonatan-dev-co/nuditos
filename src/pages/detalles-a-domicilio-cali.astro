@@ -1,12 +1,25 @@
 ---
-import CitySeoLanding from '../components/CitySeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { CITY_LANDINGS } from '../data/seo-landings';
-
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-
-const products = await getLiveProducts();
-const config = CITY_LANDINGS['detalles-a-domicilio-cali'];
 ---
-
-<CitySeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Detalles a Domicilio en Cali | Nuditos"
+  seoDesc="Detalles a domicilio en Cali con flores tejidas y regalos artesanales personalizados."
+  seoKeywords="detalles a domicilio cali, regalos domicilio cali, flores tejidas cali"
+  eyebrow="Entrega con estilo en Cali"
+  h1="Detalles a domicilio en Cali para"
+  h1Em="ocasiones especiales"
+  heroCopy="Regala en Cali con una pieza tejida, elegante y lista para sorprender a quien más quieres."
+  ctaWaText="Hola Nuditos! 🌸 Quiero un detalle a domicilio en Cali"
+  productKeywords={["ramo", "premium", "flor"]}
+  collectionTitle="Disponibles para Cali"
+  faq={[
+    { q: "¿Entregan en toda Cali?", a: "Se confirma por sector al recibir el pedido." },
+    { q: "¿Puedo personalizar color?", a: "Sí, según disponibilidad." },
+    { q: "¿Cómo coordino entrega?", a: "Por WhatsApp con datos de dirección y horario." },
+    { q: "¿Hay opciones para pareja?", a: "Sí, con líneas románticas y premium." },
+  ]}
+  ctaFinalTitle="¿Enviamos tu detalle en <em class='italic text-violet-600 font-normal'>Cali?</em>"
+  ctaFinalCopy="Escríbenos por WhatsApp y coordinamos la entrega perfecta."
+  ctaTags={["📍 Cali", "🚚 Domicilio", "🎁 Listo para regalar", "✍️ Dedicatoria"]}
+/>

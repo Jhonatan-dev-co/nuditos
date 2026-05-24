@@ -1,12 +1,25 @@
 ---
-import CitySeoLanding from '../components/CitySeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { CITY_LANDINGS } from '../data/seo-landings';
-
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-
-const products = await getLiveProducts();
-const config = CITY_LANDINGS['detalles-a-domicilio-medellin'];
 ---
-
-<CitySeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Detalles a Domicilio en Medellín | Nuditos"
+  seoDesc="Detalles a domicilio en Medellín con flores tejidas y ramos de crochet personalizados."
+  seoKeywords="detalles a domicilio medellin, regalos domicilio medellin, flores tejidas medellin"
+  eyebrow="Entrega con estilo en Medellín"
+  h1="Detalles a domicilio en Medellín para"
+  h1Em="sorprender mejor"
+  heroCopy="Coordina entregas en Medellín con una propuesta artesanal que no pasa desapercibida."
+  ctaWaText="Hola Nuditos! 🌸 Quiero un detalle a domicilio en Medellín"
+  productKeywords={["ramo", "premium", "flor"]}
+  collectionTitle="Disponibles para Medellín"
+  faq={[
+    { q: "¿Entregan el mismo día?", a: "Depende de inventario, personalización y ruta." },
+    { q: "¿Puedo pagar online?", a: "Sí, según medios habilitados en tienda." },
+    { q: "¿Incluye empaque de regalo?", a: "Sí, la entrega se prepara lista para obsequio." },
+    { q: "¿Puedo pedir para oficina?", a: "Sí, se coordina dirección exacta." },
+  ]}
+  ctaFinalTitle="¿Enviamos tu detalle en <em class='italic text-violet-600 font-normal'>Medellín?</em>"
+  ctaFinalCopy="Escríbenos por WhatsApp y coordinamos la entrega perfecta."
+  ctaTags={["📍 Medellín", "🚚 Domicilio", "🎁 Listo para regalar", "✍️ Dedicatoria"]}
+/>

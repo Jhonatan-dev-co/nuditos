@@ -1,0 +1,275 @@
+---
+import Icon from '../Icon.astro';
+---
+<!-- GESTOR DE LANDING PAGES -->
+<div class="tab-content" id="tab-landings">
+
+  <!-- Header -->
+  <div class="t-card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%); border: 1.5px solid #c7d2fe;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <div class="t-title" style="color: #4338ca;">🚀 Landing Pages Dinámicas</div>
+        <div class="t-sub">Crea páginas de ventas completas (San Valentín, Madres, Navidad) usando la plantilla de alta conversión.</div>
+      </div>
+      <button onclick="newLanding()" style="background: #4338ca; color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 0.8rem; white-space: nowrap;">
+        ✨ Nueva Landing
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de Landings -->
+  <div class="t-card">
+    <div class="t-title">📅 Mis Landing Pages</div>
+    <div id="landingsList">
+      <div style="text-align:center; padding: 2rem; color: var(--soft); font-size: 0.8rem;">Cargando landings...</div>
+    </div>
+  </div>
+
+  <!-- Editor de Landing -->
+  <div id="landingEditor" style="display:none; margin-top: 1.5rem;">
+    <div class="t-card" style="border: 2px solid #4338ca;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.2rem;">
+        <div class="t-title" id="landingEditorTitle">Configuración de la Landing Page</div>
+        <button onclick="closeLandingEditor()" style="background: none; border:none; cursor:pointer; color: #999; font-size: 1.2rem;">✕</button>
+      </div>
+
+      <input type="hidden" id="landId">
+      <input type="hidden" id="landCreatedAt">
+
+      <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        
+        <!-- Básico -->
+        <div class="field field-full" style="grid-column: 1/-1;">
+          <label>Título Interno (Solo para ti) *</label>
+          <input type="text" id="landTitle" placeholder="Ej: Campaña Día de la Madre 2026">
+        </div>
+
+        <div class="field">
+          <label>URL / Slug (nuditos.com.co/l/<b>esto</b>) *</label>
+          <input type="text" id="landSlug" placeholder="dia-madre" style="text-transform:lowercase;">
+          <div style="font-size: 0.65rem; color: #999; margin-top: 3px;">Sin espacios ni caracteres especiales. Ej: amor-amistad</div>
+        </div>
+
+        <div class="field">
+          <label>Estado</label>
+          <select id="landActive">
+            <option value="true">🟢 Activa (Pública)</option>
+            <option value="false">🔴 Inactiva (Borrador)</option>
+          </select>
+        </div>
+
+        <div class="field field-full" style="grid-column: 1/-1; border-top: 1px solid #e5e7eb; padding-top: 1rem; margin-top: 0.5rem;">
+          <h4 style="color: #4338ca; font-size: 0.85rem; margin-bottom: 0.8rem;">🖼️ Sección Principal (Hero)</h4>
+        </div>
+
+        <div class="field">
+          <label>Texto Banner Superior (Ej: Día de la Madre — 10 de mayo)</label>
+          <input type="text" id="landHeroBadge" placeholder="Ej: Especial San Valentín ❤️">
+        </div>
+        <div class="field">
+          <label>Fecha Límite Countdown (YYYY-MM-DD)</label>
+          <input type="date" id="landTargetDate">
+        </div>
+        <div class="field">
+          <label>Categoría de Ramos a Mostrar</label>
+          <select id="landCategory"></select>
+        </div>
+
+        <div class="field field-full" style="grid-column: 1/-1;">
+          <label>Título Principal (Usa &lt;em&gt; para resaltar y &lt;br/&gt; para salto) *</label>
+          <input type="text" id="landHeroTitle" placeholder="Ej: El regalo que tu mamá &lt;em&gt;guardará para siempre&lt;/em&gt;">
+        </div>
+
+        <div class="field field-full" style="grid-column: 1/-1;">
+          <label>Subtítulo / Texto descriptivo</label>
+          <textarea id="landHeroSubtitle" rows="2" placeholder="Ramos tejidos a mano en Colombia..."></textarea>
+        </div>
+
+        <div class="field field-full" style="grid-column: 1/-1;">
+          <label>URL Foto/Video del Hero (Cloudinary)</label>
+          <input type="text" id="landHeroImg" placeholder="https://res.cloudinary.com/.../video.mp4">
+          <div style="font-size: 0.65rem; color: #999; margin-top: 3px;">Si pones un .mp4 se reproducirá en loop automáticamente.</div>
+        </div>
+
+        <div class="field field-full" style="grid-column: 1/-1;">
+          <label>URL Foto de Unboxing / Sección Inferior (Opcional)</label>
+          <input type="text" id="landUnboxingImg" placeholder="https://res.cloudinary.com/...">
+          <div style="font-size: 0.65rem; color: #999; margin-top: 3px;">Deja vacío para usar automáticamente la segunda imagen del catálogo de la categoría.</div>
+        </div>
+
+      </div>
+
+      <!-- Botones -->
+      <div style="display:flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button onclick="saveLanding()" id="landSaveBtn" style="background: #4338ca; color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 0.85rem;">
+          💾 Guardar Landing
+        </button>
+        <button onclick="closeLandingEditor()" style="background: #f3f4f6; color: #666; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-size: 0.85rem;">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script is:inline>
+  let adminLandings = [];
+
+  async function renderLandingsList() {
+    const list = document.getElementById('landingsList');
+    if(!list) return;
+    
+    // Cargar selector de categorías si no se ha hecho
+    const catSelect = document.getElementById('landCategory');
+    if (catSelect && catSelect.options.length === 0 && window.adminCategories) {
+      catSelect.innerHTML = '<option value="">(Selecciona una categoría)</option>' +
+        window.adminCategories.map(c => `<option value="${c.id}">${c.icon||''} ${c.nombre||c.name}</option>`).join('');
+    }
+
+    try {
+      const data = await sbAdminGetLandings();
+      adminLandings = data || [];
+      
+      if(adminLandings.length === 0) {
+        list.innerHTML = `<div style="text-align:center; padding: 2rem; color: #9ca3af; font-size: 0.8rem;">No tienes ninguna landing page aún. Haz clic en "Nueva Landing".</div>`;
+        return;
+      }
+      
+      list.innerHTML = adminLandings.map(l => {
+        const isActive = l.is_active;
+        const url = `/l/${l.slug}`;
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 1rem; border: 1.5px solid #e5e7eb; border-radius: 1rem; margin-bottom: 0.75rem; background: ${isActive ? '#fff' : '#f9fafb'};">
+            <div>
+              <div style="display:flex; align-items:center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                <strong style="font-size: 0.9rem; color: #1f2937;">${l.title}</strong>
+                <span style="font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; background: ${isActive ? '#d1fae5' : '#fee2e2'}; color: ${isActive ? '#065f46' : '#991b1b'}; font-weight: 700; text-transform: uppercase;">
+                  ${isActive ? 'Activa' : 'Inactiva'}
+                </span>
+              </div>
+              <div style="font-size: 0.75rem; color: #6b7280; display:flex; align-items:center; gap: 0.5rem;">
+                <a href="${url}" target="_blank" style="color: #4338ca; text-decoration: none; font-weight: 600;">nuditos.com.co${url}</a>
+              </div>
+            </div>
+            <div style="display:flex; gap: 0.5rem;">
+              <button onclick="editLanding('${l.id}')" style="background: #e0e7ff; color: #4338ca; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.75rem;">✏️ Editar</button>
+              <button onclick="deleteLanding('${l.id}')" style="background: #fee2e2; color: #dc2626; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer;">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+    } catch(e) {
+      console.error(e);
+      list.innerHTML = `<div style="text-align:center; padding: 2rem; color: #dc2626; font-size: 0.8rem;">Error cargando landings: ${e.message}</div>`;
+    }
+  }
+
+  function newLanding() {
+    document.getElementById('landId').value = '';
+    document.getElementById('landCreatedAt').value = '';
+    document.getElementById('landTitle').value = '';
+    document.getElementById('landSlug').value = '';
+    document.getElementById('landActive').value = 'true';
+    
+    document.getElementById('landHeroBadge').value = '';
+    document.getElementById('landTargetDate').value = '';
+    document.getElementById('landHeroTitle').value = '';
+    document.getElementById('landHeroSubtitle').value = '';
+    document.getElementById('landHeroImg').value = '';
+    document.getElementById('landUnboxingImg').value = '';
+    document.getElementById('landCategory').value = '';
+    
+    document.getElementById('landingEditorTitle').textContent = '✨ Nueva Landing Page';
+    document.getElementById('landingEditor').style.display = 'block';
+    document.getElementById('landingEditor').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function editLanding(id) {
+    const l = adminLandings.find(x => x.id === id);
+    if(!l) return;
+    
+    document.getElementById('landId').value = l.id;
+    document.getElementById('landCreatedAt').value = l.created_at;
+    document.getElementById('landTitle').value = l.title;
+    document.getElementById('landSlug').value = l.slug;
+    document.getElementById('landActive').value = l.is_active ? 'true' : 'false';
+    
+    const c = l.content || {};
+    document.getElementById('landHeroBadge').value = c.heroBadge || '';
+    document.getElementById('landTargetDate').value = c.targetDate || '';
+    document.getElementById('landHeroTitle').value = c.heroTitle || '';
+    document.getElementById('landHeroSubtitle').value = c.heroSubtitle || '';
+    document.getElementById('landHeroImg').value = c.heroImg || '';
+    document.getElementById('landUnboxingImg').value = c.unboxingImg || '';
+    document.getElementById('landCategory').value = c.categorySlug || '';
+    
+    document.getElementById('landingEditorTitle').textContent = '✏️ Editando: ' + l.title;
+    document.getElementById('landingEditor').style.display = 'block';
+    document.getElementById('landingEditor').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function closeLandingEditor() {
+    document.getElementById('landingEditor').style.display = 'none';
+  }
+
+  async function saveLanding() {
+    const btn = document.getElementById('landSaveBtn');
+    const oldText = btn.innerHTML;
+    
+    const id = document.getElementById('landId').value;
+    const title = document.getElementById('landTitle').value.trim();
+    const slug = document.getElementById('landSlug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    const is_active = document.getElementById('landActive').value === 'true';
+    
+    if(!title || !slug) {
+      window.showToast?.('❌ Título y Slug son obligatorios');
+      return;
+    }
+    
+    const content = {
+      heroBadge: document.getElementById('landHeroBadge').value.trim(),
+      targetDate: document.getElementById('landTargetDate').value,
+      heroTitle: document.getElementById('landHeroTitle').value.trim(),
+      heroSubtitle: document.getElementById('landHeroSubtitle').value.trim(),
+      heroImg: document.getElementById('landHeroImg').value.trim(),
+      unboxingImg: document.getElementById('landUnboxingImg').value.trim(),
+      categorySlug: document.getElementById('landCategory').value
+    };
+    
+    btn.innerHTML = '⏳ Guardando...';
+    btn.disabled = true;
+    
+    try {
+      const payload = { title, slug, is_active, content };
+      if (id) payload.id = id;
+      
+      await sbAdminSaveLanding(payload);
+      
+      window.showToast?.('✅ Landing guardada correctamente');
+      closeLandingEditor();
+      renderLandingsList();
+      
+    } catch(e) {
+      console.error(e);
+      window.showToast?.(`❌ Error: ${e.message}`);
+    } finally {
+      btn.innerHTML = oldText;
+      btn.disabled = false;
+    }
+  }
+
+  async function deleteLanding(id) {
+    if(!confirm('¿Estás seguro de eliminar esta landing page?')) return;
+    
+    try {
+      await sbAdminDeleteLanding(id);
+      window.showToast?.('🗑️ Landing eliminada');
+      renderLandingsList();
+    } catch(e) {
+      console.error(e);
+      window.showToast?.(`❌ Error: ${e.message}`);
+    }
+  }
+</script>

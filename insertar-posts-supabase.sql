@@ -609,10 +609,20 @@ Cuando llegues con un ramo de crochet personalizado y una carta hecha desde el c
   'ramo girasoles crochet, girasoles tejidos, flores girasol eternas, regalo girasoles Colombia, significado girasoles regalo, girasoles para amiga',
   NOW() - INTERVAL '1 day',
   NOW() - INTERVAL '1 day'
-);
+)
+ON CONFLICT (slug) DO UPDATE SET
+  title          = EXCLUDED.title,
+  excerpt        = EXCLUDED.excerpt,
+  content        = EXCLUDED.content,
+  category       = EXCLUDED.category,
+  image          = EXCLUDED.image,
+  meta_title     = EXCLUDED.meta_title,
+  meta_description = EXCLUDED.meta_description,
+  seo_keywords   = EXCLUDED.seo_keywords,
+  updated_at     = NOW();
 
 -- ─────────────────────────────────────────────
--- Verificar que los posts se insertaron bien:
+-- Verificar que los posts se insertaron/actualizaron bien:
 SELECT id, title, slug, category, created_at 
 FROM posts 
 ORDER BY created_at DESC;

@@ -503,3 +503,40 @@ async function sbAdminUpdateEstadoPedido(id, estado, guia, transportadora) {
 async function sbAdminDeletePedido(id) {
   return _del('pedidos', `id=eq.${id}`, true);
 }
+async function sbAdminGetLandings() {
+  return await _get('landings', 'order=created_at.desc', true);
+}
+
+async function sbAdminSaveLanding(l) {
+  if (l.id) {
+    return await _patch('landings', `id=eq.${l.id}`, l, true);
+  } else {
+    return await _post('landings', l, true);
+  }
+}
+
+async function sbAdminDeleteLanding(id) {
+  return await _del('landings', `id=eq.${id}`, true);
+}
+
+/* ── TESTIMONIOS ── */
+async function sbAdminGetTestimonios() {
+  try {
+    return await _get('testimonios', 'order=created_at.desc', true);
+  } catch(e) {
+    console.error('Error al cargar testimonios:', e);
+    return [];
+  }
+}
+
+async function sbAdminSaveTestimonio(data) {
+  if (data.id) {
+    return await _patch('testimonios', `id=eq.${data.id}`, data, true);
+  } else {
+    return await _post('testimonios', data, true);
+  }
+}
+
+async function sbAdminDeleteTestimonio(id) {
+  return await _del('testimonios', `id=eq.${id}`, true);
+}

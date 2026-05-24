@@ -9,9 +9,10 @@ interface Props {
   parentView?: 'carousel' | 'grid' | 'list';
   idScope?: string; // Nuevo: para evitar duplicados en view-transition-name
   eager?: boolean;
+  showScarcity?: boolean; // Fuerza una barra de stock simulada (solo para landings)
 }
 
-const { p, catName = 'Nuditos', class: className, parentView = 'grid', idScope = 'default', eager = false } = Astro.props;
+const { p, catName = 'Nuditos', class: className, parentView = 'grid', idScope = 'default', eager = false, showScarcity = false } = Astro.props;
 const imgLoading = eager ? 'eager' : 'lazy';
 
 const vtScope = `${idScope}-${parentView}`;
@@ -21,6 +22,27 @@ const hasMultiple = allImgs.length > 1;
 
 const searchStr = `${p.name} ${catName} ${p.badge || ''} ${p.desc || ''}`.replace(/<[^>]*>?/gm, '').toLowerCase();
 const allCats = [...new Set([p.cat, ...(p.cats || [])].filter(Boolean))].join(',');
+
+// Lógica de Precios y Stock (CRO y Urgencia Real)
+const showPrice = p.oferta && p.precioOferta > 0 ? p.precioOferta : p.price;
+const origPrice = p.oferta && p.precioOriginal > 0 ? p.precioOriginal : null;
+const amountSaved = origPrice ? origPrice - showPrice : 0;
+
+// Stock ficticio para landings: Calcula un número constante entre 2 y 7 basado en el ID
+let finalStock = p.stock;
+if (showScarcity) {
+  const seed = String(p.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  finalStock = (seed % 6) + 2; 
+}
+
+const hasLowStock = finalStock !== undefined && finalStock !== null && finalStock <= 12 && finalStock > 0;
+
+// Máximo 2 etiquetas activas para no tapar la foto en móviles
+const activeBadges = [
+  p.badge ? { type: 'custom', text: p.badge } : null,
+  p.oferta ? { type: 'oferta', text: 'Oferta' } : null,
+  p.envioGratis ? { type: 'envio' } : null
+].filter(Boolean).slice(0, 2);
 ---
 
 <article 
@@ -78,10 +100,36 @@ const allCats = [...new Set([p.cat, ...(p.cats || [])].filter(Boolean))].join(',
       </div>
     )}
 
-    {/* Badges */}
+    {/* Badges: Se muestran máximo 2 a la vez para no tapar la foto en móviles */}
     <div class="badges-overlay">
-      {p.badge && <span class="badge">{p.badge}</span>}
-      {p.oferta && <span class="badge-off">Oferta</span>}
+      {activeBadges.map(badge => {
+        if (badge.type === 'custom') {
+          return <span class="p-badge badge-custom">{badge.text}</span>;
+        }
+        if (badge.type === 'oferta') {
+          return <span class="p-badge p-badge-oferta">{badge.text}</span>;
+        }
+        if (badge.type === 'envio') {
+          return (
+            <span class={`p-badge p-badge-envio ${parentView === 'grid' ? 'p-badge-envio-grid' : 'p-badge-envio-carousel'}`} title="Envío Gratis">
+              <Icon name="truck" class="w-3.5 h-3.5" />
+              <span class="badge-text hidden sm:inline">Envío Gratis</span>
+              {parentView !== 'grid' && (
+                <span class="badge-text-carousel inline sm:hidden">Gratis</span>
+              )}
+            </span>
+          );
+        }
+        return null;
+      })}
+    </div>
+
+    {/* Rating Visual (Prueba Social en Foto) */}
+    <div class="rating-pill">
+       <svg viewBox="0 0 20 20" fill="currentColor">
+         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+       </svg>
+       <span>{p.rating || "5.0"}</span>
     </div>
 
     {/* Quick Add icon */}
@@ -97,8 +145,35 @@ const allCats = [...new Set([p.cat, ...(p.cats || [])].filter(Boolean))].join(',
     <a href={`/ramo/${productSlug}`}>
       <h3 class="product-name">{p.name}</h3>
     </a>
-    <div class="price-container">
-      <span class="price">${p.price.toLocaleString('es-CO')}</span>
+
+    {/* Urgencia de Stock (Exclusivo Landing o Real) */}
+    {hasLowStock && (
+      <div class="mt-2.5 mb-1.5">
+        <div class="flex justify-between text-[9px] font-bold uppercase tracking-widest text-rose-600 mb-1">
+          <span>Stock disponible:</span>
+          <span>Solo {finalStock} unidades</span>
+        </div>
+        <div class="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden">
+           <div class="bg-rose-500 h-full rounded-full" style={`width: ${(finalStock / 15) * 100}%`}></div>
+        </div>
+      </div>
+    )}
+
+    {/* Precio y Ahorro */}
+    <div class="price-container flex flex-col items-start gap-1 mt-2">
+       <div class="flex items-center gap-2">
+         <span class={`price ${amountSaved > 0 ? 'text-rose-600' : ''}`}>${showPrice.toLocaleString('es-CO')}</span>
+         {amountSaved > 0 && (
+           <span class="text-[13px] text-stone-300 line-through decoration-stone-200">${origPrice.toLocaleString('es-CO')}</span>
+         )}
+       </div>
+       {amountSaved > 0 && (
+         <div class="inline-flex mt-0.5">
+            <span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border border-emerald-100">
+               Ahorra ${amountSaved.toLocaleString('es-CO')}
+            </span>
+         </div>
+       )}
     </div>
   </div>
 </article>
@@ -185,7 +260,115 @@ const allCats = [...new Set([p.cat, ...(p.cats || [])].filter(Boolean))].join(',
   .card-info { padding: 1rem 0.5rem; }
   .cat-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: #a8a29e; font-weight: 700; }
   .product-name { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: #1c1917; margin: 2px 0; }
+  .price-container { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 2px; }
   .price { font-weight: 700; color: #1c1917; font-size: 0.9rem; }
+
+  /* ==========================================
+     NUEVOS ESTILOS RE-IMAGINADOS PARA BADGES & RATINGS
+     ========================================== */
+  .badges-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* Anulamos la posición absoluta de main.css para fluir en flex */
+  .badges-overlay .p-badge {
+    position: static !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 0.28rem 0.6rem !important;
+    font-size: 0.62rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .badges-overlay .p-badge.badge-custom {
+    background: rgba(124, 58, 237, 0.9) !important; /* Lila Nuditos */
+    color: white !important;
+  }
+
+  .badges-overlay .p-badge.p-badge-oferta {
+    background: rgba(239, 68, 68, 0.9) !important; /* Rojo Coral */
+    color: white !important;
+    animation: badge-glow 2.5s infinite ease-in-out;
+  }
+
+  .badges-overlay .p-badge.p-badge-envio {
+    background: rgba(16, 185, 129, 0.9) !important; /* Verde Esmeralda */
+    color: white !important;
+  }
+
+  @media (max-width: 640px) {
+    /* En móvil y solo en vista de grilla, la píldora de Envío Gratis se transforma en un círculo minimalista */
+    .badges-overlay .p-badge.p-badge-envio.p-badge-envio-grid {
+      padding: 0 !important;
+      width: 1.6rem !important;
+      height: 1.6rem !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 50% !important;
+    }
+  }
+
+  /* Estrella de Calificación Glassmorphic */
+  .rating-pill {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 0.28rem 0.55rem;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .rating-pill:hover {
+    background: rgba(255, 255, 255, 0.96);
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .rating-pill svg {
+    width: 12px;
+    height: 12px;
+    color: #f59e0b; /* Amber */
+  }
+
+  .rating-pill span {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #44403c;
+    line-height: 1;
+    margin-top: 1px;
+  }
+
+  @keyframes badge-glow {
+    0%, 100% { box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+    50% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
+  }
 </style>
 
 <script>

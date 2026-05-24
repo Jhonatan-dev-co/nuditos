@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig, passthroughImageService } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 
@@ -7,7 +7,9 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
   site: 'https://nuditos.com.co',
   output: 'hybrid',
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    imageService: 'passthrough'
+  }),
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'viewport',
@@ -39,6 +41,7 @@ export default defineConfig({
     inlineStylesheets: 'always',
   },
   image: {
+    service: passthroughImageService(),
     remotePatterns: [
       {
         protocol: 'https',

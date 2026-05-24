@@ -2,16 +2,26 @@
 import Icon from './Icon.astro';
 // Overlay de búsqueda global. La lógica reside en src/scripts/search-ui.ts
 ---
-<div class="fixed inset-0 z-[2005] bg-[#1a1220]/40 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 [&.open]:opacity-100 [&.open]:pointer-events-auto flex flex-col items-center pt-16 px-4" id="searchOverlay">
-  <div class="w-full max-w-2xl bg-white/95 backdrop-blur-3xl rounded-[2rem] shadow-2xl overflow-hidden border border-white/60 transform -translate-y-12 transition-transform duration-500 ease-out" id="searchBoxWrapper">
-    <div class="flex items-center p-3 pl-5 border-b border-gray-100">
-      <Icon name="search" class="text-[#8a7592] text-xl" />
-      <input type="text" id="searchInput" class="flex-1 w-full bg-transparent border-none outline-none text-base text-[#1a1220] placeholder-[#8a7592]/70 font-sans px-4 py-3" placeholder="Busca ramos, rosas, amigurumis..." autocomplete="off">
-      <button id="closeSearchBtn" class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 hover:bg-gray-200 transition-colors" aria-label="Cerrar búsqueda">
-        <Icon name="close" class="text-xl text-[#1a1220]" />
+<div class="fixed inset-0 z-[2005] bg-[#1a1220]/50 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 [&.open]:opacity-100 [&.open]:pointer-events-auto flex flex-col items-center pt-14 md:pt-20 px-4" id="searchOverlay">
+  <div class="w-full max-w-xl bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-stone-100 transform -translate-y-8 transition-transform duration-500 ease-out" id="searchBoxWrapper">
+    
+    <!-- Campo de búsqueda -->
+    <div class="flex items-center gap-3 px-5 py-4 border-b border-stone-100">
+      <Icon name="search" class="text-stone-400 flex-shrink-0" />
+      <input
+        type="text"
+        id="searchInput"
+        class="flex-1 bg-transparent border-none outline-none text-sm text-[#1a1220] placeholder-stone-400 font-sans"
+        placeholder="Busca ramos, rosas, amigurumis..."
+        autocomplete="off"
+      />
+      <button id="closeSearchBtn" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-stone-100 transition-colors flex-shrink-0" aria-label="Cerrar búsqueda">
+        <Icon name="close" class="text-stone-500" />
       </button>
     </div>
-    <div class="max-h-[60vh] overflow-y-auto px-2 py-4" id="searchResults"></div>
+
+    <!-- Resultados -->
+    <div class="max-h-[55vh] overflow-y-auto" id="searchResults"></div>
   </div>
 </div>
 

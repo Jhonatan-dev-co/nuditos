@@ -1,12 +1,26 @@
 ---
-import CitySeoLanding from '../components/CitySeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
+import PremiumLanding from '../components/PremiumLanding.astro';
 import { CITY_LANDINGS } from '../data/seo-landings';
-
 export const prerender = false;
 
-const products = await getLiveProducts();
 const config = CITY_LANDINGS['ramos-de-flores-medellin'];
 ---
-
-<CitySeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle={config.title}
+  seoDesc={config.description}
+  seoKeywords={config.keywords}
+  eyebrow={`Arte Textil en ${config.city}`}
+  h1={config.h1.split(' en ')[0]}
+  h1Em={`en ${config.city}`}
+  heroCopy={config.heroCopy}
+  ctaWaText={`Hola Nuditos! 🌸 Quiero regalar flores en ${config.city}`}
+  productKeywords={["ramo", "rosa", "girasol", "crochet"]}
+  collectionTitle={`Favoritos en ${config.city}`}
+  isCityPage={true}
+  city={config.city}
+  relatedLinks={config.relatedLinks}
+  faq={config.localFaq}
+  ctaFinalTitle={`¿Sorprendemos a alguien en <em class='italic text-violet-600 font-normal'>${config.city}?</em>`}
+  ctaFinalCopy="El detalle perfecto para celebrar la vida con algo que no se marchita."
+  ctaTags={[`📍 ${config.city}`, "🌸 Hecho a mano", "🎁 Regalo único", "🚚 Entrega segura"]}
+/>

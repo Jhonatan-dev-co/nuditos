@@ -1,9 +1,24 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
+import PremiumLanding from '../components/PremiumLanding.astro';
 import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
 export const prerender = false;
-const products = await getLiveProducts();
+
 const config = COMMERCIAL_LANDINGS['flores-amarillas'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle={config.title}
+  seoDesc={config.description}
+  seoKeywords={config.keywords}
+  eyebrow={config.eyebrow}
+  h1={config.h1.split(' para ')[0]}
+  h1Em="para brillar"
+  heroCopy={config.heroCopy}
+  ctaWaText={`Hola Nuditos! 🌸 Quiero regalar flores amarillas`}
+  productKeywords={config.productHints}
+  collectionTitle="Girasoles y Flores Amarillas"
+  relatedLinks={config.relatedLinks}
+  faq={config.faq}
+  ctaFinalTitle="Regala un rayo de <em class='italic text-violet-600 font-normal'>sol</em>"
+  ctaFinalCopy="El detalle perfecto para septiembre que nunca se marchita."
+  ctaTags={["🌻 Girasoles", "💛 Amistad eterna", "🚚 Envío nacional"]}
+/>

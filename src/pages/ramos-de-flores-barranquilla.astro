@@ -1,12 +1,26 @@
 ---
-import CitySeoLanding from '../components/CitySeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
+import PremiumLanding from '../components/PremiumLanding.astro';
 import { CITY_LANDINGS } from '../data/seo-landings';
-
 export const prerender = false;
 
-const products = await getLiveProducts();
 const config = CITY_LANDINGS['ramos-de-flores-barranquilla'];
 ---
-
-<CitySeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle={config.title}
+  seoDesc={config.description}
+  seoKeywords={config.keywords}
+  eyebrow={`Regalos Únicos en ${config.city}`}
+  h1={config.h1.split(' en ')[0]}
+  h1Em={`en ${config.city}`}
+  heroCopy={config.heroCopy}
+  ctaWaText={`Hola Nuditos! 🌸 Quiero regalar flores en ${config.city}`}
+  productKeywords={["ramo", "girasol", "rosa", "crochet"]}
+  collectionTitle={`Favoritos en ${config.city}`}
+  isCityPage={true}
+  city={config.city}
+  relatedLinks={config.relatedLinks}
+  faq={config.localFaq}
+  ctaFinalTitle={`¿Te enviamos flores a <em class='italic text-violet-600 font-normal'>${config.city}?</em>`}
+  ctaFinalCopy="El detalle artesanal que no se rinde ante el sol del Caribe."
+  ctaTags={[`📍 ${config.city}`, "🌸 Arte manual", "🎁 Recuerdo eterno", "🚚 Envío a casa"]}
+/>

@@ -1,0 +1,443 @@
+---
+import Icon from '../Icon.astro';
+---
+<!-- GESTOR DE TESTIMONIOS -->
+<div class="tab-content" id="tab-testimonios">
+
+  <!-- Header -->
+  <div class="t-card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%); border: 1.5px solid #f5d0fe;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <div class="t-title" style="color: #c026d3;">💬 Reseñas y Testimonios</div>
+        <div class="t-sub">Administra las opiniones de clientes, capturas de WhatsApp y gestiona qué reseñas aparecen en las landings.</div>
+      </div>
+      <button onclick="newTestimonio()" style="background: #c026d3; color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 0.8rem; white-space: nowrap;">
+        ✨ Nuevo Testimonio
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de Testimonios -->
+  <div class="t-card">
+    <div class="t-title">📝 Mis Reseñas</div>
+    <div id="testimoniosList">
+      <div style="text-align:center; padding: 2rem; color: var(--soft); font-size: 0.8rem;">Cargando testimonios...</div>
+    </div>
+  </div>
+
+  <!-- Editor Inline de Testimonio -->
+  <div id="testimonioEditor" style="display:none; margin-top: 1.5rem;">
+    <div class="t-card" style="border: 2px solid #c026d3;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.2rem;">
+        <div class="t-title" id="testimonioEditorTitle">Configuración de Testimonio</div>
+        <button onclick="closeTestimonioEditor()" style="background: none; border:none; cursor:pointer; color: #999; font-size: 1.2rem;">✕</button>
+      </div>
+
+      <input type="hidden" id="testId">
+
+      <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        
+        <div class="field">
+          <label>Tipo de Reseña</label>
+          <select id="testTipo" onchange="toggleTestimonioFields(); updateTestimonioPreview()">
+            <option value="texto">📝 Texto Escrito</option>
+            <option value="whatsapp">📱 Captura de WhatsApp</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Estado</label>
+          <select id="testActivo">
+            <option value="true">🟢 Pública (Visible en tienda)</option>
+            <option value="false">🔴 Oculta (Borrador)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Nombre del Cliente *</label>
+          <input type="text" id="testNombre" placeholder="Ej: Carolina M." oninput="updateTestimonioPreview()">
+        </div>
+
+        <div class="field">
+          <label>Ciudad / Departamento</label>
+          <input type="text" id="testCiudad" placeholder="Ej: Medellín, Antioquia" oninput="updateTestimonioPreview()">
+        </div>
+
+        <div class="field">
+          <label>Producto Comprado</label>
+          <select id="testProducto" onchange="updateTestimonioPreview()">
+            <option value="">-- Selecciona un ramo --</option>
+          </select>
+        </div>
+        
+        <div class="field">
+          <label>Fecha de Compra (Mejora E-E-A-T)</label>
+          <input type="date" id="testTiempo" onchange="updateTestimonioPreview()">
+        </div>
+
+        <!-- Campos de Texto -->
+        <div id="testFieldsTexto" style="grid-column: 1/-1; display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="field field-full" style="grid-column: 1/-1;">
+            <label>Comentario *</label>
+            <textarea id="testTexto" rows="3" placeholder="El ramo está precioso..." oninput="updateTestimonioPreview()"></textarea>
+          </div>
+          <div class="field">
+            <label>Color de Tarjeta</label>
+            <select id="testColor" onchange="updateTestimonioPreview()">
+              <option value="rose">Rosa (Cariño)</option>
+              <option value="violet">Violeta (Romance)</option>
+              <option value="emerald">Esmeralda (Frescura)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Calificación</label>
+            <select id="testEstrellas" onchange="updateTestimonioPreview()">
+              <option value="5">⭐⭐⭐⭐⭐ 5 Estrellas</option>
+              <option value="4">⭐⭐⭐⭐ 4 Estrellas</option>
+              <option value="3">⭐⭐⭐ 3 Estrellas</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Campo de WhatsApp -->
+        <div id="testFieldsWhatsapp" class="field field-full" style="grid-column: 1/-1; display:none;">
+          <label>Captura de Pantalla (URL Cloudinary) *</label>
+          <div style="display:flex; gap: 0.5rem;">
+            <input type="text" id="testImgUrl" placeholder="https://res.cloudinary.com/..." oninput="updateTestimonioPreview()" style="flex:1">
+            <input type="file" id="testImgFile" accept="image/*" style="display:none" onchange="uploadTestimonioImg(this)">
+            <button class="btn-secondary" onclick="document.getElementById('testImgFile').click()" style="padding:0 1rem; border-radius:8px">
+              <i class="ph-image"></i> 📸 Subir Foto
+            </button>
+          </div>
+        </div>
+
+        <!-- Vista Previa -->
+        <div class="field field-full" style="grid-column: 1/-1; margin-top:1rem; padding-top:1rem; border-top:1px dashed #ddd;">
+          <label style="color:#c026d3; font-weight:700;">👀 Vista Previa en Vivo</label>
+          <div style="background:#f9fafb; padding:1.5rem; border-radius:1rem; display:flex; justify-content:center;">
+             <div id="testPreviewContainer" style="width:100%; max-width:340px;"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Botones -->
+      <div style="display:flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button onclick="saveTestimonio()" id="testSaveBtn" style="background: #c026d3; color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 0.85rem;">
+          💾 Guardar Testimonio
+        </button>
+        <button onclick="closeTestimonioEditor()" style="background: #f3f4f6; color: #666; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-size: 0.85rem;">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script is:inline>
+  let adminTestimonios = [];
+
+  async function loadTestimonios() {
+    const list = document.getElementById('testimoniosList');
+    if(!list) return;
+    
+    try {
+      const data = await sbAdminGetTestimonios();
+      adminTestimonios = data || [];
+      renderTestimoniosList();
+    } catch(e) {
+      console.error(e);
+      list.innerHTML = `<div style="text-align:center; padding: 2rem; color: #dc2626; font-size: 0.8rem;">Error cargando testimonios: ${e.message}</div>`;
+    }
+  }
+
+  function renderTestimoniosList() {
+    const list = document.getElementById('testimoniosList');
+    
+    if(adminTestimonios.length === 0) {
+      list.innerHTML = `<div style="text-align:center; padding: 2rem; color: #9ca3af; font-size: 0.8rem;">No tienes testimonios aún. Haz clic en "Nuevo Testimonio".</div>`;
+      return;
+    }
+    
+    list.innerHTML = adminTestimonios.map(t => {
+      const isActive = t.activo !== false;
+      const isWa = t.tipo === 'whatsapp';
+      
+      const badgeColor = isWa ? '#dcfce7' : '#e0e7ff';
+      const badgeText = isWa ? '#15803d' : '#4338ca';
+      const badgeLabel = isWa ? '📱 WhatsApp' : '📝 Texto';
+      
+      return `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 1rem; border: 1.5px solid #e5e7eb; border-radius: 1rem; margin-bottom: 0.75rem; background: ${isActive ? '#fff' : '#f9fafb'};">
+          <div style="display:flex; gap:1rem; align-items:center">
+            ${isWa ? 
+              `<img src="${t.img_url}" style="width:40px; height:40px; object-fit:cover; border-radius:8px; border:1px solid #ddd">` : 
+              `<div style="width:40px; height:40px; border-radius:50%; background:#f3f4f6; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#666">${(t.nombre||'U').slice(0,2).toUpperCase()}</div>`
+            }
+            <div>
+              <div style="display:flex; align-items:center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                <strong style="font-size: 0.9rem; color: #1f2937;">${t.nombre || 'Sin nombre'}</strong>
+                <span style="font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; background: ${badgeColor}; color: ${badgeText}; font-weight: 700;">
+                  ${badgeLabel}
+                </span>
+                <span style="font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; background: ${isActive ? '#d1fae5' : '#fee2e2'}; color: ${isActive ? '#065f46' : '#991b1b'}; font-weight: 700; text-transform: uppercase;">
+                  ${isActive ? 'Público' : 'Oculto'}
+                </span>
+              </div>
+              <div style="font-size: 0.75rem; color: #6b7280; display:flex; align-items:center; gap: 0.5rem;">
+                ${t.ciudad || 'Sin ciudad'} • ${t.tiempo || ''} ${!isWa ? `• ${t.estrellas||5} ⭐` : ''}
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; gap: 0.5rem;">
+            <button onclick="editTestimonio('${t.id}')" style="background: #fae8ff; color: #c026d3; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.75rem;">✏️ Editar</button>
+            <button onclick="deleteTestimonio('${t.id}')" style="background: #fee2e2; color: #dc2626; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer;">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function newTestimonio() {
+    document.getElementById('testId').value = '';
+    document.getElementById('testTipo').value = 'texto';
+    document.getElementById('testActivo').value = 'true';
+    document.getElementById('testNombre').value = '';
+    document.getElementById('testCiudad').value = '';
+    document.getElementById('testTexto').value = '';
+    document.getElementById('testProducto').value = '';
+    document.getElementById('testTiempo').value = '';
+    document.getElementById('testColor').value = 'rose';
+    document.getElementById('testEstrellas').value = '5';
+    document.getElementById('testImgUrl').value = '';
+    
+    document.getElementById('testimonioEditorTitle').textContent = '✨ Nuevo Testimonio';
+    document.getElementById('testimonioEditor').style.display = 'block';
+    document.getElementById('testimonioEditor').scrollIntoView({ behavior: 'smooth' });
+    
+    populateTestimonioProducts();
+    toggleTestimonioFields();
+    updateTestimonioPreview();
+  }
+
+  function editTestimonio(id) {
+    const t = adminTestimonios.find(x => x.id == id);
+    if(!t) return;
+    
+    document.getElementById('testId').value = t.id;
+    document.getElementById('testTipo').value = t.tipo || 'texto';
+    document.getElementById('testActivo').value = t.activo !== false ? 'true' : 'false';
+    document.getElementById('testNombre').value = t.nombre || '';
+    document.getElementById('testCiudad').value = t.ciudad || '';
+    document.getElementById('testTexto').value = t.texto || '';
+    document.getElementById('testProducto').value = t.producto || '';
+    document.getElementById('testTiempo').value = parseDateForInput(t.tiempo) || '';
+    document.getElementById('testColor').value = t.color || 'rose';
+    document.getElementById('testEstrellas').value = t.estrellas || '5';
+    document.getElementById('testImgUrl').value = t.img_url || '';
+    
+    document.getElementById('testimonioEditorTitle').textContent = '✏️ Editando Reseña';
+    document.getElementById('testimonioEditor').style.display = 'block';
+    document.getElementById('testimonioEditor').scrollIntoView({ behavior: 'smooth' });
+    
+    populateTestimonioProducts(t.producto);
+    toggleTestimonioFields();
+    updateTestimonioPreview();
+  }
+
+  function closeTestimonioEditor() {
+    document.getElementById('testimonioEditor').style.display = 'none';
+  }
+
+  function toggleTestimonioFields() {
+    const tipo = document.getElementById('testTipo').value;
+    if(tipo === 'texto') {
+      document.getElementById('testFieldsTexto').style.display = 'grid';
+      document.getElementById('testFieldsWhatsapp').style.display = 'none';
+    } else {
+      document.getElementById('testFieldsTexto').style.display = 'none';
+      document.getElementById('testFieldsWhatsapp').style.display = 'block';
+    }
+  }
+
+  function parseDateForInput(textStr) {
+    if (!textStr) return '';
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const parts = textStr.split(' ');
+    if (parts.length === 4 && parts[1] === 'de') {
+      const d = parts[0].padStart(2, '0');
+      const m = String(meses.indexOf(parts[2]) + 1).padStart(2, '0');
+      const y = parts[3];
+      if (m !== '00') return `${y}-${m}-${d}`;
+    }
+    return '';
+  }
+
+  function formatFechaForUI(dateStr) {
+    if (!dateStr || !dateStr.includes('-')) return dateStr || 'Fecha reciente';
+    const [y, m, d] = dateStr.split('-');
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    return `${parseInt(d)} de ${meses[parseInt(m)-1]} ${y}`;
+  }
+
+  function populateTestimonioProducts(selectedProduct = '') {
+    const select = document.getElementById('testProducto');
+    if(select && typeof adminProducts !== 'undefined') {
+      select.innerHTML = '<option value="">-- Selecciona un ramo --</option>' + 
+        adminProducts.map(p => {
+          const name = p.name || p.nombre;
+          return `<option value="${name}" ${name === selectedProduct ? 'selected' : ''}>${name}</option>`;
+        }).join('');
+    }
+  }
+
+  function updateTestimonioPreview() {
+    const container = document.getElementById('testPreviewContainer');
+    if(!container) return;
+
+    const tipo = document.getElementById('testTipo').value;
+    const nombre = document.getElementById('testNombre').value || 'Nombre del Cliente';
+    const ciudad = document.getElementById('testCiudad').value || 'Ciudad, Departamento';
+    const producto = document.getElementById('testProducto').value || 'Ramo Nuditos';
+    const tiempoRaw = document.getElementById('testTiempo').value;
+    const tiempo = formatFechaForUI(tiempoRaw);
+
+    if(tipo === 'whatsapp') {
+       const img = document.getElementById('testImgUrl').value;
+       container.innerHTML = `
+         <div style="border-radius: 1.5rem; overflow: hidden; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.08);">
+            <div style="aspect-ratio: 9/12; background: #eee; position: relative; overflow: hidden;">
+               ${img ? `<img src="${img}" style="width:100%; height:100%; object-fit:cover;">` : '<div style="height:100%; display:flex; align-items:center; justify-content:center; color:#aaa; font-size:0.8rem; font-weight:600;">Sube una captura</div>'}
+               <div style="position:absolute; bottom:0; left:0; right:0; padding:1rem; background:linear-gradient(transparent, rgba(0,0,0,0.7));">
+                  <div style="color:white; font-size:0.75rem; font-weight:700;"><span style="color:#4ade80">●</span> WhatsApp de ${nombre}</div>
+               </div>
+            </div>
+            <div style="padding:0.8rem 1rem; display:flex; justify-content:space-between; align-items:center;">
+               <span style="font-size:0.6rem; font-weight:700; color:#999; text-transform:uppercase;">${ciudad}</span>
+               <span style="font-size:0.55rem; color:#4ade80; font-weight:800; text-transform:uppercase;">Compra Verificada</span>
+            </div>
+         </div>
+       `;
+    } else {
+       const texto = document.getElementById('testTexto').value || 'Aquí irá el comentario del cliente agradeciendo por su ramo...';
+       const color = document.getElementById('testColor').value || 'rose';
+       const estrellas = parseInt(document.getElementById('testEstrellas').value) || 5;
+       const avatar = nombre.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+
+       const colorStyles = {
+         rose: { bg: '#fff1f2', text: '#be123c', border: '#ffe4e6', badge: '#fff1f2', badgeText: '#e11d48' },
+         violet: { bg: '#f5f3ff', text: '#6d28d9', border: '#ddd6fe', badge: '#f5f3ff', badgeText: '#7c3aed' },
+         emerald: { bg: '#ecfdf5', text: '#047857', border: '#d1fae5', badge: '#ecfdf5', badgeText: '#059669' }
+       };
+       const cs = colorStyles[color];
+
+       container.innerHTML = `
+         <div style="padding:1.5rem; border-radius:2rem; box-shadow:0 10px 25px rgba(0,0,0,0.05); background:white; border:1px solid #f1f1f1;">
+            <div style="display:flex; gap:0.8rem; align-items:center; margin-bottom:1rem;">
+               <div style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem; background:${cs.bg}; color:${cs.text}">${avatar}</div>
+               <div>
+                  <div style="font-weight:800; font-size:0.85rem; color:#111;">${nombre}</div>
+                  <div style="font-size:0.65rem; color:#999; text-transform:uppercase; letter-spacing:1px;">${ciudad}</div>
+               </div>
+            </div>
+            <div style="font-size:0.7rem; margin-bottom:0.8rem;">
+               ${Array(estrellas).fill('⭐').join('')}
+            </div>
+            <div style="font-size:0.8rem; line-height:1.5; color:#444; font-style:italic; margin-bottom:1.2rem;">"${texto}"</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+               <span style="font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; padding:3px 10px; border-radius:50px; background:${cs.badge}; color:${cs.badgeText}; border:1px solid ${cs.border}">${producto}</span>
+               <span style="font-size:0.65rem; color:#ccc;">${tiempo}</span>
+            </div>
+         </div>
+       `;
+    }
+  }
+
+  async function saveTestimonio() {
+    const btn = document.getElementById('testSaveBtn');
+    const oldText = btn.innerHTML;
+    
+    const id = document.getElementById('testId').value;
+    const nombre = document.getElementById('testNombre').value.trim();
+    const tipo = document.getElementById('testTipo').value;
+    
+    if(!nombre) {
+      window.showToast?.('❌ El nombre del cliente es obligatorio');
+      return;
+    }
+    
+    if(tipo === 'whatsapp' && !document.getElementById('testImgUrl').value.trim()) {
+      window.showToast?.('❌ Debes incluir la URL de la imagen');
+      return;
+    }
+    if(tipo === 'texto' && !document.getElementById('testTexto').value.trim()) {
+      window.showToast?.('❌ Debes incluir un comentario');
+      return;
+    }
+    
+    const data = {
+      tipo,
+      activo: document.getElementById('testActivo').value === 'true',
+      nombre,
+      ciudad: document.getElementById('testCiudad').value.trim(),
+      texto: document.getElementById('testTexto').value.trim(),
+      producto: document.getElementById('testProducto').value.trim(),
+      tiempo: formatFechaForUI(document.getElementById('testTiempo').value),
+      img_url: document.getElementById('testImgUrl').value.trim(),
+      color: document.getElementById('testColor').value,
+      estrellas: parseInt(document.getElementById('testEstrellas').value),
+      avatar: (nombre || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2)
+    };
+    
+    if (id) data.id = id;
+    
+    btn.innerHTML = '⏳ Guardando...';
+    btn.disabled = true;
+    
+    try {
+      await sbAdminSaveTestimonio(data);
+      window.showToast?.('✅ Testimonio guardado');
+      closeTestimonioEditor();
+      loadTestimonios();
+    } catch(e) {
+      console.error(e);
+      window.showToast?.(`❌ Error: ${e.message}`);
+    } finally {
+      btn.innerHTML = oldText;
+      btn.disabled = false;
+    }
+  }
+
+  async function deleteTestimonio(id) {
+    if(!confirm('¿Estás seguro de eliminar este testimonio?')) return;
+    
+    try {
+      await sbAdminDeleteTestimonio(id);
+      window.showToast?.('🗑️ Testimonio eliminado');
+      loadTestimonios();
+    } catch(e) {
+      console.error(e);
+      window.showToast?.(`❌ Error: ${e.message}`);
+    }
+  }
+
+  window.uploadTestimonioImg = async function(inputElem) {
+    const file = inputElem.files[0];
+    if(!file) return;
+    
+    try {
+      window.showToast?.('⏳ Subiendo foto y optimizando...');
+      const url = await uploadToCloudinary(file, 'testimonio-whatsapp');
+      if (url) {
+        document.getElementById('testImgUrl').value = url;
+        updateTestimonioPreview();
+        window.showToast?.('✅ Foto subida correctamente');
+      }
+    } catch(e) {
+      console.error(e);
+      window.showToast?.('❌ Error al subir: ' + e.message);
+    }
+  }
+</script>

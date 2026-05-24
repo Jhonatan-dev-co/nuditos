@@ -1,0 +1,513 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ProductCard from '../components/ProductCard.astro';
+
+import TestimonialsSection from '../components/TestimonialsSection.astro';
+import { getLiveProducts, getPublicConfig, getLiveCategories } from '../lib/supabase';
+import { slugify } from '../data/datos';
+
+export interface Props {
+  seoTitle: string;
+  seoDesc: string;
+  seoKeywords?: string;
+  eyebrow: string;
+  h1: string;
+  h1Em: string;
+  heroCopy: string;
+  ctaWaText: string;
+  // Filtro de productos
+  categorySlug?: string;
+  productKeywords?: string[];
+  // Colección
+  collectionTitle: string;
+  collectionBadge?: string;
+  // FAQ
+  faq: { q: string; a: string }[];
+  // CTA final
+  ctaFinalTitle: string;
+  ctaFinalCopy: string;
+  ctaTags?: string[];
+  // Opcional countdown
+  countdownDate?: string;
+  countdownLabel?: string;
+  // SEO Avanzado
+  relatedLinks?: { label: string; href: string }[];
+  isCityPage?: boolean;
+  city?: string;
+  // E-E-A-T y SEO de contenido
+  breadcrumbLabel?: string;
+  seoContent?: string;
+  processImages?: string[];
+  unboxingImg?: string;
+}
+
+const {
+  seoTitle, seoDesc, seoKeywords,
+  eyebrow, h1, h1Em, heroCopy,
+  ctaWaText,
+  categorySlug, productKeywords = [],
+  collectionTitle, collectionBadge,
+  faq,
+  ctaFinalTitle, ctaFinalCopy, ctaTags = [],
+  countdownDate, countdownLabel = '',
+  relatedLinks = [],
+  isCityPage = false,
+  city = 'Colombia',
+  breadcrumbLabel = '',
+  seoContent = '',
+  processImages = [],
+  unboxingImg: unboxingImgProp,
+} = Astro.props;
+
+// Breadcrumb label: usa el prop o genera uno del título
+const crumbLabel = breadcrumbLabel || seoTitle.split('|')[0].trim();
+const pageUrl = new URL(Astro.url.pathname, 'https://nuditos.com.co').href;
+
+const liveProducts = await getLiveProducts();
+const publicConfigRaw = await getPublicConfig();
+const rawCategories = await getLiveCategories();
+
+const safeProducts = liveProducts.map(p => ({ id: p.id, name: p.name, price: p.price, emoji: p.emoji || '🌸', img: p.img || '', cat: p.cat || '', desc: p.desc || '' }));
+const safeCategories = rawCategories || [];
+const publicConfig = publicConfigRaw || {};
+
+let filtered: any[] = liveProducts.filter(p => {
+  if (categorySlug) {
+    const cats: string[] = [p.cat, ...(p.cats || [])].map((c: any) => (c ?? '').toLowerCase().trim());
+    if (cats.includes(categorySlug.toLowerCase())) return true;
+  }
+  if (productKeywords.length) {
+    const name = (p.name || '').toLowerCase();
+    const desc = (p.desc || '').toLowerCase();
+    if (productKeywords.some(k => name.includes(k.toLowerCase()) || desc.includes(k.toLowerCase()))) return true;
+  }
+  if (!categorySlug && !productKeywords.length) return p.activo !== false;
+  return false;
+});
+
+if (!filtered.length) {
+  filtered = liveProducts.filter(p => p.activo !== false && p.destacado).slice(0, 8);
+}
+
+filtered.sort((a, b) => a.price - b.price);
+
+const urlHeroSlug = Astro.url.searchParams.get('hero');
+let adProduct: any = null;
+if (urlHeroSlug) {
+  const adIdx = filtered.findIndex(p => slugify(p.name) === urlHeroSlug);
+  if (adIdx > -1) { [adProduct] = filtered.splice(adIdx, 1); filtered.unshift(adProduct); }
+  else adProduct = liveProducts.find(p => slugify(p.name) === urlHeroSlug);
+}
+
+const ordenados = filtered;
+const heroImg: string = adProduct?.img || ordenados[0]?.img || '';
+const unboxingImg: string = unboxingImgProp || ordenados[1]?.img || ordenados[0]?.img || '';
+const minPrice = ordenados.length > 0 ? Math.min(...ordenados.map(p => p.price).filter(Boolean)) : 0;
+
+export const prerender = false;
+---
+
+<Layout title={seoTitle} description={seoDesc} keywords={seoKeywords} hideBoutiqueHighlights={true}>
+
+  <!-- Schema: Page / LocalBusiness -->
+  {isCityPage ? (
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FlowerShop",
+      "name": `Nuditos Tejidos - ${city}`,
+      "image": "https://nuditos.com.co/logo.png",
+      "@id": pageUrl,
+      "url": pageUrl,
+      "telephone": "+573144931525",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Envío a domicilio",
+        "addressLocality": city,
+        "addressRegion": city,
+        "addressCountry": "CO"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        "opens": "08:00",
+        "closes": "20:00"
+      },
+      "sameAs": ["https://www.instagram.com/nuditos_tejidos"]
+    })} />
+  ) : (
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": seoTitle,
+      "description": seoDesc,
+      "url": pageUrl,
+      "publisher": {
+        "@type": "Organization",
+        "name": "Nuditos Tejidos",
+        "url": "https://nuditos.com.co",
+        "logo": { "@type": "ImageObject", "url": "https://nuditos.com.co/logo.png" }
+      }
+    })} />
+  )}
+
+  <!-- Schema: BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://nuditos.com.co/" },
+      { "@type": "ListItem", "position": 2, "name": "Catálogo", "item": "https://nuditos.com.co/catalogo" },
+      { "@type": "ListItem", "position": 3, "name": crumbLabel, "item": pageUrl }
+    ]
+  })} />
+
+  <!-- Schema: FAQPage -->
+  {faq.length > 0 && (
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faq.map(item => ({
+        "@type": "Question",
+        "name": item.q,
+        "acceptedAnswer": { "@type": "Answer", "text": item.a }
+      }))
+    })} />
+  )}
+
+  <!-- Schema: ItemList (productos mostrados) -->
+  {ordenados.length > 0 && (
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": collectionTitle,
+      "numberOfItems": Math.min(ordenados.length, 12),
+      "itemListElement": ordenados.slice(0, 12).map((p, i) => ({
+        "@type": "ListItem",
+        "position": i + 1,
+        "item": {
+          "@type": "Product",
+          "name": p.name,
+          "image": p.img || '',
+          "url": `https://nuditos.com.co/ramo/${slugify(p.name)}`,
+          "offers": {
+            "@type": "Offer",
+            "price": p.price,
+            "priceCurrency": "COP",
+            "availability": "https://schema.org/InStock"
+          }
+        }
+      }))
+    })} />
+  )}
+
+  {countdownDate && (
+    <div class="bg-rose-50 text-rose-950 border-b border-rose-100/50 py-2.5 px-4">
+      <div class="max-w-[1200px] mx-auto flex flex-wrap items-center justify-center gap-2 text-center text-[10px] md:text-xs tracking-widest uppercase font-medium">
+        <span class="font-bold text-rose-800">{countdownLabel}</span>
+        <span class="hidden sm:inline text-rose-300">|</span>
+        <div class="flex items-center gap-1.5" id="plCountdown">
+          <span class="text-rose-600">Faltan</span>
+          <span class="bg-rose-900 text-white px-1.5 py-0.5 rounded font-bold tabular-nums" id="cdDays">--</span>
+          <span class="text-rose-600">días,</span>
+          <span class="bg-rose-900 text-white px-1.5 py-0.5 rounded font-bold tabular-nums" id="cdHours">--</span>
+          <span class="text-rose-600">horas,</span>
+          <span class="bg-rose-900 text-white px-1.5 py-0.5 rounded font-bold tabular-nums" id="cdMins">--</span>
+          <span class="text-rose-600">minutos</span>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <!-- HERO -->
+  <section class="bg-white pt-4 pb-8 md:py-8 px-4 md:px-6 overflow-hidden relative">
+    <div class="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-4 lg:gap-12 items-center">
+      <!-- Imagen -->
+      <div class="relative order-1 lg:order-2">
+        {heroImg ? (
+          <div class="aspect-[4/5] rounded-3xl overflow-hidden bg-stone-50 border border-stone-100 shadow-xl">
+            {heroImg.toLowerCase().endsWith('.mp4') ? (
+              <video src={heroImg} autoplay loop muted playsinline class="w-full h-full object-cover" />
+            ) : (
+              <img src={heroImg} alt={h1} class="w-full h-full object-cover" loading="eager" fetchpriority="high" />
+            )}
+          </div>
+        ) : (
+          <div class="aspect-[4/5] rounded-3xl bg-stone-50 border border-stone-100 flex items-center justify-center text-rose-200"><Icon name="heart-3" class="w-32 h-32" /></div>
+        )}
+        <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-md border border-stone-100 flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-[9px] font-bold uppercase text-stone-600 tracking-widest">Disponible ahora</span>
+        </div>
+      </div>
+      <!-- Texto -->
+      <div class="order-2 lg:order-1 text-center lg:text-left">
+        <div class="flex items-center gap-2 justify-center lg:justify-start mb-3 mt-4 lg:mt-0">
+          <span class="text-[10px] tracking-[3px] uppercase text-violet-600 font-bold border-l-2 border-violet-300 pl-3">{eyebrow}</span>
+        </div>
+        <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl font-light text-stone-800 leading-tight mb-3">
+          {h1}<br/><em class="italic text-violet-600 font-normal">{h1Em}</em>
+        </h1>
+        <p class="text-stone-500 text-sm md:text-base leading-relaxed mb-6 max-w-lg mx-auto lg:mx-0">{heroCopy}</p>
+        <div class="flex flex-wrap gap-6 justify-center lg:justify-start mb-8 text-center">
+          <div>
+            <div class="text-xl font-bold text-emerald-600">GRATIS</div>
+            <div class="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Envío Nacional</div>
+          </div>
+          <div class="w-px bg-stone-100 hidden sm:block"></div>
+          <div>
+            <div class="text-xl font-bold text-stone-800">100%</div>
+            <div class="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Hecho a mano</div>
+          </div>
+          <div class="w-px bg-stone-100 hidden sm:block"></div>
+          <div>
+            <div class="text-xl font-bold text-stone-800">⭐ 5.0</div>
+            <div class="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Calificación</div>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+          <a href="#catalogo" class="inline-flex items-center justify-center gap-2 bg-[#1a1220] text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-lg hover:-transtone-y-0.5">
+            <Icon name="grid" class="text-sm" /> Ver colección
+          </a>
+          <a href={`https://wa.me/573144931525?text=${encodeURIComponent(ctaWaText)}`} target="_blank" class="inline-flex items-center justify-center gap-2 bg-green-500 text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg shadow-green-100 hover:-transtone-y-0.5">
+            <Icon name="whatsapp" class="text-sm" /> Atención Personalizada
+          </a>
+        </div>
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+          <div class="flex -space-x-2">
+            <div class="w-8 h-8 rounded-full bg-rose-100 border-2 border-white flex items-center justify-center text-rose-600 font-bold text-[9px]">CM</div>
+            <div class="w-8 h-8 rounded-full bg-violet-100 border-2 border-white flex items-center justify-center text-violet-600 font-bold text-[9px]">JP</div>
+            <div class="w-8 h-8 rounded-full bg-emerald-100 border-2 border-white flex items-center justify-center text-emerald-600 font-bold text-[9px]">AP</div>
+          </div>
+          <div class="text-left">
+            <div class="flex text-amber-400 text-[10px] gap-0.5">
+              <Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" /><Icon name="star" />
+            </div>
+            <div class="text-[10px] text-stone-500 font-medium">Cientos de clientes felices en Colombia</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="absolute -top-24 -right-24 w-64 h-64 bg-violet-100/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-rose-100/20 rounded-full blur-3xl pointer-events-none"></div>
+  </section>
+
+  <!-- CATÁLOGO -->
+  <section id="catalogo" class="bg-white py-14 px-6 border-t border-stone-100 overflow-hidden">
+    <div class="max-w-[1400px] mx-auto">
+      <div class="flex items-center justify-between mb-8 pb-2 border-b border-stone-200">
+        <h2 class="uppercase font-bold tracking-widest text-[#1a1220] text-xs md:text-sm">{collectionTitle}</h2>
+        <div class="flex items-center gap-4">
+          <span class="hidden md:block text-[10px] text-stone-400 uppercase tracking-widest font-medium">Desliza para ver más →</span>
+          <a href="/catalogo" class="text-[9px] md:text-[10px] tracking-widest uppercase font-bold text-stone-500 hover:text-stone-900 border border-stone-200 px-3 py-1 bg-white hover:bg-stone-50 transition-colors">Ver catálogo</a>
+        </div>
+      </div>
+
+      {collectionBadge && (
+        <div class="flex items-center gap-3 mb-8">
+          <span class="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-200 text-rose-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+            {collectionBadge}
+          </span>
+        </div>
+      )}
+
+      {ordenados.length > 0 ? (
+        <div class="relative group">
+          <!-- Contenedor con Scroll Snap en Móvil y Grid en Desktop -->
+          <div class="flex md:grid md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-x-auto md:overflow-x-visible pb-8 md:pb-0 snap-x snap-mandatory scrollbar-hide scroll-pl-6 -mx-6 px-6 md:mx-0 md:px-0 after:content-[''] after:w-1 after:flex-shrink-0 md:after:hidden">
+            {ordenados.slice(0, 12).map((p, i) => (
+              <div class="min-w-[280px] sm:min-w-[320px] md:min-w-0 snap-start">
+                <ProductCard p={p} idScope="premium-landing" parentView="grid" eager={i < 2} showScarcity={true} />
+              </div>
+            ))}
+            
+            {/* Card final de "Ver más" en el slider móvil */}
+            <div class="md:hidden min-w-[200px] snap-start flex items-center justify-center p-6 bg-stone-50 rounded-[2rem] border border-dashed border-stone-200">
+               <a href="/catalogo" class="flex flex-col items-center gap-3 text-center">
+                 <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm border border-stone-100">
+                   <Icon name="arrow-right" class="text-violet-500" />
+                 </div>
+                 <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Ver todo el catálogo</span>
+               </a>
+            </div>
+          </div>
+          
+          {/* Indicador de scroll visual en móvil */}
+          <div class="flex md:hidden justify-center gap-1.5 mt-2">
+             <div class="w-8 h-1 bg-violet-200 rounded-full">
+               <div class="w-1/3 h-full bg-violet-500 rounded-full animate-pulse"></div>
+             </div>
+          </div>
+        </div>
+      ) : (
+        <div class="text-center py-20">
+          <p class="text-stone-400 text-sm mb-6 flex items-center justify-center gap-2">Próximamente disponibles <Icon name="heart-3" class="w-4 h-4 text-rose-300" /></p>
+          <a href="https://wa.me/573144931525" target="_blank" class="inline-flex items-center gap-2 bg-green-500 text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-green-600 transition">
+            <Icon name="whatsapp" class="text-sm" /> Consultar disponibilidad
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- TESTIMONIOS -->
+  <TestimonialsSection />
+
+  <!-- POR QUÉ NUDITOS -->
+  <section class="bg-stone-50 py-14 px-6 border-y border-stone-100">
+    <div class="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <div class="aspect-square rounded-3xl bg-stone-100 border border-stone-100 overflow-hidden shadow-md order-2 lg:order-1">
+        {unboxingImg ? (
+          <img src={unboxingImg} class="w-full h-full object-cover" alt="Ramo tejido Nuditos" loading="lazy" />
+        ) : (
+          <div class="w-full h-full flex items-center justify-center text-rose-200"><Icon name="heart-3" class="w-24 h-24 opacity-50" /></div>
+        )}
+      </div>
+      <div class="order-1 lg:order-2 text-center lg:text-left">
+        <div class="text-[10px] tracking-[3px] uppercase text-violet-600 font-bold mb-4 flex items-center justify-center lg:justify-start gap-3">
+          <span class="h-px w-8 bg-violet-200"></span> ¿Por qué elegir Nuditos?
+        </div>
+        <h2 class="font-serif text-3xl md:text-5xl font-light text-stone-800 mb-6 leading-tight">Flores que <em class="italic text-violet-600 font-normal">nunca mueren</em></h2>
+        <div class="space-y-4 text-sm mb-10">
+          <div class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-stone-100 shadow-sm hover:shadow-md transition-all">
+            <Icon name="magic" class="text-violet-500 text-lg flex-shrink-0 mt-0.5" />
+            <div>
+              <div class="text-[10px] uppercase tracking-widest font-bold text-stone-800 mb-1">Durabilidad infinita</div>
+              <p class="text-stone-500 leading-relaxed text-xs">Las flores naturales duran 5–7 días. Los ramos Nuditos duran para siempre.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-stone-100 shadow-sm hover:shadow-md transition-all">
+            <Icon name="hand-heart" class="text-rose-500 text-lg flex-shrink-0 mt-0.5" />
+            <div>
+              <div class="text-[10px] uppercase tracking-widest font-bold text-stone-800 mb-1">Pieza única</div>
+              <p class="text-stone-500 leading-relaxed text-xs">Cada ramo es tejido a mano, puntada a puntada. Nunca hay dos iguales.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-stone-100 shadow-sm hover:shadow-md transition-all">
+            <Icon name="refresh" class="text-violet-500 text-lg flex-shrink-0 mt-0.5" />
+            <div>
+              <div class="text-[10px] uppercase tracking-widest font-bold text-stone-800 mb-1">Devoluciones Gratis</div>
+              <p class="text-stone-500 leading-relaxed text-xs">Garantía total si tu pedido llega dañado. <span class="text-[9px] italic opacity-75">*Aplican términos y condiciones.</span></p>
+            </div>
+          </div>
+        </div>
+        <a href="#catalogo" class="inline-flex items-center gap-2 bg-[#1a1220] text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-lg">
+          <Icon name="grid" class="text-sm" /> Ver ramos disponibles
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ENLAZADO INTERNO (SEO) -->
+  {relatedLinks.length > 0 && (
+    <div class="border-t border-stone-100 bg-white px-4 py-5">
+      <div class="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-1">
+        <span class="text-[9px] uppercase tracking-widest font-bold text-stone-400 whitespace-nowrap flex-shrink-0">Ver también</span>
+        {relatedLinks.map(link => (
+          <a href={link.href} class="whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-full border border-stone-200 text-[9px] uppercase tracking-widest font-bold text-stone-500 hover:border-violet-300 hover:text-violet-700 transition-colors">{link.label}</a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- FAQ -->
+  <section class="bg-stone-50 py-8 md:py-12 px-4 border-t border-stone-100">
+    <div class="max-w-[800px] mx-auto">
+      <div class="mb-6">
+        <div class="text-[9px] tracking-[3px] uppercase text-violet-600 font-bold mb-1">Preguntas frecuentes</div>
+        <h2 class="font-serif text-xl md:text-2xl font-light text-stone-800">Todo lo que necesitas saber</h2>
+      </div>
+      <div class="space-y-3">
+        {faq.map(item => (
+          <details class="bg-white rounded-2xl border border-stone-100 shadow-sm group">
+            <summary class="flex items-center justify-between gap-3 p-4 cursor-pointer list-none">
+              <h3 class="font-bold text-stone-800 text-[10px] uppercase tracking-widest flex-1">{item.q}</h3>
+              <Icon name="arrow-down-s" class="text-stone-300 group-open:rotate-180 transition-transform flex-shrink-0" />
+            </summary>
+            <p class="text-stone-500 text-xs leading-relaxed px-4 pb-4">{item.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- CTA FINAL -->
+  <section class="bg-stone-50 py-10 md:py-16 px-4 border-t border-stone-100" id="personalizado">
+    <div class="max-w-lg mx-auto text-center">
+      <div class="text-[9px] tracking-[3px] uppercase text-violet-600 font-bold mb-3 flex items-center justify-center gap-3">
+        <span class="h-px w-6 bg-violet-200"></span> Atención personalizada <span class="h-px w-6 bg-violet-200"></span>
+      </div>
+      <h2 class="font-serif text-2xl md:text-4xl font-light text-stone-800 mb-4 leading-tight" set:html={ctaFinalTitle}></h2>
+      <p class="text-stone-500 text-xs md:text-sm leading-relaxed mb-8 max-w-xs mx-auto">{ctaFinalCopy}</p>
+      
+      <a 
+        href={`https://wa.me/573144931525?text=${encodeURIComponent(ctaWaText)}`} 
+        target="_blank" 
+        class="inline-flex items-center gap-3 bg-[#1a1220] text-white px-10 py-4 rounded-2xl font-bold shadow-xl hover:bg-black transition-all uppercase text-[10px] tracking-widest active:scale-95"
+      >
+        <Icon name="whatsapp" class="text-lg" /> Escribir por WhatsApp
+      </a>
+    </div>
+  </section>
+
+  <!-- STICKY CTA -->
+  <div id="stickyCTA" class="fixed bottom-[68px] md:bottom-8 left-0 md:left-1/2 md:-transtone-x-1/2 w-full md:w-[94%] md:max-w-[500px] z-[1600] bg-white/90 md:bg-white/95 backdrop-blur-xl border-t md:border border-stone-100 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] md:shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-4 md:p-2.5 md:rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] transtone-y-[150%] opacity-0 pointer-events-none">
+    <div class="flex items-center gap-4 md:gap-3 max-w-[500px] mx-auto md:mx-0">
+      <div class="w-12 h-12 md:w-11 md:h-11 rounded-xl md:rounded-full overflow-hidden bg-stone-50 border border-stone-100 flex-shrink-0 shadow-sm">
+        <img src={heroImg} alt="Nuditos" class="w-full h-full object-cover" />
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] truncate mb-0.5">{collectionTitle}</div>
+        <div class="text-sm md:text-base font-bold text-violet-600">
+          Desde <span class="font-sans">{minPrice > 0 ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(minPrice) : 'Consultar'}</span>
+        </div>
+      </div>
+      <a href="#catalogo" class="bg-[#1a1220] text-white px-6 md:px-8 py-3.5 rounded-xl md:rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-black active:scale-95 transition-all shadow-lg flex items-center gap-2">
+        <Icon name="grid" class="text-sm" /> Elegir ramo
+      </a>
+    </div>
+  </div>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    #stickyCTA { will-change: transform, opacity; }
+    #stickyCTA.is-visible { transform: translate(0, 0); opacity: 1; pointer-events: auto; }
+    @media (min-width: 768px) { #stickyCTA.is-visible { transform: translate(-50%, 0); } }
+    @media (max-width: 768px) {
+      :global(body:has(#stickyCTA.is-visible) .wa-float) { opacity: 0 !important; transform: scale(0) !important; pointer-events: none !important; }
+    }
+  </style>
+
+  <script is:inline set:html={`window.NUDITOS_LIVE_PRODUCTS = ${JSON.stringify(safeProducts)}; window.NUDITOS_CATEGORIES = ${JSON.stringify(safeCategories)}; window.NUDITOS_LIVE_CONFIG = ${JSON.stringify(publicConfig)}; window.PL_COUNTDOWN = "${Astro.props.countdownDate || ''}";`} />
+
+  <script is:inline>
+    (function() {
+      var cd = window.PL_COUNTDOWN;
+      if (cd) {
+        var target = new Date(cd).getTime();
+        function tick() {
+          var diff = target - Date.now();
+          var dEl = document.getElementById('cdDays');
+          var hEl = document.getElementById('cdHours');
+          var mEl = document.getElementById('cdMins');
+          if (!dEl) return;
+          if (diff <= 0) { document.getElementById('plCountdown').parentElement.innerHTML = '<span class="font-bold text-rose-800">¡Aprovecha ahora!</span>'; return; }
+          dEl.textContent = String(Math.floor(diff / 86400000)).padStart(2,'0');
+          hEl.textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+          mEl.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+        }
+        tick(); setInterval(tick, 60000);
+      }
+      var stickyCTA = document.getElementById('stickyCTA');
+      window.addEventListener('scroll', function() {
+        stickyCTA.classList.toggle('is-visible', window.scrollY > 600);
+      }, { passive: true });
+    })();
+  </script>
+
+</Layout>

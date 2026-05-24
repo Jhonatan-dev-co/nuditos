@@ -1,9 +1,26 @@
 ---
-import CommercialSeoLanding from '../components/CommercialSeoLanding.astro';
-import { getLiveProducts } from '../lib/supabase';
-import { COMMERCIAL_LANDINGS } from '../data/seo-landings';
+import PremiumLanding from '../components/PremiumLanding.astro';
 export const prerender = false;
-const products = await getLiveProducts();
-const config = COMMERCIAL_LANDINGS['regalos-san-valentin'];
 ---
-<CommercialSeoLanding config={config} products={products} />
+<PremiumLanding
+  seoTitle="Regalos de San Valentín en Colombia | Nuditos"
+  seoDesc="Regalos de San Valentín con flores tejidas, ramos de crochet y detalles románticos que duran años."
+  seoKeywords="regalos san valentin colombia, regalo para san valentin, detalle romantico san valentin"
+  eyebrow="Romance con memoria"
+  h1="Regalos de San Valentín con"
+  h1Em="sello artesanal"
+  heroCopy="Haz que el detalle no termine en 3 días. Regala una pieza tejida que represente su historia y dure para siempre."
+  ctaWaText="Hola Nuditos! ❤️ Quiero un ramo especial para San Valentín"
+  productKeywords={["rosa", "amor", "aniversario", "romantico"]}
+  collectionTitle="Colección San Valentín"
+  collectionBadge="Edición romántica"
+  faq={[
+    { q: "¿Qué regalar en San Valentín si ya regalé flores?", a: "Una versión tejida mantiene el simbolismo y suma originalidad." },
+    { q: "¿Sirve para aniversario también?", a: "Sí, es ideal para fechas románticas durante todo el año." },
+    { q: "¿Puedo incluir mensaje personalizado?", a: "Sí, puedes pedir tarjeta o mensaje según disponibilidad." },
+    { q: "¿En qué ciudades entregan?", a: "Trabajamos envíos nacionales en Colombia." },
+  ]}
+  ctaFinalTitle="¿Quieres algo <em class='italic text-violet-600 font-normal'>inolvidable?</em>"
+  ctaFinalCopy="Escríbenos y creamos el ramo romántico perfecto, personalizado con sus colores y flores favoritas."
+  ctaTags={["❤️ Edición romántica", "🌹 Rosas eternas", "🎁 Empaque boutique", "✍️ Mensaje a mano"]}
+/>

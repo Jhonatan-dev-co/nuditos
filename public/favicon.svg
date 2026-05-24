@@ -1,10 +1,66 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#b794cc;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7a4d9a;stop-opacity:1" />
-    </linearGradient>
+    <radialGradient id="petalGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </radialGradient>
+    <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </radialGradient>
+    <!-- Pétalo crochet: forma de loop tejido -->
+    <filter id="soft">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur"/>
+      <feOffset dx="0" dy="2" result="shadow"/>
+      <feFlood flood-color="#7c3aed" flood-opacity="0.25" result="color"/>
+      <feComposite in="color" in2="shadow" operator="in" result="coloredShadow"/>
+      <feMerge>
+        <feMergeNode in="coloredShadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <circle cx="50" cy="50" r="45" fill="white" stroke="url(#g)" stroke-width="2" />
-  <text x="50" y="65" font-family="Arial" font-size="50" text-anchor="middle" fill="url(#g)">🌸</text>
+
+  <!-- 6 Pétalos tipo crochet (elipses rotadas desde el centro) -->
+  <g transform="translate(50,50)" filter="url(#soft)">
+
+    <!-- Pétalo 0° -->
+    <ellipse cx="0" cy="-20" rx="10" ry="18" fill="url(#petalGrad)" transform="rotate(0)"/>
+    <!-- Surcos del tejido: líneas internas -->
+    <path d="M-4,-14 Q0,-8 4,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.6" transform="rotate(0)"/>
+    <path d="M-6,-20 Q0,-16 6,-20" stroke="#e9d5ff" stroke-width="1" fill="none" opacity="0.5" transform="rotate(0)"/>
+
+    <!-- Pétalo 60° -->
+    <ellipse cx="0" cy="-20" rx="10" ry="18" fill="url(#petalGrad)" transform="rotate(60)"/>
+    <path d="M-4,-14 Q0,-8 4,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.6" transform="rotate(60)"/>
+    <path d="M-6,-20 Q0,-16 6,-20" stroke="#e9d5ff" stroke-width="1" fill="none" opacity="0.5" transform="rotate(60)"/>
+
+    <!-- Pétalo 120° -->
+    <ellipse cx="0" cy="-20" rx="10" ry="18" fill="url(#petalGrad)" transform="rotate(120)"/>
+    <path d="M-4,-14 Q0,-8 4,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.6" transform="rotate(120)"/>
+    <path d="M-6,-20 Q0,-16 6,-20" stroke="#e9d5ff" stroke-width="1" fill="none" opacity="0.5" transform="rotate(120)"/>
+
+    <!-- Pétalo 180° -->
+    <ellipse cx="0" cy="-20" rx="10" ry="18" fill="url(#petalGrad)" transform="rotate(180)"/>
+    <path d="M-4,-14 Q0,-8 4,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.6" transform="rotate(180)"/>
+    <path d="M-6,-20 Q0,-16 6,-20" stroke="#e9d5ff" stroke-width="1" fill="none" opacity="0.5" transform="rotate(180)"/>
+
+    <!-- Pétalo 240° -->
+    <ellipse cx="0" cy="-20" rx="10" ry="18" fill="url(#petalGrad)" transform="rotate(240)"/>
+    <path d="M-4,-14 Q0,-8 4,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.6" transform="rotate(240)"/>
+    <path d="M-6,-20 Q0,-16 6,-20" stroke="#e9d5ff" stroke-width="1" fill="none" opacity="0.5" transform="rotate(240)"/>
+
+    <!-- Pétalo 300° -->
+    <ellipse cx="0" cy="-20" rx="10" ry="18" fill="url(#petalGrad)" transform="rotate(300)"/>
+    <path d="M-4,-14 Q0,-8 4,-14" stroke="#c084fc" stroke-width="1.5" fill="none" opacity="0.6" transform="rotate(300)"/>
+    <path d="M-6,-20 Q0,-16 6,-20" stroke="#e9d5ff" stroke-width="1" fill="none" opacity="0.5" transform="rotate(300)"/>
+
+    <!-- Centro: botón crochet -->
+    <circle cx="0" cy="0" r="11" fill="url(#centerGrad)"/>
+    <!-- Textura de centro tejido -->
+    <circle cx="0" cy="0" r="8" fill="none" stroke="#fcd34d" stroke-width="2" stroke-dasharray="3 2"/>
+    <circle cx="0" cy="0" r="4" fill="#f59e0b"/>
+    <!-- Punto central -->
+    <circle cx="0" cy="0" r="2" fill="#fde68a"/>
+  </g>
 </svg>
