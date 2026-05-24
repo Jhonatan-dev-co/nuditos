@@ -187,6 +187,8 @@ function sbToConfig(rows) {
     socialWhatsapp:       m.social_whatsapp || '',
     gaId:                 m.ga_id || '',
     gaActive:             m.ga_active === 'true',
+    tiktokPixelActivo:    m.tiktok_pixel_activo === 'true',
+    tiktokPixelId:        m.tiktok_pixel_id || '',
   };
 }
 
@@ -405,6 +407,8 @@ async function sbAdminSaveConfig(cfg) {
     { clave: 'social_whatsapp',     valor: cfg.socialWhatsapp || '' },
     { clave: 'ga_id',               valor: cfg.gaId || '' },
     { clave: 'ga_active',           valor: String(!!cfg.gaActive) },
+    { clave: 'tiktok_pixel_activo',  valor: String(!!cfg.tiktokPixelActivo) },
+    { clave: 'tiktok_pixel_id',      valor: cfg.tiktokPixelId || '' },
   ];
   return _post('config?on_conflict=clave', updates, true, 'resolution=merge-duplicates');
 }

@@ -63,7 +63,7 @@ const ref = Astro.url.searchParams.get('ref') || '';
         }
       } catch (e) {}
 
-      // 2. Track Facebook Pixel Purchase Event
+      // 2. Track Facebook & TikTok Pixel Purchase Events
       if (typeof window.fbq === 'function' && totalAmount > 0) {
         window.fbq('track', 'Purchase', {
           content_ids: orderItems.map(i => i.id ? i.id.toString() : ''),
@@ -71,6 +71,19 @@ const ref = Astro.url.searchParams.get('ref') || '';
           currency: 'COP',
           num_items: orderItems.reduce((acc, i) => acc + (i.qty || 1), 0),
           content_type: 'product'
+        });
+      }
+      if (typeof window.ttq === 'object' && totalAmount > 0) {
+        window.ttq.track('CompletePayment', {
+          contents: orderItems.map(i => ({
+            content_id: i.id ? i.id.toString() : '',
+            content_name: i.name || '',
+            content_type: 'product',
+            price: Number(i.price),
+            quantity: Number(i.qty || 1)
+          })),
+          value: totalAmount,
+          currency: 'COP'
         });
       }
 

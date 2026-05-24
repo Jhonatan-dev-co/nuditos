@@ -410,6 +410,14 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       if(adminCfg.gaActive) document.getElementById('toggleGASEO').classList.add('on');
       if(adminCfg.metaPixelId) document.getElementById('seoMetaPixelId').value = adminCfg.metaPixelId;
       if(adminCfg.metaPixelActivo) document.getElementById('toggleMetaPixelSEO').classList.add('on');
+      if(adminCfg.tiktokPixelId) {
+        document.getElementById('tiktokPixelId').value = adminCfg.tiktokPixelId;
+        document.getElementById('seoTikTokPixelId').value = adminCfg.tiktokPixelId;
+      }
+      if(adminCfg.tiktokPixelActivo) {
+        document.getElementById('toggleTikTokPixel').classList.add('on');
+        document.getElementById('toggleTikTokPixelSEO').classList.add('on');
+      }
       if(adminCfg.socialProofMode && document.getElementById('socialProofMode')) {
         document.getElementById('socialProofMode').value = adminCfg.socialProofMode;
       }
@@ -1575,6 +1583,9 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       const pixelId = document.getElementById('seoMetaPixelId')?.value.trim() || document.getElementById('metaPixelId')?.value.trim();
       const pixelActivo = document.getElementById('toggleMetaPixelSEO')?.classList.contains('on') || document.getElementById('toggleMetaPixel')?.classList.contains('on');
 
+      const tiktokPixelId = document.getElementById('seoTikTokPixelId')?.value.trim() || document.getElementById('tiktokPixelId')?.value.trim() || '';
+      const tiktokPixelActivo = document.getElementById('toggleTikTokPixelSEO')?.classList.contains('on') || document.getElementById('toggleTikTokPixel')?.classList.contains('on');
+
       const newCfg={
         ramoDestacado:momentoSelection,
         carruselHero:heroSelection,
@@ -1590,6 +1601,8 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         wompiEvents:document.getElementById('wompiEvents').value.trim(),
         metaPixelActivo: pixelActivo,
         metaPixelId: pixelId,
+        tiktokPixelActivo: tiktokPixelActivo,
+        tiktokPixelId: tiktokPixelId,
         socialProofMode: document.getElementById('socialProofMode')?.value || 'trust_badges',
         catViews:{},
         seoTitle: document.getElementById('seoTitle')?.value.trim() || '',

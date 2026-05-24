@@ -601,13 +601,26 @@ const productSchema = {
       setTimeout(() => { btn.innerHTML = original; btn.classList.remove('bg-emerald-600'); }, 2000);
     }
     
-    // Facebook Pixel Track - AddToCart
+    // Facebook & TikTok Pixel Track - AddToCart
     if (typeof window.fbq === 'function') {
       window.fbq('track', 'AddToCart', {
         content_ids: [currentProduct.id.toString()],
         content_name: currentProduct.name,
         content_type: 'product',
         value: currentProduct.price,
+        currency: 'COP'
+      });
+    }
+    if (typeof window.ttq === 'object') {
+      window.ttq.track('AddToCart', {
+        contents: [{
+          content_id: currentProduct.id.toString(),
+          content_name: currentProduct.name,
+          content_type: 'product',
+          price: Number(currentProduct.price),
+          quantity: 1
+        }],
+        value: Number(currentProduct.price),
         currency: 'COP'
       });
     }
@@ -659,12 +672,24 @@ const productSchema = {
         setInterval(updateCd, 60000);
       }
 
-      // Facebook Pixel Track - ViewContent
+      // Facebook & TikTok Pixel Track - ViewContent
       if (typeof window.fbq === 'function') {
         window.fbq('track', 'ViewContent', {
           content_ids: [product.id.toString()],
           content_name: product.name,
           content_type: 'product',
+          value: Number(showPrice),
+          currency: 'COP'
+        });
+      }
+      if (typeof window.ttq === 'object') {
+        window.ttq.track('ViewContent', {
+          contents: [{
+            content_id: product.id.toString(),
+            content_name: product.name,
+            content_type: 'product',
+            price: Number(showPrice)
+          }],
           value: Number(showPrice),
           currency: 'COP'
         });

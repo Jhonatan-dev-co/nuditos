@@ -144,6 +144,14 @@ FAQ objetivo:"></textarea>
         <input type="text" id="seoGAId" placeholder="G-XXXXXXXXXX" style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem" />
       </div>
 
+      <div class="field" style="margin-bottom:1.2rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+          <label style="font-size:.75rem;font-weight:600">TikTok Pixel</label>
+          <div class="toggle-btn" id="toggleTikTokPixelSEO" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <input type="text" id="seoTikTokPixelId" placeholder="ID del Pixel de TikTok" style="width:100%;padding:.7rem;border:1.5px solid #eee;border-radius:8px;font-size:.9rem" />
+      </div>
+
       <small style="color:#777;font-size:.72rem">Revision semanal recomendada: indexacion, CTR, consultas y cobertura por landing.</small>
     </div>
   </div>
@@ -278,6 +286,11 @@ FAQ objetivo:"></textarea>
       const settingsPixelId = document.getElementById('metaPixelId');
       const settingsPixelToggle = document.getElementById('toggleMetaPixel');
 
+      const seoTTPixelId = document.getElementById('seoTikTokPixelId').value.trim();
+      const seoTTPixelActive = document.getElementById('toggleTikTokPixelSEO').classList.contains('on');
+      const settingsTTPixelId = document.getElementById('tiktokPixelId');
+      const settingsTTPixelToggle = document.getElementById('toggleTikTokPixel');
+
       if (settingsPixelId) {
         if (seoPixelId && seoPixelId !== settingsPixelId.value) settingsPixelId.value = seoPixelId;
         else if (!seoPixelId && settingsPixelId.value) document.getElementById('seoMetaPixelId').value = settingsPixelId.value;
@@ -286,6 +299,16 @@ FAQ objetivo:"></textarea>
       if (settingsPixelToggle) {
         if (seoPixelActive) settingsPixelToggle.classList.add('on');
         else settingsPixelToggle.classList.remove('on');
+      }
+
+      if (settingsTTPixelId) {
+        if (seoTTPixelId && seoTTPixelId !== settingsTTPixelId.value) settingsTTPixelId.value = seoTTPixelId;
+        else if (!seoTTPixelId && settingsTTPixelId.value) document.getElementById('seoTikTokPixelId').value = settingsTTPixelId.value;
+      }
+
+      if (settingsTTPixelToggle) {
+        if (seoTTPixelActive) settingsTTPixelToggle.classList.add('on');
+        else settingsTTPixelToggle.classList.remove('on');
       }
 
       if (typeof saveConfig === 'function') {

@@ -23,12 +23,15 @@ document.addEventListener('astro:page-load', () => {
   input.addEventListener('input', e => {
     const q = (e.target as HTMLInputElement).value.trim().toLowerCase();
     
-    // Facebook Pixel Track - Search (Debounced)
+    // Facebook & TikTok Pixel Track - Search (Debounced)
     clearTimeout(searchTimer);
     if (q.length >= 3) {
       searchTimer = setTimeout(() => {
         if (typeof window.fbq === 'function') {
           window.fbq('track', 'Search', { search_string: q });
+        }
+        if (typeof (window as any).ttq === 'object') {
+          (window as any).ttq.track('Search', { query: q });
         }
       }, 700);
     }

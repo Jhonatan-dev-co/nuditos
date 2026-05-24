@@ -58,6 +58,22 @@ import Icon from '../Icon.astro';
   </div>
 
   <div class="t-card">
+    <div class="t-title">🎵 TikTok Pixel</div>
+    <div class="t-sub">Activa el seguimiento en TikTok Ads.</div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">TikTok Pixel activo</div>
+        <div class="toggle-desc">Registra visitas y eventos de compra en TikTok</div>
+      </div>
+      <button class="toggle" id="toggleTikTokPixel" onclick="this.classList.toggle('on')"></button>
+    </div>
+    <div class="t-field" style="margin-top:.9rem">
+      <label>TikTok Pixel ID</label>
+      <input type="text" id="tiktokPixelId" placeholder="PCXXXXXXXXXXXXXXXXXXXX">
+    </div>
+  </div>
+
+  <div class="t-card">
     <div class="t-title">🖼️ Vista por categoría</div>
     <div class="t-sub">Elige cómo se muestran los productos de cada categoría.</div>
     <div id="catViewsList"></div>

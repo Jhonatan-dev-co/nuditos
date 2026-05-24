@@ -203,6 +203,8 @@ export async function getLiveConfig() {
         socialWhatsapp:       m.social_whatsapp || '',
         gaId:                 m.ga_id || '',
         gaActive:             m.ga_active === 'true',
+        tiktokPixelActivo:    m.tiktok_pixel_activo === 'true',
+        tiktokPixelId:        m.tiktok_pixel_id || '',
       };
     } catch (e) {
       console.error('[supabase-config]', e);

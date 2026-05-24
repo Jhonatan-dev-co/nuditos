@@ -736,13 +736,26 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       restoreFormData();
       updateMiniSummaries();
 
-      // Facebook Pixel Track - InitiateCheckout
+      // Facebook & TikTok Pixel Track - InitiateCheckout
       if (typeof window.fbq === 'function' && _cart.length > 0) {
         window.fbq('track', 'InitiateCheckout', {
           content_ids: _cart.map(i => i.id ? i.id.toString() : ''),
           value: getTotal(),
           currency: 'COP',
           num_items: _cart.reduce((sum, i) => sum + i.qty, 0)
+        });
+      }
+      if (typeof window.ttq === 'object' && _cart.length > 0) {
+        window.ttq.track('InitiateCheckout', {
+          contents: _cart.map(i => ({
+            content_id: i.id ? i.id.toString() : '',
+            content_name: i.name || '',
+            content_type: 'product',
+            price: Number(i.price),
+            quantity: Number(i.qty || 1)
+          })),
+          value: getTotal(),
+          currency: 'COP'
         });
       }
 
