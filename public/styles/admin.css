@@ -30,6 +30,91 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);heig
 .login-btn:hover{background:var(--lila-dark);transform:translateY(-1px)}
 .login-err{color:var(--red);font-size:.78rem;margin-top:.6rem;display:none}
 
+/* ── OAUTH & TOGGLE OPTIONS ── */
+.login-oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 0.8rem;
+  outline: none;
+}
+.login-google {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1.5px solid #e5e7eb;
+}
+.login-google:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.login-github {
+  background: #24292e;
+  color: #ffffff;
+  border: none;
+}
+.login-github:hover {
+  background: #1b1f23;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--soft);
+  font-size: 0.8rem;
+  margin: 1.2rem 0;
+}
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1.5px solid var(--border);
+}
+.login-divider:not(:empty)::before {
+  margin-right: .75rem;
+}
+.login-divider:not(:empty)::after {
+  margin-left: .75rem;
+}
+.login-toggle-email {
+  font-size: 0.8rem;
+  color: var(--lila);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.2s;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  margin-top: 0.4rem;
+}
+.login-toggle-email:hover {
+  color: var(--lila-dark);
+}
+.login-email-container {
+  display: none;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease;
+  width: 100%;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
 /* ── PANEL ── */
 #adminPanel{display:none;height:100vh;flex-direction:column}
 

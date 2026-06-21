@@ -52,19 +52,16 @@ const colors: any = {
 const getColors = (c: string) => colors[c] || colors.rose;
 ---
 
-<section class="bg-stone-50 py-16 px-6 border-t border-stone-100 overflow-hidden">
+<section class="bg-stone-50 py-12 px-6 border-t border-stone-100 overflow-hidden">
   <div class="max-w-[1200px] mx-auto">
-    <div class="text-center mb-12">
-      <div class="inline-flex items-center justify-center bg-rose-50 text-rose-600 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[2px] mb-4 border border-rose-100 shadow-sm gap-2">
-        <Icon name="heart-3" class="text-xs" /> Clientes enamorados en toda Colombia
-      </div>
-      <h2 class="font-serif text-3xl md:text-5xl font-light text-stone-800 mb-4 leading-tight">Historias <em class="italic text-rose-500 font-normal">Reales</em></h2>
-      <p class="text-stone-500 text-sm md:text-base max-w-lg mx-auto">Lo que dicen las personas que decidieron confiar en Nuditos para un momento especial.</p>
+    <div class="mb-10 text-left">
+      <h2 class="font-serif text-3xl md:text-5xl font-light text-stone-800 mb-3 leading-tight">Historias <em class="italic text-rose-500 font-normal">Reales</em></h2>
+      <p class="text-stone-500 text-sm md:text-base max-w-lg">Lo que dicen las personas que decidieron confiar en Nuditos para un momento especial.</p>
     </div>
 
-    <div class="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto md:overflow-x-visible pb-8 md:pb-0 snap-x snap-mandatory scrollbar-hide scroll-pl-6 -mx-6 px-6 md:mx-0 md:px-0 after:content-[''] after:w-1 after:flex-shrink-0 md:after:hidden">
+    <div id="testimonialsCarousel" class="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide scroll-pl-6 -mx-6 px-6 md:mx-0 md:px-0 after:content-[''] after:w-1 after:flex-shrink-0 relative">
       {list.map((t: any, i: number) => (
-        <div class="min-w-[300px] md:min-w-0 snap-start bg-white rounded-[2.5rem] border border-stone-100 shadow-sm hover:shadow-md transition-all flex flex-col group overflow-hidden">
+        <div class="testimonio-card shrink-0 w-[85vw] sm:w-[350px] md:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] snap-start bg-white rounded-[2.5rem] border border-stone-100 shadow-sm hover:shadow-md transition-all flex flex-col group overflow-hidden">
           
           {t.tipo === 'whatsapp' ? (
             <div class="flex flex-col h-full">
@@ -96,7 +93,7 @@ const getColors = (c: string) => colors[c] || colors.rose;
             /* Card de Texto */
             <div class="p-7 md:p-8 flex flex-col h-full">
               <div class="flex items-center gap-4 mb-6">
-                <div class={`w-12 h-12 rounded-full ${getColors(t.color || 'rose').bg} flex items-center justify-center ${getColors(t.color || 'rose').text} font-bold text-lg flex-shrink-0`}>
+                 <div class={`w-12 h-12 rounded-full ${getColors(t.color || 'rose').bg} flex items-center justify-center ${getColors(t.color || 'rose').text} font-bold text-lg flex-shrink-0`}>
                   {t.avatar || (t.nombre?.[0] || 'U')}
                 </div>
                 <div>
@@ -118,7 +115,7 @@ const getColors = (c: string) => colors[c] || colors.rose;
               </p>
 
               <div class="flex items-center justify-between mt-auto pt-5 border-t border-stone-50">
-                <span class={`px-3 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase border ${getColors(t.color || 'rose').badge}`}>
+                 <span class={`px-3 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase border ${getColors(t.color || 'rose').badge}`}>
                   {t.producto || t.product || 'Ramo Nuditos'}
                 </span>
                 <span class="text-[10px] text-stone-300 font-medium">{t.tiempo || t.time || 'Reciente'}</span>
@@ -187,4 +184,48 @@ const getColors = (c: string) => colors[c] || colors.rose;
       document.body.style.overflow = 'auto';
     });
   }
+
+  // Lógica del Carrusel de Testimonios
+  document.addEventListener('DOMContentLoaded', () => {
+    const carousel = document.getElementById('testimonialsCarousel');
+    if (!carousel) return;
+
+    // 1. Mezclar (shuffle) en el cliente para que siempre se vea diferente al entrar
+    const cards = Array.from(carousel.querySelectorAll('.testimonio-card'));
+    // Algoritmo Fisher-Yates
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      carousel.appendChild(cards[j]); 
+    }
+
+    // 2. Auto-scroll fluido
+    let autoScrollInterval;
+    const startAutoScroll = () => {
+      autoScrollInterval = setInterval(() => {
+        const firstCard = carousel.querySelector('.testimonio-card');
+        if (!firstCard) return;
+        const cardWidth = firstCard.offsetWidth;
+        const gap = 24; // gap-6 en Tailwind = 1.5rem = 24px
+        const step = cardWidth + gap;
+        
+        // Si llegamos al final, volvemos al inicio suavemente
+        if (carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 10) {
+          carousel.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          carousel.scrollBy({ left: step, behavior: 'smooth' });
+        }
+      }, 3500); // Cambia cada 3.5 segundos
+    };
+
+    const stopAutoScroll = () => clearInterval(autoScrollInterval);
+
+    // Iniciar auto-scroll
+    startAutoScroll();
+
+    // Pausar si el usuario interactúa
+    carousel.addEventListener('mouseenter', stopAutoScroll);
+    carousel.addEventListener('mouseleave', startAutoScroll);
+    carousel.addEventListener('touchstart', stopAutoScroll, {passive: true});
+    carousel.addEventListener('touchend', startAutoScroll, {passive: true});
+  });
 </script>

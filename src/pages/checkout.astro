@@ -674,7 +674,12 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
              items: o.cart,
              discount: o.discount,
              address: `${o.direccion}, ${o.barrio}, ${o.ciudad}, ${o.departamento}${o.codigoPostal ? ' CP:' + o.codigoPostal : ''}`,
-             notes: o.notas
+             notes: o.notas,
+             direccion: o.direccion,
+             barrio: o.barrio,
+             ciudad: o.ciudad,
+             departamento: o.departamento,
+             codigoPostal: o.codigoPostal
           })
         });
 
@@ -693,6 +698,16 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
         const checkoutConfig = data.widgetConfig;
         checkoutConfig.redirectUrl = window.location.origin + '/gracias';
+        
+        // Pre-llenar datos del cliente en Wompi Widget para evitar doble digitación
+        checkoutConfig.customerData = {
+          email: o.email,
+          fullName: o.fullname,
+          phoneNumber: o.phone.replace(/\D/g, ''),
+          phoneNumberPrefix: '+57',
+          legalId: o.doc,
+          legalIdType: getFieldVal('co-doc-type') || 'CC'
+        };
 
         // 2. Iniciar Widget de Wompi de manera impecable
         if (window.WidgetCheckout) {

@@ -5,7 +5,7 @@ import type { APIRoute } from 'astro';
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const payload = await request.json();
-    const { fullname, email, phone, items, discount, address, notes } = payload;
+    const { fullname, email, phone, items, discount, address, notes, direccion, barrio, ciudad, departamento, codigoPostal } = payload;
 
     // Obtener variables de entorno de Cloudflare de forma robusta
     const env = (locals as any).runtime?.env || {};
@@ -89,6 +89,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
       items: items.map((i: any) => `${i.qty}x ${i.name}`).join(', '),
       total: finalTotal,
       estado: 'pendiente',
+      direccion: direccion || null,
+      departamento: departamento || null,
+      ciudad: ciudad || null,
+      barrio: barrio || null,
+      codigo_postal: codigoPostal || null,
       notas: `${address}${notes ? ' | ' + notes : ''}`,
     };
 

@@ -3,7 +3,7 @@ import Icon from './Icon.astro';
 import { slugify, clUrl } from '../data/datos';
 const { p } = Astro.props;
 ---
-<a class="group flex items-center bg-white rounded-2xl overflow-hidden border border-stone-100 hover:shadow-lg transition-all duration-300 p-2 gap-4" href={`/ramo/${slugify(p.name)}`} aria-label={`Ver detalles de ${p.name}`}>
+<a class="group flex items-center bg-white rounded-2xl overflow-hidden border border-stone-200/80 shadow-sm hover:shadow-md hover:border-violet-200/80 transition-all duration-300 p-2 gap-4" href={`/ramo/${slugify(p.name)}`} aria-label={`Ver detalles de ${p.name}`}>
   <div class="w-20 h-20 flex-shrink-0 bg-stone-50 rounded-xl overflow-hidden">
     {p.img ? (
       <img src={clUrl(p.img, 200)} alt={p.name} loading="lazy" class="w-full h-full object-cover transition-transform group-hover:scale-110" />

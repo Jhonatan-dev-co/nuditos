@@ -80,6 +80,53 @@ async function sbSignIn(email, password) {
   return data;
 }
 
+async function sbSignInWithOAuth(provider) {
+  // Redirigir a Supabase OAuth endpoint
+  const redirectUrl = window.location.origin + window.location.pathname;
+  const url = `${SB_URL}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectUrl)}`;
+  window.location.href = url;
+}
+
+function sbHandleOAuthCallback() {
+  try {
+    const hash = window.location.hash;
+    if (!hash) return false;
+    
+    // Convertir el hash fragment en URLSearchParams
+    const params = new URLSearchParams(hash.substring(1));
+    const token = params.get('access_token');
+    const expiresIn = params.get('expires_in');
+    const error = params.get('error');
+    const errorDescription = params.get('error_description');
+
+    if (error) {
+      console.error('Supabase OAuth Error:', error, errorDescription);
+      throw new Error(errorDescription || error);
+    }
+    
+    if (token) {
+      _sbToken = token;
+      localStorage.setItem('sb_session', JSON.stringify({
+        token: token,
+        expires: Date.now() + (parseInt(expiresIn || '3600') * 1000)
+      }));
+      // Limpiar el hash de la URL para que no quede visible
+      history.replaceState(null, document.title, window.location.pathname + window.location.search);
+      return true;
+    }
+  } catch (e) {
+    console.error('Error al manejar el callback de OAuth:', e);
+    // Propagar el error o mostrar en consola
+    const errEl = document.getElementById('loginErr');
+    if (errEl) {
+      errEl.textContent = 'Error de autenticación: ' + e.message;
+      errEl.style.display = 'block';
+    }
+  }
+  return false;
+}
+
+
 async function sbSignOut() {
   try {
     await fetch(`${SB_URL}/auth/v1/logout`, {
