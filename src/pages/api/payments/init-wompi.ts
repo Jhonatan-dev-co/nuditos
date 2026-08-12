@@ -5,7 +5,7 @@ import type { APIRoute } from 'astro';
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const payload = await request.json();
-    const { fullname, email, phone, items, discount, address, notes, direccion, barrio, ciudad, departamento, codigoPostal } = payload;
+    const { fullname, email, phone, waUser, items, discount, address, notes, direccion, barrio, ciudad, departamento, codigoPostal } = payload;
 
     // Obtener variables de entorno de Cloudflare de forma robusta
     const env = (locals as any).runtime?.env || {};
@@ -82,10 +82,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     // 3. Crear pedido en Supabase
+    const cleanWaUser = waUser ? (String(waUser).trim().startsWith('@') ? String(waUser).trim() : `@${String(waUser).trim()}`) : null;
     const dbPayload = {
       cliente_nombre: fullname,
       cliente_email: email,
-      cliente_telefono: phone,
+      cliente_telefono: cleanWaUser ? `${phone} (${cleanWaUser})` : phone,
       items: items.map((i: any) => `${i.qty}x ${i.name}`).join(', '),
       total: finalTotal,
       estado: 'pendiente',
@@ -94,7 +95,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       ciudad: ciudad || null,
       barrio: barrio || null,
       codigo_postal: codigoPostal || null,
-      notas: `${address}${notes ? ' | ' + notes : ''}`,
+      notas: `${address}${notes ? ' | ' + notes : ''}${cleanWaUser ? ' | WA Username: ' + cleanWaUser : ''}`,
     };
 
     const res = await fetch(`${SB_URL}/rest/v1/pedidos`, {

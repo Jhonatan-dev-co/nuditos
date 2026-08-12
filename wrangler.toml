@@ -1,15 +1,3 @@
 name = "nuditos"
-main = "dist/_worker.js/index.js"
+pages_build_output_dir = "dist"
 compatibility_date = "2026-04-18"
-assets = { directory = "dist" }
-
-[[routes]]
-pattern = "nuditos.com.co"
-custom_domain = true
-
-[[routes]]
-pattern = "www.nuditos.com.co"
-custom_domain = true
-
-[observability]
-enabled = true

@@ -91,6 +91,11 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
                 <input class="co-input" type="tel" id="co-phone" name="phone" placeholder="Celular" autocomplete="tel" />
                 <div class="co-field-error">Número requerido.</div>
               </div>
+
+              <div class="co-field">
+                <p class="co-form-instruction">Usuario de WhatsApp <span class="text-stone-400 font-normal text-xs">(Opcional)</span></p>
+                <input class="co-input" type="text" id="co-wa-user" name="wa_user" placeholder="Ej: @juan_andres" />
+              </div>
               
               <div class="co-field">
                 <p class="co-form-instruction">Tipo de documento</p>
@@ -470,7 +475,7 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     }
 
     function saveFormData() {
-      const fields = ['co-nombre','co-apellido','co-email','co-phone','co-doc','co-doc-type',
+      const fields = ['co-nombre','co-apellido','co-email','co-phone','co-wa-user','co-doc','co-doc-type',
                       'co-departamento','co-ciudad','co-direccion','co-barrio','co-codigo-postal','co-notas'];
       const data = {};
       fields.forEach(f => { 
@@ -524,6 +529,7 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         fullname: fullname,
         email: getFieldVal('co-email'),
         phone: getFieldVal('co-phone'),
+        waUser: getFieldVal('co-wa-user'),
         doc: getFieldVal('co-doc'),
         departamento: getFieldVal('co-departamento'),
         ciudad: getFieldVal('co-ciudad'),
@@ -671,6 +677,7 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
              fullname: o.fullname,
              email: o.email,
              phone: o.phone,
+             waUser: o.waUser,
              items: o.cart,
              discount: o.discount,
              address: `${o.direccion}, ${o.barrio}, ${o.ciudad}, ${o.departamento}${o.codigoPostal ? ' CP:' + o.codigoPostal : ''}`,

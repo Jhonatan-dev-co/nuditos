@@ -17,6 +17,25 @@ import Icon from '../Icon.astro';
   </div>
 
   <div class="t-card">
+    <div class="t-title">📦 Skydropx — Integración de Envíos Reales</div>
+    <div class="t-sub">Ingresa tu API Key y API Secret de Skydropx para generar guías reales en tu panel.</div>
+    <div class="cloudinary-config">
+      <div class="cc-title"><Icon name="settings-3"  /> Credenciales de Skydropx</div>
+      <div class="cc-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; margin-top:0.5rem">
+        <div class="cc-field">
+          <label>API Key (Token)</label>
+          <input type="password" id="skydropxApiKey" placeholder="Pega tu API Key aquí">
+        </div>
+        <div class="cc-field">
+          <label>API Secret (Opcional)</label>
+          <input type="password" id="skydropxApiSecret" placeholder="Pega tu API Secret aquí">
+        </div>
+      </div>
+      <button class="cc-save" style="margin-top:0.8rem" onclick="saveSkydropxConfig()"><Icon name="save"  /> Guardar Credenciales Skydropx</button>
+    </div>
+  </div>
+
+  <div class="t-card">
     <div class="t-title">💳 Wompi — Pasarela de pago</div>
     <div class="t-sub">Activa el botón de pago con tarjeta y PSE en el carrito.</div>
     <div class="toggle-row">

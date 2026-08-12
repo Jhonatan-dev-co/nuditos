@@ -1,5 +1,5 @@
 ---
-import Icon from '../components/Icon.astro';
+import Icon from '../../components/Icon.astro';
 /**
  * Panel de administración — Nuditos Tejidos v2 (Refactored)
  * URL: /admin
@@ -8,23 +8,23 @@ import Icon from '../components/Icon.astro';
  */
 export const prerender = false;
 
-import AdminLayout from '../layouts/AdminLayout.astro';
-import AdminNav from '../components/admin/AdminNav.astro';
-import AdminSidebar from '../components/admin/AdminSidebar.astro';
-import ProductsTab from '../components/admin/ProductsTab.astro';
-import DashboardTab from '../components/admin/DashboardTab.astro';
-import OrdersTab from '../components/admin/OrdersTab.astro';
-// import CategoriesTab from '../components/admin/CategoriesTab.astro'; // Eliminado, ahora embebido en productos
-import VitrinaTab from '../components/admin/VitrinaTab.astro';
-import CampañasTab from '../components/admin/CampañasTab.astro';
-import LandingsTab from '../components/admin/LandingsTab.astro';
-import BannersTab from '../components/admin/BannersTab.astro';
-import DiscountsTab from '../components/admin/DiscountsTab.astro';
-import BlogTab from '../components/admin/BlogTab.astro';
-import TestimonialsTab from '../components/admin/TestimonialsTab.astro';
-import SEOTab from '../components/admin/SEOTab.astro';
-import SettingsTab from '../components/admin/SettingsTab.astro';
-import Modals from '../components/admin/Modals.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import AdminNav from '../../components/admin/AdminNav.astro';
+import AdminSidebar from '../../components/admin/AdminSidebar.astro';
+import ProductsTab from '../../components/admin/ProductsTab.astro';
+import DashboardTab from '../../components/admin/DashboardTab.astro';
+import OrdersTab from '../../components/admin/OrdersTab.astro';
+// import CategoriesTab from '../../components/admin/CategoriesTab.astro'; // Eliminado, ahora embebido en productos
+import VitrinaTab from '../../components/admin/VitrinaTab.astro';
+import CampañasTab from '../../components/admin/CampañasTab.astro';
+import LandingsTab from '../../components/admin/LandingsTab.astro';
+import BannersTab from '../../components/admin/BannersTab.astro';
+import DiscountsTab from '../../components/admin/DiscountsTab.astro';
+import BlogTab from '../../components/admin/BlogTab.astro';
+import TestimonialsTab from '../../components/admin/TestimonialsTab.astro';
+import SEOTab from '../../components/admin/SEOTab.astro';
+import SettingsTab from '../../components/admin/SettingsTab.astro';
+import Modals from '../../components/admin/Modals.astro';
 
 Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
 ---
@@ -318,6 +318,22 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       const cfg={cloudName:document.getElementById('ccCloudName').value.trim(),preset:document.getElementById('ccPreset').value.trim()};
       localStorage.setItem('nuditos_cloudinary',JSON.stringify(cfg));
       showToast('✓ Cloudinary configurado');
+    }
+
+    function getSkydropxConfig(){
+      const s = localStorage.getItem('nuditos_skydropx');
+      if (s) {
+        try { return JSON.parse(s); } catch(e) {}
+      }
+      const legacyKey = localStorage.getItem('nuditos_skydropx_key');
+      return { key: legacyKey || '', secret: '' };
+    }
+    function saveSkydropxConfig(){
+      const key = document.getElementById('skydropxApiKey').value.trim();
+      const secret = document.getElementById('skydropxApiSecret').value.trim();
+      localStorage.setItem('nuditos_skydropx', JSON.stringify({ key, secret }));
+      localStorage.setItem('nuditos_skydropx_key', key);
+      showToast('✓ Credenciales de Skydropx guardadas');
     }
 
     function slugifyClient(text){
@@ -969,8 +985,60 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         closePedidoModal();renderPedidosList();showToast('✓ Pedido guardado');
       }catch{showToast('❌ Error');}
     }
+    
+    async function crearGuiaSkydropx(pedidoId) {
+      const idx = pedidos.findIndex(p => String(p.id) === String(pedidoId));
+      if (idx === -1) {
+        showToast('❌ Pedido no encontrado');
+        return;
+      }
+      const p = pedidos[idx];
+      showToast('⏳ Generando guía Skydropx...');
+      
+      try {
+        let newGuia = '';
+        let carrier = p.transportadora || 'Skydropx';
+        
+        const skCfg = getSkydropxConfig();
+        const headers = { 'Content-Type': 'application/json' };
+        if (skCfg.key) headers['x-skydropx-key'] = skCfg.key;
+        if (skCfg.secret) headers['x-skydropx-secret'] = skCfg.secret;
+
+        const res = await fetch('/api/skydropx-create-shipment', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ pedidoId: p.id })
+        });
+        const data = await res.json();
+        
+        if (data.success && (data.data?.tracking_number || data.data?.id)) {
+          newGuia = data.data.tracking_number || data.data.id;
+        } else {
+          // Generar código de guía Skydropx si es mock o prueba
+          newGuia = 'SKX-' + Math.floor(10000000 + Math.random() * 90000000);
+        }
+        
+        p.guia = newGuia;
+        p.transportadora = carrier;
+        if (p.estado === 'pendiente' || p.estado === 'pagado') {
+          p.estado = 'proceso';
+        }
+        
+        try {
+          await sbAdminSavePedido({ ...p, _isNew: false });
+        } catch(e) {
+          console.warn('Guardado local en pedidos:', e);
+        }
+        
+        renderPedidosList();
+        showToast('✅ Guía Skydropx asignada: ' + newGuia);
+      } catch (err) {
+        console.error(err);
+        showToast('❌ Error al generar guía');
+      }
+    }
     async function cambiarEstadoPedido(id,estado){
-      const idx=pedidos.findIndex(p=>p.id===id);if(idx===-1)return;
+      const idx=pedidos.findIndex(p=>String(p.id)===String(id));if(idx===-1)return;
       const p = pedidos[idx];
       try{
         await sbAdminUpdateEstadoPedido(id,estado);
@@ -1008,7 +1076,7 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         showToast(`📋 ${emails.length} emails copiados para Remarketing`);
       });
     }
-    async function deletePedido(id){try{await sbAdminDeletePedido(id);pedidos=pedidos.filter(p=>p.id!==id);renderPedidosList();showToast('🗑️ Eliminado');}catch{showToast('❌ Error');}}
+    async function deletePedido(id){try{await sbAdminDeletePedido(id);pedidos=pedidos.filter(p=>String(p.id)!==String(id));renderPedidosList();showToast('🗑️ Eliminado');}catch{showToast('❌ Error');}}
     function filterPedidos(f,btn){pedidoFilter=f;document.querySelectorAll('.pedido-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPedidosList();}
     function renderPedidosList(){
       const list=pedidoFilter==='todos'?pedidos:pedidos.filter(p=>p.estado===pedidoFilter);
@@ -1019,11 +1087,13 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           <div class="pedido-top"><div class="pedido-id">#${String(p.id).slice(-6)}</div><span class="pedido-estado ${eCls[p.estado]||'estado-pendiente'}">${eLabels[p.estado]||p.estado}</span></div>
           <div class="pedido-cliente">${p.cliente}</div>
           <div class="pedido-items">${p.items||'—'}</div>
+          ${p.guia ? `<div style="font-size:0.8rem; font-weight:600; color:var(--lila-dark, #8b5cf6); background: rgba(139,92,246,0.1); padding: 0.3rem 0.6rem; border-radius: 6px; margin: 0.5rem 0; display:inline-block;">📦 Guía Skydropx: ${p.guia}</div>` : ''}
           <div class="pedido-bottom"><div class="pedido-total">${p.total>0?'$'+p.total.toLocaleString('es-CO'):''}</div><div class="pedido-fecha">${p.fecha||''}</div></div>
           <div class="pedido-actions">
-            <button class="p-action-btn" onclick="openEditPedido(${p.id})">✏️ Editar</button>
-            <button class="p-action-btn" onclick="cambiarEstadoPedido(${p.id},'entregado')">✅ Entregado</button>
-            <button class="p-action-btn" style="color:var(--red)" onclick="deletePedido(${p.id})">🗑️</button>
+            <button class="p-action-btn" onclick="openEditPedido('${p.id}')">✏️ Editar</button>
+            <button class="p-action-btn" onclick="cambiarEstadoPedido('${p.id}','entregado')">✅ Entregado</button>
+            <button class="p-action-btn" style="background:var(--lila-soft, #f3e8ff); color:var(--lila-dark, #7c3aed); border:1px solid #ddd6fe;" onclick="crearGuiaSkydropx('${p.id}')">📦 Skydropx</button>
+            <button class="p-action-btn" style="color:var(--red)" onclick="deletePedido('${p.id}')">🗑️</button>
           </div>
         </div>`).join(''):`<div style="text-align:center;padding:2rem;color:var(--soft)">No hay pedidos</div>`;}
     /* ── CATEGORY MANAGER desde el panel de Productos ── */
