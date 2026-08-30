@@ -15,6 +15,7 @@ export async function GET({ site }: { site: URL | undefined }) {
     { loc: '/flores-eternas', priority: '0.9', changefreq: 'weekly' },
     { loc: '/regalos-dia-de-la-madre', priority: '0.9', changefreq: 'weekly' },
     { loc: '/regalos-para-novia', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/regalos-para-ella', priority: '0.8', changefreq: 'weekly' },
     { loc: '/regalo-para-esposa', priority: '0.8', changefreq: 'weekly' },
     { loc: '/regalos-san-valentin', priority: '0.8', changefreq: 'weekly' },
     { loc: '/regalos-amor-y-amistad', priority: '0.8', changefreq: 'weekly' },

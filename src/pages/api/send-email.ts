@@ -28,6 +28,16 @@ const SVG_ICONS = {
   camera: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8c5fad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`
 };
 
+function escapeHtml(unsafe: any): string {
+  if (unsafe === null || unsafe === undefined) return '';
+  return String(unsafe)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // ── HELPER: Buscar imagen del producto en Supabase por nombre ──
 async function getProductImage(productName: string, sbUrl: string, sbKey: string): Promise<string> {
   try {
@@ -643,6 +653,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
       `);
     }
 
+    if (!html || !subject || !to) {
+      return new Response(JSON.stringify({ error: 'invalid_request', message: 'Tipo de correo no reconocido o falta destinatario' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(String(to).trim())) {
+      return new Response(JSON.stringify({ error: 'invalid_email', message: 'Dirección de correo no válida' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
     // ── ENVÍO REAL A RESEND ──
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -652,7 +671,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       },
       body: JSON.stringify({
         from: 'Nuditos Tejidos <hola@nuditos.com.co>',
-        to: to,
+        to: String(to).trim(),
         subject: subject,
         html: html
       })

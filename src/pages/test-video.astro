@@ -86,14 +86,14 @@ return Astro.redirect('/catalogo', 301);
     <div class="info" id="status3">Cargando...</div>
   </div>
 
-  <script>
+  <script is:inline>
     function checkVideo(id, statusId) {
       const v = document.getElementById(id);
       const s = document.getElementById(statusId);
-      if (!v) return;
+      if (!v || !s) return;
       
       const update = () => {
-        s.innerHTML = `readyState: ${v.readyState} | paused: ${v.paused} | error: ${v.error ? 'CODE '+v.error.code : 'none'} | videoWidth: ${v.videoWidth}x${v.videoHeight} | currentTime: ${v.currentTime.toFixed(1)}s | src: ${v.src}`;
+        s.innerHTML = `readyState: ${v.readyState} | paused: ${v.paused} | error: ${v.error ? 'CODE '+v.error.code : 'none'} | videoWidth: ${v.videoWidth}x${v.videoHeight} | currentTime: ${v.currentTime ? v.currentTime.toFixed(1) : 0}s | src: ${v.src}`;
       };
       
       v.addEventListener('loadeddata', update);

@@ -12,24 +12,13 @@ async function signParams(params: Record<string, string | number>, apiSecret: st
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-export const POST: APIRoute = async ({ request }) => {
-  const apiSecret = import.meta.env.CLOUDINARY_API_SECRET;
-  const apiKey = import.meta.env.CLOUDINARY_API_KEY;
-  const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME || 'dzxgu27wr';
-  const uploadPreset = import.meta.env.CLOUDINARY_UPLOAD_PRESET || 'ssjghh9e';
-  const folder = import.meta.env.CLOUDINARY_FOLDER || 'nuditos-products';
-
-  if (!apiSecret || !apiKey) {
-    return new Response(
-      JSON.stringify({
-        error: 'Configura CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET en Cloudflare',
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  }
+export const POST: APIRoute = async ({ request, locals }) => {
+  const runtimeEnv = (locals as any)?.runtime?.env || {};
+  const apiSecret = runtimeEnv.CLOUDINARY_API_SECRET || import.meta.env.CLOUDINARY_API_SECRET;
+  const apiKey = runtimeEnv.CLOUDINARY_API_KEY || import.meta.env.CLOUDINARY_API_KEY;
+  const cloudName = runtimeEnv.CLOUDINARY_CLOUD_NAME || import.meta.env.CLOUDINARY_CLOUD_NAME || 'dzxgu27wr';
+  const uploadPreset = runtimeEnv.CLOUDINARY_UPLOAD_PRESET || import.meta.env.CLOUDINARY_UPLOAD_PRESET || 'ssjghh9e';
+  const folder = runtimeEnv.CLOUDINARY_FOLDER || import.meta.env.CLOUDINARY_FOLDER || 'nuditos-products';
 
   let customPublicId = null;
   try {
@@ -39,6 +28,23 @@ export const POST: APIRoute = async ({ request }) => {
     }
   } catch (e) {
     // Sin body
+  }
+
+  if (!apiSecret || !apiKey) {
+    // Si no hay API secret configurada, usar el preset unsigned existente (ssjghh9e)
+    return new Response(
+      JSON.stringify({
+        unsigned: true,
+        cloudName,
+        uploadPreset,
+        folder,
+        publicId: customPublicId,
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 
   const timestamp = Math.floor(Date.now() / 1000);

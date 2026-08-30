@@ -15,27 +15,38 @@ const ref = Astro.url.searchParams.get('ref') || '';
   description="Tu pedido ha sido procesado exitosamente."
   noIndex={true}
 >
-  <div class="max-w-[800px] mx-auto px-6 py-20 text-center flex flex-col items-center">
-    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
+  <div class="max-w-[700px] mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center flex flex-col items-center">
+    <div class="w-20 h-20 bg-emerald-50 border border-emerald-200/60 text-emerald-600 rounded-3xl flex items-center justify-center mb-6 shadow-xs">
       <Icon name="checkbox-circle" class="text-4xl" />
     </div>
-    <h1 class="font-serif text-3xl md:text-5xl font-light text-stone-800 mb-4">
-      ¡Gracias por tu compra!
+    
+    <div class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/70 text-emerald-900 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4">
+      Pedido Confirmado
+    </div>
+
+    <h1 class="font-serif text-3xl md:text-5xl font-light text-slate-800 mb-4 leading-tight">
+      ¡Gracias por tu <em class="italic text-amber-600 font-normal">compra!</em>
     </h1>
-    <p class="text-stone-500 mb-8 w-full max-w-md">
-      Hemos recibido tu pedido correctamente. Estamos tejiendo amor para ti.
-      Pronto recibirás un correo con los detalles de tu orden.
+    <p class="text-slate-500 mb-8 max-w-md text-xs sm:text-sm leading-relaxed">
+      Hemos recibido tu orden correctamente. Nuestro taller artesano está tejiendo con todo el amor para ti. Te notificaremos cada avance de tu envío.
     </p>
 
     {ref && (
-      <div class="bg-stone-50 border border-stone-200 py-3 px-6 rounded-xl text-xs text-stone-600 font-medium mb-8 uppercase tracking-widest">
-        Número de transacción: <strong class="text-stone-800">{ref}</strong>
+      <div class="bg-amber-50/70 border border-amber-200/70 py-3 px-6 rounded-2xl text-xs text-amber-900 font-medium mb-8 uppercase tracking-wider">
+        Referencia de pago: <strong class="text-slate-900">{ref}</strong>
       </div>
     )}
 
-    <a href="/" class="bg-violet-700 text-white font-bold uppercase tracking-widest text-[11px] px-8 py-4 rounded-2xl hover:bg-violet-800 transition-colors shadow-md">
-      Volver al Inicio
-    </a>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <a href="/" class="inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white font-bold uppercase tracking-wider text-xs px-8 py-4 rounded-2xl transition-all shadow-lg active:scale-95">
+        <Icon name="shopping-bag-3" class="w-4 h-4 text-amber-400" />
+        <span>Volver al Inicio</span>
+      </a>
+      <a href="https://wa.me/573144931525" target="_blank" class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-xs px-6 py-4 rounded-2xl transition-all shadow-md active:scale-95">
+        <Icon name="whatsapp" class="w-4 h-4" />
+        <span>Consultar por WhatsApp</span>
+      </a>
+    </div>
   </div>
 
   <script is:inline>

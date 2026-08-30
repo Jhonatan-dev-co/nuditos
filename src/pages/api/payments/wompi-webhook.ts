@@ -3,35 +3,28 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { getLiveConfig } from '../../../lib/supabase';
 
-async function updatePedidoStatus(pedidoId: string, statusText: string, sbToken: string, sbUrl: string) {
-  try {
-    const res = await fetch(`${sbUrl}/rest/v1/pedidos?id=eq.${pedidoId}`, {
-      method: 'PATCH',
-      headers: {
-        'apikey': sbToken,
-        'Authorization': `Bearer ${sbToken}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        estado: statusText,
-      })
-    });
-    return res.ok;
-  } catch (e) {
-    console.error('[wompi-webhook] Error de red actualizando pedido:', e);
-    return false;
-  }
-}
-
 async function verifyWebhookSignature(body: any, eventsSecret: string) {
-  if (!eventsSecret || !body.signature || !body.signature.checksum) return false;
+  if (!eventsSecret || !body?.signature?.checksum) return false;
   const { data, timestamp, signature } = body;
-  const transaction = data.transaction;
+  const properties = signature.properties;
   
-  // Wompi docs: Para eventos referidos a transacciones, las propiedades por defecto
-  // de checksum para eventos son: id, status, amount_in_cents, timestamp y el secreto
-  const rawString = `${transaction.id}${transaction.status}${transaction.amount_in_cents}${timestamp}${eventsSecret}`;
+  let rawString = '';
+  if (Array.isArray(properties) && properties.length > 0) {
+    // Si Wompi envía las propiedades específicas a concatenar
+    for (const prop of properties) {
+      const parts = prop.split('.');
+      let val: any = data;
+      for (const part of parts) {
+        val = val ? val[part] : undefined;
+      }
+      rawString += (val !== undefined && val !== null ? String(val) : '');
+    }
+    rawString += `${timestamp}${eventsSecret}`;
+  } else {
+    // Fallback estándar de transacción Wompi
+    const transaction = data?.transaction || {};
+    rawString = `${transaction.id || ''}${transaction.status || ''}${transaction.amount_in_cents || ''}${timestamp}${eventsSecret}`;
+  }
 
   const encoder = new TextEncoder();
   const dataUint8 = encoder.encode(rawString);
@@ -39,7 +32,7 @@ async function verifyWebhookSignature(body: any, eventsSecret: string) {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-  return hashHex === signature.checksum;
+  return hashHex.toLowerCase() === String(signature.checksum).toLowerCase();
 }
 
 export const GET: APIRoute = async () => {
@@ -72,7 +65,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       const isValid = await verifyWebhookSignature(body, eventSecret);
       if (!isValid) {
         console.warn('[wompi-webhook] ❌ Rechazado: Firma de evento inválida.');
-        return new Response(JSON.stringify({ error: 'invalid_signature' }), { status: 200, headers: { 'Content-Type': 'application/json' }  });
+        return new Response(JSON.stringify({ error: 'invalid_signature' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
     } else {
         console.log('[wompi-webhook] ⚠️ Advertencia: Validando evento sin firma de seguridad.');
@@ -104,8 +97,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
           body: JSON.stringify({ estado: finalStatus })
         });
         
-        const updatedData = await updateRes.json();
-        const pedido = updatedData[0];
+        const updatedData = updateRes.ok ? await updateRes.json() : null;
+        const pedido = Array.isArray(updatedData) && updatedData.length > 0 ? updatedData[0] : null;
 
         // 3. NOTIFICACIONES (Solo si el pago fue aprobado)
         if (finalStatus === 'pagado' && pedido) {
@@ -154,7 +147,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
                            `📦 *Pedido:* #${pedido.id}\n` +
                            `👤 *Cliente:* ${pedido.cliente_nombre}\n` +
                            `🏷️ *Items:* ${pedido.items}\n` +
-                           `💵 *Total:* $${pedido.total.toLocaleString('es-CO')}\n\n` +
+                           `💵 *Total:* $${Number(pedido.total || 0).toLocaleString('es-CO')}\n\n` +
                            `👉 [Ver panel Admin](${baseURL}/admin)`;
               
               await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {

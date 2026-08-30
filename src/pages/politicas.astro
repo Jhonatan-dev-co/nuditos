@@ -7,209 +7,149 @@ import Layout from '../layouts/Layout.astro';
   title="Políticas — Nuditos Tejidos"
   description="Consulta nuestras políticas de envío, cambios, devoluciones y privacidad en Nuditos Tejidos."
 >
-  <style>
-    .page-hero { background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%); padding: 5rem 1.5rem 4rem; text-align: center; }
-    .page-eyebrow { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem; }
-    .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 6vw, 3.5rem); font-weight: 400; line-height: 1.15; color: var(--text); margin-bottom: 1.2rem; }
-    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
-    .page-hero p { max-width: 500px; margin: 0 auto; color: var(--text-soft); font-size: 1rem; line-height: 1.7; }
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-stone-50 via-white to-amber-50/20 pt-20 sm:pt-24 pb-12 sm:pb-16 px-4 md:px-6 border-b border-stone-100 text-center">
+    <div class="max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200/70 text-amber-900 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4">
+        Información legal
+      </div>
+      <h1 class="font-serif text-[clamp(2.1rem,6vw,4.2rem)] font-light leading-[1.08] text-slate-800 mb-4">
+        Nuestras <em class="italic text-amber-600 font-normal">políticas</em>
+      </h1>
+      <p class="max-w-xl mx-auto text-slate-500 text-xs sm:text-sm md:text-base leading-relaxed">
+        En Nuditos Tejidos nos importa tu confianza y tranquilidad. Aquí detallamos cómo trabajamos para darte la mejor experiencia.
+      </p>
+    </div>
+  </section>
 
-    .policy-wrap { max-width: 800px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
-    .policy-section { margin-bottom: 4rem; }
-    .policy-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; color: var(--text); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
-    .policy-title i { color: var(--lila-dark); font-size: 1.5rem; }
-    .policy-content { color: var(--text-soft); font-size: 0.95rem; line-height: 1.8; }
-    .policy-content p { margin-bottom: 1.2rem; }
-    .policy-content ul { margin-bottom: 1.5rem; padding-left: 1.2rem; }
-    .policy-content li { margin-bottom: 0.6rem; position: relative; list-style: none; }
-    .policy-content li::before { content: '🌸'; position: absolute; left: -1.5rem; font-size: 0.8rem; }
-    
-    .policy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
-    .policy-card { background: var(--white); border-radius: 20px; padding: 2rem; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
-    .policy-card h4 { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; color: var(--lila-dark); }
-
-    @media (max-width: 768px) {
-      .policy-grid { grid-template-columns: 1fr; }
-    }
-  </style>
-
-  <div class="page-hero">
-    <div class="page-eyebrow">Información legal</div>
-    <h1>Nuestras <em>políticas</em></h1>
-    <p>En Nuditos Tejidos nos importa tu confianza. Aquí detallamos cómo trabajamos para darte la mejor experiencia.</p>
-  </div>
-
-  <div class="policy-wrap">
+  <!-- Contenido de Políticas -->
+  <main class="max-w-[840px] mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-12">
     
     <!-- ENVÍOS -->
-    <section class="policy-section" id="envios">
-      <h2 class="policy-title"><Icon name="truck"  /> Envíos y Entregas</h2>
-      <div class="policy-content">
-        <p>Realizamos envíos a todo el territorio colombiano utilizando empresas de mensajería certificadas (Interrapidisimo, Servientrega, Envia).</p>
-        <div class="policy-grid">
-          <div class="policy-card">
-            <h4>Tiempos de preparación</h4>
-            <p>Cada ramo es tejido a mano. El tiempo de elaboración es de <strong>1 a 3 días hábiles</strong> tras confirmar el pago.</p>
-          </div>
-          <div class="policy-card">
-            <h4>Tiempos de transporte</h4>
-            <p>Una vez despachado, la entrega tarda de <strong>2 a 5 días hábiles</strong> según la ubicación (ciudades principales son más rápidas).</p>
-          </div>
+    <section class="bg-white rounded-2xl sm:rounded-3xl border border-stone-200/80 p-6 sm:p-8 shadow-xs" id="envios">
+      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-stone-100">
+        <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60 flex items-center justify-center">
+          <Icon name="truck" class="w-4 h-4" />
         </div>
-        <p style="margin-top: 1.5rem;"><strong>Costo de envío:</strong> El valor base es de $17.000 COP, pero puede variar según el peso y destino. Ofrecemos promociones de envío gratuito en pedidos superiores a cierto monto indicado en el carrito.</p>
+        <h2 class="font-serif text-2xl font-light text-slate-800">Envíos y Entregas</h2>
+      </div>
+      
+      <p class="text-slate-500 text-xs sm:text-sm leading-relaxed mb-6">
+        Realizamos envíos a todo el territorio colombiano utilizando transportadoras certificadas (Interrapidísimo, Servientrega, Envía) con embalaje rígido protector para asegurar que cada flor llegue intacta.
+      </p>
+      
+      <div class="grid sm:grid-cols-2 gap-4 mb-6">
+        <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200/60">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/60 inline-block mb-2">Paso 1</span>
+          <h3 class="font-bold text-xs sm:text-sm text-slate-800 mb-1">Tiempos de preparación</h3>
+          <p class="text-slate-500 text-[11px] sm:text-xs leading-relaxed">Cada ramo es tejido a mano. El tiempo de elaboración es de <strong>1 a 3 días hábiles</strong> tras confirmar el pago.</p>
+        </div>
+        <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200/60">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60 inline-block mb-2">Paso 2</span>
+          <h3 class="font-bold text-xs sm:text-sm text-slate-800 mb-1">Tiempos de transporte</h3>
+          <p class="text-slate-500 text-[11px] sm:text-xs leading-relaxed">Una vez despachado, la entrega tarda de <strong>2 a 5 días hábiles</strong> según la ciudad o municipio de destino.</p>
+        </div>
+      </div>
+      
+      <div class="bg-emerald-50/60 border border-emerald-200/60 rounded-xl p-3.5 flex items-center gap-2.5">
+        <Icon name="checkbox-circle" class="w-4 h-4 text-emerald-600 flex-shrink-0" />
+        <span class="text-[11px] sm:text-xs text-emerald-900 font-medium">Ofrecemos promociones de envío gratis en compras señaladas en nuestra tienda online.</span>
       </div>
     </section>
 
     <!-- CAMBIOS Y DEVOLUCIONES -->
-    <section class="policy-section" id="cambios">
-      <h2 class="policy-title"><Icon name="refresh"  /> Cambios y Devoluciones</h2>
-      <div class="policy-content">
-        <p>Debido a que nuestros productos son artesanales y, en muchos casos, personalizados, aplicamos las siguientes reglas:</p>
-        <ul>
-          <li><strong>Defectos de fábrica:</strong> Tienes 15 días calendario para reportar cualquier daño estructural en el tejido.</li>
-import Layout from '../layouts/Layout.astro';
----
-
-<Layout
-  title="Políticas — Nuditos Tejidos"
-  description="Consulta nuestras políticas de envío, cambios, devoluciones y privacidad en Nuditos Tejidos."
->
-  <style>
-    .page-hero { background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%); padding: 5rem 1.5rem 4rem; text-align: center; }
-    .page-eyebrow { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem; }
-    .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 6vw, 3.5rem); font-weight: 400; line-height: 1.15; color: var(--text); margin-bottom: 1.2rem; }
-    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
-    .page-hero p { max-width: 500px; margin: 0 auto; color: var(--text-soft); font-size: 1rem; line-height: 1.7; }
-
-    .policy-wrap { max-width: 800px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
-    .policy-section { margin-bottom: 4rem; }
-    .policy-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; color: var(--text); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
-    .policy-title i { color: var(--lila-dark); font-size: 1.5rem; }
-    .policy-content { color: var(--text-soft); font-size: 0.95rem; line-height: 1.8; }
-    .policy-content p { margin-bottom: 1.2rem; }
-    .policy-content ul { margin-bottom: 1.5rem; padding-left: 1.2rem; }
-    .policy-content li { margin-bottom: 0.6rem; position: relative; list-style: none; }
-    .policy-content li::before { content: '🌸'; position: absolute; left: -1.5rem; font-size: 0.8rem; }
-    
-    .policy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
-    .policy-card { background: var(--white); border-radius: 20px; padding: 2rem; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
-    .policy-card h4 { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; color: var(--lila-dark); }
-
-    @media (max-width: 768px) {
-      .policy-grid { grid-template-columns: 1fr; }
-    }
-  </style>
-
-  <div class="page-hero">
-    <div class="page-eyebrow">Información legal</div>
-    <h1>Nuestras <em>políticas</em></h1>
-    <p>En Nuditos Tejidos nos importa tu confianza. Aquí detallamos cómo trabajamos para darte la mejor experiencia.</p>
-  </div>
-
-  <div class="policy-wrap">
-    
-    <!-- ENVÍOS -->
-    <section class="policy-section" id="envios">
-      <h2 class="policy-title"><Icon name="truck"  /> Envíos y Entregas</h2>
-      <div class="policy-content">
-        <p>Realizamos envíos a todo el territorio colombiano utilizando empresas de mensajería certificadas (Interrapidisimo, Servientrega, Envia).</p>
-        <div class="policy-grid">
-          <div class="policy-card">
-            <h4>Tiempos de preparación</h4>
-            <p>Cada ramo es tejido a mano. El tiempo de elaboración es de <strong>1 a 3 días hábiles</strong> tras confirmar el pago.</p>
-          </div>
-          <div class="policy-card">
-            <h4>Tiempos de transporte</h4>
-            <p>Una vez despachado, la entrega tarda de <strong>2 a 5 días hábiles</strong> según la ubicación (ciudades principales son más rápidas).</p>
-          </div>
+    <section class="bg-white rounded-2xl sm:rounded-3xl border border-stone-200/80 p-6 sm:p-8 shadow-xs" id="cambios">
+      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-stone-100">
+        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 border border-amber-200/60 flex items-center justify-center">
+          <Icon name="refresh" class="w-4 h-4" />
         </div>
-        <p style="margin-top: 1.5rem;"><strong>Costo de envío:</strong> El valor base es de $17.000 COP, pero puede variar según el peso y destino. Ofrecemos promociones de envío gratuito en pedidos superiores a cierto monto indicado en el carrito.</p>
+        <h2 class="font-serif text-2xl font-light text-slate-800">Garantías y Cambios</h2>
       </div>
-    </section>
 
-    <!-- CAMBIOS Y DEVOLUCIONES -->
-    <section class="policy-section" id="cambios">
-      <h2 class="policy-title"><Icon name="refresh"  /> Cambios y Devoluciones</h2>
-      <div class="policy-content">
-        <p>Debido a que nuestros productos son artesanales y, en muchos casos, personalizados, aplicamos las siguientes reglas:</p>
-        <ul>
-          <li><strong>Defectos de fábrica:</strong> Tienes 15 días calendario para reportar cualquier daño estructural en el tejido.</li>
-          <li><strong>Productos personalizados:</strong> No se aceptan devoluciones por retracto una vez iniciada la producción del diseño a medida.</li>
-          <li><strong>Proceso:</strong> Escríbenos a WhatsApp con fotos del estado del producto para iniciar el trámite de garantía.</li>
-        </ul>
-      </div>
+      <p class="text-slate-500 text-xs sm:text-sm leading-relaxed mb-4">
+        Debido a que nuestros productos son artesanales y hechos con esmero, aplicamos los siguientes lineamientos:
+      </p>
+
+      <ul class="space-y-2.5 text-xs sm:text-sm text-slate-600">
+        <li class="flex items-start gap-2.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 flex-shrink-0"></span>
+          <span><strong>Defectos de fabricación:</strong> Cuentas con 15 días calendario para reportar cualquier daño estructural en el tejido.</span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 flex-shrink-0"></span>
+          <span><strong>Productos personalizados:</strong> No aplican devoluciones por retracto una vez iniciada la producción del diseño personalizado acordado.</span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 flex-shrink-0"></span>
+          <span><strong>Trámite:</strong> Escríbenos por WhatsApp con fotos del estado del producto para brindarte una solución inmediata.</span>
+        </li>
+      </ul>
     </section>
 
     <!-- PRIVACIDAD -->
-    <section class="policy-section" id="privacidad">
-      <h2 class="policy-title"><Icon name="shield-user"  /> Protección de Datos</h2>
-      <div class="policy-content">
-        <p>En cumplimiento con la Ley 1581 de 2012, informamos que tus datos personales (Nombre, Cédula, Dirección, Teléfono) se utilizan exclusivamente para:</p>
-        <ul>
-          <li>Gestión y despacho de tus pedidos.</li>
-          <li>Comunicación directa vía WhatsApp para soporte.</li>
-          <li>Información sobre novedades y descuentos (siempre puedes darte de baja).</li>
-        </ul>
-        <p>No compartimos tu información con terceros, excepto con las transportadoras necesarias para realizar tu entrega.</p>
-      </div>
-    </section>
-
-    <!-- TRANSPARENCIA COMERCIAL Y CANALES DE PQR -->
-    <section class="policy-section" id="transparencia">
-      <h2 class="policy-title"><Icon name="award" /> Transparencia Comercial y PQR</h2>
-      <div class="policy-content">
-        <p>De acuerdo con la legislación colombiana (Ley 1480 de 2011 - Estatuto del Consumidor), a continuación presentamos la información de contacto y canales oficiales de atención al cliente de Nuditos Tejidos:</p>
-        <div class="policy-grid">
-          <div class="policy-card">
-            <h4>Información de la Empresa</h4>
-            <ul class="space-y-2 mt-2">
-              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>Propietario:</strong> [TODO: Nombre del Propietario / Representante Legal]</li>
-              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>NIT / Cédula:</strong> [TODO: NIT o Cédula del Propietario]</li>
-              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>Dirección Física:</strong> Calle Principal, El Dorado, Meta, Colombia</li>
-            </ul>
-          </div>
-          <div class="policy-card">
-            <h4>Canales de Atención (PQR)</h4>
-            <ul class="space-y-2 mt-2">
-              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>Correo Corporativo:</strong> [TODO: correo@nuditos.com.co]</li>
-              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>WhatsApp de Soporte:</strong> +57 314 493 1525</li>
-              <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]"><strong>Horario:</strong> Lunes a Sábado - 8:00 AM a 8:00 PM</li>
-            </ul>
-          </div>
+    <section class="bg-white rounded-2xl sm:rounded-3xl border border-stone-200/80 p-6 sm:p-8 shadow-xs" id="privacidad">
+      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-stone-100">
+        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center">
+          <Icon name="shield-user" class="w-4 h-4" />
         </div>
+        <h2 class="font-serif text-2xl font-light text-slate-800">Protección de Datos Personales</h2>
       </div>
+
+      <p class="text-slate-500 text-xs sm:text-sm leading-relaxed mb-4">
+        En cumplimiento con la Ley 1581 de 2012 (Habeas Data), tus datos personales se emplean únicamente para la gestión de pedidos, emisión de guías y soporte directo. No compartimos tu información con terceros no relacionados con la entrega.
+      </p>
     </section>
 
-    <!-- DERECHO DE RETRACTO (LEY 1480 DE 2011) -->
-    <section class="policy-section" id="retracto">
-      <h2 class="policy-title"><Icon name="refresh" /> Derecho de Retracto (Ley 1480 de 2011)</h2>
-      <div class="policy-content">
-        <p>Garantizamos el cumplimiento de los derechos de los consumidores en Colombia. Según el **Artículo 47 de la Ley 1480 de 2011**, el Derecho de Retracto faculta al comprador a desistir de su compra dentro de los <strong>cinco (5) días hábiles</strong> siguientes a la recepción del bien.</p>
-        
-        <div class="bg-violet-50/50 border border-violet-100/50 rounded-2xl p-5 my-4">
-          <h4 class="font-bold text-violet-900 mb-2 font-serif text-[0.95rem] tracking-wide uppercase">Excepciones al Derecho de Retracto en Bienes Artesanales</h4>
-          <p class="text-sm text-stone-600 leading-relaxed">
-            De acuerdo con las excepciones consagradas en el Artículo 47 de la Ley 1480 de 2011:
-          </p>
-          <ul class="text-sm text-stone-600 space-y-1 mt-2 pl-4">
-            <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]">
-              El derecho de retracto **no se aplicará** en contratos de suministro de bienes confeccionados conforme a las especificaciones del consumidor o claramente **personalizados** (ej. ramos tejidos con colores, iniciales o figuras solicitadas a medida).
-            </li>
-            <li class="relative list-none before:content-['🌸'] before:absolute before:left-[-1.2rem]">
-              Tampoco aplicará en bienes que, por su naturaleza artesanal y al ser hechos a mano desde cero por encargo directo, ya hayan comenzado su etapa de producción física.
-            </li>
+    <!-- TRANSPARENCIA Y PQR -->
+    <section class="bg-white rounded-2xl sm:rounded-3xl border border-stone-200/80 p-6 sm:p-8 shadow-xs" id="transparencia">
+      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-stone-100">
+        <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 border border-purple-200/60 flex items-center justify-center">
+          <Icon name="award" class="w-4 h-4" />
+        </div>
+        <h2 class="font-serif text-2xl font-light text-slate-800">Transparencia Comercial y PQR</h2>
+      </div>
+
+      <p class="text-slate-500 text-xs sm:text-sm leading-relaxed mb-6">
+        Información de contacto y canales de atención de Nuditos Tejidos (Ley 1480 de 2011 - Estatuto del Consumidor):
+      </p>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200/60">
+          <h3 class="font-bold text-xs sm:text-sm text-slate-800 mb-2">Información del Taller</h3>
+          <ul class="text-[11px] sm:text-xs text-slate-600 space-y-1.5">
+            <li><strong>Ubicación:</strong> El Dorado, Meta, Colombia</li>
+            <li><strong>Atención:</strong> Envíos a todo el país</li>
           </ul>
         </div>
-
-        <p>Para productos de catálogo estándar (sin personalización), puedes ejercer tu derecho de retracto bajo las siguientes condiciones:</p>
-        <ul>
-          <li>El producto debe ser devuelto en las **mismas condiciones** en que fue recibido: sin uso, con su empaque rígido original, etiquetas y accesorios completos.</li>
-          <li>Los **costos de transporte** y demás que conlleve la devolución del bien serán cubiertos en su totalidad por el comprador.</li>
-          <li>Una vez verificado el estado óptimo del ramo devuelto, procederemos al reembolso del dinero en un plazo no mayor a **treinta (30) días calendario** a través del método de pago original o transferencia acordada.</li>
-        </ul>
-        <p>Para iniciar una solicitud de retracto o aplicar una garantía, por favor comunícate a nuestro correo corporativo o WhatsApp de atención adjuntando tu número de pedido y soportes.</p>
+        <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200/60">
+          <h3 class="font-bold text-xs sm:text-sm text-slate-800 mb-2">Canales de Atención (PQR)</h3>
+          <ul class="text-[11px] sm:text-xs text-slate-600 space-y-1.5">
+            <li><strong>WhatsApp Soporte:</strong> +57 314 493 1525</li>
+            <li><strong>Horario:</strong> Lunes a Sábado - 8:00 AM a 8:00 PM</li>
+          </ul>
+        </div>
       </div>
     </section>
+  </main>
 
-  </div>
+  <!-- CTA FINAL -->
+  <section class="bg-[#1a1220] py-8 sm:py-10 md:py-14 px-3 sm:px-4 md:px-6 relative overflow-hidden text-center">
+    <div class="max-w-lg mx-auto relative z-10">
+      <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+        <Icon name="whatsapp" class="w-6 h-6 sm:w-7 sm:h-7 text-green-400" />
+      </div>
+      <h2 class="font-serif text-2xl sm:text-3xl md:text-4xl font-light text-white mb-2 leading-tight">
+        ¿Tienes alguna <em class="italic text-green-400 font-normal">inquietud?</em>
+      </h2>
+      <p class="text-stone-400 text-xs sm:text-[13px] leading-relaxed mb-6 max-w-sm mx-auto">
+        Estamos listos para ayudarte y resolver cualquier duda sobre tu pedido.
+      </p>
+      <a href="https://wa.me/573144931525" class="inline-flex items-center gap-2 bg-green-500 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-bold shadow-lg shadow-green-500/20 hover:bg-green-400 transition-all text-xs sm:text-sm tracking-wide active:scale-[0.97]" target="_blank">
+        <Icon name="whatsapp" class="w-4 h-4" />
+        <span>Escribir por WhatsApp</span>
+      </a>
+    </div>
+    <div class="absolute -top-20 -right-20 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  </section>
 </Layout>

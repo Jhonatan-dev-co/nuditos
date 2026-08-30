@@ -1,10 +1,7 @@
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   NUDITOS â€” Checkout Premium
+/* ══════════════════════════════════════════
+   NUDITOS — Checkout Premium
    Consistente con el design system de main.css
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-/* â”€â”€ Layout General â”€â”€ */
-   ──────────────────────────────────────────  */
+   ══════════════════════════════════════════ */
 
 /* ── Layout General ── */
 .checkout-page {
@@ -277,50 +274,52 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
   .co-row { grid-template-columns: 1fr; }
 }
 
-/* â”€â”€ Botones de navegaciÃ³n del form â”€â”€ */
+/* ── Botones de navegación del form ── */
 .co-btn-wrap {
   display: flex; justify-content: space-between; align-items: center;
   margin-top: 1.5rem; gap: 1rem;
 }
 .co-btn-primary {
-  flex: 1; background: var(--accent); color: white; border: none;
-  padding: 1.2rem;
+  flex: 1; background: #1a1220; color: white; border: none;
+  padding: 1.1rem 1.5rem;
   font-family: var(--font-sans);
   font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-  border-radius: 50px; cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+  border-radius: 1rem; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 20px rgba(26, 18, 32, 0.2);
 }
 .co-btn-primary:hover { 
-  background: var(--primary); 
+  background: #000000; 
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 12px 25px rgba(26, 18, 32, 0.3);
 }
-.co-btn-primary:active { transform: translateY(0); }
+.co-btn-primary:active { transform: scale(0.98); }
 .co-btn-back {
-  background: none; border: 1px solid var(--border-dark);
+  background: white; border: 1px solid var(--border-dark);
   color: var(--text-soft);
   padding: 1.05rem 1.2rem;
   font-family: 'Jost', sans-serif;
   font-size: 0.7rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-  border-radius: 10px; cursor: pointer; transition: all 0.2s;
+  border-radius: 1rem; cursor: pointer; transition: all 0.2s;
   display: flex; align-items: center; gap: 0.4rem; white-space: nowrap;
 }
-.co-btn-back:hover { border-color: var(--text); color: var(--text); }
+.co-btn-back:hover { border-color: var(--text); color: var(--text); background: var(--bg-soft); }
 
-/* â”€â”€ Paso 3: SelecciÃ³n de MÃ©todo de Pago â”€â”€ */
+/* ── Paso 3: Selección de Método de Pago ── */
 .co-payment-methods { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.5rem; }
 .co-payment-option {
   display: flex; align-items: center; gap: 1rem;
   padding: 1rem 1.2rem;
-  border: 2px solid var(--border-dark); border-radius: 12px;
+  border: 1.5px solid var(--border-dark); border-radius: 1rem;
   cursor: pointer; transition: all 0.2s;
   position: relative;
+  background: white;
 }
-.co-payment-option:hover { border-color: var(--lila); }
+.co-payment-option:hover { border-color: #1a1220; }
 .co-payment-option.selected {
-  border-color: var(--lila-dark);
-  background: var(--lila-xlight);
+  border-color: #1a1220;
+  background: #fafaf9;
+  box-shadow: 0 4px 14px rgba(26, 18, 32, 0.06);
 }
 .co-payment-option input[type="radio"] { display: none; }
 .co-payment-icon { font-size: 1.5rem; flex-shrink: 0; }
@@ -334,10 +333,10 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
   display: flex; align-items: center; justify-content: center;
 }
 .co-payment-option.selected .co-payment-check {
-  background: var(--lila-dark); border-color: var(--lila-dark);
+  background: #1a1220; border-color: #1a1220;
 }
 .co-payment-option.selected .co-payment-check::after {
-  content: 'âœ“'; color: white; font-size: 0.65rem; font-weight: 700;
+  content: '✓'; color: white; font-size: 0.65rem; font-weight: 700;
 }
 .co-payment-tag {
   position: absolute; top: -1px; right: 10px;
@@ -650,7 +649,7 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
   color: var(--text);
 }
 .co-discount-btn {
-  background: var(--lila-dark);
+  background: #1a1220;
   border: none;
   width: 60px;
   display: flex;
@@ -659,7 +658,7 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
   cursor: pointer;
   transition: all 0.3s ease;
 }
-.co-discount-btn:hover { background: var(--text); transform: scale(1.05); }
+.co-discount-btn:hover { background: #000000; transform: scale(1.05); }
 .co-discount-icon { color: white; width: 18px; height: 18px; }
 
 @media (min-width: 850px) {
@@ -671,38 +670,64 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
 
 .co-btn-outline {
   display: block; width: 100%; text-align: center;
-  padding: 1rem; border: 1px solid var(--lila);
-  font-family: 'Jost', sans-serif; font-size: 0.8rem; font-weight: 700;
-  letter-spacing: 1.5px; color: var(--lila-dark); text-decoration: none;
-  background: transparent; transition: all 0.3s; cursor: pointer;
-  margin-bottom: 0.5rem; border-radius: 100px;
+  padding: 0.9rem; border: 1px solid var(--border-dark);
+  font-family: 'Jost', sans-serif; font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 1.5px; color: var(--text-soft); text-decoration: none;
+  background: white; transition: all 0.25s; cursor: pointer;
+  margin-bottom: 0.5rem; border-radius: 1rem;
 }
-.co-btn-outline:hover { background: var(--lila-xlight); border-color: var(--lila-dark); transform: scale(1.02); }
+.co-btn-outline:hover { background: var(--bg-soft); border-color: var(--text); color: var(--text); transform: translateY(-1px); }
 
-.co-total-line.discount { color: var(--mint-dark); }
+.co-btn-pay-premium {
+  background: #1a1220;
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 25px rgba(26, 18, 32, 0.25);
+}
+.co-btn-pay-premium:hover:not(:disabled) {
+  background: #000000;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(26, 18, 32, 0.35);
+}
+.co-btn-pay-premium:active:not(:disabled) { transform: scale(0.98); }
+
+.co-total-line.discount { color: var(--accent-emerald); }
 
 /* ── Trust Highlights Bar ── */
 .co-highlights {
-  background: var(--cream-dark);
+  background: var(--bg-soft);
   border-top: 1px solid var(--border-dark);
-  padding: 4rem 1.5rem;
-  margin-top: 4rem;
+  padding: 3rem 1.5rem;
+  margin-top: 3.5rem;
 }
 .co-hi-inner {
   max-width: 1100px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2.5rem;
+  gap: 2rem;
 }
 .co-hi-item {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 .co-hi-icon {
-  width: 28px; height: 28px;
-  color: var(--text-soft);
+  width: 24px; height: 24px;
+  color: var(--accent-amber);
   flex-shrink: 0;
 }
 .co-hi-text {
@@ -725,7 +750,7 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
 @media (max-width: 600px) {
   .co-hi-inner {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1rem;
   }
 }
 

@@ -2,114 +2,50 @@
 import Icon from './Icon.astro';
 ---
 
-<section class="boutique-highlights">
-  <div class="highlights-container">
-    
-    <div class="highlight-item">
-      <div class="hi-icon-wrap">
-        <Icon name="leaf" class="w-7 h-7" />
+<section class="bg-stone-50 py-8 sm:py-10 md:py-14 px-3 sm:px-4 md:px-6 border-y border-stone-100">
+  <div class="max-w-[1200px] mx-auto">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      
+      <div class="flex items-start gap-3 p-3.5 sm:p-4 bg-white rounded-2xl border border-stone-100 shadow-xs hover:shadow-md transition-all">
+        <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+          <Icon name="leaf" class="w-4.5 h-4.5 text-amber-600" />
+        </div>
+        <div class="min-w-0">
+          <div class="text-xs sm:text-[13px] font-bold text-slate-800 mb-0.5">Hecho a Mano</div>
+          <p class="text-slate-500 leading-relaxed text-[11px] sm:text-xs">Crochet 100% artesanal que dura para siempre.</p>
+        </div>
       </div>
-      <div class="hi-text">
-        <h3>Hecho a Mano</h3>
-        <p>Crochet 100% artesanal que dura para siempre.</p>
-      </div>
-    </div>
 
-    <div class="highlight-item">
-      <div class="hi-icon-wrap">
-        <Icon name="truck" class="w-7 h-7" />
+      <div class="flex items-start gap-3 p-3.5 sm:p-4 bg-white rounded-2xl border border-stone-100 shadow-xs hover:shadow-md transition-all">
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+          <Icon name="truck" class="w-4.5 h-4.5 text-emerald-600" />
+        </div>
+        <div class="min-w-0">
+          <div class="text-xs sm:text-[13px] font-bold text-slate-800 mb-0.5">Envío Incluido</div>
+          <p class="text-slate-500 leading-relaxed text-[11px] sm:text-xs">A todo Colombia, sin mínimos ni sorpresas.</p>
+        </div>
       </div>
-      <div class="hi-text">
-        <h3>Envío Incluido</h3>
-        <p>A todo Colombia, sin mínimos ni sorpresas.</p>
-      </div>
-    </div>
 
-    <div class="highlight-item">
-      <div class="hi-icon-wrap">
-        <Icon name="bank-card" class="w-7 h-7" />
+      <div class="flex items-start gap-3 p-3.5 sm:p-4 bg-white rounded-2xl border border-stone-100 shadow-xs hover:shadow-md transition-all">
+        <div class="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <Icon name="bank-card" class="w-4.5 h-4.5 text-blue-600" />
+        </div>
+        <div class="min-w-0">
+          <div class="text-xs sm:text-[13px] font-bold text-slate-800 mb-0.5">Pagos Seguros</div>
+          <p class="text-slate-500 leading-relaxed text-[11px] sm:text-xs">100% seguros con Nequi, PSE y tarjetas.</p>
+        </div>
       </div>
-      <div class="hi-text">
-        <h3>Pagos Seguros</h3>
-        <p>100% seguros y respaldados.</p>
-      </div>
-    </div>
 
-    <div class="highlight-item">
-      <div class="hi-icon-wrap">
-        <Icon name="whatsapp" class="w-7 h-7" />
+      <div class="flex items-start gap-3 p-3.5 sm:p-4 bg-white rounded-2xl border border-stone-100 shadow-xs hover:shadow-md transition-all">
+        <div class="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+          <Icon name="whatsapp" class="w-4.5 h-4.5 text-green-600" />
+        </div>
+        <div class="min-w-0">
+          <div class="text-xs sm:text-[13px] font-bold text-slate-800 mb-0.5">Soporte Humano</div>
+          <p class="text-slate-500 leading-relaxed text-[11px] sm:text-xs">Escríbenos para personalizar tu ramo eterno.</p>
+        </div>
       </div>
-      <div class="hi-text">
-        <h3>Soporte Humano</h3>
-        <p>Escríbenos para personalizar tu ramo eterno.</p>
-      </div>
-    </div>
 
+    </div>
   </div>
 </section>
-
-<style>
-  .boutique-highlights {
-    background: #fafaf9; /* --bg-soft */
-    border-top: 1px solid #f5f5f4;
-    border-bottom: 1px solid #f5f5f4;
-    padding: 3rem 1.5rem;
-  }
-
-  .highlights-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 2rem;
-  }
-
-  @media (min-width: 768px) {
-    .highlights-container {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .boutique-highlights { padding: 4rem 2rem; }
-  }
-
-  @media (min-width: 1024px) {
-    .highlights-container {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  .highlight-item {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    padding: 0.5rem;
-  }
-
-  .hi-icon-wrap {
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 1rem;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #7c3aed; /* --accent */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    flex-shrink: 0;
-  }
-
-  .hi-text h3 {
-    font-family: 'Jost', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: #1c1917; /* --primary */
-    margin-bottom: 0.25rem;
-  }
-
-  .hi-text p {
-    font-size: 0.8rem;
-    color: #78716c; /* --text-soft */
-    line-height: 1.4;
-  }
-</style>

@@ -72,7 +72,7 @@ export const COMMERCIAL_LANDINGS: Record<string, CommercialLandingConfig> = {
     description: 'Celebra la tradición de las flores amarillas con ramos de crochet que nunca se mueren. El detalle perfecto para amistades y nuevos comienzos.',
     keywords: 'flores amarillas tejidas, flores amarillas septiembre colombia, girasoles crochet, regalo flores amarillas, flores eternas amarillas',
     h1: 'Lleva la alegría de las flores amarillas a otro nivel',
-    eyebrow: 'Tradición y luz en cada puntada',
+    eyebrow: 'Edición especial septiembre',
     heroCopy: 'No dejes que el regalo de septiembre dure solo una semana. Nuestras flores amarillas tejidas son un rayo de sol permanente que ilumina cualquier espacio.',
     primaryKeyword: 'flores amarillas tejidas',
     secondaryKeywords: ['flores amarillas septiembre', 'girasoles tejidos', 'regalo amistad colombia'],

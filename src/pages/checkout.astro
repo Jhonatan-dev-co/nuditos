@@ -232,7 +232,7 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
               </a>
 
               <button class="co-btn-pay-premium" id="btn-pay-wompi" onclick="window.finalizarPedido()" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 1rem;" disabled>
-                <Icon name="shield-user" style="color: white; width: 14px; height: 14px;" /> PAGO SEGURO
+                <Icon name="shield-user" class="text-white w-3.5 h-3.5" /> PAGO SEGURO
               </button>
 
 
@@ -308,19 +308,26 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     function getSubtotal() { return _cart.reduce((acc, i) => acc + (i.price * i.qty), 0); }
     function fmt(n) { return '$' + n.toLocaleString('es-CO') + ' COP'; }
 
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+
     function updateMiniSummaries() {
       const ms1 = document.getElementById('ms-1');
       const ms2 = document.getElementById('ms-2');
       if (ms1) {
-        const email = getFieldVal('co-email');
-        const name = `${getFieldVal('co-nombre')} ${getFieldVal('co-apellido')}`.trim();
-        const phone = getFieldVal('co-phone');
+        const email = escapeHtml(getFieldVal('co-email'));
+        const name = escapeHtml(`${getFieldVal('co-nombre')} ${getFieldVal('co-apellido')}`.trim());
+        const phone = escapeHtml(getFieldVal('co-phone'));
         ms1.innerHTML = `<div>${email}</div><div>${name}</div><div>${phone}</div>`;
       }
       if (ms2) {
-        const city = getFieldVal('co-ciudad');
-        const dept = getFieldVal('co-departamento');
-        const addr = getFieldVal('co-direccion');
+        const city = escapeHtml(getFieldVal('co-ciudad'));
+        const dept = escapeHtml(getFieldVal('co-departamento'));
+        const addr = escapeHtml(getFieldVal('co-direccion'));
         ms2.innerHTML = `<div>${city}${city && dept ? ', ' : ''}${dept}</div><div>${addr}</div>`;
       }
     }
@@ -787,7 +794,8 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       
       formFields.forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
+        if (el && el.dataset.bound !== '1') {
+          el.dataset.bound = '1';
           const eventType = el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input';
           el.addEventListener(eventType, () => {
             saveFormData();
@@ -798,6 +806,6 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     }
 
     document.addEventListener('astro:page-load', init);
-    document.addEventListener('DOMContentLoaded', init);
   </script>
+  <script src="/scripts/emails.js" defer is:inline></script>
 </Layout>

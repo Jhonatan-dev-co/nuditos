@@ -27,11 +27,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
        }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
-    if (!fullname || !email || !items || !Array.isArray(items)) {
+    if (!fullname || !email || !items || !Array.isArray(items) || items.length === 0) {
       return new Response(JSON.stringify({ error: 'Datos incompletos', message: 'Faltan campos obligatorios' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // 1. Obtener productos directamente con fetch (no depende de import.meta.env a nivel de módulo)
+    // 1. Obtener productos directamente de Supabase para validar precios inmutables
     const prodRes = await fetch(`${SB_URL}/rest/v1/productos?activo=eq.true&select=id,nombre,precio,precio_original,oferta,envio_gratis`, {
       headers: { 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}` }
     });
@@ -45,19 +45,28 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const allProducts = await prodRes.json();
 
     let subtotal = 0;
+    const validatedItems: Array<{ id: number; name: string; qty: number; price: number }> = [];
+
     items.forEach((item: any) => {
       const p = allProducts.find((x: any) => String(x.id) === String(item.id));
       if (p) {
-        subtotal += (p.precio || 0) * item.qty;
+        const qty = Math.max(1, Math.min(Math.floor(Number(item.qty) || 1), 99));
+        const price = Number(p.precio) || 0;
+        subtotal += price * qty;
+        validatedItems.push({
+          id: p.id,
+          name: p.nombre || item.name || 'Ramo Nuditos',
+          qty,
+          price
+        });
       }
     });
 
-    let finalTotal = subtotal;
-    if (discount && discount.pct) {
-      finalTotal = subtotal - Math.round(subtotal * (discount.pct / 100));
+    if (validatedItems.length === 0 || subtotal <= 0) {
+      return new Response(JSON.stringify({ error: 'invalid_items', message: 'Los productos seleccionados no son válidos.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // 2. Obtener configuración de Wompi directamente
+    // 2. Obtener configuración de Wompi y Descuentos directamente
     const cfgRes = await fetch(`${SB_URL}/rest/v1/config?select=clave,valor`, {
       headers: { 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}` }
     });
@@ -81,21 +90,56 @@ export const POST: APIRoute = async ({ request, locals }) => {
         return new Response(JSON.stringify({ error: 'gateway_error', message: 'Configuración de pagos incompleta.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // 3. Crear pedido en Supabase
-    const cleanWaUser = waUser ? (String(waUser).trim().startsWith('@') ? String(waUser).trim() : `@${String(waUser).trim()}`) : null;
+    // 3. Validación estricta de cupones y descuentos del lado del servidor (prevención de fraude)
+    let validDiscountPct = 0;
+    if (discount && typeof discount === 'object' && discount.code) {
+      const submittedCode = String(discount.code).trim().toUpperCase();
+      
+      // Chequear descuento global activo
+      if (cfg.descuento_activo === 'true' && submittedCode === (cfg.descuento_codigo || 'NUDITOS10').toUpperCase()) {
+        validDiscountPct = Math.min(Math.max(parseInt(cfg.descuento_porcentaje) || 10, 0), 50);
+      } else {
+        // Chequear tabla de cupones de Supabase
+        try {
+          const cupRes = await fetch(`${SB_URL}/rest/v1/cupones?codigo=eq.${encodeURIComponent(submittedCode)}&activo=eq.true&select=porcentaje`, {
+            headers: { 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}` }
+          });
+          if (cupRes.ok) {
+            const cupRows = await cupRes.json();
+            if (Array.isArray(cupRows) && cupRows.length > 0 && cupRows[0].porcentaje) {
+              validDiscountPct = Math.min(Math.max(parseInt(cupRows[0].porcentaje) || 0, 0), 50);
+            }
+          }
+        } catch {
+          // Ignorar si tabla cupones no existe
+        }
+      }
+    }
+
+    let finalTotal = subtotal;
+    if (validDiscountPct > 0) {
+      finalTotal = Math.max(0, subtotal - Math.round(subtotal * (validDiscountPct / 100)));
+    }
+
+    // 4. Crear pedido en Supabase
+    const cleanFullname = String(fullname).trim().slice(0, 150);
+    const cleanEmail = String(email).trim().toLowerCase().slice(0, 150);
+    const cleanPhone = String(phone).replace(/[^\d+ ()-]/g, '').slice(0, 30);
+    const cleanWaUser = waUser ? (String(waUser).trim().startsWith('@') ? String(waUser).trim().slice(0, 60) : `@${String(waUser).trim().slice(0, 60)}`) : null;
+    
     const dbPayload = {
-      cliente_nombre: fullname,
-      cliente_email: email,
-      cliente_telefono: cleanWaUser ? `${phone} (${cleanWaUser})` : phone,
-      items: items.map((i: any) => `${i.qty}x ${i.name}`).join(', '),
+      cliente_nombre: cleanFullname,
+      cliente_email: cleanEmail,
+      cliente_telefono: cleanWaUser ? `${cleanPhone} (${cleanWaUser})` : cleanPhone,
+      items: validatedItems.map((i) => `${i.qty}x ${i.name}`).join(', '),
       total: finalTotal,
       estado: 'pendiente',
-      direccion: direccion || null,
-      departamento: departamento || null,
-      ciudad: ciudad || null,
-      barrio: barrio || null,
-      codigo_postal: codigoPostal || null,
-      notas: `${address}${notes ? ' | ' + notes : ''}${cleanWaUser ? ' | WA Username: ' + cleanWaUser : ''}`,
+      direccion: direccion ? String(direccion).trim().slice(0, 200) : null,
+      departamento: departamento ? String(departamento).trim().slice(0, 100) : null,
+      ciudad: ciudad ? String(ciudad).trim().slice(0, 100) : null,
+      barrio: barrio ? String(barrio).trim().slice(0, 100) : null,
+      codigo_postal: codigoPostal ? String(codigoPostal).trim().slice(0, 20) : null,
+      notas: `${address ? String(address).trim() : ''}${notes ? ' | ' + String(notes).trim() : ''}${cleanWaUser ? ' | WA Username: ' + cleanWaUser : ''}`.slice(0, 500),
     };
 
     const res = await fetch(`${SB_URL}/rest/v1/pedidos`, {
@@ -123,7 +167,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const savedOrder = orders[0];
     const orderId = savedOrder.id;
 
-    // 4. Generar Firma de Integridad SHA-256
+    // 5. Generar Firma de Integridad SHA-256 oficial
     const reference = `NUDITOS-${orderId}`;
     const amountInCents = Math.round(finalTotal * 100);
     const currency = 'COP';

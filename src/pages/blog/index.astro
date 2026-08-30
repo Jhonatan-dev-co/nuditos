@@ -6,7 +6,6 @@ import { getLivePosts } from '../../lib/supabase';
 
 // Fetch live posts from Supabase or fallback to mock data
 const livePosts = await getLivePosts();
-console.log('Posts recibidos de Supabase:', livePosts.length);
 const posts = livePosts.length > 0 ? livePosts : [
   {
     title: 'Cómo cuidar tus flores de crochet para que duren años',
@@ -37,68 +36,59 @@ function formatDate(dateStr: string) {
   description="Artículos sobre ramos de crochet, ideas de regalos para novia, mamá y amiga, flores eternas y más. Todo sobre Nuditos Tejidos."
   keywords="blog ramos crochet, guía regalos Colombia, flores eternas blog, ideas de regalo, nuditos tejidos"
 >
-  <style>
-    .page-hero { background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%); padding: 5rem 1.5rem 4rem; text-align: center; }
-    .page-eyebrow { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem; }
-    .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 6vw, 3.5rem); font-weight: 400; line-height: 1.15; color: var(--text); margin-bottom: 1.2rem; }
-    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
-    
-    .blog-container { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
-    .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem; }
-    
-    .blog-card { background: var(--white); border-radius: 24px; overflow: hidden; border: 1px solid var(--border); transition: transform 0.4s, box-shadow 0.4s; text-decoration: none; display: flex; flex-direction: column; }
-    .blog-card:hover { transform: translateY(-10px); box-shadow: var(--shadow-lg); border-color: var(--lila-light); }
-    
-    .blog-img-wrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--lila-xlight); }
-    .blog-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
-    .blog-card:hover .blog-img-wrap img { transform: scale(1.08); }
-    
-    .blog-content { padding: 1.8rem; flex-grow: 1; display: flex; flex-direction: column; }
-    .blog-meta { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--lila-dark); margin-bottom: 0.8rem; display: flex; gap: 1rem; align-items: center; }
-    .blog-meta span { opacity: 0.5; }
-    
-    .blog-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 1rem; }
-    .blog-excerpt { font-size: 0.9rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    
-    .blog-footer { margin-top: auto; padding-top: 1.2rem; border-top: 1px solid var(--lila-xlight); font-size: 0.85rem; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 0.5rem; }
-    .blog-footer i { color: var(--lila-dark); transition: transform 0.3s; }
-    .blog-card:hover .blog-footer i { transform: translateX(5px); }
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-stone-50 via-white to-amber-50/20 pt-20 sm:pt-24 pb-12 sm:pb-16 px-4 md:px-6 border-b border-stone-100 text-center">
+    <div class="max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200/70 text-amber-900 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4">
+        Puntadas & Consejos
+      </div>
+      <h1 class="font-serif text-[clamp(2.1rem,6vw,4.2rem)] font-light leading-[1.08] text-slate-800 mb-4">
+        Blog <em class="italic text-amber-600 font-normal">Nuditos</em>
+      </h1>
+      <p class="max-w-xl mx-auto text-slate-500 text-xs sm:text-sm md:text-base leading-relaxed">
+        Historias, guías de cuidado, ideas de regalo y secretos detrás de nuestras flores tejidas a mano.
+      </p>
+    </div>
+  </section>
 
-    @media (max-width: 480px) {
-      .blog-grid { grid-template-columns: 1fr; gap: 2rem; }
-    }
-  </style>
-
-  <div class="page-hero">
-    <div class="page-eyebrow">Puntadas & Consejos</div>
-    <h1>Blog <em>Nuditos</em></h1>
-  </div>
-
-  <div class="blog-container">
-    <div class="blog-grid">
+  <!-- Grilla de Artículos -->
+  <main class="max-w-[1100px] mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
       {posts.map(post => (
-        <a href={`/blog/${post.slug}`} class="blog-card">
-          <div class="blog-img-wrap">
+        <a href={`/blog/${post.slug}`} class="group bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-stone-200/80 hover:border-amber-300 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col hover:-translate-y-1">
+          <div class="aspect-16/10 overflow-hidden bg-stone-100 relative">
             <img 
               src={clUrl(post.image || post.img, 800)} 
               alt={post.title} 
               width="800"
-              height="450"
-              loading="lazy" 
+              height="500"
+              loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           </div>
-          <div class="blog-content">
-            <div class="blog-meta">
-              {post.category || 'Nuditos'} <span>•</span> {formatDate(post.created_at)}
+          <div class="p-5 sm:p-6 flex flex-col flex-1">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="bg-amber-50 border border-amber-200/60 text-amber-900 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                {post.category || 'Nuditos'}
+              </span>
+              <span class="text-[11px] text-slate-400 font-medium">{formatDate(post.created_at)}</span>
             </div>
-            <h2 class="blog-title">{post.title}</h2>
-            <p class="blog-excerpt">{post.excerpt || post.content?.substring(0, 150) + '...'}</p>
-            <div class="blog-footer">
-              Leer artículo <Icon name="arrow-right" />
+            
+            <h2 class="font-serif text-xl sm:text-2xl font-light text-slate-800 group-hover:text-amber-600 transition-colors leading-snug mb-2">
+              {post.title}
+            </h2>
+            
+            <p class="text-slate-500 text-xs leading-relaxed mb-4 line-clamp-3">
+              {post.excerpt || post.content?.substring(0, 150) + '...'}
+            </p>
+            
+            <div class="mt-auto pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-slate-700 group-hover:text-amber-600 transition-colors">
+              <span class="uppercase tracking-wider text-[10px]">Leer artículo</span>
+              <Icon name="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
         </a>
       ))}
     </div>
-  </div>
+  </main>
 </Layout>

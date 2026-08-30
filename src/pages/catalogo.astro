@@ -10,7 +10,7 @@ export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { getLiveProducts, getLiveCategories } from '../lib/supabase';
-import { categories as FALLBACK_CATEGORIES } from '../data/datos';
+import { categories as FALLBACK_CATEGORIES, slugify } from '../data/datos';
 
 // Cache-Control para velocidad máxima (1 min fresca, 10 min stale)
 Astro.response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600');
@@ -78,7 +78,7 @@ const schemaItemList = {
       name: p.name,
       description: p.desc,
       image: p.img || '',
-      url: `${SITE_URL}/ramo/${p.slug || ''}`,
+      url: `${SITE_URL}/ramo/${p.slug || slugify(p.name)}`,
       brand: { '@type': 'Brand', name: 'Nuditos Tejidos' },
       offers: {
         '@type': 'Offer',
@@ -112,12 +112,12 @@ const schemaItemList = {
           <span class="opacity-50">/</span>
           <span class="text-stone-700">Catálogo</span>
         </nav>
-        <h1 class="font-serif text-2xl md:text-3xl text-stone-900 font-medium tracking-tight">Catálogo Completo</h1>
+        <h1 class="font-serif text-2xl md:text-3xl text-slate-800 font-medium tracking-tight">Catálogo de Ramos</h1>
       </div>
       
-      <div class="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-stone-200 shadow-sm text-[9px] font-bold uppercase tracking-widest text-stone-500" id="heroStat">
-        <span class="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse"></span>
-        <span class="text-stone-900" id="heroCount">{totalProducts}</span> Productos
+      <div class="inline-flex items-center gap-2 bg-amber-50 border border-amber-200/70 text-amber-900 px-4 py-1.5 rounded-full shadow-xs text-[10px] font-bold uppercase tracking-wider" id="heroStat">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+        <span class="text-stone-900" id="heroCount">{totalProducts}</span> Ramos Disponibles
       </div>
     </div>
   </header>
@@ -146,23 +146,23 @@ const schemaItemList = {
 
         <div class="flex items-center gap-3 border-t md:border-t-0 border-stone-100 pt-3 md:pt-0">
           <div class="relative group flex-1 md:w-48">
-            <Icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm group-focus-within:text-violet-500 transition-colors" />
+            <Icon name="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm group-focus-within:text-amber-600 transition-colors" />
             <input
               type="text"
               id="catSearch"
               placeholder="¿Qué buscas?"
-              class="w-full bg-stone-50 border border-stone-200 rounded-full py-2 pl-9 pr-4 text-xs font-sans focus:bg-white focus:border-stone-300 focus:outline-none transition-all shadow-inner"
+              class="w-full bg-stone-50 border border-stone-200 rounded-full py-2.5 pl-9 pr-4 text-xs font-sans focus:bg-white focus:border-amber-400 focus:outline-none transition-all shadow-inner"
             />
           </div>
 
           <div class="relative">
-            <select id="catSort" class="appearance-none bg-stone-900 text-white rounded-full py-2 pl-4 pr-9 text-[9px] font-bold uppercase tracking-widest cursor-pointer hover:bg-stone-800 transition-colors focus:outline-none shadow-sm">
+            <select id="catSort" class="appearance-none bg-[#1a1220] hover:bg-black text-white rounded-full py-2.5 pl-4 pr-9 text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-colors focus:outline-none shadow-sm">
               <option value="default">Recomendado</option>
               <option value="price-asc">Precio: Bajo a Alto</option>
               <option value="price-desc">Precio: Alto a Bajo</option>
               <option value="name-asc">Nombre: A-Z</option>
             </select>
-            <Icon name="arrow-down-s" class="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none text-sm" />
+            <Icon name="arrow-down-s" class="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 pointer-events-none text-sm" />
           </div>
         </div>
       </div>
@@ -170,7 +170,7 @@ const schemaItemList = {
       <div id="activeFilters" class="hidden py-3 flex-wrap gap-2 border-t border-stone-50">
         <span class="text-[9px] uppercase tracking-widest text-stone-400 font-bold mr-2 self-center">Filtros:</span>
         <div id="chipsContainer" class="flex flex-wrap gap-2"></div>
-        <button id="clearAll" class="text-[9px] uppercase tracking-widest text-violet-600 font-bold hover:underline ml-auto">
+        <button id="clearAll" class="text-[9px] uppercase tracking-widest text-amber-700 font-bold hover:underline ml-auto">
           Limpiar Todo
         </button>
       </div>
@@ -194,10 +194,10 @@ const schemaItemList = {
     <div id="emptyState" class="hidden py-16 text-center space-y-6">
       <div class="text-6xl grayscale opacity-20">🧶</div>
       <div class="space-y-2">
-        <h3 class="font-serif text-2xl text-stone-800 font-light">No encontramos coincidencia</h3>
-        <p class="text-stone-400 text-sm">Prueba borrando los filtros activos.</p>
+        <h3 class="font-serif text-2xl text-stone-800 font-light">No encontramos coincidencias</h3>
+        <p class="text-stone-400 text-sm">Prueba borrando los filtros activos o buscando otro término.</p>
       </div>
-      <button onclick="resetFilters()" class="bg-stone-900 text-white px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-violet-700 transition-all shadow-lg active:scale-95">
+      <button onclick="resetFilters()" class="inline-flex items-center gap-2 bg-[#1a1220] hover:bg-black text-white px-8 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg active:scale-95">
         Quitar Filtros
       </button>
     </div>
@@ -225,17 +225,17 @@ const schemaItemList = {
 
   /* Nuevos Chips de Categoria */
   .cat-pill {
-    @apply flex-shrink-0 flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] text-stone-500 bg-stone-50 border border-stone-200/60 shadow-sm transition-all duration-300 whitespace-nowrap select-none;
+    @apply flex-shrink-0 flex items-center justify-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-600 bg-stone-50 border border-stone-200/80 shadow-sm transition-all duration-200 whitespace-nowrap select-none;
   }
   .cat-pill:hover {
-    @apply bg-white text-stone-800 border-stone-300 shadow-md transform -translate-y-px;
+    @apply bg-white text-stone-900 border-amber-300 shadow-sm transform -translate-y-px;
   }
   .cat-pill.active {
-    @apply bg-stone-900 text-white border-stone-900 shadow-md px-5 font-bold;
+    @apply bg-[#1a1220] text-white border-[#1a1220] shadow-md font-bold;
   }
 
   .active-chip {
-    @apply flex items-center gap-2 bg-stone-50 text-stone-700 px-3 py-1.5 rounded-full text-[10px] font-medium border border-stone-200 transition-all;
+    @apply flex items-center gap-1.5 bg-amber-50 text-amber-900 px-3 py-1 rounded-full text-[10px] font-bold border border-amber-200/70 transition-all;
   }
   
   @keyframes fadeUp {
@@ -360,6 +360,9 @@ const schemaItemList = {
       document.querySelectorAll('.cat-pill').forEach(p => {
         const isAct = normalizeStr(p.dataset.cat) === catActive;
         p.classList.toggle('active', isAct);
+        if (isAct && typeof p.scrollIntoView === 'function') {
+          p.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
       });
     }
 
@@ -370,7 +373,10 @@ const schemaItemList = {
         applyFilters();
         const url = catActive === 'todos' ? location.pathname : `${location.pathname}?categoria=${catActive}`;
         history.replaceState(null, '', url);
-        window.scrollTo({ top: document.getElementById('filterSection').offsetTop - 100, behavior: 'smooth' });
+        const filterEl = document.getElementById('filterSection');
+        if (filterEl) {
+          window.scrollTo({ top: filterEl.offsetTop - 70, behavior: 'smooth' });
+        }
       });
     });
 

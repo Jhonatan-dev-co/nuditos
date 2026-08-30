@@ -5,9 +5,10 @@ export interface Props {
   name: string;
   class?: string;
   id?: string;
+  style?: string;
 }
 
-const { name, class: className = '', id } = Astro.props;
+const { name, class: className = '', id, style } = Astro.props;
 const content = ICONS[name];
 
 if (!content) {
@@ -21,6 +22,7 @@ if (!content) {
   height="24" 
   class={className} 
   id={id}
+  style={style}
   fill="currentColor" 
   set:html={content || ''} 
 />

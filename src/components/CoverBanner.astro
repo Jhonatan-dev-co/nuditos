@@ -42,11 +42,28 @@ const hasContent = !!(title || subtitle || ctaText);
     {/* Media Layer */}
     {isVideo ? (
       <div class="video-wrapper">
-        <video src={video} autoplay muted loop playsinline class="cover-vid-desktop"></video>
-        <video src={isMobileVideo ? mobileVideo : video} autoplay muted loop playsinline class="cover-vid-mobile"></video>
+        <video autoplay muted loop playsinline preload="metadata" class="cover-video">
+          {isMobileVideo && mobileVideo !== video && (
+            <source media="(max-width: 767px)" src={mobileVideo} type="video/mp4" />
+          )}
+          <source media="(min-width: 768px)" src={video} type="video/mp4" />
+          <source src={video} type="video/mp4" />
+        </video>
       </div>
     ) : fallbackImg ? (
-      <img src={clUrl(fallbackImg, 1400)} alt="" class="cover-img" />
+      <picture class="cover-picture">
+        {mobileImg && <source media="(max-width: 767px)" srcset={clUrl(mobileImg, 750)} />}
+        <img 
+          src={clUrl(img || fallbackImg, 1400)} 
+          alt={title ? title.replace(/<[^>]*>?/gm, '') : 'Nuditos'} 
+          class="cover-img" 
+          loading="eager" 
+          fetchpriority="high"
+          decoding="sync"
+          width="1400"
+          height="700"
+        />
+      </picture>
     ) : (
       <div class="h-20 bg-stone-900"></div>
     )}
@@ -77,15 +94,9 @@ const hasContent = !!(title || subtitle || ctaText);
 <style>
   .cover-wrapper { width: 100%; background: #000; }
   .cover-container { position: relative; width: 100%; overflow: hidden; }
-  .video-wrapper { width: 100%; line-height: 0; }
+  .video-wrapper, .cover-picture { width: 100%; line-height: 0; display: block; }
   video, .cover-img { width: 100%; height: auto; display: block; }
-  
-  .cover-vid-desktop { display: none; }
-  .cover-vid-mobile { display: block; }
-  @media (min-width: 768px) {
-    .cover-vid-desktop { display: block; }
-    .cover-vid-mobile { display: none; }
-  }
+  .cover-video { width: 100%; height: auto; object-fit: cover; }
 
   /* === CAPA DE CONTENIDO === */
   .cover-overlay {

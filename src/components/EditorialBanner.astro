@@ -43,12 +43,26 @@ const hasContent = !!(title || subtitle || ctaText);
     {/* Media Layer */}
     <div class="ed-media-wrapper">
       {isVideo ? (
-        <>
-          <video src={video} autoplay muted loop playsinline class="ed-vid-desktop"></video>
-          <video src={isMobileVideo ? mobileVideo : video} autoplay muted loop playsinline class="ed-vid-mobile"></video>
-        </>
+        <video autoplay muted loop playsinline preload="metadata" class="ed-video">
+          {isMobileVideo && mobileVideo !== video && (
+            <source media="(max-width: 767px)" src={mobileVideo} type="video/mp4" />
+          )}
+          <source media="(min-width: 768px)" src={video} type="video/mp4" />
+          <source src={video} type="video/mp4" />
+        </video>
       ) : fallbackImg ? (
-        <img src={clUrl(fallbackImg, 1400)} alt="" class="ed-img" />
+        <picture class="ed-picture">
+          {mobileImg && <source media="(max-width: 767px)" srcset={clUrl(mobileImg, 750)} />}
+          <img 
+            src={clUrl(img || fallbackImg, 1400)} 
+            alt={title ? title.replace(/<[^>]*>?/gm, '') : 'Nuditos'} 
+            class="ed-img" 
+            loading="lazy"
+            decoding="async"
+            width="1400"
+            height="700"
+          />
+        </picture>
       ) : null}
     </div>
 
@@ -75,15 +89,9 @@ const hasContent = !!(title || subtitle || ctaText);
 <style>
   .ed-section { width: 100%; background: #000; }
   .ed-container { position: relative; width: 100%; overflow: hidden; }
-  .ed-media-wrapper { width: 100%; line-height: 0; }
+  .ed-media-wrapper, .ed-picture { width: 100%; line-height: 0; display: block; }
   video, .ed-img { width: 100%; height: auto; display: block; }
-  
-  .ed-vid-desktop { display: none; }
-  .ed-vid-mobile { display: block; }
-  @media (min-width: 768px) {
-    .ed-vid-desktop { display: block; }
-    .ed-vid-mobile { display: none; }
-  }
+  .ed-video { width: 100%; height: auto; object-fit: cover; }
 
   /* === CAPA DE CONTENIDO === */
   .ed-overlay {

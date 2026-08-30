@@ -12,6 +12,10 @@ export interface Product {
   badge: string;
   badgeClass: string;
   activo: boolean;
+  slug?: string;
+  destacado?: boolean;
+  stock?: number;
+  precioOferta?: number;
   oferta?: boolean;
   precioOriginal?: number;
   envioGratis?: boolean;
@@ -32,7 +36,34 @@ export interface Category {
   descripcionSeo?: string;
 }
 
-export const CONFIG_DEFAULT = {
+export interface StoreConfig {
+  ramoDestacado: number;
+  carruselHero: number[];
+  descuentoActivo: boolean;
+  descuentoCodigo: string;
+  descuentoPorcentaje: number;
+  descuentoTexto: string;
+  wompiActivo: boolean;
+  wompiKey: string;
+  wompiIntegrity?: string;
+  wompiEvents?: string;
+  catViews: Record<string, any>;
+  seleccionNuditos: number[];
+  metaPixelActivo: boolean;
+  metaPixelId: string;
+  socialProofMode: string;
+  seoTitle: string;
+  seoDescription: string;
+  seoOgImage: string;
+  socialInstagram: string;
+  socialWhatsapp: string;
+  gaId: string;
+  gaActive: boolean;
+  tiktokPixelActivo: boolean;
+  tiktokPixelId: string;
+}
+
+export const CONFIG_DEFAULT: StoreConfig = {
   ramoDestacado:      17,
   carruselHero:       [17, 55, 63],
   descuentoActivo:    false,
@@ -41,10 +72,22 @@ export const CONFIG_DEFAULT = {
   descuentoTexto:     '10% de descuento en tu primer pedido',
   wompiActivo:        false,
   wompiKey:           '',
+  wompiIntegrity:     '',
+  wompiEvents:        '',
   catViews:           {},
+  seleccionNuditos:   [17, 55],
   metaPixelActivo:    false,
   metaPixelId:        '',
   socialProofMode:    'trust_badges',
+  seoTitle:           'Nuditos Tejidos — Ramos de Crochet, Regalos y Detalles Originales',
+  seoDescription:     'Ramos de crochet hechos a mano y amigurumis. El regalo eterno perfecto para detalles inolvidables en Colombia. Envíos a todo el país.',
+  seoOgImage:         'https://nuditos.com.co/og-default.jpg',
+  socialInstagram:    'https://www.instagram.com/nuditos_tejidos/',
+  socialWhatsapp:     '573144931525',
+  gaId:               'G-KWMVM0GSZM',
+  gaActive:           false,
+  tiktokPixelActivo:  false,
+  tiktokPixelId:      '',
 };
 
 export const categories: Category[] = [

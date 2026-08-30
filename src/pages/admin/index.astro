@@ -366,25 +366,45 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         let publicId = `${baseName}-${seoSuffix}-${randomId}${idx > 0 ? ('-'+idx) : ''}`;
         if (publicId.length > 200) publicId = publicId.substring(0, 200);
 
-        const signRes=await fetch('/api/cloudinary-sign',{
-          method:'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ public_id: publicId })
-        });
-        if(!signRes.ok) {
-           const err = await signRes.json();
-           throw new Error(err.error || 'Fallo en la firma del servidor');
+        let signData = null;
+        try {
+          const signRes = await fetch('/api/cloudinary-sign', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ public_id: publicId })
+          });
+          if (signRes.ok) {
+            signData = await signRes.json();
+          }
+        } catch (errSign) {
+          console.warn('[Cloudinary Sign] Usando preset directo:', errSign);
         }
-        const{signature,timestamp,apiKey,cloudName,uploadPreset,folder,publicId:signedPublicId}=await signRes.json();
-        const fd=new FormData();
-        fd.append('file',file);fd.append('upload_preset',uploadPreset);
-        fd.append('folder',folder);fd.append('timestamp',timestamp);
-        fd.append('api_key',apiKey);fd.append('signature',signature);
-        if(signedPublicId) fd.append('public_id', signedPublicId);
+
+        const cloudName = signData?.cloudName || 'dzxgu27wr';
+        const uploadPreset = signData?.uploadPreset || 'ssjghh9e';
+        const folder = signData?.folder || 'nuditos-products';
+        const signedPublicId = signData?.publicId || publicId;
+
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', uploadPreset);
+        fd.append('folder', folder);
+
+        if (signData && !signData.unsigned && signData.signature) {
+          fd.append('timestamp', signData.timestamp);
+          fd.append('api_key', signData.apiKey);
+          fd.append('signature', signData.signature);
+          if (signedPublicId) fd.append('public_id', signedPublicId);
+        }
+
         showUploadProgress(30);
-        const res=await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,{method:'POST',body:fd});
-        if(!res.ok) {
-          const cloudErr = await res.json();
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+          method: 'POST',
+          body: fd
+        });
+
+        if (!res.ok) {
+          const cloudErr = await res.json().catch(() => ({}));
           throw new Error(cloudErr.error?.message || 'Error en Cloudinary');
         }
         const data=await res.json();

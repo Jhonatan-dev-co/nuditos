@@ -12,6 +12,8 @@ import CoverBanner from '../components/CoverBanner.astro';
 import ProductCard from '../components/ProductCard.astro';
 import Catalogo from '../components/Catalogo.astro';
 import TrustSignalsSection from '../components/TrustSignalsSection.astro';
+import TestimonialsSection from '../components/TestimonialsSection.astro';
+import CommunitySection from '../components/CommunitySection.astro';
 
 import { getLiveProducts, getLiveConfig, getPublicConfig, getLiveCategories, getLiveBanners } from '../lib/supabase';
 import { CONFIG_DEFAULT as FALLBACK_CONFIG, categories as FALLBACK_CATEGORIES, clUrl } from '../data/datos';
@@ -134,7 +136,7 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
           <section class="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-14">
             <div class="flex items-center justify-between mb-5 pb-2 border-b border-stone-200">
               <h2 class="uppercase font-bold tracking-widest text-[#1a1220] text-xs md:text-sm">{section.name}</h2>
-              <a href={section.isVirtual ? "/catalogo" : `/catalogo?categoria=${section.id}`} class="text-[9px] md:text-[10px] tracking-widest uppercase font-bold text-stone-500 hover:text-stone-900 border border-stone-200 px-3 py-1 bg-white hover:bg-stone-50 transition-colors">
+              <a href={section.isVirtual ? "/catalogo" : `/catalogo?categoria=${section.id}`} class="text-[9px] md:text-[10px] tracking-widest uppercase font-bold text-stone-500 hover:text-stone-900 border border-stone-200 px-3 py-1 bg-white hover:bg-stone-50 transition-colors rounded-lg">
                 Ver todo
               </a>
             </div>
@@ -152,88 +154,73 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
     <div class="max-w-[1400px] mx-auto px-6">
       <div class="flex items-center justify-between mb-8 pb-2 border-b border-stone-200">
         <h2 class="uppercase font-bold tracking-widest text-[#1a1220] text-sm" id="filteredTitle">Resultados</h2>
-        <button class="text-[10px] tracking-widest uppercase font-bold text-stone-500 border border-stone-200 px-3 py-1" onclick="location.reload()">VER INICIO</button>
+        <button class="text-[10px] tracking-widest uppercase font-bold text-stone-500 border border-stone-200 px-3 py-1 rounded-lg" onclick="location.reload()">VER INICIO</button>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6" id="filteredGrid"></div>
     </div>
   </div>
 
-  {liveConfig.socialProofMode !== 'hidden' && <TrustSignalsSection />}
+  {liveConfig.socialProofMode !== 'hidden' && (
+    <>
+      <TestimonialsSection />
+      <TrustSignalsSection />
+    </>
+  )}
 
   <!-- Rutas SEO -->
   <div class="border-t border-stone-100 bg-white px-4 py-5">
-    <div class="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+    <div class="flex items-center gap-2.5 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
       <span class="text-[9px] uppercase tracking-widest font-bold text-stone-400 whitespace-nowrap flex-shrink-0">Ver también</span>
-      <a href="/regalo-para-esposa" class="whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-full border border-stone-200 text-[9px] uppercase tracking-widest font-bold text-stone-500 hover:border-violet-300 hover:text-violet-700 transition-colors">Para Esposa</a>
-      <a href="/regalo-para-novia" class="whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-full border border-stone-200 text-[9px] uppercase tracking-widest font-bold text-stone-500 hover:border-violet-300 hover:text-violet-700 transition-colors">Para Novia</a>
-      <a href="/regalos-para-amiga" class="whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-full border border-stone-200 text-[9px] uppercase tracking-widest font-bold text-stone-500 hover:border-violet-300 hover:text-violet-700 transition-colors">Para Amiga</a>
-      <a href="/flores-amarillas" class="whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-full border border-stone-200 text-[9px] uppercase tracking-widest font-bold text-stone-500 hover:border-violet-300 hover:text-violet-700 transition-colors">Flores Amarillas</a>
-      <a href="/regalos-amor-y-amistad" class="whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-full border border-stone-200 text-[9px] uppercase tracking-widest font-bold text-stone-500 hover:border-violet-300 hover:text-violet-700 transition-colors">Amor y Amistad</a>
-      <a href="/flores-tejidas-a-crochet" class="whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-full border border-stone-200 text-[9px] uppercase tracking-widest font-bold text-stone-500 hover:border-violet-300 hover:text-violet-700 transition-colors">Flores Tejidas</a>
-      <a href="/regalos-originales-colombia" class="whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-full border border-stone-200 text-[9px] uppercase tracking-widest font-bold text-stone-500 hover:border-violet-300 hover:text-violet-700 transition-colors">Regalos Originales</a>
+      <a href="/regalo-para-esposa" class="whitespace-nowrap flex-shrink-0 px-3.5 py-1.5 rounded-full border border-stone-200 text-[10px] uppercase tracking-wider font-bold text-stone-600 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-colors">Para Esposa</a>
+      <a href="/regalo-para-novia" class="whitespace-nowrap flex-shrink-0 px-3.5 py-1.5 rounded-full border border-stone-200 text-[10px] uppercase tracking-wider font-bold text-stone-600 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-colors">Para Novia</a>
+      <a href="/regalos-para-amiga" class="whitespace-nowrap flex-shrink-0 px-3.5 py-1.5 rounded-full border border-stone-200 text-[10px] uppercase tracking-wider font-bold text-stone-600 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-colors">Para Amiga</a>
+      <a href="/flores-amarillas" class="whitespace-nowrap flex-shrink-0 px-3.5 py-1.5 rounded-full border border-stone-200 text-[10px] uppercase tracking-wider font-bold text-stone-600 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-colors">Flores Amarillas</a>
+      <a href="/regalos-amor-y-amistad" class="whitespace-nowrap flex-shrink-0 px-3.5 py-1.5 rounded-full border border-stone-200 text-[10px] uppercase tracking-wider font-bold text-stone-600 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-colors">Amor y Amistad</a>
+      <a href="/flores-tejidas-a-crochet" class="whitespace-nowrap flex-shrink-0 px-3.5 py-1.5 rounded-full border border-stone-200 text-[10px] uppercase tracking-wider font-bold text-stone-600 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-colors">Flores Tejidas</a>
+      <a href="/regalos-originales-colombia" class="whitespace-nowrap flex-shrink-0 px-3.5 py-1.5 rounded-full border border-stone-200 text-[10px] uppercase tracking-wider font-bold text-stone-600 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-colors">Regalos Originales</a>
     </div>
   </div>
 
   <!-- ════════ PERSONALIZADO ════════ -->
-  <section class="bg-white py-8 md:py-12 px-4 border-t border-stone-100" id="personalizado">
+  <section class="bg-white py-10 sm:py-14 px-4 border-t border-stone-100" id="personalizado">
     <div class="max-w-xl mx-auto text-center">
-      <div class="text-[9px] tracking-[3px] uppercase text-violet-600 font-bold mb-2">Hecho para ti</div>
-      <h2 class="font-serif text-xl md:text-3xl font-light text-stone-800 mb-2 leading-tight">
-        ¿Quieres algo <em class="italic text-violet-600 font-normal">único?</em>
+      <span class="inline-flex items-center bg-amber-50 border border-amber-200/70 text-amber-900 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-3">
+        Hecho para ti
+      </span>
+      <h2 class="font-serif text-2xl sm:text-3xl md:text-4xl font-light text-slate-800 mb-2 leading-tight">
+        ¿Quieres algo <em class="italic text-amber-600 font-normal">único?</em>
       </h2>
-      <p class="text-stone-400 text-[11px] mb-5 max-w-xs mx-auto">
-        Cuéntame la ocasión, colores y personaje. Lo tejemos puntada a puntada.
+      <p class="text-slate-500 text-xs sm:text-sm leading-relaxed mb-6 max-w-sm mx-auto">
+        Cuéntanos la ocasión, colores y personaje. Lo tejemos puntada a puntada con amor.
       </p>
       
       <!-- Chips: scroll horizontal en móvil -->
       <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1 justify-start md:justify-center -mx-4 px-4 mb-6">
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20para%20Cumpleaños" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest text-stone-600 hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 transition-all">Cumpleaños</a>
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20para%20Boda" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest text-stone-600 hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 transition-all">Boda</a>
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20por%20Aniversario" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest text-stone-600 hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 transition-all">Aniversario</a>
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20para%20Grado" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest text-stone-600 hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 transition-all">Grado</a>
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20regalo%20especial" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest text-stone-600 hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 transition-all">Regalo</a>
-        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20de%20mi%20Michi" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest text-stone-600 hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 transition-all">Mi Michi</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20para%20Cumpleaños" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-all">Cumpleaños</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20para%20Boda" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-all">Boda</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20por%20Aniversario" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-all">Aniversario</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20para%20Grado" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-all">Grado</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20regalo%20especial" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-all">Regalo</a>
+        <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20de%20mi%20Michi" target="_blank" class="whitespace-nowrap flex-shrink-0 bg-stone-50 border border-stone-200 px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50/50 transition-all">Mi Michi</a>
       </div>
 
       <a
         href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Quiero%20un%20ramo%20personalizado"
-        class="inline-flex items-center gap-2 bg-[#1a1220] text-white px-6 py-3 rounded-2xl font-bold shadow-md hover:bg-black transition-all uppercase text-[9px] tracking-widest"
+        class="inline-flex items-center gap-2 bg-[#1a1220] hover:bg-black text-white px-7 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm tracking-wide active:scale-95"
         target="_blank"
       >
-        <Icon name="whatsapp" class="text-sm" /> Atención personalizada por WhatsApp
+        <Icon name="whatsapp" class="w-4 h-4 text-emerald-400" />
+        <span>Atención personalizada por WhatsApp</span>
       </a>
     </div>
   </section>
 
-  <!-- ════════ COMUNIDAD E INSTAGRAM ════════ -->
-  <section class="bg-stone-50 py-8 md:py-12 px-4 border-t border-stone-100" id="comunidad">
-    <div class="max-w-[1200px] mx-auto">
-      <!-- Cabecera + botón en una fila -->
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <div class="text-[9px] tracking-[3px] uppercase text-violet-600 font-bold mb-1">Comunidad</div>
-          <h2 class="font-serif text-xl md:text-2xl font-light text-stone-800 leading-tight">
-            Siguenos en <em class="italic text-rose-500 font-normal">Instagram</em>
-          </h2>
-        </div>
-        <a href="https://instagram.com/nuditos_tejidos" target="_blank" class="flex-shrink-0 inline-flex items-center gap-1.5 bg-[#1a1220] text-white px-4 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-violet-700 transition-all">
-          <Icon name="instagram" class="text-xs" /> @nuditos_tejidos
-        </a>
-      </div>
-
-      <!-- Grid cuadrado, 4 cols en móvil y desktop -->
-      <div class="grid grid-cols-4 gap-2">
-        {liveProducts.filter(p => p.img).slice(0, 4).map((p) => (
-          <a href="https://instagram.com/nuditos_tejidos" target="_blank" class="aspect-square bg-stone-200 rounded-xl overflow-hidden relative group block">
-            <img src={clUrl(p.img, 300)} alt={p.name} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
-            <div class="absolute inset-0 bg-[#1a1220]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center text-white">
-              <Icon name="instagram" class="text-lg drop-shadow-md" />
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
+  <!-- ════════ UNIRSE A NUDITOS / COMUNIDAD ════════ -->
+  <CommunitySection 
+    products={liveProducts} 
+    instagramUrl={publicConfig?.socialInstagram || 'https://www.instagram.com/nuditos_tejidos/'} 
+    whatsappUrl={`https://wa.me/${publicConfig?.socialWhatsapp || '573144931525'}?text=Hola%20Nuditos!%20Quiero%20unirme%20a%20la%20comunidad%20🌸`} 
+  />
 
   <script is:inline set:html={`window.NUDITOS_LIVE_PRODUCTS = ${JSON.stringify(safeProducts)}; window.NUDITOS_CATEGORIES = ${JSON.stringify(safeCategories)}; window.NUDITOS_LIVE_CONFIG = ${JSON.stringify(publicConfig)}; `} />
 </Layout>

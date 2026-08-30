@@ -148,151 +148,157 @@ function formatDate(dateStr: string) {
 
   <style>
     .post-hero {
-      background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%);
-      padding: 5rem 1.5rem 4rem;
+      background: linear-gradient(to bottom right, #fafaf9, #ffffff, rgba(245, 158, 11, 0.05));
+      padding: 5rem 1.5rem 3.5rem;
       text-align: center;
+      border-bottom: 1px solid #f5f5f4;
     }
     .post-meta {
       font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-      color: var(--lila-dark); letter-spacing: 2px; margin-bottom: 1rem;
+      color: #d97706; letter-spacing: 2px; margin-bottom: 1rem;
       display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;
     }
     .post-hero h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600;
-      line-height: 1.1; color: var(--text); max-width: 900px; margin: 0 auto 2rem;
+      font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 400;
+      line-height: 1.1; color: #1e293b; max-width: 900px; margin: 0 auto 1.5rem;
     }
     .read-time {
       display: inline-flex; align-items: center; gap: 0.4rem;
       background: white; padding: 0.3rem 0.8rem; border-radius: 50px;
-      font-size: 0.7rem; color: var(--text-soft); font-weight: 500;
-      border: 1px solid var(--border);
+      font-size: 0.7rem; color: #64748b; font-weight: 600;
+      border: 1px solid #e2e8f0;
     }
     .post-img {
-      max-width: 1000px; margin: -3rem auto 0;
-      aspect-ratio: 16/9; border-radius: 32px; overflow: hidden;
-      box-shadow: var(--shadow-lg);
+      max-width: 1000px; margin: -2.5rem auto 0;
+      aspect-ratio: 16/9; border-radius: 28px; overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      border: 1px solid #f1f5f9;
     }
     .post-img img { width: 100%; height: 100%; object-fit: cover; }
 
     /* Tabla de Contenidos */
     .toc {
-      max-width: 720px; margin: 2rem auto 0; padding: 1.5rem 2rem;
-      background: var(--lila-xlight); border-radius: 20px;
-      border-left: 4px solid var(--lila-dark);
+      max-width: 720px; margin: 2.5rem auto 0; padding: 1.5rem 2rem;
+      background: #fffbeb; border-radius: 20px;
+      border-left: 4px solid #d97706;
+      border-top: 1px solid rgba(245, 158, 11, 0.15);
+      border-right: 1px solid rgba(245, 158, 11, 0.15);
+      border-bottom: 1px solid rgba(245, 158, 11, 0.15);
     }
     .toc-title {
       font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 2px; color: var(--lila-dark); margin-bottom: 0.8rem;
+      letter-spacing: 2px; color: #92400e; margin-bottom: 0.8rem;
     }
     .toc-list { list-style: none; padding: 0; margin: 0; }
     .toc-list li { margin-bottom: 0.4rem; }
     .toc-list a {
-      color: var(--text-soft); font-size: 0.9rem;
+      color: #475569; font-size: 0.9rem;
       text-decoration: none; transition: color 0.2s;
     }
-    .toc-list a:hover { color: var(--lila-dark); }
+    .toc-list a:hover { color: #d97706; }
     .toc-list .toc-h3 { padding-left: 1.2rem; }
 
     /* Contenido */
     .post-content {
       max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 4rem;
-      color: var(--text-mid); font-size: 1.1rem; line-height: 1.85;
+      color: #334155; font-size: 1.05rem; line-height: 1.85;
     }
     .post-content :global(h2) {
-      font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 600;
-      color: var(--text); margin: 3rem 0 1.5rem; scroll-margin-top: 100px;
+      font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 500;
+      color: #0f172a; margin: 3rem 0 1.2rem; scroll-margin-top: 100px;
     }
     .post-content :global(h3) {
-      font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600;
-      color: var(--text); margin: 2.5rem 0 1rem; scroll-margin-top: 100px;
+      font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 500;
+      color: #0f172a; margin: 2.5rem 0 1rem; scroll-margin-top: 100px;
     }
     .post-content :global(p) { margin-bottom: 1.5rem; }
     .post-content :global(ul), .post-content :global(ol) {
       margin-bottom: 2rem; padding-left: 1.5rem;
     }
-    .post-content :global(li) { margin-bottom: 0.8rem; }
-    .post-content :global(strong) { color: var(--text); }
-    .post-content :global(a) { color: var(--lila-dark); text-decoration: underline; }
+    .post-content :global(li) { margin-bottom: 0.6rem; }
+    .post-content :global(strong) { color: #0f172a; }
+    .post-content :global(a) { color: #d97706; text-decoration: underline; }
     .post-content :global(blockquote),
     .post-content :global(.post-tip) {
-      background: var(--lila-xlight); border-radius: 20px; padding: 1.5rem 2rem;
-      border-left: 4px solid var(--lila-dark); margin: 2rem 0; font-style: italic;
-      color: var(--text);
+      background: #fffbeb; border-radius: 20px; padding: 1.5rem 2rem;
+      border-left: 4px solid #d97706; margin: 2rem 0; font-style: italic;
+      color: #78350f;
     }
     .post-content :global(img) {
-      width: 100%; border-radius: 16px; margin: 2rem 0;
+      width: 100%; border-radius: 20px; margin: 2rem 0;
     }
 
     /* CTA Inline */
     .post-cta {
-      background: linear-gradient(135deg, #f3edf9, #fce7f3);
+      background: #fafaf9;
       border-radius: 24px; padding: 2.5rem; text-align: center; margin: 3rem 0;
-      border: 1px solid rgba(180, 150, 204, 0.2);
+      border: 1px solid #e7e5e4;
     }
     .post-cta h3 {
       font-family: 'Cormorant Garamond', serif; font-size: 1.8rem;
-      font-weight: 400; margin-bottom: 0.6rem; color: var(--text);
+      font-weight: 400; margin-bottom: 0.6rem; color: #1c1917;
     }
-    .post-cta h3 em { font-style: italic; color: var(--lila-dark); }
-    .post-cta p { color: var(--text-soft); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .post-cta h3 em { font-style: italic; color: #d97706; }
+    .post-cta p { color: #78716c; font-size: 0.9rem; margin-bottom: 1.5rem; }
     .post-cta a {
       display: inline-flex; align-items: center; gap: 0.5rem;
-      background: var(--text); color: white; padding: 0.8rem 2rem;
-      border-radius: 50px; font-weight: 600; font-size: 0.85rem;
+      background: #1a1220; color: white; padding: 0.9rem 2.2rem;
+      border-radius: 1rem; font-weight: 700; font-size: 0.85rem;
       text-decoration: none; transition: background 0.2s, transform 0.2s;
+      letter-spacing: 0.5px;
     }
-    .post-cta a:hover { background: var(--lila-dark); transform: scale(1.03); }
+    .post-cta a:hover { background: #000000; transform: scale(1.02); }
 
     /* Footer del post */
     .post-footer-section {
       max-width: 720px; margin: 0 auto; padding: 0 1.5rem 6rem;
     }
     .post-divider {
-      border: none; border-top: 1px solid var(--border);
+      border: none; border-top: 1px solid #e7e5e4;
       margin: 3rem 0;
     }
 
     /* Posts Relacionados */
     .related-section {
-      background: var(--cream); padding: 4rem 1.5rem;
+      background: #fafaf9; padding: 4rem 1.5rem; border-top: 1px solid #e7e5e4;
     }
     .related-inner { max-width: 1100px; margin: 0 auto; }
     .related-title {
       font-family: 'Cormorant Garamond', serif; font-size: 2rem;
-      text-align: center; margin-bottom: 2.5rem; color: var(--text);
+      text-align: center; margin-bottom: 2.5rem; color: #1c1917; font-weight: 400;
     }
-    .related-title em { font-style: italic; color: var(--lila-dark); }
+    .related-title em { font-style: italic; color: #d97706; }
     .related-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;
     }
     .related-card {
       background: white; border-radius: 20px; overflow: hidden;
-      border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid #e7e5e4; transition: transform 0.3s, box-shadow 0.3s;
       text-decoration: none; display: flex; flex-direction: column;
     }
-    .related-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+    .related-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
     .related-card-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
     .related-card-body { padding: 1.5rem; }
     .related-card-cat {
       font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 1.5px; color: var(--lila-dark); margin-bottom: 0.5rem;
+      letter-spacing: 1.5px; color: #d97706; margin-bottom: 0.5rem;
     }
     .related-card-title {
       font-family: 'Cormorant Garamond', serif; font-size: 1.3rem;
-      font-weight: 600; color: var(--text); line-height: 1.3;
+      font-weight: 500; color: #1c1917; line-height: 1.3;
     }
 
     /* Productos CTA */
     .products-cta {
-      background: white; padding: 4rem 1.5rem; border-top: 1px solid var(--border);
+      background: white; padding: 4rem 1.5rem; border-top: 1px solid #e7e5e4;
     }
     .products-cta-inner { max-width: 1200px; margin: 0 auto; }
     .products-cta-title {
       font-family: 'Cormorant Garamond', serif; font-size: 2rem;
-      text-align: center; margin-bottom: 2.5rem; color: var(--text);
+      text-align: center; margin-bottom: 2.5rem; color: #1c1917; font-weight: 400;
     }
-    .products-cta-title em { font-style: italic; color: var(--lila-dark); }
+    .products-cta-title em { font-style: italic; color: #d97706; }
 
     @media (max-width: 768px) {
       .post-hero { padding: 4rem 1.2rem 3rem; }
@@ -306,12 +312,15 @@ function formatDate(dateStr: string) {
   <!-- HERO -->
   <div class="post-hero">
     <div class="post-meta">
-      {post.category || 'Nuditos'} <span style="opacity:0.4">•</span> {formatDate(datePublished)}
+      <span class="inline-flex items-center bg-amber-50 border border-amber-200/70 text-amber-900 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+        {post.category || 'Nuditos'}
+      </span>
       <span class="read-time">
         <Icon name="time" /> {readTime} min de lectura
       </span>
     </div>
     <h1>{post.title}</h1>
+    <div class="text-xs text-slate-400 font-sans">{formatDate(datePublished)}</div>
   </div>
 
   <!-- IMAGEN PRINCIPAL -->
@@ -355,30 +364,25 @@ function formatDate(dateStr: string) {
     </div>
 
     <!-- CAJA DE AUTOR (E-E-A-T) -->
-    <div class="bg-gradient-to-tr from-stone-50 to-violet-50/20 rounded-[2rem] p-6 md:p-8 border border-stone-100 flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-10 mt-10 shadow-sm">
-      <div class="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-tr from-violet-100 to-rose-100 border border-stone-200/50 flex-shrink-0 shadow-md flex items-center justify-center relative group">
-        <!-- TODO: Cargar foto del avatar del autor a Cloudinary y usar:
-             Ubicación recomendada: Cloudinary folder 'autores/'
-             Dimensiones óptimas: 150x150px (Aspect ratio 1:1, circular crop)
-             Etiqueta: <img src="URL_AVATAR" alt={authorName} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-115" />
-        -->
-        <span class="text-3xl transition-transform duration-500 group-hover:scale-110">👩‍🎨</span>
+    <div class="bg-amber-50/40 rounded-3xl p-6 md:p-8 border border-amber-200/60 flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-10 mt-10 shadow-xs">
+      <div class="w-16 h-16 rounded-2xl bg-amber-100/80 border border-amber-200 flex-shrink-0 shadow-xs flex items-center justify-center relative">
+        <span class="text-3xl">👩‍🎨</span>
       </div>
       <div class="text-center sm:text-left space-y-2">
-        <div class="text-[9px] uppercase font-bold tracking-[0.25em] text-violet-600 font-sans">Escrito por</div>
+        <div class="text-[9px] uppercase font-bold tracking-[0.25em] text-amber-800 font-sans">Escrito por</div>
         <div class="flex flex-col sm:flex-row sm:items-center gap-2 justify-center sm:justify-start">
-          <h4 class="font-serif text-lg font-bold text-stone-800">{authorName}</h4>
-          <span class="inline-flex items-center gap-1 bg-violet-100/75 text-violet-700 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider self-center sm:self-auto border border-violet-200/50">
+          <h4 class="font-serif text-lg font-bold text-slate-800">{authorName}</h4>
+          <span class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider self-center sm:self-auto border border-amber-200/60">
             <Icon name="check" class="w-2.5 h-2.5" /> Tejedora Experta
           </span>
         </div>
-        <p class="text-xs text-stone-500 leading-relaxed font-sans max-w-xl">{authorBio}</p>
-        <div class="pt-2 text-[9px] font-sans text-stone-400 flex flex-wrap items-center justify-center sm:justify-start gap-3">
+        <p class="text-xs text-slate-600 leading-relaxed font-sans max-w-xl">{authorBio}</p>
+        <div class="pt-2 text-[9px] font-sans text-slate-400 flex flex-wrap items-center justify-center sm:justify-start gap-3">
           <span>💡 Especialista en Crochet y Flores Eternas</span>
           <span class="opacity-30">•</span>
           <span>📍 El Dorado, Meta</span>
           <span class="opacity-30">•</span>
-          <a href={authorInstagram} target="_blank" class="text-violet-600 hover:underline">Instagram</a>
+          <a href={authorInstagram} target="_blank" class="text-amber-700 font-bold hover:underline">Instagram</a>
         </div>
       </div>
     </div>
@@ -387,7 +391,7 @@ function formatDate(dateStr: string) {
 
     <!-- Navegación -->
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-      <a href="/blog" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--lila-dark); font-weight: 600; text-decoration: none; font-size: 0.9rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateX(-5px)'" onmouseout="this.style.transform=''">
+      <a href="/blog" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #1a1220; font-weight: 700; text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">
         <Icon name="arrow-left" /> Volver al Blog
       </a>
       <div style="display: flex; gap: 0.5rem;">
@@ -425,12 +429,12 @@ function formatDate(dateStr: string) {
     <section class="products-cta">
       <div class="products-cta-inner">
         <h2 class="products-cta-title">Explora nuestros <em>ramos eternos</em></h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem;">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {ctaProducts.map(p => <ProductCard p={p} parentView="grid" idScope="blog-cta" />)}
         </div>
-        <div style="text-align: center; margin-top: 2rem;">
-          <a href="/catalogo" style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--text); color: white; padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; transition: background 0.2s;">
-            Ver todo el catálogo <Icon name="arrow-right" />
+        <div style="text-align: center; margin-top: 2.5rem;">
+          <a href="/catalogo" class="inline-flex items-center gap-2 bg-[#1a1220] hover:bg-black text-white px-8 py-3.5 rounded-2xl font-bold uppercase tracking-wider text-xs transition-all shadow-lg active:scale-95">
+            <span>Ver todo el catálogo</span> <Icon name="arrow-right" class="w-4 h-4 text-amber-400" />
           </a>
         </div>
       </div>

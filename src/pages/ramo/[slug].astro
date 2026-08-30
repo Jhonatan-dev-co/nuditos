@@ -1,17 +1,12 @@
 ---
-import Icon from '../../components/Icon.astro';
-/**
- * Nuditos — Página de producto individual
- * URL: /ramo/[slug]
- * SSR · Usa el Layout principal (mismo nav, carrito, footer)
- */
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
+import Icon from '../../components/Icon.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import TestimonialsSection from '../../components/TestimonialsSection.astro';
-import { Image } from 'astro:assets';
-import { getLiveProductBySlug, getLiveProducts, getLiveCategories, getLiveTestimonios } from '../../lib/supabase';
+import CountdownBanner from '../../components/CountdownBanner.astro';
+import { getLiveProductBySlug, getLiveProducts, getLiveCategories } from '../../lib/supabase';
 import { slugify, clUrl, categories as FALLBACK_CATEGORIES } from '../../data/datos';
 import { getIconSvg } from '../../lib/icons';
 
@@ -31,10 +26,9 @@ const SITE_URL  = Astro.site?.toString().replace(/\/$/, '') || Astro.url.origin;
 const product = await getLiveProductBySlug(slug);
 if (!product) return Astro.redirect('/');
 
-const [allProducts, rawCategories, sbTestimonios] = await Promise.all([
+const [allProducts, rawCategories] = await Promise.all([
   getLiveProducts(),
-  getLiveCategories(),
-  getLiveTestimonios()
+  getLiveCategories()
 ]);
 
 const categories = rawCategories && rawCategories.length > 0 ? rawCategories : FALLBACK_CATEGORIES;
@@ -45,28 +39,30 @@ const others  = allProducts.filter(p => !((p.cats || []).some(cid => (product.ca
 const related = [...sameCat, ...others].slice(0, 4);
 
 // UI Helpers
-const cat = categories.find(c => c.id === product.cat) || { name: product.cat, icon: '🌸' };
+const cat = categories.find(c => c.id === product.cat) || { name: product.cat || 'Ramos', nombre: product.cat || 'Ramos', icon: '🌸' };
+const catDisplayName = cat.nombre || cat.name || 'Ramos';
 const allImgs = [product.img, ...(product.imgs || []).filter((u: string) => u && u !== product.img)].filter(Boolean);
 const mainImg = allImgs[0] || '';
 const showPrice = product.oferta && product.precioOferta > 0 ? product.precioOferta : product.price;
 const origPrice = product.oferta && product.precioOriginal > 0 ? product.precioOriginal : null;
 const inStock   = product.stock === undefined || product.stock === null || product.stock > 0;
 const pageUrl   = `${SITE_URL}/ramo/${slug}`;
-const discount  = origPrice ? Math.round((1 - showPrice / origPrice) * 100) : 0;
-const waMsg     = encodeURIComponent(
-  `Hola Nuditos! 🌸 Me interesa:\n\n*${product.name}*\n${showPrice > 0 ? '$' + showPrice.toLocaleString('es-CO') + ' COP' : 'Quisiera saber el precio'}\n\n${pageUrl}`
-);
+const discount  = origPrice && origPrice > showPrice ? Math.round((1 - showPrice / origPrice) * 100) : 0;
 
-// SEO & JSON-LD Dinámico Priorizando Supabase (Ataque a Flores Naturales)
-const isMadre = (product.cats || []).some(c => c.toLowerCase().includes('madre')) || (product.cat || '').toLowerCase().includes('madre');
+const waMessage = `Hola Nuditos! 🌸 Quiero comprar el ramo *${product.name}* (${showPrice > 0 ? '$' + showPrice.toLocaleString('es-CO') + ' COP' : ''})\n\n${pageUrl}`;
+const waUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMessage)}`;
 
-const seoTitle = product.metaTitle || `${product.name} | Mejor que las Flores Naturales | Nuditos`;
+// Campañas especiales
+const isYellow = (product.cats || []).some(c => (c || '').toLowerCase().includes('amarill') || (c || '').toLowerCase().includes('girasol')) || (product.cat || '').toLowerCase().includes('amarill') || (product.cat || '').toLowerCase().includes('girasol') || (product.name || '').toLowerCase().includes('girasol') || (product.name || '').toLowerCase().includes('amarill');
+const isMadre = (product.cats || []).some(c => (c || '').toLowerCase().includes('madre')) || (product.cat || '').toLowerCase().includes('madre');
+
+// SEO
+const seoTitle = product.metaTitle || `${product.name} | Ramo Tejido a Crochet | Nuditos`;
 const seoDesc  = product.metaDescription || (product.desc
-  ? `${product.desc} · La alternativa perfecta a las flores naturales. Ramos eternos tejidos a mano en Colombia.`
-  : `¿Ibas a regalar flores naturales? Sorprende con ${product.name} tejido a crochet. Un ramo original y eterno que nunca se marchita. Envíos en toda Colombia.`);
+  ? `${product.desc} · Flores eternas tejidas a mano en Colombia.`
+  : `Ramo ${product.name} tejido a mano en crochet. Un detalle eterno que nunca se marchita. Envíos a todo Colombia.`);
 
-// Alt Text dinámico
-const mainAltText = product.altText || `${product.name} - Ramo tejido a crochet, la mejor alternativa a regalar flores naturales que se marchitan`;
+const mainAltText = product.altText || `${product.name} - Ramo tejido a crochet que nunca se marchita`;
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
@@ -74,7 +70,7 @@ const breadcrumbSchema = {
   "itemListElement": [
     { "@type": "ListItem", "position": 1, "name": "Inicio", "item": SITE_URL },
     { "@type": "ListItem", "position": 2, "name": "Catálogo", "item": `${SITE_URL}/catalogo` },
-    { "@type": "ListItem", "position": 3, "name": cat.nombre || cat.name, "item": `${SITE_URL}/catalogo/${product.cat}` },
+    { "@type": "ListItem", "position": 3, "name": catDisplayName, "item": `${SITE_URL}/catalogo/${product.cat}` },
     { "@type": "ListItem", "position": 4, "name": product.name, "item": pageUrl }
   ]
 };
@@ -87,7 +83,7 @@ const productSchema = {
   image: allImgs.map(img => img.startsWith('http') ? img : `${SITE_URL}${img}`),
   brand: { '@type': 'Brand', name: 'Nuditos Tejidos' },
   sku: `NUD-${product.id}`,
-  category: cat.name,
+  category: catDisplayName,
   offers: {
     '@type': 'Offer',
     priceCurrency: 'COP',
@@ -96,6 +92,16 @@ const productSchema = {
     url: pageUrl,
     seller: { '@type': 'Organization', name: 'Nuditos Tejidos' },
   }
+};
+
+const currentProduct = {
+  id: Number(product.id),
+  name: product.name,
+  price: Number(showPrice),
+  img: mainImg,
+  emoji: product.emoji || '🌸',
+  cat: product.cat || '',
+  desc: product.desc || ''
 };
 ---
 
@@ -113,11 +119,18 @@ const productSchema = {
     {showPrice > 0 && <meta property="product:price:amount"   content={String(showPrice)} />}
     {showPrice > 0 && <meta property="product:price:currency" content="COP" />}
     {product.seoKeywords && <meta name="keywords" content={product.seoKeywords} />}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.css" />
   </Fragment>
 
-
-  <!-- ════════ BANNER DE CAMPAÑA INTELIGENTE ════════ -->
-  {isMadre ? (
+  <!-- ════════ BANNER TOP CON CONTADOR ════════ -->
+  {isYellow ? (
+    <CountdownBanner 
+      targetDate="2026-09-21"
+      title="Día de las Flores Amarillas"
+      badge="21 de Septiembre"
+      slug="flores-amarillas"
+    />
+  ) : isMadre ? (
     <div class="bg-rose-50 text-rose-950 border-b border-rose-100/50 py-2.5 px-4">
       <div class="max-w-[1200px] mx-auto flex flex-wrap items-center justify-center gap-2 text-center text-[10px] md:text-xs tracking-widest uppercase font-medium">
         <span class="font-bold text-rose-800">Día de la Madre — 10 de mayo</span>
@@ -133,37 +146,41 @@ const productSchema = {
   ) : (
     <div class="bg-emerald-50 text-emerald-900 border-b border-emerald-100/50 py-2 px-4">
       <div class="max-w-[1200px] mx-auto flex items-center justify-center gap-2 text-[10px] tracking-widest uppercase font-bold">
-        <Icon name="truck" class="text-emerald-500 text-xs" /> Envío Gratis Nacional — Tejiendo momentos desde 2022
+        <Icon name="truck" class="w-3.5 h-3.5 text-emerald-600" /> Envío Gratis Nacional — Tejiendo momentos desde 2022
       </div>
     </div>
   )}
 
-  <!-- BREADCRUMB - MOSTRADOS SOLO EN DESKTOP -->
-  <nav class="hidden md:flex max-w-[1200px] mx-auto px-6 pt-4 pb-2 md:py-8 items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-stone-400 font-medium" aria-label="Breadcrumb">
+  <!-- ════════ BREADCRUMB (Desktop) ════════ -->
+  <nav class="hidden md:flex max-w-[1200px] mx-auto px-4 sm:px-6 pt-3 pb-1 md:py-3 items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-stone-400 font-medium" aria-label="Breadcrumb">
     <a href="/" class="hover:text-stone-800 transition-colors">Inicio</a>
     <span class="opacity-30">/</span>
-    <a href={`/catalogo?categoria=${product.cat}`} class="hover:text-stone-800 transition-colors">{cat.name}</a>
+    <a href="/catalogo" class="hover:text-stone-800 transition-colors">Catálogo</a>
     <span class="opacity-30">/</span>
-    <span class="text-stone-600 font-bold tracking-normal normal-case text-[11px]">{product.name}</span>
+    <a href={`/catalogo/${product.cat}`} class="hover:text-stone-800 transition-colors">{catDisplayName}</a>
+    <span class="opacity-30">/</span>
+    <span class="text-stone-700 font-bold tracking-normal normal-case text-[11px]">{product.name}</span>
   </nav>
 
-  <!-- SECCIÓN DE PRODUCTO -->
-  <section class="max-w-[1200px] mx-auto px-0 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-20 items-start pb-4 overflow-x-hidden">
+  <!-- ════════ SECCIÓN DE PRODUCTO ════════ -->
+  <section class="max-w-[1200px] mx-auto px-3 sm:px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-16 items-start pt-0 pb-6 sm:py-6 md:py-8 overflow-hidden relative">
 
     <!-- GALERÍA -->
-    <div class="px-4 pt-4 md:px-0 md:pt-0">
+    <div class="relative w-full">
       <div 
-        class="swiper product-gallery-swiper relative w-full aspect-[4/5] rounded-[2.2rem] overflow-hidden bg-stone-50 shadow-sm border border-stone-100"
+        class="swiper product-gallery-swiper relative w-full aspect-[4/5] rounded-2xl md:rounded-3xl overflow-hidden bg-stone-50 shadow-md sm:shadow-lg border border-stone-100"
         id="ramoMainWrap"
       >
         <div class="swiper-wrapper">
           {allImgs.map((img: string, i: number) => (
             <div class="swiper-slide cursor-zoom-in" onclick={`openLightbox(${i})`}>
               <img
-                src={clUrl(img, 1000)} 
+                src={clUrl(img, 800)} 
+                srcset={`${clUrl(img, 500)} 500w, ${clUrl(img, 800)} 800w, ${clUrl(img, 1200)} 1200w`}
+                sizes="(max-width: 768px) 100vw, 50vw"
                 alt={i === 0 ? mainAltText : `${product.name} - Imagen ${i + 1}`}
-                width="1000"
-                height="1250"
+                width="800"
+                height="1000"
                 class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 loading={i === 0 ? "eager" : "lazy"}
                 decoding={i === 0 ? "sync" : "async"}
@@ -175,27 +192,31 @@ const productSchema = {
           ))}
         </div>
 
-        <div class="swiper-pagination !bottom-6"></div>
+        <div class="swiper-pagination !bottom-4"></div>
 
         {product.badge && (
-          <div class="absolute top-6 left-6 z-10 hidden md:flex bg-white/90 backdrop-blur-md border border-stone-100 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider items-center gap-2 shadow-sm">
-             {product.badge === 'Nuevo'    && <Icon name="sparkling" class="text-emerald-500" />}
-             {product.badge === 'Popular'  && <Icon name="fire" class="text-rose-500" />}
-             {product.badge === 'Especial' && <Icon name="award" class="text-violet-500" />}
-             {product.badge}
+          <div class="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur-md border border-stone-200/80 px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+             {product.badge === 'Nuevo'    && <Icon name="sparkling" class="text-emerald-500 w-3.5 h-3.5" />}
+             {product.badge === 'Popular'  && <Icon name="fire" class="text-rose-500 w-3.5 h-3.5" />}
+             {product.badge === 'Especial' && <Icon name="award" class="text-amber-500 w-3.5 h-3.5" />}
+             <span>{product.badge}</span>
           </div>
         )}
         
-        {!inStock && <div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center font-serif text-2xl uppercase tracking-widest text-stone-800 z-10">Agotado</div>}
+        {!inStock && (
+          <div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center font-serif text-2xl uppercase tracking-widest text-stone-800 z-10">
+            Agotado
+          </div>
+        )}
       </div>
 
       <!-- Miniaturas en Desktop -->
       {allImgs.length > 1 && (
-        <div class="hidden md:flex gap-3 overflow-x-auto pb-2 scrollbar-none mt-4">
+        <div class="hidden md:flex gap-3 overflow-x-auto pb-2 scrollbar-none mt-3.5">
           {allImgs.map((url: string, i: number) => (
             <button 
-              class={`ramo-thumb w-20 aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${i === 0 ? 'border-violet-300' : 'border-transparent opacity-60 hover:opacity-100'}`}
-              onclick={`gallerySwiper.slideTo(${i})`}
+              class={`ramo-thumb w-18 aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 cursor-pointer ${i === 0 ? 'border-amber-500 opacity-100 shadow-sm ring-2 ring-amber-400/30' : 'border-transparent opacity-60 hover:opacity-100'}`}
+              onclick={`if(window.gallerySwiper) window.gallerySwiper.slideTo(${i})`}
               data-thumb={i}
             >
               <img src={clUrl(url, 200)} alt={`${product.name} mini`} width="80" height="100" loading="lazy" decoding="async" class="w-full h-full object-cover" />
@@ -205,76 +226,100 @@ const productSchema = {
       )}
     </div>
 
-    <!-- INFO -->
-    <div class="px-4 pt-4 md:px-0 md:pt-0">
-      <div class="space-y-1 md:space-y-4">
-        <div class="text-[9px] md:text-[10px] font-bold tracking-[0.3em] uppercase text-stone-400 flex items-center gap-2">
-           Colección {cat.name}
-        </div>
-        
-        <h1 class="font-serif text-3xl md:text-[3.25rem] font-light text-stone-800 leading-[1.1]">
-          {product.name}
-        </h1>
+    <!-- INFORMACIÓN DE COMPRA -->
+    <div class="text-left">
+      <div class="text-[10px] font-bold tracking-[0.25em] uppercase text-amber-800 bg-amber-50/80 border border-amber-200/60 px-3 py-1 rounded-full w-fit mb-2 flex items-center gap-1.5">
+         {cat.icon || '🌸'} Colección {catDisplayName}
+      </div>
+      
+      <h1 class="font-serif text-[1.85rem] sm:text-3xl md:text-5xl font-light text-slate-800 leading-[1.18] mb-2">
+        {product.name}
+      </h1>
 
-        <div class="flex items-baseline gap-3 mt-2 md:mt-4 mb-6">
-          {showPrice > 0 ? (
-            <>
-              <span class="font-sans text-2xl md:text-[2.2rem] font-bold text-violet-700 tracking-tight">
-                ${showPrice.toLocaleString('es-CO')} <span class="text-[10px] font-sans text-stone-400 font-medium tracking-normal ml-0.5 relative -top-1">COP</span>
-              </span>
-              {origPrice && (
-                <span class="text-sm md:text-xl text-stone-300 line-through font-light decoration-stone-200">
-                  ${origPrice.toLocaleString('es-CO')}
-                </span>
-              )}
-            </>
-          ) : (
-             <span class="text-violet-600 font-bold uppercase tracking-widest text-[11px] italic">Precio a consultar</span>
-          )}
-        </div>
+      <!-- Pills de Confianza y Valor -->
+      <div class="flex items-center gap-1.5 sm:gap-2 mb-4 flex-wrap">
+        <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold border border-emerald-200/60">
+          <Icon name="truck" class="w-3.5 h-3.5 text-emerald-600" /> Envío gratis
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-900 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold border border-amber-200/60">
+          <Icon name="hand-heart" class="w-3.5 h-3.5 text-amber-600" /> Hecho a mano
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-stone-100 text-stone-700 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold border border-stone-200">
+          <Icon name="checkbox-circle" class="w-3.5 h-3.5 text-stone-600" /> Desde 2022
+        </span>
       </div>
 
+      <!-- Precio -->
+      <div class="flex items-baseline gap-3 mb-5">
+        {showPrice > 0 ? (
+          <>
+            <span class="font-sans text-2xl md:text-[2.2rem] font-extrabold text-stone-900 tracking-tight">
+              ${showPrice.toLocaleString('es-CO')} <span class="text-[11px] font-sans text-stone-400 font-medium tracking-normal ml-0.5 relative -top-1">COP</span>
+            </span>
+            {origPrice && origPrice > showPrice && (
+              <span class="text-sm md:text-lg text-stone-400 line-through font-light decoration-stone-300">
+                ${origPrice.toLocaleString('es-CO')}
+              </span>
+            )}
+            {discount > 0 && (
+              <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                -{discount}%
+              </span>
+            )}
+          </>
+        ) : (
+           <span class="text-amber-600 font-bold uppercase tracking-widest text-xs italic">Precio a consultar</span>
+        )}
+      </div>
+
+      <!-- Botones de Acción (Comprar Ramo + WhatsApp) -->
       {inStock && showPrice > 0 && (
-        <div class="flex flex-col gap-4 mt-8">
+        <div class="flex gap-2 sm:gap-3 mb-6">
           <button 
-            class="w-full h-14 bg-[#1f1d1d] text-white rounded-[0.8rem] font-bold uppercase tracking-[0.1em] text-[11px] flex items-center justify-center gap-3 hover:bg-violet-700 transition-all active:scale-95 shadow-lg shadow-[#1f1d1d]/10 border border-[#141212]"
-            onclick={`addToCartFromPage(${product.id})`} 
-            id="ramoCartBtn"
+            id="ramoCartBtn" 
+            type="button" 
+            data-product-id={product.id}
+            onclick={`addToCartFromPage(${product.id})`}
+            class="flex-1 inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white px-5 sm:px-7 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-lg active:scale-95 cursor-pointer relative overflow-hidden group"
           >
-            <Icon name="shopping-bag-3" class="text-[1.35rem] leading-none mb-0.5" /> AGREGAR AL CARRITO
+            <Icon name="shopping-bag-3" class="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+            <span id="ramoCartBtnText">Comprar ramo</span>
           </button>
-          
-          <div class="flex items-start">
-             <span class={`text-[9px] font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full flex items-center gap-2 border ${inStock ? 'bg-white text-stone-500 border-stone-200 shadow-sm' : 'bg-rose-50 text-rose-600 border-rose-100 shadow-sm'}`}>
-                <Icon name={inStock ? 'checkbox-circle' : 'close-circle'} class="text-sm opacity-80" />
-                {inStock ? 'Disponible' : 'Bajo Pedido'}
-             </span>
-          </div>
+          <a 
+            id="heroWaBtn"
+            href={waUrl} 
+            target="_blank" 
+            class="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-6 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-md active:scale-95 whitespace-nowrap"
+          >
+            <Icon name="whatsapp" class="w-4 h-4" />
+            <span>WhatsApp</span>
+          </a>
         </div>
       )}
 
+      <!-- Descripción & Beneficios del Ramo -->
       {product.desc && (
-        <div class="mt-8 pt-8 border-t border-stone-100/80">
-           <div class="text-[9px] font-bold text-stone-300 uppercase tracking-[0.25em] mb-4">Por qué elegir este ramo</div>
-           <p class="text-stone-500 leading-relaxed text-[13px] md:text-[14px] font-light max-w-[480px] mb-6">
+        <div class="pt-5 border-t border-stone-100/80">
+           <div class="text-[9px] font-bold text-stone-400 uppercase tracking-[0.25em] mb-2.5">Por qué elegir este ramo</div>
+           <p class="text-stone-600 leading-relaxed text-[13px] md:text-[14px] font-light max-w-[480px] mb-4">
              {product.desc}
            </p>
-           <div class="space-y-3">
-             <div class="flex items-start gap-3">
-               <span class="w-5 h-5 rounded-full bg-violet-50 border border-violet-100 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
-               <span class="text-stone-600 text-[12px] md:text-[13px] leading-snug"><strong class="text-stone-800">No se marchita</strong> — Dura años, no días como las flores naturales</span>
+           <div class="space-y-2.5">
+             <div class="flex items-start gap-2.5">
+               <span class="w-4.5 h-4.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
+               <span class="text-slate-600 text-xs sm:text-[13px] leading-snug"><strong class="text-slate-800">No se marchita</strong> — Dura años, no días como las flores naturales</span>
              </div>
-             <div class="flex items-start gap-3">
-               <span class="w-5 h-5 rounded-full bg-violet-50 border border-violet-100 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
-               <span class="text-stone-600 text-[12px] md:text-[13px] leading-snug"><strong class="text-stone-800">100% artesanal</strong> — Cada pétalo tejido a mano con hilos premium</span>
+             <div class="flex items-start gap-2.5">
+               <span class="w-4.5 h-4.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
+               <span class="text-slate-600 text-xs sm:text-[13px] leading-snug"><strong class="text-slate-800">100% artesanal</strong> — Cada pétalo tejido a mano con hilos premium</span>
              </div>
-             <div class="flex items-start gap-3">
-               <span class="w-5 h-5 rounded-full bg-violet-50 border border-violet-100 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
-               <span class="text-stone-600 text-[12px] md:text-[13px] leading-snug"><strong class="text-stone-800">Hipoalergénico</strong> — Sin polen, apto para personas con alergias</span>
+             <div class="flex items-start gap-2.5">
+               <span class="w-4.5 h-4.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
+               <span class="text-slate-600 text-xs sm:text-[13px] leading-snug"><strong class="text-slate-800">Hipoalergénico</strong> — Sin polen, apto para cualquier persona</span>
              </div>
-             <div class="flex items-start gap-3">
-               <span class="w-5 h-5 rounded-full bg-violet-50 border border-violet-100 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
-               <span class="text-stone-600 text-[12px] md:text-[13px] leading-snug"><strong class="text-stone-800">Envío a toda Colombia</strong> — Empaque premium en caja rígida protectora</span>
+             <div class="flex items-start gap-2.5">
+               <span class="w-4.5 h-4.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
+               <span class="text-slate-600 text-xs sm:text-[13px] leading-snug"><strong class="text-slate-800">Envío nacional seguro</strong> — Empaque rígido protector listo para regalar</span>
              </div>
            </div>
         </div>
@@ -283,154 +328,122 @@ const productSchema = {
     </div>
   </section>
 
-  <!-- ════════ SECCIÓN: RESEÑAS ════════ -->
+  <!-- ════════ SECCIÓN: RESEÑAS / TESTIMONIOS (Clientes Felices) ════════ -->
   <TestimonialsSection />
 
-  <!-- ════════ SECCIÓN: CONFIANZA Y GARANTÍAS (Inyectado de Landing) ════════ -->
-  <section class="bg-stone-50 py-12 px-6 border-t border-stone-100">
-    <div class="max-w-[1200px] mx-auto">
-      <div class="grid md:grid-cols-3 gap-8">
-        <!-- Garantía 1 -->
-        <div class="flex gap-4 p-6 bg-white rounded-2xl border border-stone-100 shadow-sm">
-          <div class="w-12 h-12 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 flex-shrink-0">
-            <Icon name="history" class="text-2xl" />
-          </div>
-          <div>
-            <h4 class="font-bold text-[11px] uppercase tracking-widest text-stone-800 mb-1">Desde el año 2022</h4>
-            <p class="text-[12px] text-stone-500 leading-snug">Miles de ramos entregados en toda Colombia. Somos expertos en flores eternas.</p>
-          </div>
-        </div>
-        <!-- Garantía 2 -->
-        <div class="flex gap-4 p-6 bg-white rounded-2xl border border-stone-100 shadow-sm">
-          <div class="w-12 h-12 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 flex-shrink-0">
-            <Icon name="refresh" class="text-2xl" />
-          </div>
-          <div>
-            <h4 class="font-bold text-[11px] uppercase tracking-widest text-stone-800 mb-1">Devoluciones Gratis</h4>
-            <p class="text-[12px] text-stone-500 leading-snug">Garantía total si el pedido llega dañado. *Aplican términos y condiciones.</p>
-          </div>
-        </div>
-        <!-- Garantía 3 -->
-        <div class="flex gap-4 p-6 bg-white rounded-2xl border border-stone-100 shadow-sm">
-          <div class="w-12 h-12 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 flex-shrink-0">
-            <Icon name="heart-3" class="text-2xl" />
-          </div>
-          <div>
-            <h4 class="font-bold text-[11px] uppercase tracking-widest text-stone-800 mb-1">Tejido 100% a Mano</h4>
-            <p class="text-[12px] text-stone-500 leading-snug">No es fábrica, es arte. Cada pétalo de este ramo tiene horas de dedicación.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ════════ SECCIÓN: PREGUNTAS FRECUENTES (Objeciones) ════════ -->
-  <section class="bg-[#fafaf9] py-12 border-t border-stone-100">
-    <div class="max-w-[1200px] mx-auto px-6">
-      <div class="text-center mb-8">
-        <h3 class="uppercase font-bold tracking-[0.3em] text-stone-400 text-[10px] mb-2">Dudas comunes</h3>
-        <h2 class="font-serif text-3xl text-stone-800">¿Tienes alguna pregunta?</h2>
+  <section class="bg-white py-8 sm:py-12 border-t border-stone-100">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6">
+      <div class="text-center max-w-lg mx-auto mb-6 sm:mb-8">
+        <span class="inline-flex items-center bg-stone-100 border border-stone-200 text-stone-700 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2">
+          Dudas comunes
+        </span>
+        <h2 class="font-serif text-2xl sm:text-3xl md:text-4xl font-light text-slate-800 leading-tight">
+          Preguntas <em class="italic text-amber-600 font-normal">frecuentes</em>
+        </h2>
       </div>
       
-      <div class="grid md:grid-cols-2 gap-x-12 gap-y-4 max-w-4xl mx-auto">
-        <div class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm">
-          <div class="font-bold text-stone-800 text-[13px] mb-2 flex items-center gap-2">
-            <Icon name="question-line" class="text-violet-500" /> ¿Llegan bien a otras ciudades?
+      <div class="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+        <div class="bg-stone-50 p-5 rounded-2xl border border-stone-200/80 shadow-xs">
+          <div class="font-bold text-slate-800 text-xs sm:text-[13px] mb-1.5 flex items-center gap-2">
+            <Icon name="question-line" class="text-amber-600 w-4 h-4" /> ¿Llegan bien a otras ciudades?
           </div>
-          <p class="text-stone-500 text-[12px] leading-relaxed">Sí. El tejido a crochet es flexible pero resistente, y lo empacamos en una caja rígida que evita cualquier daño durante el transporte nacional.</p>
+          <p class="text-slate-500 text-[11px] sm:text-xs leading-relaxed">Sí. El tejido a crochet es flexible pero resistente, y lo empacamos en una caja rígida reforzada que evita cualquier daño durante el transporte nacional.</p>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm">
-          <div class="font-bold text-stone-800 text-[13px] mb-2 flex items-center gap-2">
-            <Icon name="question-line" class="text-violet-500" /> ¿Es seguro pagar por la web?
+        <div class="bg-stone-50 p-5 rounded-2xl border border-stone-200/80 shadow-xs">
+          <div class="font-bold text-slate-800 text-xs sm:text-[13px] mb-1.5 flex items-center gap-2">
+            <Icon name="question-line" class="text-amber-600 w-4 h-4" /> ¿Es seguro pagar por la web?
           </div>
-          <p class="text-stone-500 text-[12px] leading-relaxed">Usamos Wompi, la pasarela de pagos de Bancolombia. Tu dinero está protegido y aceptamos Nequi, PSE y tarjetas.</p>
+          <p class="text-slate-500 text-[11px] sm:text-xs leading-relaxed">Usamos Wompi, la pasarela de pagos oficial de Bancolombia. Tu dinero está protegido y aceptamos Nequi, Daviplata, PSE y tarjetas.</p>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm">
-          <div class="font-bold text-stone-800 text-[13px] mb-2 flex items-center gap-2">
-            <Icon name="question-line" class="text-violet-500" /> ¿Cuánto tiempo dura el ramo?
+        <div class="bg-stone-50 p-5 rounded-2xl border border-stone-200/80 shadow-xs">
+          <div class="font-bold text-slate-800 text-xs sm:text-[13px] mb-1.5 flex items-center gap-2">
+            <Icon name="question-line" class="text-amber-600 w-4 h-4" /> ¿Cuánto tiempo dura el ramo?
           </div>
-          <p class="text-stone-500 text-[12px] leading-relaxed">Es una flor eterna. No se marchita, no necesita agua y mantiene su color por años si se cuida del polvo y la humedad excesiva.</p>
+          <p class="text-slate-500 text-[11px] sm:text-xs leading-relaxed">Es una flor eterna. No se marchita, no necesita agua y mantiene su color por años si se cuida del polvo y la humedad directa.</p>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm">
-          <div class="font-bold text-stone-800 text-[13px] mb-2 flex items-center gap-2">
-            <Icon name="question-line" class="text-violet-500" /> ¿Tienen atención por WhatsApp?
+        <div class="bg-stone-50 p-5 rounded-2xl border border-stone-200/80 shadow-xs">
+          <div class="font-bold text-slate-800 text-xs sm:text-[13px] mb-1.5 flex items-center gap-2">
+            <Icon name="question-line" class="text-amber-600 w-4 h-4" /> ¿Tienen atención por WhatsApp?
           </div>
-          <p class="text-stone-500 text-[12px] leading-relaxed">¡Claro! Puedes escribirnos al 573144931525 en cualquier momento si prefieres un trato más personal o personalizado.</p>
+          <p class="text-slate-500 text-[11px] sm:text-xs leading-relaxed">¡Claro! Puedes escribirnos al 573144931525 en cualquier momento si prefieres asesoría directa o personalizar tu pedido.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SECCIÓN DE DETALLES ADICIONALES (ACORDEÓN SEO DINÁMICO) -->
+  <!-- ════════ SECCIÓN DE DETALLES ADICIONALES (Ficha Técnica & Materiales) ════════ -->
   {product.desc && (
-    <section class="bg-white pt-8 pb-16">
-      <div class="max-w-[1200px] mx-auto px-6">
-        <div class="bg-stone-50 rounded-[2.5rem] border border-stone-100/80 shadow-sm px-6 md:px-10 overflow-hidden">
+    <section class="bg-stone-50/70 pt-6 pb-12 sm:pb-16 border-t border-stone-100">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6">
+        <div class="bg-white rounded-2xl md:rounded-3xl border border-stone-200/80 shadow-xs px-5 sm:px-8 md:px-10 overflow-hidden">
           <button 
             onclick="document.getElementById('seoDetails').classList.toggle('hidden'); this.querySelector('.icon-unfold').classList.toggle('-rotate-180');"
-            class="w-full flex items-center justify-between py-8 group"
+            class="w-full flex items-center justify-between py-6 sm:py-8 group cursor-pointer"
           >
-            <div class="flex items-center gap-6">
-               <div class="hidden md:flex w-14 h-14 rounded-2xl border border-stone-200 bg-white items-center justify-center text-stone-300">
-                  <Icon name="leaf" class="text-2xl" />
-               </div>
-               <div class="text-left">
-                  <div class="text-[9px] font-bold uppercase tracking-[0.3em] text-violet-500 mb-2">Ficha Técnica</div>
-                  <h2 class="font-serif text-2xl md:text-3xl text-stone-900 group-hover:text-violet-600 transition-colors">
-                    Materiales y <em>cuidados</em> artesanos
-                  </h2>
-               </div>
+            <div class="flex items-center gap-4 sm:gap-6">
+              <div class="hidden md:flex w-12 h-12 rounded-2xl border border-stone-200 bg-stone-50 items-center justify-center text-amber-600">
+                <Icon name="plant" class="w-6 h-6" />
+              </div>
+              <div class="text-left">
+                <span class="inline-flex items-center bg-amber-100/70 border border-amber-300/60 text-amber-900 px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1.5">
+                  Ficha Técnica
+                </span>
+                <h2 class="font-serif text-xl sm:text-2xl md:text-3xl font-light text-slate-800 group-hover:text-amber-600 transition-colors">
+                  Materiales y <em class="italic text-amber-600 font-normal">cuidados</em> artesanos
+                </h2>
+              </div>
             </div>
-            <div class="icon-unfold transition-transform duration-500 w-10 h-10 rounded-full border border-stone-200 flex items-center justify-center shadow-sm text-stone-600 bg-white group-hover:bg-violet-50 group-hover:text-violet-600 group-hover:border-violet-100">
-              <Icon name="arrow-down-s" class="text-xl" />
+            <div class="icon-unfold transition-transform duration-300 w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-stone-200 flex items-center justify-center shadow-xs text-stone-600 bg-stone-50 group-hover:bg-amber-50 group-hover:text-amber-600 group-hover:border-amber-200">
+              <Icon name="arrow-down-s" class="text-lg sm:text-xl" />
             </div>
           </button>
 
-          <div id="seoDetails" class="hidden pt-4 pb-12 animate-fade-in border-t border-stone-200/50">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20 pt-6">
-              <div class="md:col-span-2 space-y-8">
+          <div id="seoDetails" class="hidden pt-2 pb-8 sm:pb-10 border-t border-stone-100">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 pt-4">
+              <div class="md:col-span-2 space-y-6">
                 <div>
-                  <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4">Sobre este ramo</h3>
-                  <div class="prose prose-stone max-w-none text-stone-600 leading-relaxed space-y-4">
+                  <h3 class="font-bold text-[10px] sm:text-xs uppercase tracking-wider text-slate-700 mb-2">Sobre este ramo</h3>
+                  <div class="text-slate-600 text-xs sm:text-[13px] leading-relaxed space-y-3 font-light">
                     <p>{product.desc}</p>
-                    <p>Cada ramo de <strong>Nuditos Tejidos</strong> es una obra de arte única. Diseñado para perdurar, este ramo combina la calidez de lo artesanal con la belleza eterna de las flores que no se marchitan.</p>
+                    <p>Cada ramo de <strong>Nuditos Tejidos</strong> es una obra de arte única. Diseñado para perdurar, combina la calidez de lo artesanal con la belleza eterna de las flores que no se marchitan.</p>
                   </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-stone-200/50">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-stone-100">
                   <div>
-                    <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-800 mb-4 flex items-center gap-2">
-                      <Icon name="plant" class="text-violet-500" /> Materiales Premium
+                    <h3 class="font-bold text-xs uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                      <Icon name="plant" class="text-amber-600 w-4 h-4" /> Materiales Premium
                     </h3>
-                    <p class="text-xs text-stone-500 leading-relaxed">
+                    <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
                       Tejido con hilos de algodón premium de alta resistencia. Utilizamos rellenos hipoalergénicos y estructuras internas que mantienen la forma perfecta de cada pétalo y hoja.
                     </p>
                   </div>
                   <div>
-                    <h3 class="font-bold text-[10px] uppercase tracking-[0.2em] text-stone-800 mb-4 flex items-center gap-2">
-                      <Icon name="history" class="text-violet-500" /> Cuidados de tu Ramo
+                    <h3 class="font-bold text-xs uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                      <Icon name="history" class="text-amber-600 w-4 h-4" /> Cuidados de tu Ramo
                     </h3>
-                    <ul class="text-xs text-stone-500 leading-relaxed space-y-2">
+                    <ul class="text-[11px] sm:text-xs text-slate-500 leading-relaxed space-y-1.5">
                       <li>• Mantener alejado de la humedad directa.</li>
                       <li>• Limpiar el polvo con un cepillo de cerdas suaves.</li>
-                      <li>• Evitar la exposición solar prolongada.</li>
+                      <li>• Evitar la exposición solar prolongada continua.</li>
                     </ul>
                   </div>
                 </div>
               </div>
               
-              <div class="bg-white p-8 rounded-[2rem] border border-stone-100 h-fit">
-                <h3 class="font-serif text-xl border-b border-stone-200 pb-4 mb-4">Envío Seguro</h3>
-                <p class="text-xs text-stone-500 leading-relaxed mb-6">
-                  Empacamos cada pedido con protección especial para que llegue intacto a su destino.
+              <div class="bg-stone-50 p-6 rounded-2xl border border-stone-200/80 h-fit">
+                <h3 class="font-serif text-lg font-light text-slate-800 border-b border-stone-200 pb-3 mb-3">Envío Seguro</h3>
+                <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed mb-4">
+                  Empacamos cada pedido con protección rígida especial para que llegue impecable a su destino.
                 </p>
-                <div class="space-y-4">
-                   <div class="flex items-center gap-3 text-xs font-medium text-stone-600">
-                     <Icon name="truck" class="text-violet-500" /> Todo el país
-                   </div>
-                   <div class="flex items-center gap-3 text-xs font-medium text-stone-600">
-                     <Icon name="checkbox-circle" class="text-emerald-500" /> Devoluciones Flexibles
-                   </div>
+                <div class="space-y-2.5 text-xs text-slate-700 font-medium">
+                  <div class="flex items-center gap-2">
+                    <Icon name="truck" class="text-amber-600 w-4 h-4" /> Envíos a toda Colombia
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <Icon name="checkbox-circle" class="text-emerald-600 w-4 h-4" /> Garantía de Entrega
+                  </div>
                 </div>
               </div>
             </div>
@@ -440,27 +453,31 @@ const productSchema = {
     </section>
   )}
 
-  <!-- SECCIÓN: PRODUCTOS RELACIONADOS -->
+  <!-- ════════ SECCIÓN: PRODUCTOS RELACIONADOS ════════ -->
   {related.length > 0 && (
-    <section class="border-t border-stone-100 pt-6 pb-12">
-      <div class="max-w-[1200px] mx-auto px-6">
-        <div class="text-center mb-8">
-          <h2 class="font-serif text-xl md:text-3xl font-light text-stone-800 uppercase tracking-[0.2em]">Más para enamorar</h2>
-          <div class="h-px w-10 bg-violet-100 mx-auto mt-2"></div>
+    <section class="bg-white border-t border-stone-100 py-8 sm:py-12 px-4 sm:px-6">
+      <div class="max-w-[1200px] mx-auto">
+        <div class="text-center max-w-lg mx-auto mb-6 sm:mb-8">
+          <span class="inline-flex items-center bg-amber-100/70 border border-amber-300/60 text-amber-900 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2">
+            Colección {catDisplayName}
+          </span>
+          <h2 class="font-serif text-2xl sm:text-3xl font-light text-slate-800 leading-tight">
+            Más ramos para <em class="italic text-amber-600 font-normal">enamorar</em>
+          </h2>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {related.map((p: any) => <ProductCard p={p} idScope="related" />)}
         </div>
       </div>
     </section>
   )}
 
-  <!-- LIGHTBOX PREMIUM CON ZOOM -->
-  <div class="fixed inset-0 bg-stone-950/98 z-[1000] opacity-0 pointer-events-none transition-all duration-500 backdrop-blur-2xl flex flex-col" id="ramoLightbox">
-    <div class="flex justify-between items-center p-6 z-10">
+  <!-- ════════ LIGHTBOX PREMIUM CON ZOOM ════════ -->
+  <div class="fixed inset-0 bg-stone-950/98 z-[2000] opacity-0 pointer-events-none transition-all duration-500 backdrop-blur-2xl flex flex-col" id="ramoLightbox">
+    <div class="flex justify-between items-center p-4 sm:p-6 z-10">
       <div class="text-white/60 text-[10px] font-bold uppercase tracking-[0.2em]">Galería Nuditos</div>
-      <button class="text-white/60 hover:text-white transition-colors p-2" onclick="closeLightbox()">
-        <Icon name="close" class="text-3xl" />
+      <button class="text-white/60 hover:text-white transition-colors p-2 cursor-pointer" onclick="closeLightbox()">
+        <Icon name="close" class="text-2xl sm:text-3xl" />
       </button>
     </div>
     
@@ -471,9 +488,9 @@ const productSchema = {
             <div class="swiper-slide !flex items-center justify-center">
               <div class="swiper-zoom-container">
                 <img 
-                   src={clUrl(img, 1600)} 
-                   alt={`Zoom ${product.name}`} 
-                   class="max-w-full max-h-screen object-contain"
+                  src={clUrl(img, 1600)} 
+                  alt={`Zoom ${product.name} ${i + 1}`} 
+                  class="max-w-full max-h-screen object-contain"
                 />
               </div>
             </div>
@@ -483,243 +500,292 @@ const productSchema = {
       </div>
     </div>
     
-    <div class="p-8 text-center text-white/20 text-[9px] uppercase tracking-widest pointer-events-none">
-       Pellizca para hacer zoom · Desliza para navegar
+    <div class="p-6 text-center text-white/40 text-[10px] uppercase tracking-widest pointer-events-none">
+      Pellizca para hacer zoom · Desliza para navegar
     </div>
   </div>
 
-  <!-- BOTÓN STICKY MÓVIL (Original Full Width) -->
-  <div 
-    id="stickyBuyBar" 
-    class="md:hidden fixed bottom-[68px] left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-stone-100 p-4 z-[150] translate-y-[110%] transition-transform duration-500 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] opacity-0 pointer-events-none"
+  <!-- ════════ STICKY CTA BAR (Mobile & Desktop con Apple Glassmorphism) ════════ -->
+  <div
+    id="stickyCTA"
+    class="fixed bottom-[68px] md:bottom-8 left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-[94%] md:max-w-[520px] z-[1600] border-t md:border px-3.5 py-2.5 md:p-2.5 md:rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] translate-y-[150%] opacity-0 pointer-events-none"
   >
-    <div class="flex items-center gap-4 max-w-[500px] mx-auto">
-      <div class="w-12 h-12 rounded-xl overflow-hidden bg-stone-50 border border-stone-100 flex-shrink-0">
-        <img src={clUrl(allImgs[0], 120)} alt={product.name} class="w-full h-full object-cover" />
+    <div class="flex items-center gap-2.5 sm:gap-3 max-w-[520px] mx-auto md:mx-0">
+      <!-- Miniatura -->
+      <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-stone-50 border border-stone-200 flex-shrink-0">
+        <img id="stickyProductImg" src={clUrl(mainImg, 120)} alt={product.name} class="w-full h-full object-cover" />
       </div>
+
+      <!-- Texto del Ramo -->
       <div class="flex-1 min-w-0">
-        <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest truncate mb-0.5">{product.name}</div>
-        <div class="text-sm font-bold text-violet-600">${showPrice.toLocaleString('es-CO')}</div>
+        <div id="stickyProductName" class="text-xs sm:text-[13px] font-bold text-stone-900 leading-tight truncate">
+          {product.name}
+        </div>
+        <div class="text-[11px] sm:text-xs font-black text-amber-700 flex items-center gap-1.5 mt-0.5">
+          <span id="stickyProductPrice">{showPrice > 0 ? `$${showPrice.toLocaleString('es-CO')}` : 'Consultar'}</span>
+          <span class="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-100/80">Envío gratis</span>
+        </div>
       </div>
+
+      <!-- Botón Comprar en Sticky -->
       <button 
-        class="bg-[#1f1d1d] text-white px-6 h-12 rounded-xl font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 active:scale-95 transition-all shadow-md"
+        id="btnStickyBuy"
+        type="button" 
+        data-product-id={product.id}
         onclick={`addToCartFromPage(${product.id})`}
+        class="bg-[#1a1220] hover:bg-black text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-full text-xs font-bold tracking-wide active:scale-95 transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap cursor-pointer"
       >
-        <Icon name="add" class="text-lg" /> AGREGAR
+        <Icon name="shopping-bag-3" class="w-3.5 h-3.5 text-amber-400" />
+        <span id="btnStickyBuyText">Comprar</span>
       </button>
     </div>
   </div>
 
-</Layout>
+  <style>
+    html { scroll-behavior: smooth; }
 
-<script define:vars={{ allImgs, clUrl, product, showPrice, mainImg }}>
-  let currentImg = 0;
-  window.gallerySwiper = null;
-  window.lightboxSwiper = null;
-  let stickyObserver = null;
-
-  function initSwipers() {
-    if (!window.Swiper) return;
-
-    // Swiper Principal
-    window.gallerySwiper = new window.Swiper('.product-gallery-swiper', {
-      slidesPerView: 1,
-      spaceBetween: 0,
-      speed: 800,
-      loop: allImgs.length > 1,
-      pagination: { 
-        el: '.swiper-pagination', 
-        clickable: true, 
-        dynamicBullets: true 
-      },
-      on: { 
-        slideChange: function() { 
-          updateThumbs(this.realIndex); 
-        } 
-      }
-    });
-
-    // Swiper Lightbox (Zoom)
-    window.lightboxSwiper = new window.Swiper('.lightbox-swiper', {
-      slidesPerView: 1,
-      spaceBetween: 40,
-      speed: 800,
-      zoom: {
-        maxRatio: 3,
-        minRatio: 1,
-      },
-      grabCursor: true,
-      keyboard: { enabled: true },
-      on: {
-        slideChange: function() {
-          if (window.gallerySwiper) window.gallerySwiper.slideToLoop(this.activeIndex);
-        }
-      }
-    });
-  }
-
-  function updateThumbs(idx) {
-    document.querySelectorAll('.ramo-thumb').forEach((t, i) => {
-      const isActive = i === idx;
-      t.classList.toggle('border-violet-300', isActive);
-      t.classList.toggle('border-transparent', !isActive);
-      t.classList.toggle('opacity-60', !isActive);
-      t.classList.toggle('opacity-100', isActive);
-    });
-  }
-
-  window.openLightbox = function(idx) {
-    const box = document.getElementById('ramoLightbox');
-    if (box) { 
-      box.classList.add('open'); 
-      document.body.style.overflow = 'hidden';
-      if (window.lightboxSwiper) {
-        window.lightboxSwiper.slideTo(idx, 0);
-        window.lightboxSwiper.update();
+    /* Estilo base estándar para Android, Windows y otros navegadores */
+    #stickyCTA { 
+      will-change: transform, opacity; 
+      background-color: #ffffff;
+      border-color: rgba(231, 229, 228, 0.95);
+      box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    #stickyCTA.is-visible { transform: translate(0, 0); opacity: 1; pointer-events: auto; }
+    @media (min-width: 768px) { 
+      #stickyCTA.is-visible { transform: translate(-50%, 0); } 
+      #stickyCTA {
+        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.14);
       }
     }
-  };
 
-  window.closeLightbox = function() {
-    const box = document.getElementById('ramoLightbox');
-    if (box) box.classList.remove('open');
-    document.body.style.overflow = '';
-  };
-
-  // Carrito logic
-  const currentProduct = { id: Number(product.id), name: product.name, price: Number(showPrice), img: mainImg, emoji: product.emoji || '🌸' };
-  window.NUDITOS_LIVE_PRODUCTS = [currentProduct, ...(window.NUDITOS_LIVE_PRODUCTS || [])];
-
-  window.addToCartFromPage = function(id) {
-    if (typeof addToCart !== 'function') return;
-    addToCart(id);
-    const btn = document.getElementById('ramoCartBtn');
-    if (btn) {
-      const original = btn.innerHTML;
-      btn.innerHTML = '¡Agregado!';
-      btn.classList.add('bg-emerald-600');
-      setTimeout(() => { btn.innerHTML = original; btn.classList.remove('bg-emerald-600'); }, 2000);
+    /* Efecto Glassmorphism exclusivo para iPhone, iPad y Mac */
+    :global(html.is-apple) #stickyCTA {
+      background-color: rgba(255, 255, 255, 0.82) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-color: rgba(255, 255, 255, 0.6) !important;
+      box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.7) inset !important;
     }
-    
-    // Facebook & TikTok Pixel Track - AddToCart
-    if (typeof window.fbq === 'function') {
-      window.fbq('track', 'AddToCart', {
-        content_ids: [currentProduct.id.toString()],
-        content_name: currentProduct.name,
-        content_type: 'product',
-        value: currentProduct.price,
-        currency: 'COP'
-      });
+    @media (min-width: 768px) {
+      :global(html.is-apple) #stickyCTA {
+        background-color: rgba(255, 255, 255, 0.86) !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.16), 0 1px 0 rgba(255, 255, 255, 0.8) inset !important;
+      }
     }
-    if (typeof window.ttq === 'object') {
-      window.ttq.track('AddToCart', {
-        contents: [{
-          content_id: currentProduct.id.toString(),
-          content_name: currentProduct.name,
-          content_type: 'product',
-          price: Number(currentProduct.price),
-          quantity: 1
-        }],
-        value: Number(currentProduct.price),
-        currency: 'COP'
-      });
+
+    @media (max-width: 768px) {
+      :global(body:has(#stickyCTA.is-visible) .wa-float) {
+        opacity: 0 !important; transform: scale(0) !important; pointer-events: none !important;
+      }
     }
-  };
 
-  // Lógica de Sticky Buy Bar (Móvil)
-  function initStickyBar() {
-    const mainBtn = document.getElementById('ramoCartBtn');
-    const stickyBar = document.getElementById('stickyBuyBar');
-    if (!mainBtn || !stickyBar || window.innerWidth >= 768) return;
+    /* Lightbox */
+    #ramoLightbox.open { opacity: 1; pointer-events: auto; }
+    #ramoLightbox.open img { transform: scale(1); }
+    #ramoLightbox img { transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+  </style>
 
-    if (stickyObserver) stickyObserver.disconnect();
+  <script is:inline set:html={`
+    window.NUDITOS_LIVE_PRODUCTS = [${JSON.stringify(currentProduct)}, ...(window.NUDITOS_LIVE_PRODUCTS || [])];
+  `} />
 
-    stickyObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          stickyBar.classList.remove('is-visible');
-        } else {
-          // Solo mostrar si el botón principal está ARRIBA de la vista (el usuario bajó)
-          if (entry.boundingClientRect.top < 0) {
-            stickyBar.classList.add('is-visible');
+  <script is:inline>
+    // Detección de dispositivos Apple (iOS / macOS) para el efecto Glassmorphism
+    (function() {
+      var isApple = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) && !window.MSStream;
+      if (isApple) {
+        document.documentElement.classList.add('is-apple');
+      }
+    })();
+
+    // Manejador del botón Comprar
+    window.addToCartFromPage = function(id) {
+      if (typeof addToCart !== 'function') return;
+      addToCart(id);
+
+      // Feedback visual en botón Hero
+      var btn = document.getElementById('ramoCartBtn');
+      if (btn) {
+        var btnText = document.getElementById('ramoCartBtnText');
+        var orig = btnText ? btnText.textContent : 'Comprar ramo';
+        btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'scale-[1.02]');
+        btn.classList.remove('bg-[#1a1220]', 'hover:bg-black');
+        if (btnText) btnText.textContent = '¡Ramo agregado!';
+        setTimeout(function() {
+          btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'scale-[1.02]');
+          btn.classList.add('bg-[#1a1220]', 'hover:bg-black');
+          if (btnText) btnText.textContent = orig;
+
+          // Abrir carrito
+          if (typeof toggleCart === 'function') {
+            toggleCart();
           }
+        }, 700);
+      }
+
+      // Feedback visual en botón Sticky
+      var stickyBtn = document.getElementById('btnStickyBuy');
+      if (stickyBtn) {
+        var stickyBtnText = document.getElementById('btnStickyBuyText');
+        var origSticky = stickyBtnText ? stickyBtnText.textContent : 'Comprar';
+        stickyBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+        stickyBtn.classList.remove('bg-[#1a1220]', 'hover:bg-black');
+        if (stickyBtnText) stickyBtnText.textContent = '¡Listo!';
+        setTimeout(function() {
+          stickyBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+          stickyBtn.classList.add('bg-[#1a1220]', 'hover:bg-black');
+          if (stickyBtnText) stickyBtnText.textContent = origSticky;
+        }, 700);
+      }
+
+      // Tracking Pixel
+      var prods = window.NUDITOS_LIVE_PRODUCTS || [];
+      var cur = prods.find(function(p) { return p.id === id; });
+      if (cur) {
+        if (typeof window.fbq === 'function') {
+          window.fbq('track', 'AddToCart', {
+            content_ids: [cur.id.toString()],
+            content_name: cur.name,
+            content_type: 'product',
+            value: Number(cur.price || 0),
+            currency: 'COP'
+          });
+        }
+        if (typeof window.ttq === 'object') {
+          window.ttq.track('AddToCart', {
+            contents: [{
+              content_id: cur.id.toString(),
+              content_name: cur.name,
+              content_type: 'product',
+              price: Number(cur.price || 0),
+              quantity: 1
+            }],
+            value: Number(cur.price || 0),
+            currency: 'COP'
+          });
+        }
+      }
+    };
+
+    window.gallerySwiper = null;
+    window.lightboxSwiper = null;
+
+    function initSwipers() {
+      if (!window.Swiper) return;
+
+      var galleryEl = document.querySelector('.product-gallery-swiper');
+      if (galleryEl && !window.gallerySwiper) {
+        var slidesCount = galleryEl.querySelectorAll('.swiper-slide').length;
+        window.gallerySwiper = new window.Swiper('.product-gallery-swiper', {
+          slidesPerView: 1,
+          spaceBetween: 0,
+          speed: 800,
+          loop: slidesCount > 1,
+          pagination: { 
+            el: '.swiper-pagination', 
+            clickable: true, 
+            dynamicBullets: true 
+          },
+          on: { 
+            slideChange: function() { 
+              updateThumbs(this.realIndex); 
+            } 
+          }
+        });
+      }
+
+      var lightboxEl = document.querySelector('.lightbox-swiper');
+      if (lightboxEl && !window.lightboxSwiper) {
+        window.lightboxSwiper = new window.Swiper('.lightbox-swiper', {
+          slidesPerView: 1,
+          spaceBetween: 40,
+          speed: 800,
+          zoom: {
+            maxRatio: 3,
+            minRatio: 1,
+          },
+          grabCursor: true,
+          keyboard: { enabled: true },
+          on: {
+            slideChange: function() {
+              if (window.gallerySwiper) window.gallerySwiper.slideToLoop(this.activeIndex);
+            }
+          }
+        });
+      }
+    }
+
+    function updateThumbs(idx) {
+      document.querySelectorAll('.ramo-thumb').forEach(function(t, i) {
+        var isActive = (i === idx);
+        if (isActive) {
+          t.classList.add('border-amber-500', 'opacity-100', 'shadow-sm', 'ring-2', 'ring-amber-400/30');
+          t.classList.remove('border-transparent', 'opacity-60');
+        } else {
+          t.classList.remove('border-amber-500', 'opacity-100', 'shadow-sm', 'ring-2', 'ring-amber-400/30');
+          t.classList.add('border-transparent', 'opacity-60');
         }
       });
-    }, { threshold: 0 });
+    }
 
-    stickyObserver.observe(mainBtn);
-  }
+    window.openLightbox = function(idx) {
+      var box = document.getElementById('ramoLightbox');
+      if (box) { 
+        box.classList.add('open'); 
+        document.body.style.overflow = 'hidden';
+        if (window.lightboxSwiper) {
+          window.lightboxSwiper.slideTo(idx, 0);
+          window.lightboxSwiper.update();
+        }
+      }
+    };
 
-    document.addEventListener('astro:page-load', () => {
-      initSwipers();
-      initStickyBar();
-      
-      // Countdown si es campaña Madre
+    window.closeLightbox = function() {
+      var box = document.getElementById('ramoLightbox');
+      if (box) box.classList.remove('open');
+      document.body.style.overflow = '';
+    };
+
+    (function() {
+      // 1. Sticky CTA Observer
+      var stickyCTA = document.getElementById('stickyCTA');
+      if (stickyCTA) {
+        window.addEventListener('scroll', function() {
+          if (window.scrollY > 450) stickyCTA.classList.add('is-visible');
+          else stickyCTA.classList.remove('is-visible');
+        }, { passive: true });
+      }
+
+      // 2. Madre countdown si aplica
       if (document.getElementById('madreCountdown')) {
-        const target = new Date('2026-05-10T23:59:59-05:00').getTime();
+        var target = new Date('2026-05-10T23:59:59-05:00').getTime();
         function updateCd() {
-          const now = Date.now();
-          const diff = target - now;
+          var now = Date.now();
+          var diff = target - now;
           if (diff <= 0) return;
-          const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          document.getElementById('cdDays').textContent = String(d).padStart(2, '0');
-          document.getElementById('cdHours').textContent = String(h).padStart(2, '0');
-          document.getElementById('cdMins').textContent = String(m).padStart(2, '0');
+          var d = Math.floor(diff / (1000 * 60 * 60 * 24));
+          var h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          var m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          var dEl = document.getElementById('cdDays');
+          var hEl = document.getElementById('cdHours');
+          var mEl = document.getElementById('cdMins');
+          if (dEl) dEl.textContent = String(d).padStart(2, '0');
+          if (hEl) hEl.textContent = String(h).padStart(2, '0');
+          if (mEl) mEl.textContent = String(m).padStart(2, '0');
         }
         updateCd();
         setInterval(updateCd, 60000);
       }
+    })();
 
-      // Facebook & TikTok Pixel Track - ViewContent
-      if (typeof window.fbq === 'function') {
-        window.fbq('track', 'ViewContent', {
-          content_ids: [product.id.toString()],
-          content_name: product.name,
-          content_type: 'product',
-          value: Number(showPrice),
-          currency: 'COP'
-        });
-      }
-      if (typeof window.ttq === 'object') {
-        window.ttq.track('ViewContent', {
-          contents: [{
-            content_id: product.id.toString(),
-            content_name: product.name,
-            content_type: 'product',
-            price: Number(showPrice)
-          }],
-          value: Number(showPrice),
-          currency: 'COP'
-        });
-      }
+    document.addEventListener('astro:page-load', function() {
+      initSwipers();
     });
-  
-  // Inicialización de respaldo
-  if (document.readyState === 'complete') initSwipers();
-</script>
 
-<style is:global>
-  @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .scrollbar-none::-webkit-scrollbar { display: none; }
-  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-  #ramoLightbox.open { opacity: 1; pointer-events: auto; }
-  #ramoLightbox.open img { transform: scale(1); }
-  #ramoLightbox img { transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
-
-  #stickyBuyBar.is-visible {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  /* Ocultar el WA flotante global en móvil cuando este CTA es visible */
-  @media (max-width: 768px) {
-    :global(body:has(#stickyBuyBar.is-visible) .wa-float) {
-      opacity: 0 !important;
-      transform: scale(0) !important;
-      pointer-events: none !important;
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      initSwipers();
     }
-  }
-</style>
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js" defer is:inline onload="window.initSwipers ? window.initSwipers() : null"></script>
+</Layout>

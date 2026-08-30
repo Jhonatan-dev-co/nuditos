@@ -31,65 +31,123 @@ const faqSchema = {
     <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
   </Fragment>
 
-  <section class="bg-gradient-to-br from-stone-50 via-white to-sky-50/40 pt-24 pb-20 px-6 border-b border-stone-100">
+  <section class="bg-gradient-to-br from-stone-50 via-white to-amber-50/20 pt-20 sm:pt-24 pb-14 sm:pb-16 px-4 md:px-6 border-b border-stone-100">
     <div class="max-w-5xl mx-auto text-center">
-      <div class="text-[10px] uppercase tracking-[4px] font-bold text-sky-600 mb-4">Cobertura local</div>
-      <h1 class="font-serif text-[clamp(2.1rem,6vw,4.2rem)] leading-[1.05] text-stone-900 mb-6">{config.h1}</h1>
-      <p class="max-w-3xl mx-auto text-stone-600 text-base md:text-lg leading-relaxed mb-8">{config.heroCopy}</p>
-      <a href="https://wa.me/573144931525" class="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-stone-900 text-white uppercase tracking-widest text-xs font-bold hover:bg-sky-700 transition-colors">
-        <Icon name="whatsapp" />
-        Coordinar envio en {config.city}
-      </a>
+      <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200/70 text-amber-900 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4">
+        Cobertura local en {config.city}
+      </div>
+      <h1 class="font-serif text-[clamp(2.1rem,6vw,4.2rem)] font-light leading-[1.08] text-slate-800 mb-4">{config.h1}</h1>
+      <p class="max-w-2xl mx-auto text-slate-500 text-xs sm:text-sm md:text-base leading-relaxed mb-6 sm:mb-8">{config.heroCopy}</p>
+      
+      <!-- Pills de Valor -->
+      <div class="flex items-center justify-center gap-2 mb-6 sm:mb-8 flex-wrap">
+        <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border border-emerald-200/60">
+          <Icon name="truck" class="w-3.5 h-3.5 text-emerald-600" /> Envío a {config.city}
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-900 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border border-amber-200/60">
+          <Icon name="hand-heart" class="w-3.5 h-3.5 text-amber-600" /> Hecho a mano
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-stone-100 text-stone-700 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border border-stone-200">
+          <Icon name="checkbox-circle" class="w-3.5 h-3.5 text-stone-600" /> Desde 2022
+        </span>
+      </div>
+
+      <div class="flex justify-center gap-2.5 sm:gap-3 flex-wrap">
+        <a href="/catalogo" class="inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-lg active:scale-95">
+          <Icon name="shopping-bag-3" class="w-4 h-4 text-amber-400" />
+          <span>Ver catálogo</span>
+        </a>
+        <a href="https://wa.me/573144931525" class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 sm:px-7 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-md active:scale-95">
+          <Icon name="whatsapp" class="w-4 h-4" />
+          <span>Coordinar envío en {config.city}</span>
+        </a>
+      </div>
     </div>
   </section>
 
-  <section class="max-w-[1200px] mx-auto px-6 py-14">
-    <div class="grid md:grid-cols-3 gap-6">
-      <article class="md:col-span-2 bg-white border border-stone-100 rounded-3xl p-7 shadow-sm">
-        <h2 class="font-serif text-3xl text-stone-900 mb-4">Cobertura y tiempos</h2>
-        <p class="text-stone-600 leading-relaxed text-sm md:text-base">{config.coverageCopy}</p>
+  <section class="max-w-[1200px] mx-auto px-4 sm:px-6 py-10 sm:py-14">
+    <div class="grid md:grid-cols-3 gap-4 sm:gap-6">
+      <article class="md:col-span-2 bg-white border border-stone-100 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xs">
+        <h2 class="font-serif text-2xl sm:text-3xl font-light text-slate-800 mb-3">Cobertura y tiempos</h2>
+        <p class="text-slate-500 leading-relaxed text-xs sm:text-sm md:text-base">{config.coverageCopy}</p>
       </article>
-      <article class="bg-white border border-stone-100 rounded-3xl p-7 shadow-sm">
-        <h3 class="font-serif text-2xl text-stone-900 mb-3">Compra guiada</h3>
-        <p class="text-stone-600 text-sm leading-relaxed mb-4">Te ayudamos a escoger segun ocasion, presupuesto y destinatario.</p>
-        <a href="/catalogo" class="text-[11px] uppercase tracking-widest font-bold text-sky-700">Ir al catalogo</a>
+      <article class="bg-white border border-stone-100 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col justify-between">
+        <div>
+          <h3 class="font-serif text-xl sm:text-2xl font-light text-slate-800 mb-2">Compra guiada</h3>
+          <p class="text-slate-500 text-xs sm:text-sm leading-relaxed mb-4">Te ayudamos a escoger según ocasión, presupuesto y destinatario.</p>
+        </div>
+        <a href="/catalogo" class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-900 border border-amber-200 bg-amber-50 px-4 py-2.5 rounded-xl w-fit transition-colors">
+          <span>Ir al catálogo</span> &rarr;
+        </a>
       </article>
     </div>
   </section>
 
-  <section class="max-w-[1200px] mx-auto px-6 pb-16">
-    <div class="flex items-end justify-between mb-7 border-b border-stone-200 pb-3">
-      <h2 class="font-serif text-3xl text-stone-900">Favoritos en {config.city}</h2>
-      <a href="/catalogo" class="text-[10px] uppercase tracking-widest font-bold text-stone-500 hover:text-stone-900">Ver todo</a>
+  <section class="max-w-[1200px] mx-auto px-4 sm:px-6 pb-12 sm:pb-16">
+    <div class="flex items-end justify-between mb-6 border-b border-stone-200 pb-3">
+      <div>
+        <h2 class="font-serif text-2xl sm:text-3xl font-light text-slate-800">Favoritos en {config.city}</h2>
+        <p class="text-xs text-slate-500 mt-1">Los ramos más pedidos para entrega en tu ciudad.</p>
+      </div>
+      <a href="/catalogo" class="text-[10px] uppercase tracking-widest font-bold text-stone-500 hover:text-stone-900 border border-stone-200 px-3 py-1 bg-white hover:bg-stone-50 transition-colors rounded-lg">Ver todo</a>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
       {cityProducts.map((p) => <ProductCard p={p} />)}
     </div>
   </section>
 
-  <section class="bg-stone-50 py-16 px-6 border-y border-stone-100">
-    <div class="max-w-5xl mx-auto">
-      <h2 class="font-serif text-4xl text-center text-stone-900 mb-10">Preguntas frecuentes en {config.city}</h2>
-      <div class="grid gap-4">
-        {config.localFaq.map((item) => (
-          <article class="bg-white border border-stone-100 rounded-2xl p-6">
-            <h3 class="font-bold text-stone-800 mb-2 text-sm md:text-base">{item.q}</h3>
-            <p class="text-stone-600 text-sm leading-relaxed">{item.a}</p>
-          </article>
+  <!-- FAQ Acordeón -->
+  <section class="bg-stone-50 py-10 sm:py-14 px-4 sm:px-6 border-y border-stone-100">
+    <div class="max-w-[800px] mx-auto">
+      <div class="text-center max-w-lg mx-auto mb-6 sm:mb-8">
+        <span class="inline-flex items-center bg-stone-100 border border-stone-200 text-stone-700 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2">
+          Dudas frecuentes
+        </span>
+        <h2 class="font-serif text-2xl sm:text-3xl font-light text-slate-800 leading-tight">Preguntas frecuentes en {config.city}</h2>
+      </div>
+      <div class="space-y-0 rounded-xl sm:rounded-2xl overflow-hidden border border-stone-200 bg-white shadow-xs">
+        {config.localFaq.map((item, idx) => (
+          <details class="group" open={idx === 0}>
+            <summary class="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-3 sm:py-3.5 cursor-pointer select-none hover:bg-stone-50 transition-colors border-b border-stone-100 list-none [&::-webkit-details-marker]:hidden">
+              <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <Icon name="sparkling" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600" />
+              </div>
+              <span class="flex-1 text-xs sm:text-[13px] font-bold text-slate-800">{item.q}</span>
+              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400 transition-transform group-open:rotate-180 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </summary>
+            <p class="text-slate-500 text-[11px] sm:text-xs leading-relaxed px-3.5 pb-3.5 pt-1 pl-11 sm:px-4 sm:pb-4 sm:pl-14">{item.a}</p>
+          </details>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="max-w-5xl mx-auto px-6 py-14 text-center">
-    <h2 class="font-serif text-4xl text-stone-900 mb-4">Rutas relacionadas</h2>
-    <div class="flex flex-wrap justify-center gap-3">
-      {config.relatedLinks.map((l) => (
-        <a href={l.href} class="px-5 py-2 rounded-full border border-stone-200 text-xs uppercase tracking-widest font-bold text-stone-600 hover:border-sky-500 hover:text-sky-700 transition-colors">
-          {l.label}
-        </a>
-      ))}
+  <!-- CTA FINAL -->
+  <section class="bg-[#1a1220] py-8 sm:py-10 md:py-14 px-3 sm:px-4 md:px-6 relative overflow-hidden text-center">
+    <div class="max-w-lg mx-auto relative z-10">
+      <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+        <Icon name="whatsapp" class="w-6 h-6 sm:w-7 sm:h-7 text-green-400" />
+      </div>
+      <h2 class="font-serif text-2xl sm:text-3xl md:text-4xl font-light text-white mb-2 leading-tight">
+        Ramos entregados con <em class="italic text-green-400 font-normal">amor</em> en {config.city}
+      </h2>
+      <p class="text-stone-400 text-xs sm:text-[13px] leading-relaxed mb-6 max-w-sm mx-auto">
+        Coordinamos tu entrega y personalizamos el ramo a tu gusto.
+      </p>
+      <div class="flex flex-wrap justify-center gap-2 mb-6">
+        {config.relatedLinks.map((l) => (
+          <a href={l.href} class="px-3.5 py-1.5 rounded-full border border-white/20 text-[10px] uppercase tracking-wider font-bold text-stone-300 hover:border-amber-400 hover:text-amber-400 transition-colors">
+            {l.label}
+          </a>
+        ))}
+      </div>
+      <a href="https://wa.me/573144931525" class="inline-flex items-center gap-2 bg-green-500 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-bold shadow-lg shadow-green-500/20 hover:bg-green-400 transition-all text-xs sm:text-sm tracking-wide active:scale-[0.97]">
+        <Icon name="whatsapp" class="w-4 h-4" />
+        <span>Escribir por WhatsApp</span>
+      </a>
     </div>
+    <div class="absolute -top-20 -right-20 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
   </section>
 </Layout>
 

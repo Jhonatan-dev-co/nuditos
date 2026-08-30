@@ -6,20 +6,20 @@ const faqs = [
   // ═══ Sobre los productos ═══
   { q: "¿De qué están hechos los ramos de crochet Nuditos?", a: "Todos nuestros ramos están tejidos con <strong>hilos de algodón premium</strong> utilizando la técnica de crochet. Las flores no se marchitan, no necesitan agua y pueden durar años con cuidados básicos.", category: "productos" },
   { q: "¿Cuánto tiempo dura un ramo de crochet?", a: "Con los cuidados básicos (evitar humedad directa y sol prolongado), un ramo de crochet puede durar <strong>muchos años</strong>. Tenemos clientas con ramos de más de 3 años que siguen perfectos.", category: "productos" },
-  { q: "¿Los colores son exactamente como en las fotos?", a: "Hacemos todo lo posible para que las fotos representen fielmente los colores reales. Si tienes dudas, escríbenos por <a href='https://wa.me/573144931525'>WhatsApp</a> y te enviamos fotos adicionales del producto.", category: "productos" },
+  { q: "¿Los colores son exactamente como en las fotos?", a: "Hacemos todo lo posible para que las fotos representen fielmente los colores reales. Si tienes dudas, escríbenos por WhatsApp y te enviamos fotos adicionales del producto.", category: "productos" },
   { q: "¿Qué tan grandes son los ramos?", a: "Tenemos diferentes tamaños: <strong>mini ramos</strong> (15-20 cm), <strong>medianos</strong> (25-35 cm) y <strong>grandes</strong> (40-50 cm). Cada producto indica sus dimensiones aproximadas en la descripción.", category: "productos" },
   { q: "¿Las flores de crochet huelen?", a: "Por sí solas no tienen olor, pero puedes <strong>rociarles tu perfume favorito</strong> o una esencia textil a 30 cm de distancia. El algodón absorbe muy bien los aromas y los libera suavemente.", category: "productos" },
   { q: "¿Es mejor un ramo de crochet que flores naturales?", a: "¡Definitivamente! Las flores de crochet <strong>no se marchitan</strong>, no causan alergias, son personalizables al 100%, duran años y son un recuerdo permanente. Son la evolución del regalo de flores.", category: "productos" },
   { q: "¿Qué puedo regalar si no sé qué regalar?", a: "Un ramo de crochet es perfecto porque es <strong>original, duradero y significativo</strong>. A diferencia de otros regalos, nunca se marchita y siempre recuerda el momento especial. Es ideal para novia, mamá, amiga, hermana o cualquier persona especial.", category: "productos" },
 
   // ═══ Personalización ═══
-  { q: "¿Puedo personalizar mi ramo de crochet?", a: "¡Sí! Personalizamos <strong>colores, tipo de flores, tamaño</strong> y diseño. Escríbenos por <a href='https://wa.me/573144931525'>WhatsApp</a> con tu idea y te hacemos una cotización.", category: "personalizado" },
+  { q: "¿Puedo personalizar mi ramo de crochet?", a: "¡Sí! Personalizamos <strong>colores, tipo de flores, tamaño</strong> y diseño. Escríbenos por WhatsApp con tu idea y te hacemos una cotización.", category: "personalizado" },
   { q: "¿Puedo pedir un ramo con los colores de mi equipo de fútbol?", a: "¡Claro! Podemos combinar cualquier color que necesites. Hemos hecho ramos con combinaciones de equipos, universidades y colores corporativos.", category: "personalizado" },
   { q: "¿Hacen ramos para bodas?", a: "Sí, creamos <strong>bouquets de novia</strong> eternos tejidos a crochet. Son la tendencia perfecta para novias que quieren conservar su ramo para siempre sin que se marchite.", category: "personalizado" },
   { q: "¿Hacen amigurumis personalizados?", a: "Sí, aparte de flores, también tejemos <strong>amigurumis</strong> (muñecos tejidos) personalizados. Desde mascotas hasta personajes favoritos.", category: "personalizado" },
 
   // ═══ Pedidos y pagos ═══
-  { q: "¿Cómo hago un pedido?", a: "Puedes hacer tu pedido de dos formas: <strong>1)</strong> Agrega el producto al carrito y paga directamente en la web, o <strong>2)</strong> Escríbenos por <a href='https://wa.me/573144931525'>WhatsApp</a> para atención personalizada.", category: "pedidos" },
+  { q: "¿Cómo hago un pedido?", a: "Puedes hacer tu pedido de dos formas: <strong>1)</strong> Agrega el producto al carrito y paga directamente en la web, o <strong>2)</strong> Escríbenos por WhatsApp para atención personalizada.", category: "pedidos" },
   { q: "¿Qué métodos de pago aceptan?", a: "Aceptamos todos los métodos de pago colombianos a través de <strong>Wompi</strong>: tarjetas de crédito/débito (Visa, Mastercard), PSE (transferencia bancaria), Nequi y Daviplata.", category: "pedidos" },
   { q: "¿Puedo pagar con Nequi?", a: "Sí, <strong>Nequi</strong> es uno de nuestros métodos de pago disponibles a través de la pasarela Wompi. ¡Súper fácil y rápido!", category: "pedidos" },
   { q: "¿Se puede pagar contra entrega?", a: "Actualmente no manejamos pago contra entrega. Nuestros pagos son <strong>100% seguros</strong> a través de Wompi (certificado por la Superintendencia Financiera de Colombia).", category: "pedidos" },
@@ -51,13 +51,13 @@ const faqSchema = {
   }))
 };
 
-// Agrupar FAQs por categoría
+// Agrupar FAQs por categoría con íconos e identidades de color
 const categories = [
-  { id: 'productos', name: 'Sobre los productos', icon: 'leaf' },
-  { id: 'personalizado', name: 'Personalización', icon: 'magic' },
-  { id: 'pedidos', name: 'Pedidos y pagos', icon: 'shopping-bag' },
-  { id: 'envios', name: 'Envíos y entregas', icon: 'truck' },
-  { id: 'marca', name: 'Sobre Nuditos', icon: 'heart-3' },
+  { id: 'productos', name: 'Sobre los productos', icon: 'plant', color: 'amber' },
+  { id: 'personalizado', name: 'Personalización', icon: 'magic', color: 'rose' },
+  { id: 'pedidos', name: 'Pedidos y pagos', icon: 'bank-card', color: 'emerald' },
+  { id: 'envios', name: 'Envíos y entregas', icon: 'truck', color: 'blue' },
+  { id: 'marca', name: 'Sobre Nuditos', icon: 'hand-heart', color: 'violet' },
 ];
 ---
 
@@ -66,86 +66,79 @@ const categories = [
   description="Resolvemos todas tus dudas: envíos a toda Colombia, materiales premium, personalización, métodos de pago (Nequi, PSE, tarjeta), tiempos de entrega y más."
 >
   <Fragment slot="head">
-    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
     <meta name="keywords" content="preguntas frecuentes nuditos, envío flores crochet Colombia, ramos crochet personalizados, pagar con Nequi flores, regalo novia Colombia, flores eternas Colombia" />
   </Fragment>
 
-  <style>
-    .page-hero { background: linear-gradient(135deg, var(--lila-xlight) 0%, var(--cream) 60%, var(--mint-light) 100%); padding: 5rem 1.5rem 4rem; text-align: center; }
-    .page-eyebrow { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--lila-dark); font-weight: 500; margin-bottom: 1rem; }
-    .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 6vw, 3.5rem); font-weight: 400; line-height: 1.15; color: var(--text); margin-bottom: 1.2rem; }
-    .page-hero h1 em { font-style: italic; color: var(--lila-dark); }
-    .page-hero p { max-width: 500px; margin: 0 auto; color: var(--text-soft); font-size: 1rem; line-height: 1.7; }
-
-    .faq-wrap { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
-    .faq-category { margin-bottom: 2.5rem; }
-    .faq-cat-title { font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; color: var(--lila-dark); font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1.5px solid var(--lila-light); display: flex; align-items: center; gap: 0.5rem; }
-    .faq-item { border-bottom: 1px solid var(--border-dark); }
-    .faq-q { width: 100%; background: none; border: none; display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 0; text-align: left; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 0.95rem; font-weight: 500; color: var(--text); gap: 1rem; transition: color 0.2s; }
-    .faq-q:hover { color: var(--lila-dark); }
-    .faq-q i, .faq-q :global(svg) { font-size: 1.2rem; color: var(--lila-dark); transition: transform 0.3s; flex-shrink: 0; }
-    .faq-q.open :global(svg) { transform: rotate(45deg); }
-    .faq-a { display: none; padding: 0 0 1.2rem; color: var(--text-soft); font-size: 0.9rem; line-height: 1.75; }
-    .faq-a.open { display: block; }
-    .faq-a :global(strong) { color: var(--text); }
-    .faq-a :global(a) { color: var(--lila-dark); text-decoration: underline; }
-    .faq-cta { background: var(--lila-xlight); border-radius: 20px; padding: 2.5rem; text-align: center; margin-top: 3rem; }
-    .faq-cta h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 400; margin-bottom: 0.6rem; }
-    .faq-cta h3 em { font-style: italic; color: var(--lila-dark); }
-    .faq-cta p { color: var(--text-soft); font-size: 0.88rem; margin-bottom: 1.5rem; }
-    .faq-wa { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--lila-dark); color: white; padding: 0.8rem 1.8rem; border-radius: 50px; font-size: 0.9rem; font-weight: 500; transition: background 0.2s, transform 0.2s; text-decoration: none; }
-    .faq-wa:hover { background: var(--lila); transform: scale(1.03); }
-    
-    .faq-count { 
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      background: white; border: 1px solid var(--border);
-      padding: 0.3rem 0.8rem; border-radius: 50px;
-      font-size: 0.72rem; color: var(--text-soft); font-weight: 600;
-      margin-top: 1rem;
-    }
-  </style>
-
-  <div class="page-hero">
-    <div class="page-eyebrow">Centro de ayuda</div>
-    <h1>Preguntas <em>frecuentes</em></h1>
-    <p>Todo lo que necesitas saber sobre nuestros productos, envíos, pagos y pedidos personalizados.</p>
-    <div class="faq-count">
-      <Icon name="checkbox-circle" /> {faqs.length} preguntas respondidas
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-stone-50 via-white to-amber-50/20 pt-20 sm:pt-24 pb-12 sm:pb-16 px-4 md:px-6 border-b border-stone-100 text-center">
+    <div class="max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200/70 text-amber-900 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4">
+        Centro de ayuda
+      </div>
+      <h1 class="font-serif text-[clamp(2.1rem,6vw,4.2rem)] font-light leading-[1.08] text-slate-800 mb-4">
+        Preguntas <em class="italic text-amber-600 font-normal">frecuentes</em>
+      </h1>
+      <p class="max-w-xl mx-auto text-slate-500 text-xs sm:text-sm md:text-base leading-relaxed mb-6">
+        Todo lo que necesitas saber sobre nuestros ramos tejidos, envíos, pagos y pedidos personalizados.
+      </p>
+      <div class="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-stone-200 shadow-xs text-[10px] font-bold uppercase tracking-wider text-slate-600">
+        <Icon name="checkbox-circle" class="w-3.5 h-3.5 text-emerald-600" />
+        <span>{faqs.length} preguntas respondidas</span>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <div class="faq-wrap">
-    {categories.map(cat => {
-      const catFaqs = faqs.filter(f => f.category === cat.id);
-      if (catFaqs.length === 0) return null;
-      return (
-        <div class="faq-category">
-          <div class="faq-cat-title"><Icon name={cat.icon} /> {cat.name}</div>
-          {catFaqs.map(faq => (
-            <div class="faq-item">
-              <button class="faq-q" onclick="toggleFaq(this)">{faq.q} <Icon name="add" /></button>
-              <div class="faq-a" set:html={faq.a} />
+  <!-- Acordeón de FAQs por categoría -->
+  <main class="max-w-[840px] mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <div class="space-y-10 sm:space-y-12">
+      {categories.map(cat => {
+        const catFaqs = faqs.filter(f => f.category === cat.id);
+        if (catFaqs.length === 0) return null;
+        return (
+          <div>
+            <div class="flex items-center gap-2.5 mb-4 pb-2 border-b border-stone-200">
+              <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+                <Icon name={cat.icon} class="w-3.5 h-3.5" />
+              </div>
+              <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800">{cat.name}</h2>
             </div>
-          ))}
-        </div>
-      );
-    })}
+            
+            <div class="space-y-0 rounded-2xl overflow-hidden border border-stone-200 bg-white shadow-xs">
+              {catFaqs.map((faq) => (
+                <details class="group border-b border-stone-100 last:border-b-0">
+                  <summary class="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 sm:py-4 cursor-pointer select-none hover:bg-stone-50 transition-colors list-none [&::-webkit-details-marker]:hidden">
+                    <span class="text-xs sm:text-[13px] font-bold text-slate-800">{faq.q}</span>
+                    <svg class="w-4 h-4 text-stone-400 transition-transform group-open:rotate-180 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </summary>
+                  <div class="text-slate-500 text-[11px] sm:text-xs leading-relaxed px-4 pb-4 pt-1 sm:px-5 sm:pb-5" set:html={faq.a} />
+                </details>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </main>
 
-    <div class="faq-cta">
-      <h3>¿Tu pregunta no está <em>aquí?</em></h3>
-      <p>Escríbenos por WhatsApp y te respondemos lo antes posible.</p>
-      <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸" class="faq-wa" target="_blank">
-        <Icon name="whatsapp" /> Escribir por WhatsApp
+  <!-- CTA FINAL -->
+  <section class="bg-[#1a1220] py-8 sm:py-10 md:py-14 px-3 sm:px-4 md:px-6 relative overflow-hidden text-center">
+    <div class="max-w-lg mx-auto relative z-10">
+      <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+        <Icon name="whatsapp" class="w-6 h-6 sm:w-7 sm:h-7 text-green-400" />
+      </div>
+      <h2 class="font-serif text-2xl sm:text-3xl md:text-4xl font-light text-white mb-2 leading-tight">
+        ¿Tu pregunta no está <em class="italic text-green-400 font-normal">aquí?</em>
+      </h2>
+      <p class="text-stone-400 text-xs sm:text-[13px] leading-relaxed mb-6 max-w-sm mx-auto">
+        Escríbenos por WhatsApp y te asesoramos personalmente en minutos.
+      </p>
+      <a href="https://wa.me/573144931525?text=Hola%20Nuditos!%20Tengo%20una%20pregunta%20🌸" class="inline-flex items-center gap-2 bg-green-500 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-bold shadow-lg shadow-green-500/20 hover:bg-green-400 transition-all text-xs sm:text-sm tracking-wide active:scale-[0.97]" target="_blank">
+        <Icon name="whatsapp" class="w-4 h-4" />
+        <span>Escribir por WhatsApp</span>
       </a>
     </div>
-  </div>
-
-  <script is:inline>
-    function toggleFaq(btn) {
-      const answer = btn.nextElementSibling;
-      const isOpen = btn.classList.contains('open');
-      document.querySelectorAll('.faq-q.open').forEach(b => { b.classList.remove('open'); b.nextElementSibling.classList.remove('open'); });
-      if (!isOpen) { btn.classList.add('open'); answer.classList.add('open'); }
-    }
-  </script>
+    <div class="absolute -top-20 -right-20 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  </section>
 </Layout>
