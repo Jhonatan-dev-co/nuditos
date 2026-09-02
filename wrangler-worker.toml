@@ -1,0 +1,4 @@
+﻿name = "nuditos"
+main = "dist/_worker.js/index.js"
+compatibility_date = "2026-04-18"
+assets = { directory = "dist" }

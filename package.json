@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev --host",
     "build": "astro build && echo # > dist/.assetsignore",
-    "deploy": "astro build && wrangler pages deploy dist --project-name=nuditos --branch=main",
+    "deploy": "astro build && wrangler pages deploy dist --project-name=nuditos --branch=main && wrangler deploy --config wrangler-worker.toml --keep-vars",
     "preview": "astro preview",
     "upload": "node scripts/upload-image.js"
   },
