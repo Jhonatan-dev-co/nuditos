@@ -16,37 +16,459 @@ import Icon from '../Icon.astro';
   </div>
 </div>
 
-<!-- MODAL PEDIDO -->
+<!-- ════════ MODAL "MI PEDIDO" — WORKSTATION A PANTALLA COMPLETA EN PC ════════ -->
 <div class="modal-overlay" id="pedidoModal">
-  <div class="modal-box">
-    <div class="modal-title" id="pedidoModalTitle">Nuevo pedido</div>
-    <div class="modal-sub">Registra el pedido recibido por WhatsApp</div>
-    <input type="hidden" id="pedidoEditId">
-    <div class="modal-field"><label>Nombre cliente</label><input type="text" id="pCliente" placeholder="Valentina García"></div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.8rem;">
-      <div class="modal-field"><label>Email (Opcional)</label><input type="email" id="pEmail" placeholder="cliente@correo.com"></div>
-      <div class="modal-field"><label>WhatsApp</label><input type="text" id="pTel" placeholder="+57 300 000 0000"></div>
-    </div>
-    <div class="modal-field"><label>Productos pedidos</label><textarea id="pItems" placeholder="1x Ramo noche estrellada&#10;1x Maceta girasol"></textarea></div>
-    <div class="modal-field"><label>Total (COP)</label><input type="number" id="pTotal" placeholder="135000" min="0"></div>
-    <div class="modal-field"><label>Estado</label>
-      <select id="pEstado">
-        <option value="pendiente">⏳ Pendiente</option>
-        <option value="pagado">💰 Pagado</option>
-        <option value="proceso">🔄 En proceso</option>
-        <option value="entregado">✅ Entregado</option>
-        <option value="cancelado">❌ Cancelado</option>
-      </select>
-    </div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.8rem;">
-      <div class="modal-field"><label>Transportadora</label><input type="text" id="pTrans" placeholder="Servientrega / Inter"></div>
-      <div class="modal-field"><label>Número de Guía</label><input type="text" id="pGuia" placeholder="123456789"></div>
-    </div>
-    <div class="modal-field"><label>Notas / Dirección</label><textarea id="pNotas" placeholder="Dirección de entrega, indicaciones, etc."></textarea></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closePedidoModal()">Cancelar</button>
-      <button class="btn-save" onclick="savePedido()"><Icon name="save"  /> Guardar</button>
-    </div>
+  <div class="modal-box-mipedido" id="pedidoModalBox">
+    
+    <!-- 1. BARRA SUPERIOR EJECUTIVA A PANTALLA COMPLETA -->
+    <header class="mp-header">
+      <div class="mp-header-left">
+        <button type="button" class="mp-back-btn" onclick="closePedidoModal()" title="Volver al listado de pedidos">
+          <Icon name="arrow-left" style="width:16px;height:16px;" /> <span>Volver a Pedidos</span>
+        </button>
+
+        <div class="mp-avatar-badge" id="mpHeaderAvatar"><Icon name="plant" style="width:22px;height:22px;" /></div>
+
+        <div class="mp-header-info">
+          <div class="mp-title-row">
+            <span class="mp-title-main" id="mpHeaderTitle">Mi Pedido</span>
+            <span id="mpHeaderId" class="mp-id-badge" onclick="copyOrderField('id','ID Pedido',this)" title="Clic para copiar ID">#---</span>
+            <span id="mpHeaderStatus" class="pedido-estado estado-pendiente"><Icon name="time" style="width:13px;height:13px;margin-right:4px;" /> Pendiente</span>
+          </div>
+          <div class="mp-header-sub">
+            <span id="mpHeaderClientName" class="mp-header-client">—</span>
+            <span class="mp-header-dot">·</span>
+            <span id="mpHeaderDate" class="mp-header-date">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selector de Modo de Trabajo en Pantalla Completa -->
+      <div class="mp-header-center">
+        <div class="mp-mode-toggle-group">
+          <button type="button" class="mp-mode-btn active" id="mpModeBtnView" onclick="setPedidoViewMode(false)">
+            <Icon name="eye" style="width:15px;height:15px;margin-right:6px;" /> Vista de Despacho (Lado a Lado)
+          </button>
+          <button type="button" class="mp-mode-btn" id="mpModeBtnEdit" onclick="setPedidoViewMode(true)">
+            <Icon name="edit" style="width:15px;height:15px;margin-right:6px;" /> Modo Edición (Todo el Espacio)
+          </button>
+        </div>
+      </div>
+
+      <!-- Acciones Rápidas en Cabecera -->
+      <div class="mp-header-actions">
+        <button type="button" class="btn-copy-manifest-mini" onclick="copyFullOrderManifest()" title="Copiar ficha de transporte formateada">
+          <Icon name="clipboard" style="width:15px;height:15px;margin-right:5px;" /> Ficha / Rótulo
+        </button>
+
+        <a id="mpHeaderWaBtn" href="#" target="_blank" class="p-action-btn wa-btn" style="text-decoration:none;">
+          <Icon name="whatsapp" style="width:15px;height:15px;margin-right:5px;" /> WhatsApp
+        </a>
+
+        <!-- Botón Desplegable de Correos Transaccionales -->
+        <div style="position:relative;display:inline-block;" id="mpEmailDropdownWrapper">
+          <button type="button" class="p-action-btn" id="mpBtnEmailDropdown" style="background:#f3e8ff;color:var(--lila-dark);border-color:#ddd6fe;font-weight:600;display:inline-flex;align-items:center;gap:4px;" onclick="toggleEmailActionsMenu(event)" title="Enviar correo al cliente">
+            <Icon name="mail" style="width:14px;height:14px;" />
+            <span>Enviar Correo</span>
+            <Icon name="arrow-down-s" style="width:13px;height:13px;" />
+          </button>
+          <div id="mpEmailActionsMenu" style="display:none;position:absolute;right:0;top:100%;margin-top:6px;background:#ffffff;border-radius:12px;border:1.5px solid #e9d5ff;box-shadow:0 10px 30px rgba(140,95,173,0.22);z-index:200;min-width:260px;padding:6px;text-align:left;">
+            <div style="padding:6px 10px;font-size:0.7rem;font-weight:700;color:var(--lila-dark);text-transform:uppercase;letter-spacing:1px;">Notificaciones al Cliente</div>
+            <button type="button" class="mp-menu-item" onclick="sendModalEmailAction('compra_confirmada')">🛍️ Confirmación de Compra</button>
+            <button type="button" class="mp-menu-item" onclick="sendModalEmailAction('pedido_enviado')">📦 Notificar Envío con Guía</button>
+            <button type="button" class="mp-menu-item" onclick="sendModalEmailAction('envio_encamino')">🚚 Paquete En Camino</button>
+            <button type="button" class="mp-menu-item" onclick="sendModalEmailAction('envio_reparto')">🛵 Paquete En Reparto (¡Llega hoy!)</button>
+            <button type="button" class="mp-menu-item" onclick="sendModalEmailAction('envio_entregado')">✅ Pedido Entregado</button>
+            <div style="height:1px;background:#f3e8ff;margin:5px 0;"></div>
+            <div style="padding:4px 10px;font-size:0.7rem;font-weight:700;color:#047857;text-transform:uppercase;letter-spacing:1px;">Avisos Internos</div>
+            <button type="button" class="mp-menu-item" onclick="sendModalEmailAction('notificacion_admin')">📩 Reenviar Alerta al Taller/Admin</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn-save" id="mpBtnSavePedidoHeader" onclick="savePedido()">
+          <Icon name="save" /> Guardar
+        </button>
+
+        <button type="button" class="mp-close-btn" onclick="closePedidoModal()" title="Cerrar modal (Esc)">
+          <Icon name="close" style="width:18px;height:18px;" />
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. ÁREA DE TRABAJO A PANTALLA COMPLETA EN PC -->
+    <main class="mp-body-scroll">
+      <input type="hidden" id="pedidoEditId">
+
+      <!-- ══════ VISTA 1: VISTA DE DESPACHO CON ACORDEONES Y FOTO AL FRENTE (PC LADO A LADO) ══════ -->
+      <div id="mpViewContainer" class="mp-split-grid">
+        
+        <!-- COLUMNA IZQUIERDA: ACORDEONES ORGANIZADOS -->
+        <div class="mp-col-datos">
+
+          <!-- ▸ ACORDEÓN 1: DESTINATARIO Y CONTACTO -->
+          <div class="mp-accordion open" id="accCliente">
+            <div class="mp-acc-header" onclick="toggleAccordion('accCliente')">
+              <div class="mp-acc-header-left">
+                <span class="mp-acc-icon"><Icon name="user" style="width:18px;height:18px;" /></span>
+                <span class="mp-acc-title">Destinatario & Contacto</span>
+              </div>
+              <div class="mp-acc-header-right" onclick="event.stopPropagation()">
+                <button type="button" class="btn-copy-chip" onclick="copyOrderField('cliente','Nombre',this)"><Icon name="clipboard" style="width:13px;height:13px;margin-right:3px;" /> Copiar Nombre</button>
+                <button type="button" class="btn-copy-chip" onclick="copyOrderField('tel','WhatsApp',this)"><Icon name="clipboard" style="width:13px;height:13px;margin-right:3px;" /> Copiar Celular</button>
+                <button type="button" class="mp-acc-edit-link" onclick="setPedidoViewMode(true)" title="Editar datos del cliente"><Icon name="edit" style="width:13px;height:13px;margin-right:3px;" /> Editar</button>
+                <span class="mp-acc-arrow" onclick="toggleAccordion('accCliente')"><Icon name="arrow-down-s" style="width:16px;height:16px;" /></span>
+              </div>
+            </div>
+            <div class="mp-acc-body">
+              <div class="mp-view-block">
+                <div class="mp-data-row">
+                  <span class="mp-data-label">Nombre del Cliente</span>
+                  <span class="mp-data-val bold" id="mpViewCliente">—</span>
+                  <button type="button" class="btn-copy-chip" onclick="copyOrderField('cliente','Nombre',this)"><Icon name="clipboard" style="width:13px;height:13px;" /></button>
+                </div>
+                <div class="mp-data-row">
+                  <span class="mp-data-label">WhatsApp / Celular</span>
+                  <span class="mp-data-val bold" id="mpViewTel">—</span>
+                  <div style="display:flex;gap:.35rem;">
+                    <button type="button" class="btn-copy-chip" onclick="copyOrderField('tel','WhatsApp',this)"><Icon name="clipboard" style="width:13px;height:13px;" /></button>
+                    <a id="mpLinkWa" href="#" target="_blank" class="btn-copy-chip" style="background:#dcfce7;color:#166534;border-color:#bbf7d0;text-decoration:none;"><Icon name="whatsapp" style="width:13px;height:13px;margin-right:3px;" /> Abrir Chat</a>
+                  </div>
+                </div>
+                <div class="mp-data-row">
+                  <span class="mp-data-label">Correo Electrónico</span>
+                  <span class="mp-data-val" id="mpViewEmail">—</span>
+                  <button type="button" class="btn-copy-chip" onclick="copyOrderField('email','Email',this)"><Icon name="clipboard" style="width:13px;height:13px;" /></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ▸ ACORDEÓN 2: DIRECCIÓN Y LOGÍSTICA DE ENVÍO -->
+          <div class="mp-accordion open" id="accDireccion">
+            <div class="mp-acc-header" onclick="toggleAccordion('accDireccion')">
+              <div class="mp-acc-header-left">
+                <span class="mp-acc-icon"><Icon name="map-pin" style="width:18px;height:18px;" /></span>
+                <span class="mp-acc-title">Dirección de Entrega & Logística</span>
+              </div>
+              <div class="mp-acc-header-right" onclick="event.stopPropagation()">
+                <button type="button" class="btn-copy-chip" onclick="copyOrderField('direccion_completa','Dirección completa',this)"><Icon name="clipboard" style="width:13px;height:13px;margin-right:3px;" /> Copiar Dirección</button>
+                <button type="button" class="mp-acc-edit-link" onclick="setPedidoViewMode(true)" title="Editar dirección"><Icon name="edit" style="width:13px;height:13px;margin-right:3px;" /> Editar</button>
+                <span class="mp-acc-arrow" onclick="toggleAccordion('accDireccion')"><Icon name="arrow-down-s" style="width:16px;height:16px;" /></span>
+              </div>
+            </div>
+            <div class="mp-acc-body">
+              <div class="mp-view-block">
+                <div class="mp-data-row">
+                  <span class="mp-data-label">Dirección Exacta</span>
+                  <span class="mp-data-val bold" id="mpViewDireccion">—</span>
+                  <button type="button" class="btn-copy-chip" onclick="copyOrderField('direccion','Dirección',this)"><Icon name="clipboard" style="width:13px;height:13px;" /></button>
+                </div>
+                <div class="mp-data-row">
+                  <span class="mp-data-label">Ciudad / Depto</span>
+                  <span class="mp-data-val" id="mpViewCiudad">—</span>
+                  <button type="button" class="btn-copy-chip" onclick="copyOrderField('ciudad','Ciudad',this)"><Icon name="clipboard" style="width:13px;height:13px;" /></button>
+                </div>
+                <div class="mp-data-row">
+                  <span class="mp-data-label">Barrio / CP</span>
+                  <span class="mp-data-val" id="mpViewBarrio">—</span>
+                  <button type="button" class="btn-copy-chip" onclick="copyOrderField('barrio','Barrio',this)"><Icon name="clipboard" style="width:13px;height:13px;" /></button>
+                </div>
+                <div class="mp-data-row">
+                  <span class="mp-data-label">Transportadora</span>
+                  <span class="mp-data-val" id="mpViewTrans">—</span>
+                  <button type="button" class="p-action-btn" style="background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe;padding:.25rem .6rem;font-size:.72rem;" onclick="crearGuiaSkydropxFromCurrentModal()"><Icon name="package" style="width:14px;height:14px;margin-right:4px;" /> Generar Skydropx</button>
+                </div>
+                <div class="mp-data-row">
+                  <span class="mp-data-label">Número de Guía</span>
+                  <span class="mp-data-val bold" id="mpViewGuia" style="color:var(--lila-dark);font-size:.95rem;">—</span>
+                  <div style="display:flex;gap:.35rem;flex-wrap:wrap;">
+                    <button type="button" class="btn-copy-chip" onclick="copyOrderField('guia','Número de Guía',this)"><Icon name="clipboard" style="width:13px;height:13px;margin-right:3px;" /> Copiar Guía</button>
+                    <button type="button" class="btn-copy-chip" id="mpBtnSendGuiaDirect" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0;font-weight:700;" onclick="sendModalEmailAction('pedido_enviado')" title="Enviar correo con transportadora y guía al cliente"><Icon name="send-plane" style="width:13px;height:13px;margin-right:3px;" /> Enviar Guía al Cliente</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ▸ ACORDEÓN 3: DEDICATORIA DE LA TARJETA DE REGALO -->
+          <div class="mp-accordion open" id="accDedicatoria">
+            <div class="mp-acc-header" onclick="toggleAccordion('accDedicatoria')">
+              <div class="mp-acc-header-left">
+                <span class="mp-acc-icon"><Icon name="heart-3" style="width:18px;height:18px;" /></span>
+                <span class="mp-acc-title">Dedicatoria para la Tarjeta de Regalo</span>
+              </div>
+              <div class="mp-acc-header-right" onclick="event.stopPropagation()">
+                <button type="button" class="btn-copy-chip" style="background:#fef3c7;color:#92400e;border-color:#fde68a;" onclick="copyOrderField('dedicatoria','Dedicatoria',this)"><Icon name="clipboard" style="width:13px;height:13px;margin-right:3px;" /> Copiar Dedicatoria</button>
+                <button type="button" class="mp-acc-edit-link" onclick="setPedidoViewMode(true)"><Icon name="edit" style="width:13px;height:13px;margin-right:3px;" /> Editar</button>
+                <span class="mp-acc-arrow" onclick="toggleAccordion('accDedicatoria')"><Icon name="arrow-down-s" style="width:16px;height:16px;" /></span>
+              </div>
+            </div>
+            <div class="mp-acc-body">
+              <div class="mp-dedicatoria-box">
+                <div id="mpViewDedicatoria" class="mp-dedicatoria-text">«Sin dedicatoria especial»</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ▸ ACORDEÓN 4: RAMOS Y PRODUCTOS COMPRADOS -->
+          <div class="mp-accordion open" id="accProductos">
+            <div class="mp-acc-header" onclick="toggleAccordion('accProductos')">
+              <div class="mp-acc-header-left">
+                <span class="mp-acc-icon"><Icon name="shopping-bag-3" style="width:18px;height:18px;" /></span>
+                <span class="mp-acc-title">Ramos & Productos Comprados</span>
+              </div>
+              <div class="mp-acc-header-right" onclick="event.stopPropagation()">
+                <button type="button" class="btn-copy-chip" onclick="copyOrderField('items','Productos',this)"><Icon name="clipboard" style="width:13px;height:13px;margin-right:3px;" /> Copiar Items</button>
+                <button type="button" class="btn-copy-chip" onclick="copyOrderField('total','Total',this)"><Icon name="clipboard" style="width:13px;height:13px;margin-right:3px;" /> Copiar Total</button>
+                <button type="button" class="mp-acc-edit-link" onclick="setPedidoViewMode(true)"><Icon name="edit" style="width:13px;height:13px;margin-right:3px;" /> Modificar</button>
+                <span class="mp-acc-arrow" onclick="toggleAccordion('accProductos')"><Icon name="arrow-down-s" style="width:16px;height:16px;" /></span>
+              </div>
+            </div>
+            <div class="mp-acc-body">
+              <div id="mpViewItemsList" class="mp-items-list"></div>
+              
+              <div class="mp-total-bar">
+                <span class="mp-total-label">Total Liquidado del Pedido:</span>
+                <span id="mpViewTotal" class="mp-total-value">$0 COP</span>
+                <button type="button" class="btn-copy-chip" onclick="copyOrderField('total','Total',this)"><Icon name="clipboard" style="width:13px;height:13px;margin-right:3px;" /> Copiar Total</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTÓN MAESTRO DE COPIADO DE RÓTULO -->
+          <button type="button" class="btn-copy-manifest" id="mpBtnCopyManifest" onclick="copyFullOrderManifest()">
+            <Icon name="truck" style="width:18px;height:18px;margin-right:6px;" /> Copiar Ficha Completa para Transportadora (Interrapidísima / Servientrega / Envía)
+          </button>
+
+        </div>
+
+        <!-- COLUMNA DERECHA: VITRINA DEL RAMO EN ALTA DEFINICIÓN (AL FRENTE) -->
+        <aside class="mp-col-foto">
+          <div class="mp-photo-card">
+            <div class="mp-photo-card-header">
+              <span class="mp-photo-badge" id="mpPhotoBadge"><Icon name="plant" style="width:14px;height:14px;margin-right:4px;" /> Ramo Comprado</span>
+              <div style="display:flex;gap:.35rem;">
+                <button type="button" class="btn-copy-chip" onclick="copyOrderField('ramo_nombre','Nombre del ramo',this)"><Icon name="clipboard" style="width:13px;height:13px;margin-right:3px;" /> Nombre</button>
+                <button type="button" class="btn-copy-chip" onclick="copyOrderField('foto_url','URL Foto',this)"><Icon name="external-link" style="width:13px;height:13px;margin-right:3px;" /> Link</button>
+              </div>
+            </div>
+
+            <!-- Marco de Fotografía Principal en HD con Zoom -->
+            <div class="mp-photo-frame" onclick="openPhotoLightbox()" title="Clic para ver en pantalla completa">
+              <img id="mpMainPhoto" src="" alt="Ramo comprado" class="mp-main-img" onerror="onPhotoError(this)" />
+              <div class="mp-photo-zoom-hint"><Icon name="zoom-in" style="width:14px;height:14px;margin-right:4px;" /> Clic para ampliar en pantalla completa</div>
+            </div>
+
+            <!-- Selector de ramos si compró varios -->
+            <div id="mpItemsSelector" class="mp-items-selector" style="display:none;"></div>
+
+            <!-- Detalles del Ramo -->
+            <div class="mp-photo-meta">
+              <div class="mp-photo-meta-left">
+                <div id="mpProductTitle" class="mp-product-title">Ramo Nuditos</div>
+                <div id="mpProductCat" class="mp-foto-cat">Categoría: Ramos tejidos a crochet</div>
+              </div>
+              <div class="mp-photo-meta-right">
+                <div id="mpProductPrice" class="mp-product-price">$0</div>
+                <a id="mpBtnVerTienda" href="/catalogo" target="_blank" class="p-action-btn" style="font-size:.72rem;">
+                  <Icon name="external-link" style="width:13px;height:13px;margin-right:3px;" /> Ver en Tienda
+                </a>
+              </div>
+            </div>
+
+            <!-- Acciones al pie de la foto -->
+            <div class="mp-photo-actions-row">
+              <button type="button" class="p-action-btn" style="flex:1;" onclick="openPhotoLightbox()"><Icon name="zoom-in" style="width:14px;height:14px;margin-right:4px;" /> Ampliar Ramo</button>
+              <button type="button" class="p-action-btn" style="flex:1;" onclick="setPedidoViewMode(true)"><Icon name="edit" style="width:14px;height:14px;margin-right:4px;" /> Cambiar Ramo / Foto</button>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+
+      <!-- ══════ VISTA 2: MODO EDICIÓN A PANTALLA COMPLETA (TODO EL ESPACIO PARA FACILIDAD VISUAL) ══════ -->
+      <div id="mpEditContainer" class="mp-edit-full-workspace" style="display:none;">
+        
+        <div class="mp-edit-banner">
+          <div>
+            <div class="mp-edit-banner-title"><Icon name="edit" style="width:18px;height:18px;margin-right:6px;" /> Estación de Edición — Pantalla Completa</div>
+            <div class="mp-edit-banner-sub">Modifica cualquier dato del cliente, entrega, ramo o dedicatoria. Todo el espacio está optimizado para ver y escribir con total claridad.</div>
+          </div>
+          <div style="display:flex;gap:.5rem;">
+            <button type="button" class="p-action-btn" onclick="setPedidoViewMode(false)"><Icon name="eye" style="width:15px;height:15px;margin-right:4px;" /> Volver a Vista Lado a Lado</button>
+            <button type="button" class="btn-save" onclick="savePedido()"><Icon name="save" /> Guardar Cambios</button>
+          </div>
+        </div>
+
+        <div class="mp-edit-grid-full">
+          
+          <!-- TARJETA EDIT 1: CLIENTE Y CONTACTO -->
+          <div class="mp-edit-card">
+            <div class="mp-edit-card-header">
+              <span class="mp-edit-card-icon"><Icon name="user" style="width:18px;height:18px;" /></span>
+              <span class="mp-edit-card-title">1. Datos del Cliente y Contacto</span>
+            </div>
+            <div class="mp-form-grid-4">
+              <div class="modal-field">
+                <label>Nombre Completo del Cliente *</label>
+                <input type="text" id="pCliente" placeholder="Ej: Valentina García Gómez" required class="mp-edit-input">
+              </div>
+              <div class="modal-field">
+                <label>WhatsApp / Celular *</label>
+                <input type="text" id="pTel" placeholder="Ej: 3144931525" class="mp-edit-input">
+              </div>
+              <div class="modal-field">
+                <label>Correo Electrónico</label>
+                <input type="email" id="pEmail" placeholder="cliente@correo.com" class="mp-edit-input">
+              </div>
+              <div class="modal-field">
+                <label>Valor Total del Pedido (COP) *</label>
+                <input type="number" id="pTotal" placeholder="148000" min="0" class="mp-edit-input bold" style="color:var(--lila-dark);">
+              </div>
+            </div>
+          </div>
+
+          <!-- TARJETA EDIT 2: DIRECCIÓN Y LOGÍSTICA DE ENVÍO -->
+          <div class="mp-edit-card">
+            <div class="mp-edit-card-header">
+              <span class="mp-edit-card-icon"><Icon name="map-pin" style="width:18px;height:18px;" /></span>
+              <span class="mp-edit-card-title">2. Dirección de Entrega & Guía de Envío</span>
+            </div>
+            <div class="mp-form-grid-full">
+              <div class="modal-field">
+                <label>Dirección Completa de Entrega (Calle, Carrera, Número, Apto / Casa)</label>
+                <input type="text" id="pDireccion" placeholder="Calle 127 # 19-45, Torre 2 Apto 502" class="mp-edit-input">
+              </div>
+            </div>
+            <div class="mp-form-grid-4">
+              <div class="modal-field">
+                <label>Ciudad y Departamento</label>
+                <input type="text" id="pCiudad" placeholder="Bogotá, Cundinamarca" class="mp-edit-input">
+              </div>
+              <div class="modal-field">
+                <label>Barrio / Localidad</label>
+                <input type="text" id="pBarrio" placeholder="Usaquén / Cedritos" class="mp-edit-input">
+              </div>
+              <div class="modal-field">
+                <label>Transportadora</label>
+                <input type="text" id="pTrans" placeholder="Interrapidísima / Servientrega / Skydropx" class="mp-edit-input">
+              </div>
+              <div class="modal-field">
+                <label>Número de Guía</label>
+                <input type="text" id="pGuia" placeholder="SKX-98234812" class="mp-edit-input bold">
+              </div>
+            </div>
+          </div>
+
+          <!-- TARJETA EDIT 3: DEDICATORIA DE LA TARJETA DE REGALO -->
+          <div class="mp-edit-card">
+            <div class="mp-edit-card-header">
+              <span class="mp-edit-card-icon"><Icon name="heart-3" style="width:18px;height:18px;" /></span>
+              <span class="mp-edit-card-title">3. Mensaje para la Tarjeta de Regalo / Notas Especiales</span>
+            </div>
+            <div class="modal-field">
+              <label>Dedicatoria que irá escrita en la tarjeta física del ramo</label>
+              <textarea id="pNotas" rows="3" placeholder="Escribe aquí la dedicatoria de amor, cumpleaños o felicitaciones que la tejedora plasmará en la tarjeta física." class="mp-edit-textarea"></textarea>
+            </div>
+          </div>
+
+          <!-- TARJETA EDIT 4: RAMOS Y VISTA PREVIA DE FOTO -->
+          <div class="mp-edit-card">
+            <div class="mp-edit-card-header">
+              <span class="mp-edit-card-icon"><Icon name="plant" style="width:18px;height:18px;" /></span>
+              <span class="mp-edit-card-title">4. Ramos Comprados & Fotografía del Producto</span>
+            </div>
+            
+            <div class="mp-edit-prods-split">
+              <div class="mp-edit-prods-left">
+                <div class="modal-field">
+                  <label>Elegir Ramo desde el Catálogo de la Tienda (Autocompleta nombre, precio y foto):</label>
+                  <select id="mpSelectCatalogo" onchange="onSelectProductFromCatalog(this.value)" class="mp-edit-select" style="font-weight:600;">
+                    <option value="">-- Seleccionar Ramo del Catálogo --</option>
+                  </select>
+                </div>
+
+                <div class="modal-field">
+                  <label>Items Comprados (un ramo por línea, con cantidad):</label>
+                  <textarea id="pItems" rows="3" placeholder="1x Ramo Noche Estrellada&#10;1x Maceta Girasol Sol Naciente" class="mp-edit-textarea" oninput="onEditItemsChanged()"></textarea>
+                </div>
+
+                <div class="modal-field">
+                  <label>URL de Foto Personalizada (Cloudinary / WhatsApp para pedidos especiales):</label>
+                  <input type="text" id="pCustomFoto" placeholder="https://res.cloudinary.com/dzxgu27wr/..." class="mp-edit-input" oninput="onCustomPhotoInput(this.value)">
+                </div>
+              </div>
+
+              <div class="mp-edit-prods-right">
+                <div style="font-size:.76rem;font-weight:700;color:var(--soft);margin-bottom:.4rem;text-transform:uppercase;">Vista Previa de la Foto Asignada:</div>
+                <div class="mp-edit-preview-frame">
+                  <img id="mpEditPreviewImg" src="" alt="Previsualización del ramo" class="mp-edit-preview-img" onerror="onPhotoError(this)" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TARJETA EDIT 5: ESTADO DEL PEDIDO -->
+          <div class="mp-edit-card">
+            <div class="mp-edit-card-header">
+              <span class="mp-edit-card-icon"><Icon name="checkbox-circle" style="width:18px;height:18px;" /></span>
+              <span class="mp-edit-card-title">5. Estado del Pedido</span>
+            </div>
+            <div class="mp-edit-status-row">
+              <div class="modal-field" style="max-width:320px;">
+                <label>Estado Actual</label>
+                <select id="pEstado" class="mp-edit-select" onchange="onEditEstadoChanged(this.value)">
+                  <option value="pendiente">⏳ Pendiente de Pago</option>
+                  <option value="pagado">💰 Pagado / Confirmado</option>
+                  <option value="proceso">🔄 En Proceso (Tejiendo en Taller)</option>
+                  <option value="entregado">✅ Entregado al Destinatario</option>
+                  <option value="cancelado">❌ Cancelado</option>
+                </select>
+              </div>
+
+              <div class="mp-edit-status-pills">
+                <span style="font-size:.76rem;font-weight:700;color:var(--soft);text-transform:uppercase;">Acceso directo:</span>
+                <button type="button" class="mp-status-btn" data-status="pendiente" onclick="quickSetEstadoPedido('pendiente')"><Icon name="time" style="width:13px;height:13px;margin-right:4px;" /> Pendiente</button>
+                <button type="button" class="mp-status-btn" data-status="pagado" onclick="quickSetEstadoPedido('pagado')"><Icon name="bank-card" style="width:13px;height:13px;margin-right:4px;" /> Pagado</button>
+                <button type="button" class="mp-status-btn" data-status="proceso" onclick="quickSetEstadoPedido('proceso')"><Icon name="refresh" style="width:13px;height:13px;margin-right:4px;" /> En Proceso</button>
+                <button type="button" class="mp-status-btn" data-status="entregado" onclick="quickSetEstadoPedido('entregado')"><Icon name="check" style="width:13px;height:13px;margin-right:4px;" /> Entregado</button>
+                <button type="button" class="mp-status-btn" data-status="cancelado" onclick="quickSetEstadoPedido('cancelado')"><Icon name="close" style="width:13px;height:13px;margin-right:4px;" /> Cancelado</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- 3. BARRA INFERIOR FIJA CON ESTADOS RÁPIDOS Y BOTONES -->
+    <footer class="mp-footer">
+      <div class="mp-status-selector-bar">
+        <span style="font-size:.74rem;font-weight:700;color:var(--soft);text-transform:uppercase;">Cambiar estado:</span>
+        <button type="button" class="mp-status-btn" data-status="pendiente" onclick="quickSetEstadoPedido('pendiente')"><Icon name="time" style="width:13px;height:13px;margin-right:4px;" /> Pendiente</button>
+        <button type="button" class="mp-status-btn" data-status="pagado" onclick="quickSetEstadoPedido('pagado')"><Icon name="bank-card" style="width:13px;height:13px;margin-right:4px;" /> Pagado</button>
+        <button type="button" class="mp-status-btn" data-status="proceso" onclick="quickSetEstadoPedido('proceso')"><Icon name="refresh" style="width:13px;height:13px;margin-right:4px;" /> En Proceso</button>
+        <button type="button" class="mp-status-btn" data-status="entregado" onclick="quickSetEstadoPedido('entregado')"><Icon name="check" style="width:13px;height:13px;margin-right:4px;" /> Entregado</button>
+        <button type="button" class="mp-status-btn" data-status="cancelado" onclick="quickSetEstadoPedido('cancelado')"><Icon name="close" style="width:13px;height:13px;margin-right:4px;" /> Cancelado</button>
+      </div>
+
+      <div class="mp-footer-actions">
+        <button type="button" class="p-action-btn" id="mpBtnDeleteCurrent" style="color:var(--red);border-color:#fca5a5;" onclick="deleteCurrentModalPedido()"><Icon name="delete-bin" style="width:14px;height:14px;margin-right:4px;" /> Eliminar</button>
+        <button type="button" class="p-action-btn" onclick="closePedidoModal()"><Icon name="close" style="width:14px;height:14px;margin-right:4px;" /> Cerrar</button>
+        <button type="button" class="btn-save" id="mpBtnSavePedido" onclick="savePedido()"><Icon name="save" /> Guardar cambios</button>
+      </div>
+    </footer>
+
+  </div>
+</div>
+
+<!-- ════════ LIGHTBOX PARA VER LA FOTO DEL RAMO EN TAMAÑO COMPLETO ════════ -->
+<div class="mp-lightbox-overlay" id="mpLightboxModal" onclick="closePhotoLightbox()">
+  <div class="mp-lightbox-content" onclick="event.stopPropagation()">
+    <img id="mpLightboxImg" src="" alt="Ramo ampliado" class="mp-lightbox-img" />
+    <button class="mp-lightbox-close" onclick="closePhotoLightbox()" title="Cerrar vista">✕</button>
   </div>
 </div>
 
@@ -150,3 +572,25 @@ import Icon from '../Icon.astro';
 </div>
 
 <div class="toast-admin" id="toastAdmin"></div>
+
+<style>
+  .mp-menu-item {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #374151;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .mp-menu-item:hover {
+    background: #f5f0f8;
+    color: #6b3fa0;
+    font-weight: 600;
+  }
+</style>

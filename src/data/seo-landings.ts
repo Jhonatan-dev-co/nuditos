@@ -87,7 +87,7 @@ export const COMMERCIAL_LANDINGS: Record<string, CommercialLandingConfig> = {
       { label: 'Regalos para amiga', href: '/regalos-para-amiga' },
       { label: 'Catálogo completo', href: '/catalogo' },
     ],
-    productHints: ['amarilla', 'girasol', 'sol', 'alegria'],
+    productHints: ['super combo', 'dos ramos', 'amarilla', 'girasol', 'sol', 'alegria'],
     faq: [
       { q: '¿Por qué regalar flores amarillas tejidas?', a: 'Porque representan alegría y energía positiva, y al ser tejidas, el mensaje de optimismo dura para siempre.' },
       { q: '¿Tienen girasoles disponibles?', a: 'Sí, son nuestro producto estrella para esta categoría por su gran nivel de detalle.' },

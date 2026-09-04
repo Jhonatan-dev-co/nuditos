@@ -794,14 +794,43 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
       document.body.classList.toggle('scroll-lock', isOpen);
     };
 
-    window.toggleCart = function() {
+    window.openCart = function() {
       const overlay = document.getElementById('cartOverlay');
       const panel = document.getElementById('cartPanel');
       if (!overlay || !panel) return;
-      overlay.classList.toggle('open');
-      panel.classList.toggle('open');
-      const isOpen = panel.classList.contains('open');
-      document.body.classList.toggle('scroll-lock', isOpen);
+      overlay.classList.add('open');
+      panel.classList.add('open');
+      document.body.classList.add('scroll-lock');
+      const stickyCTA = document.getElementById('stickyCTA');
+      if (stickyCTA) {
+        stickyCTA.classList.remove('is-visible');
+        stickyCTA.style.display = 'none';
+      }
+    };
+
+    window.closeCart = function() {
+      const overlay = document.getElementById('cartOverlay');
+      const panel = document.getElementById('cartPanel');
+      if (!overlay || !panel) return;
+      overlay.classList.remove('open');
+      panel.classList.remove('open');
+      document.body.classList.remove('scroll-lock');
+      const stickyCTA = document.getElementById('stickyCTA');
+      if (stickyCTA) {
+        stickyCTA.style.display = '';
+        if (window.scrollY > 500) {
+          stickyCTA.classList.add('is-visible');
+        }
+      }
+    };
+
+    window.toggleCart = function() {
+      const panel = document.getElementById('cartPanel');
+      if (panel && panel.classList.contains('open')) {
+        window.closeCart();
+      } else {
+        window.openCart();
+      }
     };
 
     window.closeModal = function() {

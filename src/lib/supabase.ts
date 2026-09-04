@@ -205,6 +205,9 @@ export async function getLiveConfig() {
         gaActive:             m.ga_active === 'true',
         tiktokPixelActivo:    m.tiktok_pixel_activo === 'true',
         tiktokPixelId:        m.tiktok_pixel_id || '',
+        resendApiKey:         m.resend_api_key || '',
+        adminEmail:           m.admin_email || 'jhona@nuditos.com.co',
+        emailFrom:            m.email_from || 'Nuditos Tejidos <hola@nuditos.com.co>',
       };
     } catch (e) {
       console.error('[supabase-config]', e);
@@ -216,7 +219,7 @@ export async function getLiveConfig() {
 export async function getPublicConfig() {
   const config = await getLiveConfig();
   if (!config) return null;
-  const { wompiIntegrity, wompiEvents, ...safeConfig } = config;
+  const { wompiIntegrity, wompiEvents, resendApiKey, ...safeConfig } = config;
   return safeConfig;
 }
 

@@ -15,51 +15,75 @@ async function enviarCorreo(type, data) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type, data })
     });
-    if (!res.ok) throw new Error('Error en la función');
-    return true;
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.success) {
+      console.warn(`[emails] Error al enviar correo [${type}]:`, json.error || 'Error en servidor');
+      return { ok: false, error: json.error || 'Error al enviar', detail: json.detail };
+    }
+    return { ok: true, messageId: json.messageId };
   } catch (err) {
-    console.warn('Correo no enviado:', err.message);
-    return false;
+    console.warn(`[emails] Fallo de red enviando [${type}]:`, err.message);
+    return { ok: false, error: err.message };
   }
 }
 
 /* ════════════════════════════
-   CORREO 1 — Compra confirmada
-   Llamar después de confirmar pago de Wompi
+   HELPERS POR TIPO DE CORREO
 ════════════════════════════ */
-async function correoCompraConfirmada({ clienteEmail, clienteNombre, items, total, pedidoId }) {
-  return enviarCorreo('compra_confirmada', { clienteEmail, clienteNombre, items, total, pedidoId });
+async function correoCompraConfirmada(data) {
+  return enviarCorreo('compra_confirmada', data);
+}
+
+async function correoPedidoEnviado(data) {
+  return enviarCorreo('pedido_enviado', data);
+}
+
+async function correoEnvioEnCamino(data) {
+  return enviarCorreo('envio_encamino', data);
+}
+
+async function correoEnvioEnReparto(data) {
+  return enviarCorreo('envio_reparto', data);
+}
+
+async function correoEnvioEntregado(data) {
+  return enviarCorreo('envio_entregado', data);
+}
+
+async function correoEnvioNovedad(data) {
+  return enviarCorreo('envio_novedad', data);
+}
+
+async function correoNotificacionAdmin(data) {
+  return enviarCorreo('notificacion_admin', data);
 }
 
 /* ════════════════════════════
-   CORREO 2 — Pedido enviado
-   Llamar desde el panel admin cuando cambias estado a "enviado"
-════════════════════════════ */
-async function correoPedidoEnviado({ clienteEmail, clienteNombre, guia, transportadora }) {
-  return enviarCorreo('pedido_enviado', { clienteEmail, clienteNombre, guia, transportadora });
-}
-
-/* ════════════════════════════
-   CORREO 3 — Carrito abandonado
-   Se activa automáticamente a los 30 minutos de inactividad
+   CORREO — Carrito abandonado
 ════════════════════════════ */
 let carritoAbandonadoTimer = null;
 
 function iniciarTimerCarritoAbandonado(clienteEmail, clienteNombre, items) {
-  // Cancelar timer anterior si existe
   if (carritoAbandonadoTimer) clearTimeout(carritoAbandonadoTimer);
+  if (!clienteEmail || !clienteEmail.includes('@')) return;
 
-  // Solo activar si hay email y productos
-  if (!clienteEmail || !items || items.length === 0) return;
+  // Si items no fue provisto, leer de localStorage
+  if (!items || !items.length) {
+    try {
+      items = JSON.parse(localStorage.getItem('nuditos_cart') || '[]');
+    } catch { items = []; }
+  }
+  if (!items || items.length === 0) return;
 
-  // Esperar 30 minutos (1800000 ms) — cambiar a 120000 para probar (2 min)
+  // Esperar 30 minutos (1800000 ms)
   carritoAbandonadoTimer = setTimeout(async () => {
-    // Verificar que aún no haya comprado (carrito sigue igual)
-    const carritoActual = JSON.parse(localStorage.getItem('nuditos_cart') || '[]');
-    if (carritoActual.length > 0) {
-      await enviarCorreo('carrito_abandonado', { clienteEmail, clienteNombre, items });
-      console.log('📧 Correo carrito abandonado enviado a', clienteEmail);
-    }
+    try {
+      const carritoActual = JSON.parse(localStorage.getItem('nuditos_cart') || '[]');
+      if (carritoActual.length > 0) {
+        await enviarCorreo('carrito_abandonado', { clienteEmail, clienteNombre, items: carritoActual });
+        console.log('📧 Correo carrito abandonado enviado a', clienteEmail);
+      }
+    } catch(e) {}
   }, 1800000);
 }
 

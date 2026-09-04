@@ -30,32 +30,32 @@ export const $cart = persistentAtom<CartItem[]>('nuditos_cart', [], {
 
 export function addToCart(product: any) {
   const current = $cart.get();
-  const existing = current.find(item => item.id === product.id);
+  const existing = current.find(item => String(item.id) === String(product.id));
   
   if (existing) {
     $cart.set(current.map(item => 
-      item.id === product.id ? { ...item, qty: item.qty + 1 } : item
+      String(item.id) === String(product.id) ? { ...item, qty: item.qty + 1 } : item
     ));
   } else {
     $cart.set([...current, { 
-      id: product.id, 
+      id: Number(product.id) || product.id, 
       name: product.name, 
-      price: product.price, 
+      price: Number(product.price) || 0, 
       qty: 1, 
       img: product.img, 
-      emoji: product.emoji,
+      emoji: product.emoji || '🌸',
       slug: product.slug || slugify(product.name)
     }]);
   }
 }
 
-export function removeFromCart(id: number) {
-  $cart.set($cart.get().filter(item => item.id !== id));
+export function removeFromCart(id: number | string) {
+  $cart.set($cart.get().filter(item => String(item.id) !== String(id)));
 }
 
-export function changeQty(id: number, delta: number) {
+export function changeQty(id: number | string, delta: number) {
   const current = $cart.get();
-  const index = current.findIndex(item => item.id === id);
+  const index = current.findIndex(item => String(item.id) === String(id));
   
   if (index === -1) return;
   

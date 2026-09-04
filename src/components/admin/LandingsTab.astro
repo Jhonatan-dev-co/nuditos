@@ -92,6 +92,12 @@ import Icon from '../Icon.astro';
         </div>
 
         <div class="field field-full" style="grid-column: 1/-1;">
+          <label>URL Video de Empaque / Unboxing (Cloudinary .mp4)</label>
+          <input type="text" id="landUnboxingVideo" placeholder="https://res.cloudinary.com/.../video.mp4">
+          <div style="font-size: 0.65rem; color: #999; margin-top: 3px;">Video demostrativo de cómo van empacados los ramos para la sección de confianza.</div>
+        </div>
+
+        <div class="field field-full" style="grid-column: 1/-1;">
           <label>URL Foto de Unboxing / Sección Inferior (Opcional)</label>
           <input type="text" id="landUnboxingImg" placeholder="https://res.cloudinary.com/...">
           <div style="font-size: 0.65rem; color: #999; margin-top: 3px;">Deja vacío para usar automáticamente la segunda imagen del catálogo de la categoría.</div>
@@ -178,6 +184,7 @@ import Icon from '../Icon.astro';
     document.getElementById('landHeroTitle').value = '';
     document.getElementById('landHeroSubtitle').value = '';
     document.getElementById('landHeroImg').value = '';
+    document.getElementById('landUnboxingVideo').value = '';
     document.getElementById('landUnboxingImg').value = '';
     document.getElementById('landCategory').value = '';
     
@@ -202,6 +209,7 @@ import Icon from '../Icon.astro';
     document.getElementById('landHeroTitle').value = c.heroTitle || '';
     document.getElementById('landHeroSubtitle').value = c.heroSubtitle || '';
     document.getElementById('landHeroImg').value = c.heroImg || '';
+    document.getElementById('landUnboxingVideo').value = c.unboxingVideo || '';
     document.getElementById('landUnboxingImg').value = c.unboxingImg || '';
     document.getElementById('landCategory').value = c.categorySlug || '';
     
@@ -234,6 +242,7 @@ import Icon from '../Icon.astro';
       heroTitle: document.getElementById('landHeroTitle').value.trim(),
       heroSubtitle: document.getElementById('landHeroSubtitle').value.trim(),
       heroImg: document.getElementById('landHeroImg').value.trim(),
+      unboxingVideo: document.getElementById('landUnboxingVideo').value.trim(),
       unboxingImg: document.getElementById('landUnboxingImg').value.trim(),
       categorySlug: document.getElementById('landCategory').value
     };

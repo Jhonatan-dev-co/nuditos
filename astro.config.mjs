@@ -50,6 +50,9 @@ export default defineConfig({
     ],
   },
   vite: {
+    optimizeDeps: {
+      exclude: ['@nanostores/persistent', 'nanostores'],
+    },
     css: {
       devSourcemap: true,
     },

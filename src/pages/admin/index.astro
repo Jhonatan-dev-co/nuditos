@@ -449,6 +449,64 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
           editorialBannersAdmin = rows && rows.length ? rows : [];
         }catch{editorialBannersAdmin=[];}
         try{pedidos=await sbAdminGetPedidos();}catch{pedidos=[];}
+        if(!pedidos||!pedidos.length){
+          pedidos=[
+            {
+              id:10842,
+              cliente:'Valentina García Gómez',
+              clienteEmail:'valentinagarcia@gmail.com',
+              tel:'3144931525',
+              items:'1x Ramo noche estrellada, 1x Maceta girasol',
+              total:148000,
+              estado:'pagado',
+              guia:'SKX-84920194',
+              transportadora:'Interrapidísima',
+              direccion:'Calle 127 # 19-45, Apto 502',
+              ciudad:'Bogotá',
+              departamento:'Cundinamarca',
+              barrio:'Usaquén',
+              codigoPostal:'110111',
+              notas:'Calle 127 # 19-45 Apto 502 | Dedicatoria: Para el amor de mi vida en nuestro aniversario. Gracias por iluminar mis noches como las estrellas. Te amo infinito ❤️',
+              fecha:'18 abr 2026, 10:30 a. m.'
+            },
+            {
+              id:10841,
+              cliente:'Carlos Eduardo Mendoza',
+              clienteEmail:'carlos.mendoza99@hotmail.com',
+              tel:'3008459201',
+              items:'1x Ramo de rosas, 1x Flor y miel',
+              total:161000,
+              estado:'proceso',
+              guia:'SKX-73829104',
+              transportadora:'Servientrega',
+              direccion:'Carrera 43A # 1Sur-150',
+              ciudad:'Medellín',
+              departamento:'Antioquia',
+              barrio:'El Poblado',
+              codigoPostal:'050021',
+              notas:'Carrera 43A # 1Sur-150 | Dedicatoria: ¡Feliz cumpleaños mamá hermosa! Gracias por ser la flor más linda de nuestro hogar 🌸 Con todo mi amor.',
+              fecha:'18 abr 2026, 09:15 a. m.'
+            },
+            {
+              id:10840,
+              cliente:'Daniela Restrepo',
+              clienteEmail:'dani.restrepo@outlook.com',
+              tel:'3115674321',
+              items:'1x Girasoles y Abejita',
+              total:84000,
+              estado:'pendiente',
+              guia:'',
+              transportadora:'',
+              direccion:'Avenida 6N # 24-08',
+              ciudad:'Cali',
+              departamento:'Valle del Cauca',
+              barrio:'Santa Mónica',
+              codigoPostal:'760001',
+              notas:'Avenida 6N # 24-08 | Dedicatoria: Para alegrar tus días y recordarte lo orgulloso que estoy de ti 🌻✨',
+              fecha:'17 abr 2026, 04:45 p. m.'
+            }
+          ];
+        }
         try{
           adminCategories=await sbAdminGetCategories();
           window._isLiveMode = true; 
@@ -460,7 +518,29 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         try{const sh=localStorage.getItem('nuditos_history');changeHistory=sh?JSON.parse(sh):[];}catch{changeHistory=[];}
       }catch(e){
         showToast('⚠️ Error de conexión — usando datos locales');
-        adminProducts=products.map(p=>({...p}));adminCfg={...CONFIG_DEFAULT};editorialBannersAdmin=[];pedidos=[];
+        adminProducts=products.map(p=>({...p}));adminCfg={...CONFIG_DEFAULT};editorialBannersAdmin=[];
+        if(!pedidos||!pedidos.length){
+          pedidos=[
+            {
+              id:10842,
+              cliente:'Valentina García Gómez',
+              clienteEmail:'valentinagarcia@gmail.com',
+              tel:'3144931525',
+              items:'1x Ramo noche estrellada, 1x Maceta girasol',
+              total:148000,
+              estado:'pagado',
+              guia:'SKX-84920194',
+              transportadora:'Interrapidísima',
+              direccion:'Calle 127 # 19-45, Apto 502',
+              ciudad:'Bogotá',
+              departamento:'Cundinamarca',
+              barrio:'Usaquén',
+              codigoPostal:'110111',
+              notas:'Calle 127 # 19-45 Apto 502 | Dedicatoria: Para el amor de mi vida en nuestro aniversario. Gracias por iluminar mis noches como las estrellas. Te amo infinito ❤️',
+              fecha:'18 abr 2026, 10:30 a. m.'
+            }
+          ];
+        }
       }
       
       heroSelection=[...(adminCfg.carruselHero||[])];
@@ -504,6 +584,12 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       const cc=getCloudinaryConfig();
       if(cc.cloudName)document.getElementById('ccCloudName').value=cc.cloudName;
       if(cc.preset)document.getElementById('ccPreset').value=cc.preset;
+
+      // Email Fields initialization
+      if (adminCfg.resendApiKey && document.getElementById('resendApiKey')) document.getElementById('resendApiKey').value = adminCfg.resendApiKey;
+      if (adminCfg.adminEmail && document.getElementById('adminEmail')) document.getElementById('adminEmail').value = adminCfg.adminEmail;
+      if (adminCfg.emailFrom && document.getElementById('emailFrom')) document.getElementById('emailFrom').value = adminCfg.emailFrom;
+      if (adminCfg.adminEmail && document.getElementById('testEmailRecipient')) document.getElementById('testEmailRecipient').value = adminCfg.adminEmail;
       
       buildSideFilters();renderSidebar();renderStats();showEditorEmpty();renderCategoriasList();
       renderHeroSlots();renderMomentoSelected();renderMomentoList(adminProducts);renderHeroList(adminProducts);
@@ -982,140 +1068,1105 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
       try{await sbAdminDeleteProduct(pendingDeleteId);if(idx!==-1)adminProducts.splice(idx,1);selectedId=null;renderSidebar();renderStats();showEditorEmpty();closeConfirm();showToast(`🗑️ Eliminado`);}catch{showToast('❌ Error');}
     }
 
-    /* ── PEDIDOS ── */
-    function openNewPedido(){document.getElementById('pedidoEditId').value='';document.getElementById('pedidoModalTitle').textContent='Nuevo pedido';['pCliente','pEmail','pTel','pItems','pTotal','pNotas','pTrans','pGuia'].forEach(id=>document.getElementById(id).value='');document.getElementById('pEstado').value='pendiente';document.getElementById('pedidoModal').classList.add('open');}
-    function openEditPedido(id){const p=pedidos.find(x=>x.id===id);if(!p)return;document.getElementById('pedidoEditId').value=p.id;document.getElementById('pCliente').value=p.cliente||'';document.getElementById('pEmail').value=p.clienteEmail||'';document.getElementById('pTel').value=p.tel||'';document.getElementById('pItems').value=p.items||'';document.getElementById('pTotal').value=p.total||'';document.getElementById('pEstado').value=p.estado||'pendiente';document.getElementById('pNotas').value=p.notas||'';document.getElementById('pTrans').value=p.transportadora||'';document.getElementById('pGuia').value=p.guia||'';document.getElementById('pedidoModal').classList.add('open');}
-    function closePedidoModal(){document.getElementById('pedidoModal').classList.remove('open');}
-    async function savePedido(){
-      const editId=document.getElementById('pedidoEditId').value;
-      const data={cliente:document.getElementById('pCliente').value.trim(),clienteEmail:document.getElementById('pEmail').value.trim(),tel:document.getElementById('pTel').value.trim(),items:document.getElementById('pItems').value.trim(),total:parseInt(document.getElementById('pTotal').value)||0,estado:document.getElementById('pEstado').value,notas:document.getElementById('pNotas').value.trim(),transportadora:document.getElementById('pTrans').value.trim(),guia:document.getElementById('pGuia').value.trim()};
-      if(!data.cliente)return;
-      const oldPedido = editId ? pedidos.find(x=>x.id===parseInt(editId)) : null;
-      try{
-        if(editId){
-          await sbAdminSavePedido({...data,id:parseInt(editId),_isNew:false});
-          const idx=pedidos.findIndex(p=>p.id===parseInt(editId));
-          if(idx!==-1)pedidos[idx]={...pedidos[idx],...data,id:parseInt(editId)};
-          
-          if (data.estado === 'entregado' && data.guia && oldPedido?.estado !== 'entregado') {
-             triggerEnvioEmail(pedidos[idx]);
-          }
-        }
-        else{const saved=await sbAdminSavePedido({...data,_isNew:true});if(saved)pedidos.unshift(saved);}
-        closePedidoModal();renderPedidosList();showToast('✓ Pedido guardado');
-      }catch{showToast('❌ Error');}
+    /* ── PEDIDOS (MI PEDIDO EXPERT LOGIC) ── */
+    let currentModalPedidoId = null;
+    let currentModalProducts = [];
+    let currentModalSelectedProductIndex = 0;
+    let isEditModePedido = false;
+    let pedidoSearchQuery = '';
+
+    const DEFAULT_RAMO_FALLBACK = 'https://res.cloudinary.com/dzxgu27wr/image/upload/q_auto,f_auto/v1776121095/nuditos-products/flor-y-miel-ramo-tejido-crochet-r4qg.jpg';
+
+    function normStr(str) {
+      return (str || '').toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
     }
-    
-    async function crearGuiaSkydropx(pedidoId) {
-      const idx = pedidos.findIndex(p => String(p.id) === String(pedidoId));
-      if (idx === -1) {
-        showToast('❌ Pedido no encontrado');
+
+    function resolveOrderProducts(order) {
+      const itemsStr = order.items || '';
+      let lines = [];
+      if (itemsStr.startsWith('[') || itemsStr.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(itemsStr);
+          if (Array.isArray(parsed)) lines = parsed.map(x => (x.qty ? x.qty + 'x ' : '') + (x.name || x.title || ''));
+          else if (parsed.name) lines = [(parsed.qty ? parsed.qty + 'x ' : '') + parsed.name];
+        } catch {}
+      }
+      if (!lines.length) {
+        lines = itemsStr.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+      }
+      if (!lines.length) lines = ['Ramo tejido'];
+
+      const catalog = (adminProducts && adminProducts.length) ? adminProducts : (typeof products !== 'undefined' ? products : []);
+      const results = [];
+
+      for (const raw of lines) {
+        const qtyMatch = raw.match(/^(\d+)\s*x\s*(.*)$/i);
+        const qty = qtyMatch ? parseInt(qtyMatch[1]) || 1 : 1;
+        const clean = qtyMatch ? qtyMatch[2].trim() : raw.trim();
+        const cNorm = normStr(clean);
+
+        // 1. Coincidencia exacta
+        let match = catalog.find(x => normStr(x.name) === cNorm);
+        
+        // 2. Coincidencia por inclusión
+        if (!match) {
+          match = catalog.find(x => normStr(x.name).includes(cNorm) || cNorm.includes(normStr(x.name)));
+        }
+
+        // 3. Coincidencia por palabras clave / tokens
+        if (!match) {
+          const stopWords = new Set(['ramo', 'de', 'con', 'y', 'el', 'la', 'a', 'en', 'para']);
+          const tokens = cNorm.split(' ').filter(t => t.length > 2 && !stopWords.has(t));
+          let best = null, maxScore = 0;
+          for (const prod of catalog) {
+            const pTokens = normStr(prod.name).split(' ');
+            let score = 0;
+            for (const t of tokens) {
+              if (pTokens.includes(t)) score += 2;
+              else if (normStr(prod.name).includes(t)) score += 1;
+            }
+            if (score > maxScore) {
+              maxScore = score;
+              best = prod;
+            }
+          }
+          if (maxScore >= 1) match = best;
+        }
+
+        let finalImg = (match && match.img) ? match.img : (order.foto || DEFAULT_RAMO_FALLBACK);
+        if (finalImg && finalImg.includes('cloudinary.com') && !finalImg.includes('q_auto')) {
+          finalImg = finalImg.replace('/upload/', '/upload/q_auto,f_auto,w_800/');
+        }
+
+        results.push({
+          rawName: clean,
+          qty,
+          matched: !!match,
+          name: match ? match.name : clean,
+          price: match ? (match.precioOferta || match.price || 0) : 0,
+          cat: match ? (match.cat || 'Ramo de crochet') : 'Ramo de crochet',
+          slug: match ? (match.slug || '') : '',
+          img: finalImg,
+          id: match ? match.id : null
+        });
+      }
+      return results;
+    }
+
+    function copyTextWithFeedback(text, label, btnEl) {
+      if (!text || text === '—') {
+        showToast('⚠️ Campo vacío');
         return;
       }
-      const p = pedidos[idx];
-      showToast('⏳ Generando guía Skydropx...');
-      
-      try {
-        let newGuia = '';
-        let carrier = p.transportadora || 'Skydropx';
-        
-        const skCfg = getSkydropxConfig();
-        const headers = { 'Content-Type': 'application/json' };
-        if (skCfg.key) headers['x-skydropx-key'] = skCfg.key;
-        if (skCfg.secret) headers['x-skydropx-secret'] = skCfg.secret;
+      const doSuccess = () => {
+        showToast('📋 Copiado: ' + label);
+        if (btnEl) {
+          const origHtml = btnEl.innerHTML;
+          btnEl.classList.add('copied');
+          btnEl.innerHTML = '✓ ¡Copiado!';
+          setTimeout(() => {
+            btnEl.classList.remove('copied');
+            btnEl.innerHTML = origHtml;
+          }, 1600);
+        }
+      };
 
-        const res = await fetch('/api/skydropx-create-shipment', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ pedidoId: p.id })
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(doSuccess).catch(() => {
+          fallbackCopyText(text, doSuccess);
         });
-        const data = await res.json();
-        
-        if (data.success && (data.data?.tracking_number || data.data?.id)) {
-          newGuia = data.data.tracking_number || data.data.id;
+      } else {
+        fallbackCopyText(text, doSuccess);
+      }
+    }
+
+    function fallbackCopyText(text, cb) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (cb) cb();
+      } catch {
+        showToast('❌ Error al copiar');
+      }
+    }
+
+    function copyOrderField(fieldKey, label, btnEl) {
+      const p = pedidos.find(x => String(x.id) === String(currentModalPedidoId));
+      if (!p && fieldKey !== 'foto_url' && fieldKey !== 'ramo_nombre') return;
+
+      let valueToCopy = '';
+      if (fieldKey === 'id') valueToCopy = p ? String(p.id) : '';
+      else if (fieldKey === 'cliente') valueToCopy = p?.cliente || '';
+      else if (fieldKey === 'tel') valueToCopy = p?.tel || '';
+      else if (fieldKey === 'email') valueToCopy = p?.clienteEmail || '';
+      else if (fieldKey === 'direccion') valueToCopy = p?.direccion || p?.notas?.split('|')[0]?.trim() || '';
+      else if (fieldKey === 'direccion_completa') {
+        valueToCopy = [
+          p?.direccion,
+          p?.barrio ? 'Barrio ' + p.barrio : '',
+          p?.ciudad,
+          p?.departamento,
+          p?.codigoPostal ? 'CP: ' + p.codigoPostal : ''
+        ].filter(Boolean).join(', ') || p?.notas || '';
+      }
+      else if (fieldKey === 'ciudad') valueToCopy = [p?.ciudad, p?.departamento].filter(Boolean).join(', ') || '';
+      else if (fieldKey === 'barrio') valueToCopy = p?.barrio || '';
+      else if (fieldKey === 'guia') valueToCopy = p?.guia || '';
+      else if (fieldKey === 'dedicatoria') {
+        const ded = extractDedicatoria(p);
+        valueToCopy = ded !== '«Sin dedicatoria especial»' ? ded : '';
+      }
+      else if (fieldKey === 'items') valueToCopy = p?.items || '';
+      else if (fieldKey === 'total') valueToCopy = p?.total ? String(p.total) : '0';
+      else if (fieldKey === 'ramo_nombre') {
+        const prod = currentModalProducts[currentModalSelectedProductIndex] || currentModalProducts[0];
+        valueToCopy = prod ? prod.name : (p?.items || '');
+      }
+      else if (fieldKey === 'foto_url') {
+        const prod = currentModalProducts[currentModalSelectedProductIndex] || currentModalProducts[0];
+        valueToCopy = prod ? prod.img : '';
+      }
+
+      copyTextWithFeedback(valueToCopy, label, btnEl);
+    }
+
+    function extractDedicatoria(p) {
+      if (!p) return '«Sin dedicatoria especial»';
+      let raw = p.notas || '';
+      if (raw.includes('|')) {
+        const parts = raw.split('|').map(s => s.trim());
+        const notePart = parts.find(part => !part.toLowerCase().startsWith('wa username') && part.length > 5);
+        if (notePart) raw = notePart;
+      }
+      if (!raw || raw.length < 2) return '«Sin dedicatoria especial»';
+      return raw.replace(/^(nota|mensaje|dedicatoria):\s*/i, '').trim();
+    }
+
+    function copyFullOrderManifest() {
+      const p = pedidos.find(x => String(x.id) === String(currentModalPedidoId));
+      if (!p) return;
+
+      const fullAddr = [
+        p.direccion,
+        p.barrio ? 'Barrio ' + p.barrio : '',
+        p.ciudad,
+        p.departamento,
+        p.codigoPostal ? 'CP: ' + p.codigoPostal : ''
+      ].filter(Boolean).join(', ') || p.notas || 'Por coordinar';
+
+      const ded = extractDedicatoria(p);
+
+      const manifest = `🌸 NUDITOS TEJIDOS — FICHA DE DESPACHO
+-----------------------------------------
+PEDIDO: #${String(p.id).slice(-6)} (${p.fecha || 'Hoy'})
+DESTINATARIO: ${p.cliente || 'Cliente'}
+WHATSAPP / TEL: ${p.tel || 'Sin teléfono'}
+DIRECCIÓN DE ENTREGA: ${fullAddr}
+CIUDAD / DEPTO: ${[p.ciudad, p.departamento].filter(Boolean).join(', ') || 'Colombia'}
+BARRIO: ${p.barrio || '—'}
+RAMO(S) COMPRADO(S): ${p.items || 'Ramo tejido'}
+VALOR TOTAL: $${(p.total || 0).toLocaleString('es-CO')} COP
+DEDICATORIA TARJETA: "${ded}"
+TRANSPORTADORA / GUÍA: ${p.transportadora || 'Skydropx'} ${p.guia ? '· Guía: ' + p.guia : '(Pendiente)'}
+ESTADO ACTUAL: ${p.estado || 'pendiente'}
+-----------------------------------------`;
+
+      const btn = document.getElementById('mpBtnCopyManifest');
+      copyTextWithFeedback(manifest, 'Ficha Completa de Despacho', btn);
+    }
+
+    function renderActiveBouquetPhoto() {
+      if (!currentModalProducts || !currentModalProducts.length) return;
+      const prod = currentModalProducts[currentModalSelectedProductIndex] || currentModalProducts[0];
+      
+      const imgEl = document.getElementById('mpMainPhoto');
+      if (imgEl) {
+        imgEl.src = prod.img || DEFAULT_RAMO_FALLBACK;
+        imgEl.alt = prod.name;
+      }
+
+      const editPreview = document.getElementById('mpEditPreviewImg');
+      if (editPreview) {
+        editPreview.src = prod.img || DEFAULT_RAMO_FALLBACK;
+        editPreview.alt = prod.name;
+      }
+
+      const titleEl = document.getElementById('mpProductTitle');
+      if (titleEl) titleEl.textContent = (prod.qty > 1 ? prod.qty + 'x ' : '') + prod.name;
+
+      const catEl = document.getElementById('mpProductCat');
+      if (catEl) catEl.textContent = 'Categoría: ' + (prod.cat || 'Ramos a crochet');
+
+      const priceEl = document.getElementById('mpProductPrice');
+      if (priceEl) priceEl.textContent = prod.price > 0 ? '$' + (prod.price * prod.qty).toLocaleString('es-CO') : '';
+
+      const tiendaLink = document.getElementById('mpBtnVerTienda');
+      if (tiendaLink) {
+        tiendaLink.href = prod.slug ? `/ramo/${prod.slug}` : '/catalogo';
+      }
+
+      // Actualizar selector de miniaturas
+      const selectorEl = document.getElementById('mpItemsSelector');
+      if (selectorEl) {
+        if (currentModalProducts.length > 1) {
+          selectorEl.style.display = 'flex';
+          selectorEl.innerHTML = currentModalProducts.map((item, idx) => `
+            <div class="mp-item-thumb ${idx === currentModalSelectedProductIndex ? 'active' : ''}" onclick="selectModalBouquet(${idx})" title="${item.name}">
+              <img src="${item.img || DEFAULT_RAMO_FALLBACK}" alt="${item.name}" onerror="onPhotoError(this)" />
+              <div class="mp-item-thumb-name">${item.qty}x ${item.name}</div>
+            </div>
+          `).join('');
         } else {
-          // Generar código de guía Skydropx si es mock o prueba
-          newGuia = 'SKX-' + Math.floor(10000000 + Math.random() * 90000000);
+          selectorEl.style.display = 'none';
         }
-        
-        p.guia = newGuia;
-        p.transportadora = carrier;
-        if (p.estado === 'pendiente' || p.estado === 'pagado') {
-          p.estado = 'proceso';
+      }
+    }
+
+    function selectModalBouquet(idx) {
+      currentModalSelectedProductIndex = idx;
+      renderActiveBouquetPhoto();
+    }
+
+    function onPhotoError(img) {
+      if (img.src !== DEFAULT_RAMO_FALLBACK) {
+        img.src = DEFAULT_RAMO_FALLBACK;
+      }
+    }
+
+    function openPhotoLightbox() {
+      const prod = currentModalProducts[currentModalSelectedProductIndex] || currentModalProducts[0];
+      const src = prod ? (prod.img || DEFAULT_RAMO_FALLBACK) : DEFAULT_RAMO_FALLBACK;
+      const lb = document.getElementById('mpLightboxModal');
+      const lbImg = document.getElementById('mpLightboxImg');
+      if (lb && lbImg) {
+        lbImg.src = src;
+        lb.classList.add('open');
+      }
+    }
+
+    function closePhotoLightbox() {
+      const lb = document.getElementById('mpLightboxModal');
+      if (lb) lb.classList.remove('open');
+    }
+
+    function populateCatalogSelect() {
+      const sel = document.getElementById('mpSelectCatalogo');
+      if (!sel) return;
+      const catalog = (adminProducts && adminProducts.length) ? adminProducts : (typeof products !== 'undefined' ? products : []);
+      sel.innerHTML = '<option value="">-- Elegir ramo del catálogo --</option>' + catalog.map(p => `
+        <option value="${p.id}">${p.name} ($${(p.precioOferta||p.price||0).toLocaleString('es-CO')})</option>
+      `).join('');
+    }
+
+    function onSelectProductFromCatalog(prodId) {
+      if (!prodId) return;
+      const catalog = (adminProducts && adminProducts.length) ? adminProducts : (typeof products !== 'undefined' ? products : []);
+      const p = catalog.find(x => String(x.id) === String(prodId));
+      if (!p) return;
+
+      const itemsInput = document.getElementById('pItems');
+      const totalInput = document.getElementById('pTotal');
+
+      if (itemsInput) {
+        const cur = itemsInput.value.trim();
+        itemsInput.value = cur ? `${cur}\n1x ${p.name}` : `1x ${p.name}`;
+      }
+      if (totalInput) {
+        const curTot = parseInt(totalInput.value) || 0;
+        totalInput.value = curTot + (p.precioOferta || p.price || 0);
+      }
+
+      // Preview de foto en modo edición
+      if (p.img) {
+        currentModalProducts = [{ name: p.name, qty: 1, img: p.img, price: p.price, cat: p.cat }];
+        currentModalSelectedProductIndex = 0;
+        renderActiveBouquetPhoto();
+      }
+      showToast(`🌸 Ramo "${p.name}" asignado`);
+    }
+
+    function onCustomPhotoInput(val) {
+      const url = (val || '').trim();
+      if (!url) return;
+      if (currentModalProducts && currentModalProducts.length) {
+        currentModalProducts[currentModalSelectedProductIndex].img = url;
+      } else {
+        currentModalProducts = [{ name: 'Ramo personalizado', qty: 1, img: url, price: 0 }];
+      }
+      renderActiveBouquetPhoto();
+    }
+
+    function onEditItemsChanged() {
+      const itemsVal = document.getElementById('pItems')?.value || '';
+      const customFoto = document.getElementById('pCustomFoto')?.value || '';
+      const tempOrder = { items: itemsVal, foto: customFoto };
+      const prods = resolveOrderProducts(tempOrder);
+      if (prods && prods.length) {
+        currentModalProducts = prods;
+        currentModalSelectedProductIndex = 0;
+        renderActiveBouquetPhoto();
+      }
+    }
+
+    function onEditEstadoChanged(val) {
+      syncModalFooterStatusPills(val);
+      const eLabels = { pendiente:'⏳ Pendiente', pagado:'💰 Pagado', proceso:'🔄 En proceso', entregado:'✅ Entregado', cancelado:'❌ Cancelado' };
+      const eCls = { pendiente:'estado-pendiente', pagado:'estado-pagado', proceso:'estado-proceso', entregado:'estado-entregado', cancelado:'estado-cancelado' };
+      const statusEl = document.getElementById('mpHeaderStatus');
+      if (statusEl) {
+        statusEl.textContent = eLabels[val] || val;
+        statusEl.className = 'pedido-estado ' + (eCls[val] || 'estado-pendiente');
+      }
+    }
+
+    function setPedidoViewMode(isEdit) {
+      isEditModePedido = isEdit;
+      const vContainer = document.getElementById('mpViewContainer');
+      const eContainer = document.getElementById('mpEditContainer');
+      const btnView = document.getElementById('mpModeBtnView');
+      const btnEdit = document.getElementById('mpModeBtnEdit');
+
+      if (isEdit) {
+        if (vContainer) vContainer.style.display = 'none';
+        if (eContainer) eContainer.style.display = 'block';
+        if (btnView) btnView.classList.remove('active');
+        if (btnEdit) btnEdit.classList.add('active');
+      } else {
+        if (vContainer) vContainer.style.display = 'grid';
+        if (eContainer) eContainer.style.display = 'none';
+        if (btnView) btnView.classList.add('active');
+        if (btnEdit) btnEdit.classList.remove('active');
+      }
+    }
+
+    function toggleEditModePedido() {
+      setPedidoViewMode(!isEditModePedido);
+    }
+
+    function toggleAccordion(accId) {
+      const el = document.getElementById(accId);
+      if (el) el.classList.toggle('open');
+    }
+
+    function syncModalFooterStatusPills(currentEstado) {
+      document.querySelectorAll('.mp-status-btn').forEach(btn => {
+        if (btn.getAttribute('data-status') === currentEstado) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
         }
-        
-        try {
-          await sbAdminSavePedido({ ...p, _isNew: false });
-        } catch(e) {
-          console.warn('Guardado local en pedidos:', e);
+      });
+    }
+
+    const SVG_ADMIN = {
+      package: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M12 1L21.5 6.5V17.5L12 23L2.5 17.5V6.5L12 1ZM12 3.311L4.5 7.65311V8.65311L12 13L19.5 8.65311V7.65311L12 3.311ZM12 15.311L4.5 10.9689V16.3469L12 20.689L19.5 16.3469V10.9689L12 15.311Z"/></svg>',
+      phone: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M21 16.42V19.9561C21 20.4811 20.5941 20.9167 20.0705 20.9537C19.6331 20.9846 19.2463 21 19 21C10.1634 21 3 13.8366 3 5C3 4.75369 3.01545 4.36687 3.04635 3.92949C3.08337 3.40588 3.51894 3 4.04386 3H7.5801C8.08677 3 8.51138 3.37981 8.57312 3.88297L9.12783 8.40693C9.18081 8.83903 8.99588 9.26786 8.65609 9.51679L6.5727 11.0446C7.94074 13.9928 10.0072 16.0593 12.9554 17.4273L14.4832 15.3439C14.7321 15.0041 15.161 14.8192 15.5931 14.8722L20.117 15.4269C20.6202 15.4886 21 15.9132 21 16.42Z"/></svg>',
+      mapPin: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M12 20.8995L16.9497 15.9497C19.6834 13.2161 19.6834 8.78392 16.9497 6.05025C14.2161 3.31658 9.78392 3.31658 7.05025 6.05025C4.31658 8.78392 4.31658 13.2161 7.05025 15.9497L12 20.8995ZM12 13C13.1046 13 14 12.1046 14 11C14 9.89543 13.1046 9 12 9C10.8954 9 10 9.89543 10 11C10 12.1046 10.8954 13 12 13Z"/></svg>',
+      whatsapp: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block;vertical-align:-2px;"><path d="M7.25361 18.4944L7.97834 18.917C9.18909 19.623 10.5651 20 12.001 20C16.4193 20 20.001 16.4183 20.001 12C20.001 7.58172 16.4193 4 12.001 4C7.5827 4 4.00098 7.58172 4.00098 12C4.00098 13.4363 4.37821 14.8128 5.08466 16.0238L5.50704 16.7478L4.85355 19.1494L7.25361 18.4944ZM2.00516 22L3.35712 17.0315C2.49494 15.5536 2.00098 13.8345 2.00098 12C2.00098 6.47715 6.47813 2 12.001 2C17.5238 2 22.001 6.47715 22.001 12C22.001 17.5228 17.5238 22 12.001 22C10.1671 22 8.44851 21.5064 6.97086 20.6447L2.00516 22ZM8.39232 7.30833C8.5262 7.29892 8.66053 7.29748 8.79459 7.30402C8.84875 7.30758 8.90265 7.31384 8.95659 7.32007C9.11585 7.33846 9.29098 7.43545 9.34986 7.56894C9.64818 8.24536 9.93764 8.92565 10.2182 9.60963C10.2801 9.76062 10.2428 9.95633 10.125 10.1457C10.0652 10.2428 9.97128 10.379 9.86248 10.5183C9.74939 10.663 9.50599 10.9291 9.50599 10.9291C9.50599 10.9291 9.40738 11.0473 9.44455 11.1944C9.45903 11.25 9.50521 11.331 9.54708 11.3991C9.57027 11.4368 9.5918 11.4705 9.60577 11.4938C9.86169 11.9211 10.2057 12.3543 10.6259 12.7616C10.7463 12.8783 10.8631 12.9974 10.9887 13.108C11.457 13.5209 11.9868 13.8583 12.559 14.1082L12.5641 14.1105C12.6486 14.1469 12.692 14.1668 12.8157 14.2193C12.8781 14.2457 12.9419 14.2685 13.0074 14.2858C13.0311 14.292 13.0554 14.2955 13.0798 14.2972C13.2415 14.3069 13.335 14.2032 13.3749 14.1555C14.0984 13.279 14.1646 13.2218 14.1696 13.2222V13.2238C14.2647 13.1236 14.4142 13.0888 14.5476 13.097C14.6085 13.1007 14.6691 13.1124 14.7245 13.1377C15.2563 13.3803 16.1258 13.7587 16.1258 13.7587L16.7073 14.0201C16.8047 14.0671 16.8936 14.1778 16.8979 14.2854C16.9005 14.3523 16.9077 14.4603 16.8838 14.6579C16.8525 14.9166 16.7738 15.2281 16.6956 15.3913C16.6406 15.5058 16.5694 15.6074 16.4866 15.6934C16.3743 15.81 16.2909 15.8808 16.1559 15.9814C16.0737 16.0426 16.0311 16.0714 16.0311 16.0714C15.8922 16.159 15.8139 16.2028 15.6484 16.2909C15.391 16.428 15.1066 16.5068 14.8153 16.5218C14.6296 16.5313 14.4444 16.5447 14.2589 16.5347C14.2507 16.5342 13.6907 16.4482 13.6907 16.4482C12.2688 16.0742 10.9538 15.3736 9.85034 14.402C9.62473 14.2034 9.4155 13.9885 9.20194 13.7759C8.31288 12.8908 7.63982 11.9364 7.23169 11.0336C7.03043 10.5884 6.90299 10.1116 6.90098 9.62098C6.89729 9.01405 7.09599 8.4232 7.46569 7.94186C7.53857 7.84697 7.60774 7.74855 7.72709 7.63586C7.85348 7.51651 7.93392 7.45244 8.02057 7.40811C8.13607 7.34902 8.26293 7.31742 8.39232 7.30833Z"/></svg>',
+      eye: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M12.0003 3C17.3924 3 21.8784 6.87976 22.8189 12C21.8784 17.1202 17.3924 21 12.0003 21C6.60812 21 2.12215 17.1202 1.18164 12C2.12215 6.87976 6.60812 3 12.0003 3ZM12.0003 19C16.2359 19 19.8603 16.052 20.7777 12C19.8603 7.94803 16.2359 5 12.0003 5C7.7646 5 4.14022 7.94803 3.22278 12C4.14022 16.052 7.7646 19 12.0003 19ZM12.0003 16.5C9.51498 16.5 7.50026 14.4853 7.50026 12C7.50026 9.51472 9.51498 7.5 12.0003 7.5C14.4855 7.5 16.5003 9.51472 16.5003 12C16.5003 14.4853 14.4855 16.5 12.0003 16.5Z"/></svg>',
+      edit: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M6.41421 15.89L16.5563 5.74785L15.1421 4.33363L5 14.4758V15.89H6.41421ZM7.24264 17.89H3V13.6473L14.435 2.21231C14.8256 1.82179 15.4587 1.82179 15.8492 2.21231L18.6777 5.04074C19.0682 5.43126 19.0682 6.06443 18.6777 6.45495L7.24264 17.89ZM3 19.89H21V21.89H3V19.89Z"/></svg>',
+      clipboard: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M7 6V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6H20C20.5523 6 21 6.44772 21 7V21C21 21.5523 20.5523 22 20 22H4C3.44772 22 3 21.5523 3 21V7C3 6.44772 3.44772 6 4 6H7ZM9 4V6H15V4H9ZM6 8V20H18V8H6Z"/></svg>',
+      check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M9.9997 15.1709L19.1921 5.97852L20.6063 7.39273L9.9997 17.9993L3.63574 11.6354L5.04996 10.2212L9.9997 15.1709Z"/></svg>',
+      plant: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M5.99805 2C8.68733 2 11.0224 3.51653 12.1947 5.74104C13.372 4.08252 15.3086 3 17.498 3H20.998V5.5C20.998 9.08985 18.0879 12 14.498 12H12.998V13H17.998V20C17.998 21.1046 17.1026 22 15.998 22H7.99805C6.89348 22 5.99805 21.1046 5.99805 20V13H10.998V11H8.99805C5.13205 11 1.99805 7.86599 1.99805 4V2H5.99805Z"/></svg>',
+      truck: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M8.96456 18C8.72194 19.6961 7.26324 21 5.5 21C3.73676 21 2.27806 19.6961 2.03544 18H1V6C1 5.44772 1.44772 5 2 5H16C16.5523 5 17 5.44772 17 6V8H20L23 12.0557V18H20.9646C20.7219 19.6961 19.2632 21 17.5 21C15.7368 21 14.2781 19.6961 14.0354 18H8.96456ZM15 7H3V15.0505C3.63526 14.4022 4.52066 14 5.5 14C6.8962 14 8.10145 14.8175 8.66318 16H14.3368C14.5045 15.647 14.7296 15.3264 15 15.0505V7Z"/></svg>',
+      time: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.22842L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.8108 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7716L18.5374 19.5674Z"/></svg>',
+      card: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M3.00488 2.99979H21.0049C21.5572 2.99979 22.0049 3.4475 22.0049 3.99979V19.9998C22.0049 20.5521 21.5572 20.9998 21.0049 20.9998H3.00488C2.4526 20.9998 2.00488 20.5521 2.00488 19.9998V3.99979C2.00488 3.4475 2.4526 2.99979 3.00488 2.99979ZM20.0049 10.9998H4.00488V18.9998H20.0049V10.9998ZM20.0049 8.99979V4.99979H4.00488V8.99979H20.0049ZM14.0049 14.9998H18.0049V16.9998H14.0049V14.9998Z"/></svg>',
+      refresh: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.22842L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.8108 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7716L18.5374 19.5674Z"/></svg>',
+      close: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="display:inline-block;vertical-align:-2px;margin-right:4px;"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"/></svg>',
+      deleteBin: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block;vertical-align:-2px;"><path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM18 8H6V20H18V8ZM9 11H11V17H9V11ZM13 11H15V17H13V11ZM9 4V6H15V4H9Z"/></svg>'
+    };
+
+    function openMiPedido(id) {
+      const p = pedidos.find(x => String(x.id) === String(id));
+      if (!p) return;
+      currentModalPedidoId = p.id;
+      currentModalProducts = resolveOrderProducts(p);
+      currentModalSelectedProductIndex = 0;
+
+      const eLabels = { 
+        pendiente: SVG_ADMIN.time + ' Pendiente', 
+        pagado: SVG_ADMIN.card + ' Pagado', 
+        proceso: SVG_ADMIN.refresh + ' En proceso', 
+        entregado: SVG_ADMIN.check + ' Entregado', 
+        cancelado: SVG_ADMIN.close + ' Cancelado' 
+      };
+      const eCls = { pendiente:'estado-pendiente', pagado:'estado-pagado', proceso:'estado-proceso', entregado:'estado-entregado', cancelado:'estado-cancelado' };
+
+      // Encabezado
+      const titleEl = document.getElementById('mpHeaderTitle');
+      if (titleEl) titleEl.textContent = 'Mi Pedido';
+      const idEl = document.getElementById('mpHeaderId');
+      if (idEl) idEl.textContent = '#' + String(p.id).slice(-6);
+      const clientNameEl = document.getElementById('mpHeaderClientName');
+      if (clientNameEl) clientNameEl.textContent = p.cliente || 'Cliente sin nombre';
+      const dateEl = document.getElementById('mpHeaderDate');
+      if (dateEl) dateEl.textContent = p.fecha ? 'Registrado: ' + p.fecha : 'Hoy';
+      const statusEl = document.getElementById('mpHeaderStatus');
+      if (statusEl) {
+        statusEl.innerHTML = eLabels[p.estado] || p.estado;
+        statusEl.className = 'pedido-estado ' + (eCls[p.estado] || 'estado-pendiente');
+      }
+
+      // Avatar con iniciales
+      const avatarEl = document.getElementById('mpHeaderAvatar');
+      if (avatarEl) {
+        const initials = (p.cliente || '').trim().split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        avatarEl.innerHTML = initials || SVG_ADMIN.plant;
+      }
+
+      // Botón WhatsApp en cabecera
+      const headerWa = document.getElementById('mpHeaderWaBtn');
+      const cleanWa = (p.tel || '').replace(/\D/g, '');
+      if (headerWa) {
+        if (cleanWa) {
+          const waNum = cleanWa.startsWith('57') ? cleanWa : (cleanWa.length === 10 ? '57' + cleanWa : cleanWa);
+          headerWa.href = `https://wa.me/${waNum}?text=${encodeURIComponent('¡Hola ' + (p.cliente || '') + '! Te saludamos de Nuditos Tejidos sobre tu pedido #' + String(p.id).slice(-6) + ' 🌸')}`;
+          headerWa.style.display = 'inline-flex';
+        } else {
+          headerWa.style.display = 'none';
         }
-        
+      }
+
+      // Lado Izquierdo: Vista de Datos en Acordeones
+      const vCliente = document.getElementById('mpViewCliente');
+      if (vCliente) vCliente.textContent = p.cliente || '—';
+
+      const vTel = document.getElementById('mpViewTel');
+      if (vTel) vTel.textContent = p.tel || '—';
+
+      const linkWa = document.getElementById('mpLinkWa');
+      if (linkWa) {
+        if (cleanWa) {
+          const waNum = cleanWa.startsWith('57') ? cleanWa : (cleanWa.length === 10 ? '57' + cleanWa : cleanWa);
+          linkWa.href = `https://wa.me/${waNum}?text=${encodeURIComponent('¡Hola ' + (p.cliente || '') + '! Te saludamos de Nuditos Tejidos sobre tu pedido #' + String(p.id).slice(-6) + ' 🌸')}`;
+          linkWa.style.display = 'inline-flex';
+        } else {
+          linkWa.style.display = 'none';
+        }
+      }
+
+      const vEmail = document.getElementById('mpViewEmail');
+      if (vEmail) vEmail.textContent = p.clienteEmail || '—';
+
+      const vDir = document.getElementById('mpViewDireccion');
+      if (vDir) vDir.textContent = p.direccion || (p.notas ? p.notas.split('|')[0].trim() : '—');
+
+      const vCiudad = document.getElementById('mpViewCiudad');
+      if (vCiudad) vCiudad.textContent = [p.ciudad, p.departamento].filter(Boolean).join(', ') || '—';
+
+      const vBarrio = document.getElementById('mpViewBarrio');
+      if (vBarrio) vBarrio.textContent = [p.barrio ? 'Barrio ' + p.barrio : '', p.codigoPostal ? 'CP: ' + p.codigoPostal : ''].filter(Boolean).join(' · ') || '—';
+
+      const vTrans = document.getElementById('mpViewTrans');
+      if (vTrans) vTrans.textContent = p.transportadora || 'Skydropx / Por asignar';
+
+      const vGuia = document.getElementById('mpViewGuia');
+      if (vGuia) vGuia.textContent = p.guia || 'Sin guía asignada';
+
+      const vDed = document.getElementById('mpViewDedicatoria');
+      if (vDed) vDed.textContent = `«${extractDedicatoria(p)}»`;
+
+      const vItemsList = document.getElementById('mpViewItemsList');
+      if (vItemsList) {
+        vItemsList.innerHTML = currentModalProducts.map(item => `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:0.65rem 1rem; border-radius:12px; border:1px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,0.02);">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <span style="background:var(--lila-light); color:var(--lila-dark); font-weight:700; font-size:0.8rem; padding:3px 9px; border-radius:8px;">${item.qty}x</span>
+              <span style="font-weight:600; font-size:0.92rem; color:var(--text);">${item.name}</span>
+            </div>
+            <span style="font-size:0.92rem; font-weight:700; color:var(--lila-dark); font-family:'Playfair Display',serif;">${item.price > 0 ? '$' + (item.price * item.qty).toLocaleString('es-CO') + ' COP' : ''}</span>
+          </div>
+        `).join('');
+      }
+
+      const vTotal = document.getElementById('mpViewTotal');
+      if (vTotal) vTotal.textContent = p.total > 0 ? '$' + p.total.toLocaleString('es-CO') + ' COP' : '$0 COP';
+
+      // Lado Derecho: Vitrina del Ramo en PC
+      renderActiveBouquetPhoto();
+
+      // Pre-llenar Formulario de Edición a Pantalla Completa
+      document.getElementById('pedidoEditId').value = p.id;
+      document.getElementById('pCliente').value = p.cliente || '';
+      document.getElementById('pEmail').value = p.clienteEmail || '';
+      document.getElementById('pTel').value = p.tel || '';
+      document.getElementById('pItems').value = p.items || '';
+      document.getElementById('pTotal').value = p.total || '';
+      document.getElementById('pEstado').value = p.estado || 'pendiente';
+      document.getElementById('pNotas').value = p.notas || '';
+      document.getElementById('pTrans').value = p.transportadora || '';
+      document.getElementById('pGuia').value = p.guia || '';
+      if (document.getElementById('pDireccion')) document.getElementById('pDireccion').value = p.direccion || '';
+      if (document.getElementById('pCiudad')) document.getElementById('pCiudad').value = [p.ciudad, p.departamento].filter(Boolean).join(', ');
+      if (document.getElementById('pBarrio')) document.getElementById('pBarrio').value = p.barrio || '';
+      if (document.getElementById('pCustomFoto')) document.getElementById('pCustomFoto').value = p.foto || '';
+
+      populateCatalogSelect();
+      syncModalFooterStatusPills(p.estado || 'pendiente');
+
+      // Iniciar en Vista de Despacho (Lado a Lado)
+      setPedidoViewMode(false);
+
+      const delBtn = document.getElementById('mpBtnDeleteCurrent');
+      if (delBtn) delBtn.style.display = 'inline-block';
+
+      document.getElementById('pedidoModal').classList.add('open');
+    }
+
+    function openEditPedido(id) {
+      openMiPedido(id);
+      setPedidoViewMode(true);
+    }
+
+    function openNewPedido() {
+      currentModalPedidoId = '';
+      currentModalProducts = [];
+      currentModalSelectedProductIndex = 0;
+
+      document.getElementById('pedidoEditId').value = '';
+      const fields = ['pCliente', 'pEmail', 'pTel', 'pItems', 'pTotal', 'pNotas', 'pTrans', 'pGuia', 'pDireccion', 'pCiudad', 'pBarrio', 'pCustomFoto'];
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      document.getElementById('pEstado').value = 'pendiente';
+
+      const avatarEl = document.getElementById('mpHeaderAvatar');
+      if (avatarEl) avatarEl.innerHTML = SVG_ADMIN.package;
+
+      const titleEl = document.getElementById('mpHeaderTitle');
+      if (titleEl) titleEl.textContent = 'Nuevo Pedido';
+      const idEl = document.getElementById('mpHeaderId');
+      if (idEl) idEl.textContent = '#NUEVO';
+      const clientNameEl = document.getElementById('mpHeaderClientName');
+      if (clientNameEl) clientNameEl.textContent = 'Registrar Pedido';
+      const dateEl = document.getElementById('mpHeaderDate');
+      if (dateEl) dateEl.textContent = 'WhatsApp / Manual';
+      const statusEl = document.getElementById('mpHeaderStatus');
+      if (statusEl) {
+        statusEl.innerHTML = SVG_ADMIN.time + ' Pendiente';
+        statusEl.className = 'pedido-estado estado-pendiente';
+      }
+
+      const headerWa = document.getElementById('mpHeaderWaBtn');
+      if (headerWa) headerWa.style.display = 'none';
+
+      populateCatalogSelect();
+      syncModalFooterStatusPills('pendiente');
+
+      // Iniciar directamente en modo edición amplia
+      setPedidoViewMode(true);
+
+      const delBtn = document.getElementById('mpBtnDeleteCurrent');
+      if (delBtn) delBtn.style.display = 'none';
+
+      document.getElementById('pedidoModal').classList.add('open');
+    }
+
+    function closePedidoModal() {
+      document.getElementById('pedidoModal').classList.remove('open');
+      closePhotoLightbox();
+    }
+
+    async function quickSetEstadoPedido(nuevoEstado) {
+      if (!currentModalPedidoId) {
+        document.getElementById('pEstado').value = nuevoEstado;
+        syncModalFooterStatusPills(nuevoEstado);
+        onEditEstadoChanged(nuevoEstado);
+        return;
+      }
+      await cambiarEstadoPedido(currentModalPedidoId, nuevoEstado);
+      const eLabels = { 
+        pendiente: SVG_ADMIN.time + ' Pendiente', 
+        pagado: SVG_ADMIN.card + ' Pagado', 
+        proceso: SVG_ADMIN.refresh + ' En proceso', 
+        entregado: SVG_ADMIN.check + ' Entregado', 
+        cancelado: SVG_ADMIN.close + ' Cancelado' 
+      };
+      const eCls = { pendiente:'estado-pendiente', pagado:'estado-pagado', proceso:'estado-proceso', entregado:'estado-entregado', cancelado:'estado-cancelado' };
+      const statusEl = document.getElementById('mpHeaderStatus');
+      if (statusEl) {
+        statusEl.innerHTML = eLabels[nuevoEstado] || nuevoEstado;
+        statusEl.className = 'pedido-estado ' + (eCls[nuevoEstado] || 'estado-pendiente');
+      }
+      document.getElementById('pEstado').value = nuevoEstado;
+      syncModalFooterStatusPills(nuevoEstado);
+    }
+
+    async function deleteCurrentModalPedido() {
+      if (!currentModalPedidoId) return;
+      if (confirm('¿Eliminar definitivamente este pedido?')) {
+        await deletePedido(currentModalPedidoId);
+        closePedidoModal();
+      }
+    }
+
+    async function deletePedido(id) {
+      try {
+        await sbAdminDeletePedido(id);
+        pedidos = pedidos.filter(p => String(p.id) !== String(id));
         renderPedidosList();
-        showToast('✅ Guía Skydropx asignada: ' + newGuia);
+        showToast('🗑️ Pedido eliminado');
+      } catch {
+        showToast('❌ Error al eliminar pedido');
+      }
+    }
+
+    function crearGuiaSkydropxFromCurrentModal() {
+      if (!currentModalPedidoId) return;
+      crearGuiaSkydropx(currentModalPedidoId).then(() => {
+        const p = pedidos.find(x => String(x.id) === String(currentModalPedidoId));
+        if (p) {
+          const vGuia = document.getElementById('mpViewGuia');
+          if (vGuia) vGuia.textContent = p.guia || '—';
+          const vTrans = document.getElementById('mpViewTrans');
+          if (vTrans) vTrans.textContent = p.transportadora || 'Skydropx';
+        }
+      });
+    }
+
+    async function savePedido() {
+      const editId = document.getElementById('pedidoEditId').value;
+      const data = {
+        cliente: document.getElementById('pCliente').value.trim(),
+        clienteEmail: document.getElementById('pEmail').value.trim(),
+        tel: document.getElementById('pTel').value.trim(),
+        items: document.getElementById('pItems').value.trim(),
+        total: parseInt(document.getElementById('pTotal').value) || 0,
+        estado: document.getElementById('pEstado').value,
+        notas: document.getElementById('pNotas').value.trim(),
+        transportadora: document.getElementById('pTrans').value.trim(),
+        guia: document.getElementById('pGuia').value.trim()
+      };
+
+      const dirEl = document.getElementById('pDireccion');
+      if (dirEl && dirEl.value.trim()) data.direccion = dirEl.value.trim();
+
+      const ciudadEl = document.getElementById('pCiudad');
+      if (ciudadEl && ciudadEl.value.trim()) {
+        const parts = ciudadEl.value.trim().split(',');
+        data.ciudad = parts[0]?.trim() || '';
+        if (parts[1]) data.departamento = parts[1]?.trim();
+      }
+
+      const barrioEl = document.getElementById('pBarrio');
+      if (barrioEl && barrioEl.value.trim()) data.barrio = barrioEl.value.trim();
+
+      const fotoEl = document.getElementById('pCustomFoto');
+      if (fotoEl && fotoEl.value.trim()) data.foto = fotoEl.value.trim();
+
+      if (!data.cliente) {
+        showToast('⚠️ Ingresa el nombre del cliente');
+        return;
+      }
+
+      const oldPedido = editId ? pedidos.find(x => String(x.id) === String(editId)) : null;
+      try {
+        if (editId) {
+          await sbAdminSavePedido({ ...data, id: parseInt(editId), _isNew: false });
+          const idx = pedidos.findIndex(p => String(p.id) === String(editId));
+          if (idx !== -1) pedidos[idx] = { ...pedidos[idx], ...data, id: parseInt(editId) };
+
+          if (data.estado === 'entregado' && data.guia && oldPedido?.estado !== 'entregado') {
+            triggerEnvioEmail(pedidos[idx], 'envio_entregado');
+          } else if (data.guia && !oldPedido?.guia && data.estado !== 'pendiente') {
+            triggerEnvioEmail(pedidos[idx], 'pedido_enviado');
+          }
+          showToast('✓ Pedido actualizado con éxito');
+        } else {
+          const saved = await sbAdminSavePedido({ ...data, _isNew: true });
+          if (saved) pedidos.unshift(saved);
+          showToast('✓ Nuevo pedido registrado');
+        }
+        closePedidoModal();
+        renderPedidosList();
       } catch (err) {
         console.error(err);
-        showToast('❌ Error al generar guía');
+        showToast('❌ Error al guardar pedido');
       }
-    }
-    async function cambiarEstadoPedido(id,estado){
-      const idx=pedidos.findIndex(p=>String(p.id)===String(id));if(idx===-1)return;
-      const p = pedidos[idx];
-      try{
-        await sbAdminUpdateEstadoPedido(id,estado);
-        const oldEstado = p.estado;
-        p.estado=estado;
-        renderPedidosList();
-        showToast('✓ Estado actualizado');
-        
-        if (estado === 'entregado' && p.guia && oldEstado !== 'entregado') {
-          triggerEnvioEmail(p);
-        }
-      }catch{showToast('❌ Error');}
     }
 
-    async function triggerEnvioEmail(p) {
-      if (!p.clienteEmail) {
-        showToast('ℹ️ El pedido no tiene email del cliente');
+    /* ══════════════════════════════════════════
+       GESTIÓN Y DISPARADORES DE CORREO ADMIN
+       ══════════════════════════════════════════ */
+
+    async function cambiarEstadoPedido(id, nuevoEstado) {
+      try {
+        const p = pedidos.find(x => String(x.id) === String(id));
+        const oldEstado = p?.estado;
+        await sbAdminUpdateEstadoPedido(id, nuevoEstado);
+        if (p) {
+          p.estado = nuevoEstado;
+          const idx = pedidos.findIndex(x => String(x.id) === String(id));
+          if (idx !== -1) pedidos[idx].estado = nuevoEstado;
+        }
+        renderPedidosList();
+        showToast(`✓ Pedido #${id} cambiado a [${nuevoEstado}]`);
+
+        // Disparar correos automáticos si tiene email
+        if (p && p.clienteEmail && p.clienteEmail.includes('@')) {
+          if (nuevoEstado === 'entregado' && oldEstado !== 'entregado') {
+            triggerEnvioEmail(p, 'envio_entregado');
+          } else if (nuevoEstado === 'proceso' && p.guia && oldEstado === 'pendiente') {
+            triggerEnvioEmail(p, 'pedido_enviado');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('❌ Error al actualizar estado');
+      }
+    }
+
+    async function triggerEnvioEmail(pedido, tipo = 'compra_confirmada') {
+      if (!pedido) return;
+      const email = pedido.clienteEmail || pedido.email || '';
+      if (tipo !== 'notificacion_admin' && (!email || !email.includes('@'))) {
+        showToast('⚠️ El pedido no tiene un correo válido registrado');
         return;
       }
-      showToast('📧 Enviando notificación de envío...');
-      const success = await typeof correoPedidoEnviado === 'function' && correoPedidoEnviado({
-        clienteEmail: p.clienteEmail,
-        clienteNombre: p.cliente,
-        guia: p.guia,
-        transportadora: p.transportadora
-      });
-      if (success) showToast('✅ Correo de envío enviado');
+
+      const nombres = {
+        compra_confirmada: 'Confirmación de Compra',
+        pedido_enviado: 'Guía de Envío',
+        envio_encamino: 'Paquete en Camino',
+        envio_reparto: 'Paquete en Reparto',
+        envio_entregado: 'Pedido Entregado',
+        notificacion_admin: 'Alerta a Administrador'
+      };
+
+      showToast(`📧 Enviando ${nombres[tipo] || tipo}...`);
+
+      try {
+        const payload = {
+          pedidoId: pedido.id,
+          clienteNombre: pedido.cliente || pedido.cliente_nombre || 'Cliente',
+          clienteEmail: email,
+          total: pedido.total || 0,
+          items: pedido.items || '',
+          tel: pedido.tel || pedido.cliente_telefono || '',
+          notas: pedido.notas || pedido.direccion || '',
+          guia: pedido.guia || '',
+          transportadora: pedido.transportadora || 'Transportadora'
+        };
+
+        const res = await sbAdminSendEmail(tipo, payload);
+        if (res.ok) {
+          const dest = tipo === 'notificacion_admin' ? (adminCfg.adminEmail || 'taller') : email;
+          showToast(`✅ ${nombres[tipo] || tipo} enviado con éxito a ${dest}`);
+        } else {
+          console.warn('[triggerEnvioEmail] Fallo de Resend:', res.error);
+          showToast(`⚠️ Error al enviar: ${res.error || 'Resend rechazó el correo'}`);
+        }
+      } catch (err) {
+        console.error('[triggerEnvioEmail] Error fatal:', err);
+        showToast('❌ Error de conexión al enviar correo');
+      }
+    }
+
+    function toggleEmailActionsMenu(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('mpEmailActionsMenu');
+      if (menu) {
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      const wrapper = document.getElementById('mpEmailDropdownWrapper');
+      const menu = document.getElementById('mpEmailActionsMenu');
+      if (menu && wrapper && !wrapper.contains(e.target)) {
+        menu.style.display = 'none';
+      }
+    });
+
+    async function sendModalEmailAction(tipo) {
+      const menu = document.getElementById('mpEmailActionsMenu');
+      if (menu) menu.style.display = 'none';
+
+      if (!currentModalPedidoId) {
+        showToast('⚠️ No hay pedido abierto en el modal');
+        return;
+      }
+
+      const p = pedidos.find(x => String(x.id) === String(currentModalPedidoId));
+      if (!p) {
+        showToast('⚠️ No se encontró la información del pedido');
+        return;
+      }
+
+      // Si el admin escribió una guía o transportadora en el formulario, sincronizarla
+      const gInput = document.getElementById('pGuia')?.value?.trim();
+      if (gInput) p.guia = gInput;
+      const tInput = document.getElementById('pTrans')?.value?.trim();
+      if (tInput) p.transportadora = tInput;
+      const eInput = document.getElementById('pEmail')?.value?.trim();
+      if (eInput) p.clienteEmail = eInput;
+
+      if ((tipo === 'pedido_enviado' || tipo === 'envio_encamino' || tipo === 'envio_reparto') && !p.guia) {
+        showToast('⚠️ Primero ingresa o genera un número de guía');
+        return;
+      }
+
+      await triggerEnvioEmail(p, tipo);
+    }
+
+    async function saveEmailConfig() {
+      const resendApiKey = (document.getElementById('resendApiKey')?.value || '').trim();
+      const adminEmail = (document.getElementById('adminEmail')?.value || '').trim();
+      const emailFrom = (document.getElementById('emailFrom')?.value || '').trim();
+
+      adminCfg.resendApiKey = resendApiKey;
+      adminCfg.adminEmail = adminEmail;
+      adminCfg.emailFrom = emailFrom;
+
+      try {
+        await sbAdminSaveConfig(adminCfg);
+        showToast('✅ Configuración de correos guardada en Supabase');
+      } catch (err) {
+        console.error(err);
+        showToast('❌ Error al guardar configuración de correos');
+      }
+    }
+
+    async function testEmailConfig() {
+      const recipientEl = document.getElementById('testEmailRecipient');
+      const statusEl = document.getElementById('testEmailStatus');
+      const btnEl = document.getElementById('btnTestEmail');
+      const recipient = (recipientEl?.value || '').trim() || (document.getElementById('adminEmail')?.value || '').trim();
+
+      if (!recipient || !recipient.includes('@')) {
+        showToast('⚠️ Ingresa un correo válido para realizar la prueba');
+        if (recipientEl) recipientEl.focus();
+        return;
+      }
+
+      if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '⏳ Enviando...'; }
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = '#f3f4f6';
+        statusEl.style.color = '#374151';
+        statusEl.innerHTML = '⏳ Conectando con la API de Resend y despachando correo de prueba...';
+      }
+
+      try {
+        const res = await sbAdminSendEmail('test_email', { to: recipient });
+        if (res.ok) {
+          if (statusEl) {
+            statusEl.style.background = '#ecfdf5';
+            statusEl.style.color = '#065f46';
+            statusEl.innerHTML = `✅ <strong>¡Correo enviado con éxito!</strong> Revisa la bandeja de entrada (o spam) de <strong>${recipient}</strong>. (ID: ${res.messageId || 'ok'})`;
+          }
+          showToast('✓ Correo de prueba enviado');
+        } else {
+          if (statusEl) {
+            statusEl.style.background = '#fef2f2';
+            statusEl.style.color = '#991b1b';
+            statusEl.innerHTML = `❌ <strong>Error al enviar:</strong> ${res.error || 'Resend rechazó la solicitud'}.<br><small style="color:#b91c1c;">${res.detail?.message || res.detail?.error || 'Asegúrate de que la API Key sea correcta y que el dominio remitente esté configurado'}</small>`;
+          }
+          showToast('❌ Falla en la prueba de correo');
+        }
+      } catch (e) {
+        if (statusEl) {
+          statusEl.style.background = '#fef2f2';
+          statusEl.style.color = '#991b1b';
+          statusEl.innerHTML = `❌ Error de red: ${e.message}`;
+        }
+      } finally {
+        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = '🧪 Probar Ahora'; }
+      }
+    }
+
+    function togglePasswordVisibility(id, btn) {
+      const input = document.getElementById(id);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (btn) btn.textContent = '🙈 Ocultar';
+      } else {
+        input.type = 'password';
+        if (btn) btn.textContent = '👁 Ver';
+      }
     }
 
     function copyCustomerEmails() {
       const emails = [...new Set(pedidos.map(p => p.clienteEmail).filter(e => e && e.includes('@')))];
-      if (emails.length === 0) { showToast('No hay emails guardados'); return; }
+      if (emails.length === 0) { showToast('⚠️ No hay emails guardados'); return; }
       const blob = emails.join(', ');
-      navigator.clipboard.writeText(blob).then(() => {
-        showToast(`📋 ${emails.length} emails copiados para Remarketing`);
-      });
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(blob).then(() => {
+          showToast(`📋 ${emails.length} emails copiados para Remarketing`);
+        }).catch(() => {
+          fallbackCopyText(blob, () => showToast(`📋 ${emails.length} emails copiados`));
+        });
+      } else {
+        fallbackCopyText(blob, () => showToast(`📋 ${emails.length} emails copiados`));
+      }
     }
-    async function deletePedido(id){try{await sbAdminDeletePedido(id);pedidos=pedidos.filter(p=>String(p.id)!==String(id));renderPedidosList();showToast('🗑️ Eliminado');}catch{showToast('❌ Error');}}
-    function filterPedidos(f,btn){pedidoFilter=f;document.querySelectorAll('.pedido-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPedidosList();}
-    function renderPedidosList(){
-      const list=pedidoFilter==='todos'?pedidos:pedidos.filter(p=>p.estado===pedidoFilter);
-      const eLabels={pendiente:'⏳ Pendiente',pagado:'💰 Pagado',proceso:'🔄 En proceso',entregado:'✅ Entregado',cancelado:'❌ Cancelado'};
-      const eCls={pendiente:'estado-pendiente',pagado:'estado-pagado',proceso:'estado-proceso',entregado:'estado-entregado',cancelado:'estado-cancelado'};
-      document.getElementById('pedidosList').innerHTML=list.length?list.map(p=>`
-        <div class="pedido-card">
-          <div class="pedido-top"><div class="pedido-id">#${String(p.id).slice(-6)}</div><span class="pedido-estado ${eCls[p.estado]||'estado-pendiente'}">${eLabels[p.estado]||p.estado}</span></div>
-          <div class="pedido-cliente">${p.cliente}</div>
-          <div class="pedido-items">${p.items||'—'}</div>
-          ${p.guia ? `<div style="font-size:0.8rem; font-weight:600; color:var(--lila-dark, #8b5cf6); background: rgba(139,92,246,0.1); padding: 0.3rem 0.6rem; border-radius: 6px; margin: 0.5rem 0; display:inline-block;">📦 Guía Skydropx: ${p.guia}</div>` : ''}
-          <div class="pedido-bottom"><div class="pedido-total">${p.total>0?'$'+p.total.toLocaleString('es-CO'):''}</div><div class="pedido-fecha">${p.fecha||''}</div></div>
-          <div class="pedido-actions">
-            <button class="p-action-btn" onclick="openEditPedido('${p.id}')">✏️ Editar</button>
-            <button class="p-action-btn" onclick="cambiarEstadoPedido('${p.id}','entregado')">✅ Entregado</button>
-            <button class="p-action-btn" style="background:var(--lila-soft, #f3e8ff); color:var(--lila-dark, #7c3aed); border:1px solid #ddd6fe;" onclick="crearGuiaSkydropx('${p.id}')">📦 Skydropx</button>
-            <button class="p-action-btn" style="color:var(--red)" onclick="deletePedido('${p.id}')">🗑️</button>
+
+    function filterPedidos(f, btn) {
+      pedidoFilter = f;
+      document.querySelectorAll('.pedido-filter').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderPedidosList();
+    }
+
+    function onSearchPedidos(q) {
+      pedidoSearchQuery = (q || '').toLowerCase().trim();
+      renderPedidosList();
+    }
+
+    function renderPedidosList() {
+      // 1. Actualizar KPIs y Contadores
+      const totalCount = pedidos.length;
+      const countPendiente = pedidos.filter(p => p.estado === 'pendiente').length;
+      const countPagado = pedidos.filter(p => p.estado === 'pagado').length;
+      const countProceso = pedidos.filter(p => p.estado === 'proceso').length;
+      const countEntregado = pedidos.filter(p => p.estado === 'entregado').length;
+
+      const kpiTotal = document.getElementById('kpiTotalPedidos');
+      if (kpiTotal) kpiTotal.textContent = totalCount;
+      const kpiPend = document.getElementById('kpiPendientes');
+      if (kpiPend) kpiPend.textContent = countPendiente;
+      const kpiPag = document.getElementById('kpiPagados');
+      if (kpiPag) kpiPag.textContent = countPagado;
+      const kpiProc = document.getElementById('kpiProceso');
+      if (kpiProc) kpiProc.textContent = countProceso;
+      const kpiEntr = document.getElementById('kpiEntregados');
+      if (kpiEntr) kpiEntr.textContent = countEntregado;
+
+      // Badges en botones de filtro
+      const bTodos = document.getElementById('badgeCountTodos');
+      if (bTodos) bTodos.textContent = totalCount;
+      const bPend = document.getElementById('badgeCountPendiente');
+      if (bPend) bPend.textContent = countPendiente;
+      const bPag = document.getElementById('badgeCountPagado');
+      if (bPag) bPag.textContent = countPagado;
+      const bProc = document.getElementById('badgeCountProceso');
+      if (bProc) bProc.textContent = countProceso;
+      const bEntr = document.getElementById('badgeCountEntregado');
+      if (bEntr) bEntr.textContent = countEntregado;
+
+      // 2. Filtrar lista
+      let list = pedidoFilter === 'todos' ? pedidos : pedidos.filter(p => p.estado === pedidoFilter);
+      if (pedidoSearchQuery) {
+        list = list.filter(p => {
+          const idMatch = String(p.id).toLowerCase().includes(pedidoSearchQuery);
+          const cliMatch = (p.cliente || '').toLowerCase().includes(pedidoSearchQuery);
+          const telMatch = (p.tel || '').toLowerCase().includes(pedidoSearchQuery);
+          const itemMatch = (p.items || '').toLowerCase().includes(pedidoSearchQuery);
+          const guiaMatch = (p.guia || '').toLowerCase().includes(pedidoSearchQuery);
+          return idMatch || cliMatch || telMatch || itemMatch || guiaMatch;
+        });
+      }
+
+      const eLabels = { 
+        pendiente: SVG_ADMIN.time + ' Pendiente', 
+        pagado: SVG_ADMIN.card + ' Pagado', 
+        proceso: SVG_ADMIN.refresh + ' En proceso', 
+        entregado: SVG_ADMIN.check + ' Entregado', 
+        cancelado: SVG_ADMIN.close + ' Cancelado' 
+      };
+      const eCls = { pendiente:'estado-pendiente', pagado:'estado-pagado', proceso:'estado-proceso', entregado:'estado-entregado', cancelado:'estado-cancelado' };
+      const container = document.getElementById('pedidosList');
+      if (!container) return;
+
+      if (!list.length) {
+        container.innerHTML = `<div style="text-align:center;padding:3.5rem 1rem;color:var(--soft);grid-column:1/-1;background:#fff;border-radius:20px;border:1.5px dashed var(--border);">
+          <div style="font-size:2.4rem; margin-bottom:0.6rem; color:var(--lila); display:flex; justify-content:center;"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:var(--lila-xlight);border-radius:50%;">${SVG_ADMIN.plant}</span></div>
+          <strong style="font-size:1.1rem; color:var(--text);">No se encontraron pedidos</strong>
+          <div style="font-size:0.78rem; margin-top:0.35rem;">Intenta con otro filtro de búsqueda o registra un pedido manual con el botón "+ Nuevo pedido".</div>
+        </div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(p => {
+        const resolvedProds = resolveOrderProducts(p);
+        const primaryProd = resolvedProds[0] || { name: 'Ramo tejido', img: DEFAULT_RAMO_FALLBACK, qty: 1 };
+        const cleanWa = (p.tel || '').replace(/\D/g, '');
+        const waLink = cleanWa ? `https://wa.me/${cleanWa.startsWith('57') ? cleanWa : (cleanWa.length === 10 ? '57' + cleanWa : cleanWa)}` : '';
+        const fullAddr = [p.direccion, p.barrio ? 'Barrio ' + p.barrio : '', p.ciudad].filter(Boolean).join(', ') || p.notas?.split('|')[0]?.trim();
+
+        return `
+        <div class="pedido-card" onclick="if(!event.target.closest('button') && !event.target.closest('a')) openMiPedido('${p.id}')">
+          <div class="pedido-card-split">
+            
+            <!-- Izquierda: Datos del Pedido -->
+            <div class="pedido-card-left">
+              <div class="pedido-top">
+                <div class="pedido-id">
+                  <span>${SVG_ADMIN.package}</span> <strong>#${String(p.id).slice(-6)}</strong>
+                </div>
+                <span class="pedido-estado ${eCls[p.estado] || 'estado-pendiente'}">${eLabels[p.estado] || p.estado}</span>
+              </div>
+
+              <div class="pedido-cliente">
+                ${p.cliente || 'Cliente sin nombre'}
+              </div>
+
+              <div class="pedido-items" title="${p.items || ''}">
+                ${SVG_ADMIN.plant} ${p.items || 'Ramo tejido a crochet'}
+              </div>
+
+              <div class="pedido-detalles-mini">
+                ${p.tel ? `
+                  <span class="pedido-chip">
+                    ${SVG_ADMIN.phone} ${p.tel}
+                    ${waLink ? `<a href="${waLink}" target="_blank" onclick="event.stopPropagation()" style="color:#25d366; text-decoration:none; font-weight:700; margin-left:3px; display:inline-flex; align-items:center;" title="Abrir WhatsApp">${SVG_ADMIN.whatsapp}</a>` : ''}
+                  </span>
+                ` : ''}
+                ${fullAddr ? `<span class="pedido-chip" title="${fullAddr}">${SVG_ADMIN.mapPin} ${fullAddr.length > 28 ? fullAddr.slice(0, 26) + '...' : fullAddr}</span>` : ''}
+                ${p.guia ? `<span class="pedido-chip" style="background:#f3e8ff; color:#7c3aed; font-weight:600;">${SVG_ADMIN.truck} Guía: ${p.guia}</span>` : ''}
+              </div>
+
+              <div class="pedido-bottom">
+                <div class="pedido-total">${p.total > 0 ? '$' + p.total.toLocaleString('es-CO') : ''}</div>
+                <div class="pedido-fecha">${p.fecha || ''}</div>
+              </div>
+            </div>
+
+            <!-- Derecha: Foto del Ramo comprado (Optimizado en PC) -->
+            <div class="pedido-card-right" title="Clic para ver detalle de Mi Pedido">
+              <img src="${primaryProd.img || DEFAULT_RAMO_FALLBACK}" alt="${primaryProd.name}" class="pedido-card-img" onerror="onPhotoError(this)" loading="lazy" />
+              <div class="pedido-card-qty-badge">${primaryProd.qty > 1 ? primaryProd.qty + 'x' : '1x'}</div>
+            </div>
+
           </div>
-        </div>`).join(''):`<div style="text-align:center;padding:2rem;color:var(--soft)">No hay pedidos</div>`;}
+
+          <!-- Acciones Rápidas -->
+          <div class="pedido-actions" onclick="event.stopPropagation()">
+            <button class="p-action-btn primary" onclick="openMiPedido('${p.id}')">
+              ${SVG_ADMIN.eye} Mi Pedido
+            </button>
+            <button class="p-action-btn" onclick="openEditPedido('${p.id}')" title="Editar campos">
+              ${SVG_ADMIN.edit} Editar
+            </button>
+            <button class="p-action-btn" onclick="currentModalPedidoId='${p.id}'; copyFullOrderManifest();" title="Copiar rótulo">
+              ${SVG_ADMIN.clipboard} Rótulo
+            </button>
+            ${p.estado !== 'entregado' ? `
+              <button class="p-action-btn" onclick="cambiarEstadoPedido('${p.id}','entregado')">
+                ${SVG_ADMIN.check} Entregado
+              </button>
+            ` : ''}
+            <button class="p-action-btn" style="background:var(--lila-xlight); color:var(--lila-dark); border:1px solid var(--lila-light);" onclick="crearGuiaSkydropx('${p.id}')">
+              ${SVG_ADMIN.truck} Skydropx
+            </button>
+            <button class="p-action-btn" style="color:var(--red); border-color:#fca5a5;" onclick="deletePedido('${p.id}')" title="Eliminar">
+              ${SVG_ADMIN.deleteBin}
+            </button>
+          </div>
+        </div>
+        `;
+      }).join('');
+    }
     /* ── CATEGORY MANAGER desde el panel de Productos ── */
     function showCategoryManager(){
       document.getElementById('tab-productos').innerHTML=`
@@ -1743,7 +2794,10 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         socialInstagram: document.getElementById('socialInsta')?.value.trim() || '',
         socialWhatsapp: document.getElementById('socialWhasapp')?.value.trim() || '',
         gaId: document.getElementById('seoGAId')?.value.trim() || '',
-        gaActive: !!document.getElementById('toggleGASEO')?.classList.contains('on')
+        gaActive: !!document.getElementById('toggleGASEO')?.classList.contains('on'),
+        resendApiKey: document.getElementById('resendApiKey')?.value.trim() || adminCfg.resendApiKey || '',
+        adminEmail: document.getElementById('adminEmail')?.value.trim() || adminCfg.adminEmail || '',
+        emailFrom: document.getElementById('emailFrom')?.value.trim() || adminCfg.emailFrom || ''
       };
       try{ await sbAdminSaveConfig(newCfg); await sbAdminSaveBanners(editorialBannersAdmin); showToast('✅ Guardado'); }catch{ showToast('❌ Error');}
     }

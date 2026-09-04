@@ -39,12 +39,12 @@ const hasLowStock = finalStock !== undefined && finalStock !== null && finalStoc
 
 const cleanBadge = (txt: string) => (txt || '').replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/gu, '').trim();
 
-// Máximo 2 etiquetas activas para no tapar la foto en móviles
+// Máximo 3 etiquetas activas (ej: Más Vendido/Mejor Precio, Oferta, Envío Gratis)
 const activeBadges = [
   p.badge ? { type: 'custom', text: cleanBadge(p.badge) } : null,
   p.oferta ? { type: 'oferta', text: 'Oferta' } : null,
   p.envioGratis ? { type: 'envio', text: 'Envío Gratis' } : null
-].filter(Boolean).slice(0, 2);
+].filter(Boolean).slice(0, 3);
 ---
 
 <article 

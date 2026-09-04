@@ -2,6 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { getLiveConfig } from '../../../lib/supabase';
+import { sendNuditosEmail } from '../../../lib/emails';
 
 async function verifyWebhookSignature(body: any, eventsSecret: string) {
   if (!eventsSecret || !body?.signature?.checksum) return false;
@@ -106,37 +107,31 @@ export const POST: APIRoute = async ({ request, locals }) => {
           
           try {
             // Notificar al cliente (Email)
-            await fetch(`${baseURL}/api/send-email`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                type: 'compra_confirmada', 
-                data: {
-                  pedidoId: pedido.id,
-                  clienteNombre: pedido.cliente_nombre,
-                  clienteEmail: pedido.cliente_email,
-                  total: pedido.total,
-                  items: pedido.items
-                }
-              })
+            await sendNuditosEmail({
+              type: 'compra_confirmada',
+              data: {
+                pedidoId: pedido.id,
+                clienteNombre: pedido.cliente_nombre,
+                clienteEmail: pedido.cliente_email,
+                total: pedido.total,
+                items: pedido.items
+              },
+              locals
             });
 
             // Notificar al admin (Email)
-            await fetch(`${baseURL}/api/send-email`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                type: 'notificacion_admin', 
-                data: {
-                  pedidoId: pedido.id,
-                  clienteNombre: pedido.cliente_nombre,
-                  clienteEmail: pedido.cliente_email,
-                  tel: pedido.cliente_telefono,
-                  total: pedido.total,
-                  items: pedido.items,
-                  notas: pedido.notas
-                }
-              })
+            await sendNuditosEmail({
+              type: 'notificacion_admin',
+              data: {
+                pedidoId: pedido.id,
+                clienteNombre: pedido.cliente_nombre,
+                clienteEmail: pedido.cliente_email,
+                tel: pedido.cliente_telefono,
+                total: pedido.total,
+                items: pedido.items,
+                notas: pedido.notas
+              },
+              locals
             });
 
             // Notificación opcional a TELEGRAM (para aviso inmediato al celular)

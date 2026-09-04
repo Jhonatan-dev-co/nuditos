@@ -1,24 +1,94 @@
 ---
 import Icon from '../Icon.astro';
 ---
-<!-- PEDIDOS -->
+<!-- PEDIDOS (MI PEDIDO EXPERT WORKSPACE) -->
 <div class="tab-content" id="tab-pedidos">
-  <div class="pedidos-toolbar">
-    <button class="pedido-filter active" onclick="filterPedidos('todos',this)">Todos</button>
-    <button class="pedido-filter" onclick="filterPedidos('pendiente',this)">⏳ Pendientes</button>
-    <button class="pedido-filter" onclick="filterPedidos('pagado',this)">💰 Pagados</button>
-    <button class="pedido-filter" onclick="filterPedidos('proceso',this)">🔄 En proceso</button>
-    <button class="pedido-filter" onclick="filterPedidos('entregado',this)">✅ Entregados</button>
-    
-    <div style="flex-grow: 1;"></div>
+  <!-- ENCABEZADO Y ACCIONES PRINCIPALES -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.1rem; flex-wrap:wrap; gap:0.9rem;">
+    <div>
+      <div style="display:flex; align-items:center; gap:0.55rem;">
+        <span style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; background:var(--lila-xlight); color:var(--lila-dark);"><Icon name="package" style="width:20px;height:20px;" /></span>
+        <h2 style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--text); margin:0;">Mi Pedido — Gestión & Despachos</h2>
+      </div>
+      <div style="font-size:0.76rem; color:var(--soft); margin-top:0.2rem;">
+        Revisa la foto del ramo comprado, copia datos de envío con 1 clic y agiliza la entrega de tus pedidos.
+      </div>
+    </div>
 
-    <button class="btn-vis on" style="gap:0.4rem; font-size:0.75rem; background: var(--lila-soft); color: var(--lila-dark); border: 1px solid var(--lila-border);" onclick="copyCustomerEmails()">
-      <Icon name="mail" /> Remarketing
+    <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+      <button class="btn-vis on" style="gap:0.4rem; font-size:0.76rem; background: var(--lila-xlight); color: var(--lila-dark); border: 1.5px solid var(--lila-light); padding:0.45rem 0.95rem; border-radius:50px; font-weight:600;" onclick="copyCustomerEmails()" title="Copiar todos los correos para remarketing">
+        <Icon name="mail" style="width:14px;height:14px;" /> Remarketing
+      </button>
+      <button class="btn-new-pedido" style="padding:0.45rem 1.1rem; font-size:0.78rem; font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;" onclick="openNewPedido()">
+        <Icon name="add" style="width:16px;height:16px;" /> Nuevo pedido
+      </button>
+    </div>
+  </div>
+
+  <!-- BARRA DE KPIS EN ESCRITORIO -->
+  <div class="mp-kpi-bar">
+    <div class="mp-kpi-card">
+      <span class="mp-kpi-icon" style="background:#f5f3ff; color:#7c3aed;"><Icon name="package" style="width:18px;height:18px;" /></span>
+      <div>
+        <div class="mp-kpi-num" id="kpiTotalPedidos">0</div>
+        <div class="mp-kpi-lbl">Total Pedidos</div>
+      </div>
+    </div>
+    <div class="mp-kpi-card">
+      <span class="mp-kpi-icon" style="background:#fef3c7; color:#b45309;"><Icon name="time" style="width:18px;height:18px;" /></span>
+      <div>
+        <div class="mp-kpi-num orange" id="kpiPendientes">0</div>
+        <div class="mp-kpi-lbl">Pendientes</div>
+      </div>
+    </div>
+    <div class="mp-kpi-card">
+      <span class="mp-kpi-icon" style="background:#dcfce7; color:#15803d;"><Icon name="bank-card" style="width:18px;height:18px;" /></span>
+      <div>
+        <div class="mp-kpi-num green" id="kpiPagados">0</div>
+        <div class="mp-kpi-lbl">Pagados</div>
+      </div>
+    </div>
+    <div class="mp-kpi-card">
+      <span class="mp-kpi-icon" style="background:#dbeafe; color:#1d4ed8;"><Icon name="refresh" style="width:18px;height:18px;" /></span>
+      <div>
+        <div class="mp-kpi-num blue" id="kpiProceso">0</div>
+        <div class="mp-kpi-lbl">En Proceso</div>
+      </div>
+    </div>
+    <div class="mp-kpi-card">
+      <span class="mp-kpi-icon" style="background:#d1fae5; color:#065f46;"><Icon name="check" style="width:18px;height:18px;" /></span>
+      <div>
+        <div class="mp-kpi-num emerald" id="kpiEntregados">0</div>
+        <div class="mp-kpi-lbl">Entregados</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR CON FILTROS Y BUSCADOR EN VIVO -->
+  <div class="pedidos-toolbar">
+    <button class="pedido-filter active" onclick="filterPedidos('todos',this)">
+      Todos <span class="filter-count-badge" id="badgeCountTodos">0</span>
+    </button>
+    <button class="pedido-filter" onclick="filterPedidos('pendiente',this)">
+      <Icon name="time" style="width:13px;height:13px;margin-right:4px;" /> Pendientes <span class="filter-count-badge" id="badgeCountPendiente">0</span>
+    </button>
+    <button class="pedido-filter" onclick="filterPedidos('pagado',this)">
+      <Icon name="bank-card" style="width:13px;height:13px;margin-right:4px;" /> Pagados <span class="filter-count-badge" id="badgeCountPagado">0</span>
+    </button>
+    <button class="pedido-filter" onclick="filterPedidos('proceso',this)">
+      <Icon name="refresh" style="width:13px;height:13px;margin-right:4px;" /> En proceso <span class="filter-count-badge" id="badgeCountProceso">0</span>
+    </button>
+    <button class="pedido-filter" onclick="filterPedidos('entregado',this)">
+      <Icon name="check" style="width:13px;height:13px;margin-right:4px;" /> Entregados <span class="filter-count-badge" id="badgeCountEntregado">0</span>
     </button>
     
-    <button class="btn-new-pedido" onclick="openNewPedido()">
-      <Icon name="add"  /> Nuevo pedido
-    </button>
+    <div style="position:relative; flex:1; min-width:240px; max-width:420px; margin-left:auto;">
+      <input type="text" id="pedidoSearchInput" placeholder="Buscar por cliente, WhatsApp, ramo o #guía..." oninput="onSearchPedidos(this.value)" class="pedidos-search-input" style="width:100%; padding-left:2.4rem;" />
+      <span style="position:absolute; left:0.85rem; top:50%; transform:translateY(-50%); color:var(--soft); pointer-events:none; display:inline-flex; align-items:center;"><Icon name="search" style="width:15px;height:15px;" /></span>
+    </div>
   </div>
-  <div id="pedidosList"></div>
+
+  <!-- LISTADO DE PEDIDOS (GRID OPTIMIZADO PARA PC) -->
+  <div id="pedidosList" class="pedidos-grid"></div>
 </div>
+

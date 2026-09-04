@@ -165,13 +165,19 @@ document.addEventListener('astro:page-load', () => {
 });
 
 
-// Exponer funciones al objeto window para compatibilidad con onclick
-(window as any).addToCart = (id: number) => {
-  const live = (window as any).NUDITOS_LIVE_PRODUCTS || [];
-  const p = live.find((x: any) => x.id === id) || products.find(x => x.id === id);
+(window as any).addToCart = (idOrProduct: number | string | any) => {
+  let p: any = null;
+  if (idOrProduct && typeof idOrProduct === 'object' && idOrProduct.id) {
+    p = idOrProduct;
+  } else {
+    const id = idOrProduct;
+    const live = (window as any).NUDITOS_LIVE_PRODUCTS || [];
+    p = live.find((x: any) => String(x.id) === String(id)) || products.find(x => String(x.id) === String(id));
+  }
 
   if (p && p.price > 0) {
     addToCart(p);
+    
     showToast(`${getIconSvg('check')} ${p.name} agregado`);
     
     // Forzar aparición de la Navbar si estaba oculta
@@ -185,10 +191,20 @@ document.addEventListener('astro:page-load', () => {
       setTimeout(() => btn.classList.remove('cart-bump-animation'), 400);
     });
 
-    const fn = (window as any).sbTrackCartEvent;
-    if (fn) fn(getOrCreateSessionId(), 'add_to_cart', { product_id: id, product_name: p.name, quantity: 1, cart_total: getCartTotal() });
+    // Abrir automáticamente el panel lateral del carrito de forma limpia e idempotente
+    if (typeof (window as any).openCart === 'function') {
+      (window as any).openCart();
+    } else {
+      const panel = document.getElementById('cartPanel');
+      if (panel && !panel.classList.contains('open') && typeof (window as any).toggleCart === 'function') {
+        (window as any).toggleCart();
+      }
+    }
 
-    document.querySelectorAll(`#padd-${id}`).forEach(btn => {
+    const fn = (window as any).sbTrackCartEvent;
+    if (fn) fn(getOrCreateSessionId(), 'add_to_cart', { product_id: p.id, product_name: p.name, quantity: 1, cart_total: getCartTotal() });
+
+    document.querySelectorAll(`#padd-${p.id}`).forEach(btn => {
       btn.classList.add('added');
       const originalHTML = btn.innerHTML;
       btn.innerHTML = getIconSvg('check');
@@ -198,13 +214,13 @@ document.addEventListener('astro:page-load', () => {
       }, 1300);
     });
   } else {
-    console.warn('[cart] Producto no encontrado o sin precio:', id);
+    console.warn('[cart] Producto no encontrado o sin precio:', idOrProduct, 'p:', p);
   }
 };
 
-(window as any).changeQtyWithAnim = (id: number, delta: number, btnEl: HTMLElement) => {
+(window as any).changeQtyWithAnim = (id: number | string, delta: number, btnEl: HTMLElement) => {
   const cart = $cart.get();
-  const item = cart.find(i => i.id === id);
+  const item = cart.find(i => String(i.id) === String(id));
   if (!item) return;
 
   const newQty = item.qty + delta;

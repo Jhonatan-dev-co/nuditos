@@ -236,6 +236,9 @@ function sbToConfig(rows) {
     gaActive:             m.ga_active === 'true',
     tiktokPixelActivo:    m.tiktok_pixel_activo === 'true',
     tiktokPixelId:        m.tiktok_pixel_id || '',
+    resendApiKey:         m.resend_api_key || '',
+    adminEmail:           m.admin_email || 'jhona@nuditos.com.co',
+    emailFrom:            m.email_from || 'Nuditos Tejidos <hola@nuditos.com.co>',
   };
 }
 
@@ -267,9 +270,16 @@ function sbToPedido(p) {
     guia:           p.guia              || '',
     transportadora: p.transportadora    || '',
     notas:          p.notas             || '',
+    direccion:      p.direccion         || '',
+    ciudad:         p.ciudad            || '',
+    departamento:   p.departamento      || '',
+    barrio:         p.barrio            || '',
+    codigoPostal:   p.codigo_postal     || '',
+    foto:           p.foto              || p.img || '',
     fecha:          p.created_at
-      ? new Date(p.created_at).toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' })
+      ? new Date(p.created_at).toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
       : '',
+    raw:            p,
   };
 }
 
@@ -456,6 +466,9 @@ async function sbAdminSaveConfig(cfg) {
     { clave: 'ga_active',           valor: String(!!cfg.gaActive) },
     { clave: 'tiktok_pixel_activo',  valor: String(!!cfg.tiktokPixelActivo) },
     { clave: 'tiktok_pixel_id',      valor: cfg.tiktokPixelId || '' },
+    { clave: 'resend_api_key',       valor: cfg.resendApiKey || '' },
+    { clave: 'admin_email',          valor: cfg.adminEmail || 'jhona@nuditos.com.co' },
+    { clave: 'email_from',           valor: cfg.emailFrom || 'Nuditos Tejidos <hola@nuditos.com.co>' },
   ];
   return _post('config?on_conflict=clave', updates, true, 'resolution=merge-duplicates');
 }
@@ -535,6 +548,13 @@ async function sbAdminSavePedido(data) {
     guia:              data.guia           || '',
     transportadora:    data.transportadora || '',
   };
+  if (data.direccion !== undefined) sbData.direccion = data.direccion;
+  if (data.ciudad !== undefined) sbData.ciudad = data.ciudad;
+  if (data.departamento !== undefined) sbData.departamento = data.departamento;
+  if (data.barrio !== undefined) sbData.barrio = data.barrio;
+  if (data.codigoPostal !== undefined) sbData.codigo_postal = data.codigoPostal;
+  if (data.foto !== undefined) sbData.foto = data.foto;
+
   if (data.id && !data._isNew) {
     const r = await _patch('pedidos', `id=eq.${data.id}`, sbData, true);
     return r && r[0] ? sbToPedido(r[0]) : null;
@@ -590,4 +610,19 @@ async function sbAdminSaveTestimonio(data) {
 
 async function sbAdminDeleteTestimonio(id) {
   return await _del('testimonios', `id=eq.${id}`, true);
+}
+
+/* ── CORREOS ELECTRÓNICOS ADMIN ── */
+async function sbAdminSendEmail(type, data) {
+  try {
+    const res = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, data })
+    });
+    const json = await res.json().catch(() => ({}));
+    return { ok: res.ok && json.success, ...json };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 }

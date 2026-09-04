@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { sendNuditosEmail } from '../../lib/emails';
 
 /**
  * NUDITOS — Webhook para Skydropx
@@ -96,20 +97,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // 3. Disparar correo al cliente vía Resend
     if (emailType && customerEmail) {
-      await fetch(`${baseURL}/api/send-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: emailType,
-          data: {
-            clienteEmail: customerEmail,
-            clienteNombre: customerName,
-            guia: trackingNumber,
-            transportadora: carrier,
-            trackingUrl: trackingUrl,
-            novedad: data.status_description || data.novedad
-          }
-        })
+      await sendNuditosEmail({
+        type: emailType,
+        data: {
+          clienteEmail: customerEmail,
+          clienteNombre: customerName,
+          guia: trackingNumber,
+          transportadora: carrier,
+          trackingUrl: trackingUrl,
+          novedad: data.status_description || data.novedad
+        },
+        locals
       });
       console.log(`[skydropx-webhook] 📧 Correo de tipo ${emailType} enviado a ${customerEmail}`);
     }

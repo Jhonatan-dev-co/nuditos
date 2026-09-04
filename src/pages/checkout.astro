@@ -495,7 +495,8 @@ const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       // Abandoned cart trigger (solo si hay email y el carrito tiene items)
       if (data['co-email'] && data['co-email'].includes('@') && typeof iniciarTimerCarritoAbandonado === 'function') {
         const fullname = `${data['co-nombre'] || ''} ${data['co-apellido'] || ''}`.trim();
-        iniciarTimerCarritoAbandonado(data['co-email'], fullname, window._cart);
+        const currentCart = (_cart && _cart.length) ? _cart : JSON.parse(localStorage.getItem('nuditos_cart') || '[]');
+        iniciarTimerCarritoAbandonado(data['co-email'], fullname, currentCart);
       }
     }
 

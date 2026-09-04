@@ -36,6 +36,52 @@ import Icon from '../Icon.astro';
   </div>
 
   <div class="t-card">
+    <div class="t-title">📧 Correos Electrónicos — Resend</div>
+    <div class="t-sub">Configura el envío automático de confirmaciones, guías de envío y notificaciones al taller.</div>
+    <div class="cloudinary-config">
+      <div class="cc-title"><Icon name="mail" /> Credenciales y Remitente</div>
+      <div class="cc-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; margin-top:0.5rem">
+        <div class="cc-field" style="grid-column: 1 / -1;">
+          <label>API Key de Resend (resend.com)</label>
+          <div style="display:flex;gap:0.4rem;">
+            <input type="password" id="resendApiKey" placeholder="re_xxxxxxxxxxxxxxxxxxxx" style="flex:1;">
+            <button type="button" class="btn-vis on" style="padding:0.4rem 0.8rem;font-size:0.75rem;" onclick="togglePasswordVisibility('resendApiKey', this)">👁 Ver</button>
+          </div>
+        </div>
+        <div class="cc-field">
+          <label>Correo del Administrador (Alertas de venta)</label>
+          <input type="email" id="adminEmail" placeholder="jhona@nuditos.com.co">
+        </div>
+        <div class="cc-field">
+          <label>Remitente Oficial</label>
+          <input type="text" id="emailFrom" placeholder="Nuditos Tejidos &lt;hola@nuditos.com.co&gt;">
+        </div>
+      </div>
+      <div style="margin-top:0.6rem;font-size:0.72rem;color:var(--text-soft);line-height:1.4;">
+        💡 <strong>Tip:</strong> Si aún no has verificado tu dominio en Resend, puedes usar temporalmente <code>Nuditos Tejidos &lt;onboarding@resend.dev&gt;</code> para probar.
+      </div>
+      <div style="display:flex;gap:0.6rem;margin-top:0.9rem;flex-wrap:wrap;">
+        <button class="cc-save" onclick="saveEmailConfig()"><Icon name="save" /> Guardar Configuración de Correos</button>
+        <a href="/preview-emails" target="_blank" class="btn-vis on" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;padding:0.6rem 1rem;font-size:0.8rem;">
+          <Icon name="eye" style="width:14px;height:14px;" /> Ver Plantillas de Correo
+        </a>
+      </div>
+
+      <!-- Herramienta de Diagnóstico y Prueba en Vivo -->
+      <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px dashed var(--border-color,#e5e7eb);">
+        <div style="font-size:0.82rem;font-weight:700;color:var(--text-dark);margin-bottom:0.4rem;">🧪 Probar Envío de Correo en Vivo</div>
+        <div style="display:flex;gap:0.5rem;align-items:center;max-width:550px;">
+          <input type="email" id="testEmailRecipient" placeholder="tu-correo@gmail.com" style="flex:1;padding:0.55rem 0.8rem;border:1.5px solid var(--border-color,#e5e7eb);border-radius:10px;font-size:0.82rem;outline:none;">
+          <button type="button" id="btnTestEmail" class="btn-save" style="margin:0;padding:0.55rem 1.1rem;font-size:0.8rem;white-space:nowrap;" onclick="testEmailConfig()">
+            <Icon name="send-plane" style="width:14px;height:14px;" /> Probar Ahora
+          </button>
+        </div>
+        <div id="testEmailStatus" style="display:none;margin-top:0.6rem;padding:0.6rem 0.8rem;border-radius:8px;font-size:0.78rem;line-height:1.4;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="t-card">
     <div class="t-title">💳 Wompi — Pasarela de pago</div>
     <div class="t-sub">Activa el botón de pago con tarjeta y PSE en el carrito.</div>
     <div class="toggle-row">

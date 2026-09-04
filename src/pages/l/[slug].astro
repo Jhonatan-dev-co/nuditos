@@ -108,8 +108,8 @@ if (urlHeroSlug) {
     adProduct = liveProducts.find(p => slugify(p.name) === urlHeroSlug);
   }
 } else if (catSlug === 'flores-amarillas') {
-  // Orden de prioridad para destacar los 4 ramos amarillos más icónicos y vendidos
-  const featuredKeywords = ['abejita', 'flor y miel', 'trio de girasoles', 'flores amarillas'];
+  // Orden de prioridad para destacar los ramos amarillos más icónicos y el super combo estrella
+  const featuredKeywords = ['super combo', 'dos ramos', 'abejita', 'flor y miel', 'trio de girasoles', 'flores amarillas'];
   
   landingProducts.sort((a, b) => {
     const aName = (a.name || '').toLowerCase();
@@ -150,7 +150,8 @@ const heroImg: string = defaultSelectedProduct?.img || content.heroImg || defaul
 const heroProductName: string = defaultSelectedProduct?.name || landingData.title;
 const heroProductPrice: number = defaultSelectedProduct?.price || minPrice;
 const heroProductId: number = defaultSelectedProduct?.id || (ordenados[0]?.id || 0);
-const unboxingImg: string = content.unboxingImg || ordenados[1]?.img || ordenados[0]?.img || '';
+const unboxingVideo: string = content.unboxingVideo || 'https://res.cloudinary.com/dzxgu27wr/video/upload/q_auto:best,vc_auto/v1788554686/nuditos-products/iswxjie5xmwei8o1d8nn.mp4';
+const unboxingPoster: string = content.unboxingPoster || 'https://res.cloudinary.com/dzxgu27wr/video/upload/so_1,q_auto:best,f_auto/v1788554686/nuditos-products/iswxjie5xmwei8o1d8nn.jpg';
 
 // Enlace de WhatsApp personalizado según landing y ramo seleccionado
 const waMessage = content.ctaWaText || `Hola Nuditos! Quiero comprar el ramo ${heroProductName} (${heroProductPrice > 0 ? '$' + heroProductPrice.toLocaleString('es-CO') + ' COP' : ''})`;
@@ -219,16 +220,19 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
         </div>
 
         <!-- Card Compacta del Ramo Seleccionado -->
-        <div class="bg-amber-50/60 border border-amber-200/70 rounded-2xl px-3.5 py-2.5 mb-3.5 flex items-center justify-between gap-3">
+        <div class="bg-amber-50/70 border border-amber-200/80 rounded-2xl px-3.5 py-2.5 mb-3.5 flex items-center justify-between gap-3 shadow-2xs">
           <div class="min-w-0">
             <span class="text-[9px] sm:text-[10px] font-bold text-amber-800 uppercase tracking-wider block">Ramo Destacado</span>
             <span id="heroSelectedProductName" class="font-bold text-xs sm:text-sm text-stone-900 truncate block">
               {heroProductName}
             </span>
           </div>
-          <div class="text-right flex-shrink-0">
-            <span class="text-[9px] text-stone-400 block">Precio</span>
-            <span id="heroSelectedProductPrice" class="font-extrabold text-xs sm:text-sm text-stone-900">
+          <div class="text-right flex-shrink-0 flex flex-col items-end">
+            <span class="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-extrabold text-amber-900 bg-amber-100/90 border border-amber-300/80 px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-0.5">
+              <Icon name="award" class="w-3 h-3 text-amber-700" />
+              <span>Favorito • Mejor precio</span>
+            </span>
+            <span id="heroSelectedProductPrice" class="font-black text-xs sm:text-sm text-stone-900">
               ${heroProductPrice.toLocaleString('es-CO')}
             </span>
           </div>
@@ -244,7 +248,7 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
             class="flex-1 inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white px-5 sm:px-7 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-lg active:scale-95 cursor-pointer relative overflow-hidden group"
           >
             <Icon name="shopping-bag-3" class="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
-            <span id="btnHeroBuyText">Comprar ramo</span>
+            <span id="btnHeroBuyText">Agregar al carrito</span>
           </button>
           <a 
             id="heroWaBtn"
@@ -260,8 +264,102 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
     </div>
   </section>
 
-  <!-- ════════ TESTIMONIOS DINÁMICOS ════════ -->
-  <TestimonialsSection />
+  <!-- ════════ VIDEO DE EMPAQUE & CAJAS (Cara al producto y empaque) ════════ -->
+  <section class="bg-white py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-6 border-b border-stone-100" id="section-why">
+    <div class="max-w-[1200px] mx-auto">
+      <div class="text-center max-w-lg mx-auto mb-5 sm:mb-7">
+        <span class="inline-flex items-center bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2">
+          Empaque & Envíos
+        </span>
+        <h2 class="font-serif text-2xl sm:text-3xl md:text-4xl font-light text-slate-800 leading-tight">
+          Así viaja <em class="italic text-amber-600 font-normal">tu ramo</em>
+        </h2>
+        <p class="text-slate-500 text-xs sm:text-sm mt-1.5 max-w-sm mx-auto">
+          Cajas rígidas reforzadas y empaque premium listo para regalar en cualquier rincón de Colombia.
+        </p>
+      </div>
+
+      <!-- Video y Foto de Cajas Centrado -->
+      <div class="flex flex-col gap-3 max-w-[440px] md:max-w-[480px] mx-auto w-full">
+        <div class="aspect-[4/5] rounded-2xl sm:rounded-3xl bg-stone-950 border border-stone-200/80 overflow-hidden shadow-lg relative group select-none" id="whyCarousel">
+          
+          <!-- Barra de progreso superior estilo Reel/Story -->
+          <div class="absolute top-0 inset-x-0 h-1 bg-white/25 z-30 overflow-hidden">
+            <div id="videoProgressBar" class="h-full bg-amber-400 transition-all duration-100 ease-linear" style="width: 0%;"></div>
+          </div>
+
+          <!-- Slide 0: Video de Empaque -->
+          <div class="w-full h-full absolute inset-0 why-slide why-slide-active bg-stone-950 flex items-center justify-center overflow-hidden" data-slide-type="video">
+            <video
+              id="unboxingVideo"
+              class="w-full h-full object-cover"
+              autoplay
+              loop
+              muted
+              playsinline
+              preload="metadata"
+              poster={unboxingPoster}
+            >
+              <source src={unboxingVideo} type="video/mp4" />
+            </video>
+
+            <!-- Botón flotante para Activar / Silenciar Sonido -->
+            <button
+              type="button"
+              id="btnToggleAudio"
+              class="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/75 hover:bg-black/90 backdrop-blur-md text-white text-xs font-semibold tracking-wide border border-white/25 shadow-lg transition-all active:scale-95 cursor-pointer"
+              title="Activar o desactivar sonido"
+            >
+              <span id="audioIcon" class="flex items-center justify-center">
+                <Icon name="volume-up" class="w-4 h-4 text-amber-300" />
+              </span>
+              <span id="audioLabel">Activar sonido</span>
+            </button>
+
+            <!-- Insignia "Así empacamos tu ramo" -->
+            <div class="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-white/95 text-[11px] font-bold tracking-wider uppercase border border-white/15 pointer-events-none shadow-sm">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span class="w-2 h-2 rounded-full bg-emerald-400 -ml-4"></span>
+              <span>Así empacamos tu ramo</span>
+            </div>
+          </div>
+
+          <!-- Slide 1: Foto - Cajas listas para despacho -->
+          <div class="w-full h-full absolute inset-0 why-slide bg-stone-950 flex items-center justify-center overflow-hidden" data-slide-type="image">
+            <img
+              src="https://res.cloudinary.com/dzxgu27wr/image/upload/q_auto,f_auto/v1788508133/nuditos-products/cajas-envios-nuditos-2.jpg"
+              class="w-full h-full object-cover"
+              alt="Envíos Nuditos - Ramos empacados en cajas rígidas"
+            />
+            <div class="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/75 backdrop-blur-md text-white text-xs font-medium border border-white/20 pointer-events-none shadow-md">
+              <Icon name="package" class="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
+              <span>Cajas rígidas listas para despacho</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selector interactivo de contenido (Solo 2 pestañas: Video empaque y Cajas listas) -->
+        <div class="flex items-center justify-center gap-2" id="whyTabs">
+          <button
+            type="button"
+            class="why-tab active flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer select-none"
+            data-slide-index="0"
+          >
+            <Icon name="video" class="w-3.5 h-3.5" />
+            <span>Video empaque</span>
+          </button>
+          <button
+            type="button"
+            class="why-tab flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium text-stone-600 bg-stone-100 hover:bg-stone-200/80 border border-stone-200 transition-all cursor-pointer select-none"
+            data-slide-index="1"
+          >
+            <Icon name="package" class="w-3.5 h-3.5" />
+            <span>Cajas listas</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ════════ CATÁLOGO ════════ -->
   <section id="catalogo" class="bg-stone-50 py-6 sm:py-8 md:py-14 px-2.5 sm:px-4 md:px-6 border-t border-stone-100">
@@ -318,11 +416,13 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
     </div>
   </section>
 
-  <!-- ════════ POR QUÉ NUDITOS ════════ -->
-  <section class="bg-white py-6 sm:py-8 md:py-14 px-3 sm:px-4 md:px-6 border-y border-stone-100">
-    <div class="max-w-[1200px] mx-auto">
+  <!-- ════════ CLIENTES FELICES (Testimonios Dinámicos) ════════ -->
+  <TestimonialsSection />
 
-      <!-- Header homogenizado -->
+  <!-- ════════ POR QUÉ ELEGIR NUDITOS (Beneficios del Producto) ════════ -->
+  <section class="bg-stone-50/70 py-8 sm:py-10 md:py-14 px-3 sm:px-4 md:px-6 border-t border-stone-100" id="section-beneficios">
+    <div class="max-w-[1000px] mx-auto">
+      <!-- Header -->
       <div class="text-center max-w-lg mx-auto mb-6 sm:mb-8">
         <span class="inline-flex items-center bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2">
           ¿Por qué elegir Nuditos?
@@ -335,41 +435,45 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
         </p>
       </div>
 
-      <div class="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-12 items-center">
-        <!-- Imagen envíos - Carrusel crossfade -->
-        <div class="aspect-[4/3] md:aspect-square rounded-2xl md:rounded-3xl bg-stone-100 border border-stone-100 overflow-hidden shadow-md relative" id="whyCarousel">
-          <img src="/img/envios-nuditos-1.jpg" class="w-full h-full object-cover absolute inset-0 why-slide why-slide-active" alt="Envíos Nuditos - Cajas listas para despacho" loading="lazy" />
-          <img src="/img/envios-nuditos-2.jpg" class="w-full h-full object-cover absolute inset-0 why-slide" alt="Envíos Nuditos - Pedidos empacados" loading="lazy" />
+      <!-- Beneficios en tarjetas limpias estilo screenshot -->
+      <div class="grid md:grid-cols-2 gap-3 sm:gap-4 max-w-[880px] mx-auto">
+        <div class="flex items-start gap-3.5 sm:gap-4 p-4 sm:p-5 bg-white rounded-2xl border border-stone-200/70 shadow-xs hover:border-amber-200 hover:shadow-sm transition-all">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-100/70 flex items-center justify-center flex-shrink-0">
+            <Icon name="star" class="w-5 h-5 text-amber-500" />
+          </div>
+          <div class="min-w-0">
+            <div class="text-[13px] sm:text-sm font-bold text-slate-800 mb-1">Durabilidad infinita</div>
+            <p class="text-slate-500 leading-relaxed text-xs sm:text-[13px]">Las flores de florería duran 5–7 días. Los ramos Nuditos duran para siempre.</p>
+          </div>
         </div>
 
-        <!-- Beneficios -->
-        <div class="space-y-2.5 sm:space-y-3">
-          <div class="flex items-start gap-2.5 sm:gap-3 p-3 sm:p-3.5 bg-stone-50 rounded-xl sm:rounded-2xl border border-stone-100">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <Icon name="magic" class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-amber-600" />
-            </div>
-            <div class="min-w-0">
-              <div class="text-xs sm:text-[13px] font-bold text-slate-800 mb-0.5">Durabilidad infinita</div>
-              <p class="text-slate-500 leading-relaxed text-[11px] sm:text-xs">Las flores de florería duran 5–7 días. Los ramos Nuditos duran para siempre.</p>
-            </div>
+        <div class="flex items-start gap-3.5 sm:gap-4 p-4 sm:p-5 bg-white rounded-2xl border border-stone-200/70 shadow-xs hover:border-rose-200 hover:shadow-sm transition-all">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-rose-100/70 flex items-center justify-center flex-shrink-0">
+            <Icon name="hand-heart" class="w-5 h-5 text-rose-500" />
           </div>
-          <div class="flex items-start gap-2.5 sm:gap-3 p-3 sm:p-3.5 bg-stone-50 rounded-xl sm:rounded-2xl border border-stone-100">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-rose-100 flex items-center justify-center flex-shrink-0">
-              <Icon name="hand-heart" class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-rose-500" />
-            </div>
-            <div class="min-w-0">
-              <div class="text-xs sm:text-[13px] font-bold text-slate-800 mb-0.5">Pieza única</div>
-              <p class="text-slate-500 leading-relaxed text-[11px] sm:text-xs">Cada ramo es tejido a mano con dedicación. No hay dos iguales.</p>
-            </div>
+          <div class="min-w-0">
+            <div class="text-[13px] sm:text-sm font-bold text-slate-800 mb-1">Pieza única hecha a mano</div>
+            <p class="text-slate-500 leading-relaxed text-xs sm:text-[13px]">Cada ramo es tejido punto a punto con dedicación y lana suave hipoalergénica.</p>
           </div>
-          <div class="flex items-start gap-2.5 sm:gap-3 p-3 sm:p-3.5 bg-stone-50 rounded-xl sm:rounded-2xl border border-stone-100">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-              <Icon name="truck" class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-blue-500" />
-            </div>
-            <div class="min-w-0">
-              <div class="text-xs sm:text-[13px] font-bold text-slate-800 mb-0.5">Empaque seguro + dedicatoria</div>
-              <p class="text-slate-500 leading-relaxed text-[11px] sm:text-xs">Caja rígida reforzada, listo para regalar con tarjeta escrita a mano.</p>
-            </div>
+        </div>
+
+        <div class="flex items-start gap-3.5 sm:gap-4 p-4 sm:p-5 bg-white rounded-2xl border border-stone-200/70 shadow-xs hover:border-blue-200 hover:shadow-sm transition-all">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-blue-100/70 flex items-center justify-center flex-shrink-0">
+            <Icon name="truck" class="w-5 h-5 text-blue-500" />
+          </div>
+          <div class="min-w-0">
+            <div class="text-[13px] sm:text-sm font-bold text-slate-800 mb-1">Empaque rígido + dedicatoria</div>
+            <p class="text-slate-500 leading-relaxed text-xs sm:text-[13px]">Caja rígida reforzada para envíos nacionales, listo para regalar con tarjeta escrita a mano.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3.5 sm:gap-4 p-4 sm:p-5 bg-white rounded-2xl border border-stone-200/70 shadow-xs hover:border-emerald-200 hover:shadow-sm transition-all">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-emerald-100/70 flex items-center justify-center flex-shrink-0">
+            <Icon name="checkbox-circle" class="w-5 h-5 text-emerald-500" />
+          </div>
+          <div class="min-w-0">
+            <div class="text-[13px] sm:text-sm font-bold text-slate-800 mb-1">Garantía de entrega perfecta</div>
+            <p class="text-slate-500 leading-relaxed text-xs sm:text-[13px]">Más de 1.500 envíos en Colombia. Tu ramo viaja 100% asegurado hasta tus manos.</p>
           </div>
         </div>
       </div>
@@ -461,7 +565,7 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
   <!-- ════════ STICKY CTA BAR (Mobile/Desktop) ════════ -->
   <div
     id="stickyCTA"
-    class="fixed bottom-[68px] md:bottom-8 left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-[94%] md:max-w-[520px] z-[1600] border-t md:border px-3.5 py-2.5 md:p-2.5 md:rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] translate-y-[150%] opacity-0 pointer-events-none"
+    class="fixed bottom-[68px] md:bottom-8 left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-[94%] md:max-w-[520px] z-[90] border-t md:border px-3.5 py-2.5 md:p-2.5 md:rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] translate-y-[150%] opacity-0 pointer-events-none"
   >
     <div class="flex items-center gap-2.5 sm:gap-3 max-w-[520px] mx-auto md:mx-0">
       <!-- Miniatura -->
@@ -489,7 +593,7 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
         class="bg-[#1a1220] hover:bg-black text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-full text-xs font-bold tracking-wide active:scale-95 transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap cursor-pointer"
       >
         <Icon name="shopping-bag-3" class="w-3.5 h-3.5 text-amber-400" />
-        <span id="btnStickyBuyText">Comprar</span>
+        <span id="btnStickyBuyText">Agregar al carrito</span>
       </button>
     </div>
   </div>
@@ -497,12 +601,13 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
   <style>
     html { scroll-behavior: smooth; }
     
-    /* Estilo base estándar para Android, Windows y otros navegadores (Igual a la barra superior) */
+    /* Estilo base estándar para Android, Windows y otros navegadores */
     #stickyCTA { 
       will-change: transform, opacity; 
       background-color: #ffffff;
       border-color: rgba(231, 229, 228, 0.95);
       box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+      z-index: 50 !important;
     }
     #stickyCTA.is-visible { transform: translate(0, 0); opacity: 1; pointer-events: auto; }
     @media (min-width: 768px) { 
@@ -510,6 +615,17 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
       #stickyCTA {
         box-shadow: 0 16px 45px rgba(0, 0, 0, 0.14);
       }
+    }
+
+    /* Ocultar y enviar al fondo cuando el carrito esté abierto */
+    :global(body.scroll-lock) #stickyCTA,
+    :global(body:has(#cartPanel.open)) #stickyCTA,
+    :global(body:has(#cartOverlay.open)) #stickyCTA {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(150%) !important;
+      z-index: -1 !important;
+      display: none !important;
     }
 
     /* Efecto Glassmorphism exclusivo para iPhone, iPad y Mac */
@@ -545,9 +661,15 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
     #cdSecs { animation: cdPulse 1s ease-in-out infinite; }
     @keyframes cdPulse { 0%,100%{opacity:1} 50%{opacity:.7} }
 
-    /* Carousel */
-    .why-slide { opacity: 0; transition: opacity 1.2s ease-in-out; }
-    .why-slide-active { opacity: 1; }
+    /* Carousel & Video Unboxing */
+    .why-slide { opacity: 0; transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; }
+    .why-slide-active { opacity: 1; pointer-events: auto; }
+    .why-tab.active {
+      background-color: #d97706 !important;
+      color: #ffffff !important;
+      border-color: #d97706 !important;
+      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.35);
+    }
 
     /* FAQ Accordion */
     details summary { list-style: none; }
@@ -653,34 +775,52 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
       }
     };
 
-    // Manejador del botón Comprar con animación visual y apertura del carrito
+    // Manejador del botón Agregar al Carrito con apertura garantizada del panel
     window.handleHeroBuy = function(btn) {
-      var id = Number(btn.getAttribute('data-product-id'));
-      if (!id) return;
+      var id = Number(btn.getAttribute('data-product-id')) || 138;
 
-      // 1. Agregar al carrito
-      if (typeof window.addToCart === 'function') {
-        window.addToCart(id);
-      }
-
-      // 2. Animación de feedback en el botón
-      var btnText = document.getElementById('btnHeroBuyText');
-      var originalText = btnText ? btnText.textContent : 'Comprar ramo';
-
-      btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'scale-[1.02]');
+      // 1. Feedback visual inmediato en el botón pulsado
+      var textSpan = btn.querySelector('#btnHeroBuyText, #btnStickyBuyText');
+      if (!textSpan) textSpan = btn.querySelector('span:last-of-type');
+      var originalText = textSpan ? textSpan.textContent : 'Agregar al carrito';
+      btn.classList.add('bg-emerald-600', 'scale-[1.02]');
       btn.classList.remove('bg-[#1a1220]', 'hover:bg-black');
-      if (btnText) btnText.textContent = '¡Ramo agregado!';
+      if (textSpan) textSpan.textContent = '¡Agregado!';
 
       setTimeout(function() {
-        btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'scale-[1.02]');
+        btn.classList.remove('bg-emerald-600', 'scale-[1.02]');
         btn.classList.add('bg-[#1a1220]', 'hover:bg-black');
-        if (btnText) btnText.textContent = originalText;
+        if (textSpan) textSpan.textContent = originalText;
+      }, 1200);
 
-        // 3. Abrir la bolsa para que el cliente vea el ramo agregado
-        if (typeof toggleCart === 'function') {
-          toggleCart();
+      // 2. Localizar producto en los datos live o construir fallback confiable
+      var prods = window.NUDITOS_LIVE_PRODUCTS || [];
+      var p = prods.find(function(item) { return Number(item.id) === id; });
+      
+      if (!p) {
+        // Fallback: construir producto desde el DOM
+        var nameEl = document.getElementById('heroSelectedProductName');
+        var priceEl = document.getElementById('heroSelectedProductPrice');
+        var imgEl = document.getElementById('heroMainImg');
+        var priceNum = priceEl ? Number(priceEl.textContent.replace(/[^\d]/g, '')) : 81000;
+        p = {
+          id: id,
+          name: (nameEl && nameEl.textContent) ? nameEl.textContent.trim() : 'Flores amarillas',
+          price: priceNum || 81000,
+          img: imgEl ? imgEl.src : '',
+          emoji: '🌸'
+        };
+      }
+
+      // 3. Ejecutar agregar al carrito (addToCart se encarga de abrir el panel)
+      function doAdd() {
+        if (typeof window.addToCart === 'function') {
+          window.addToCart(p);
+        } else {
+          setTimeout(doAdd, 50);
         }
-      }, 700);
+      }
+      doAdd();
     };
 
     (function() {
@@ -705,15 +845,177 @@ const waUrl = `https://wa.me/573144931525?text=${encodeURIComponent(waMessage)}`
         }
       });
 
-      // 3. Why Nuditos carousel
+      // 3. Why Nuditos carousel + Interactive Video (Opción 1)
+      var whyCarousel = document.getElementById('whyCarousel');
+      var whySection = document.getElementById('section-why');
+      var unboxingVideo = document.getElementById('unboxingVideo');
+      var btnToggleAudio = document.getElementById('btnToggleAudio');
+      var audioIcon = document.getElementById('audioIcon');
+      var audioLabel = document.getElementById('audioLabel');
       var slides = document.querySelectorAll('.why-slide');
-      if (slides.length > 1) {
-        var current = 0;
-        setInterval(function() {
-          slides[current].classList.remove('why-slide-active');
-          current = (current + 1) % slides.length;
-          slides[current].classList.add('why-slide-active');
-        }, 4000);
+      var tabs = document.querySelectorAll('.why-tab');
+
+      var currentIndex = 0;
+      var slideTimeout = null;
+      var isHoveringOrWatching = false;
+      var isAudioActive = false;
+
+      function updateTabs(index) {
+        tabs.forEach(function(tab, i) {
+          if (i === index) {
+            tab.classList.add('active');
+            tab.classList.remove('bg-stone-100', 'text-stone-600', 'border-stone-200');
+          } else {
+            tab.classList.remove('active');
+            tab.classList.add('bg-stone-100', 'text-stone-600', 'border-stone-200');
+          }
+        });
+      }
+
+      function goToSlide(index, manualClick) {
+        if (index < 0 || index >= slides.length) return;
+        clearTimeout(slideTimeout);
+
+        slides.forEach(function(s, i) {
+          if (i === index) {
+            s.classList.add('why-slide-active');
+          } else {
+            s.classList.remove('why-slide-active');
+          }
+        });
+
+        currentIndex = index;
+        updateTabs(index);
+
+        if (index === 0) {
+          // Slide de video
+          if (unboxingVideo) {
+            var playPromise = unboxingVideo.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(function() {});
+            }
+          }
+          // Si el usuario activó sonido, dio clic manual al tab o está interactuando fijamente, NO rotar
+          if (isAudioActive || (manualClick && index === 0) || isHoveringOrWatching) {
+            return;
+          }
+          // Rotación normal: dura 6.5s en el video antes de pasar a la foto
+          slideTimeout = setTimeout(function() {
+            if (!isHoveringOrWatching && !isAudioActive) {
+              goToSlide(1);
+            }
+          }, 6500);
+        } else {
+          // Slide de foto: pausamos el video para liberar CPU
+          if (unboxingVideo && !unboxingVideo.paused) {
+            unboxingVideo.pause();
+          }
+          // Cada foto dura 4.2s
+          slideTimeout = setTimeout(function() {
+            if (!isHoveringOrWatching && !isAudioActive) {
+              var next = (currentIndex + 1) % slides.length;
+              goToSlide(next);
+            }
+          }, 4200);
+        }
+      }
+
+      // Toggle Sonido con Iconos SVG
+      var svgVolumeUp = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="w-4 h-4 text-amber-300"><path d="M13 3.00005L6.41421 9.00005H2V15H6.41421L13 21V3.00005ZM16.5 12C16.5 10.23 15.48 8.71 14 7.97V16.02C15.48 15.29 16.5 13.77 16.5 12ZM14 3.23V5.29C16.89 6.15 19 8.83 19 12C19 15.17 16.89 17.85 14 18.71V20.77C18.01 19.86 21 16.28 21 12C21 7.72 18.01 4.14 14 3.23Z"></path></svg>';
+      var svgVolumeMute = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="w-4 h-4 text-stone-300"><path d="M13 3.00005L6.41421 9.00005H2V15H6.41421L13 21V3.00005ZM17.7782 12L19.8995 9.87873L18.4853 8.46452L16.364 10.5858L14.2426 8.46452L12.8284 9.87873L14.9497 12L12.8284 14.1214L14.2426 15.5356L16.364 13.4143L18.4853 15.5356L19.8995 14.1214L17.7782 12Z"></path></svg>';
+
+      if (btnToggleAudio && unboxingVideo) {
+        btnToggleAudio.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (unboxingVideo.muted) {
+            unboxingVideo.muted = false;
+            isAudioActive = true;
+            if (audioIcon) audioIcon.innerHTML = svgVolumeMute;
+            if (audioLabel) audioLabel.textContent = 'Silenciar';
+            // Al activar sonido, detenemos la rotación para que escuche y vea el video completo
+            clearTimeout(slideTimeout);
+            unboxingVideo.play().catch(function() {});
+          } else {
+            unboxingVideo.muted = true;
+            isAudioActive = false;
+            if (audioIcon) audioIcon.innerHTML = svgVolumeUp;
+            if (audioLabel) audioLabel.textContent = 'Activar sonido';
+          }
+        });
+      }
+
+      // Barra de progreso superior del video unboxing
+      if (unboxingVideo) {
+        var videoProgressBar = document.getElementById('videoProgressBar');
+        unboxingVideo.addEventListener('timeupdate', function() {
+          if (videoProgressBar && unboxingVideo.duration) {
+            videoProgressBar.style.width = (unboxingVideo.currentTime / unboxingVideo.duration * 100) + '%';
+          }
+        });
+      }
+
+      // Si termina el video
+      if (unboxingVideo) {
+        unboxingVideo.addEventListener('ended', function() {
+          if (!isHoveringOrWatching && !isAudioActive) {
+            goToSlide(1);
+          }
+        });
+      }
+
+      // Detección cuando el cliente mira fijamente (hover en PC o toque en móvil)
+      if (whyCarousel) {
+        whyCarousel.addEventListener('mouseenter', function() {
+          if (currentIndex === 0) {
+            isHoveringOrWatching = true;
+            clearTimeout(slideTimeout);
+          }
+        });
+        whyCarousel.addEventListener('mouseleave', function() {
+          if (currentIndex === 0) {
+            isHoveringOrWatching = false;
+            if (!isAudioActive) {
+              slideTimeout = setTimeout(function() {
+                if (!isHoveringOrWatching && !isAudioActive) {
+                  goToSlide(1);
+                }
+              }, 3000);
+            }
+          }
+        });
+        whyCarousel.addEventListener('touchstart', function() {
+          if (currentIndex === 0) {
+            isHoveringOrWatching = true;
+            clearTimeout(slideTimeout);
+          }
+        }, { passive: true });
+      }
+
+      // Click en pestañas
+      tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          var targetIndex = Number(tab.getAttribute('data-slide-index') || '0');
+          goToSlide(targetIndex, true);
+        });
+      });
+
+      // IntersectionObserver: Cada vez que el usuario vuelve a la sección,
+      // actualiza automáticamente al video (Slide 0) para intentar que el cliente vea el video
+      if (whySection && 'IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              goToSlide(0);
+            } else {
+              if (unboxingVideo && !unboxingVideo.paused) {
+                unboxingVideo.pause();
+              }
+            }
+          });
+        }, { threshold: 0.25 });
+        observer.observe(whySection);
+      } else {
+        goToSlide(0);
       }
 
       // 4. Load More cards expander

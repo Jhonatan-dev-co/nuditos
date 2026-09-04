@@ -199,6 +199,7 @@ const currentProduct = {
              {product.badge === 'Nuevo'    && <Icon name="sparkling" class="text-emerald-500 w-3.5 h-3.5" />}
              {product.badge === 'Popular'  && <Icon name="fire" class="text-rose-500 w-3.5 h-3.5" />}
              {product.badge === 'Especial' && <Icon name="award" class="text-amber-500 w-3.5 h-3.5" />}
+             {(product.badge.includes('Vendido') || product.badge.includes('Precio')) && <Icon name="award" class="text-amber-500 w-3.5 h-3.5" />}
              <span>{product.badge}</span>
           </div>
         )}
@@ -508,7 +509,7 @@ const currentProduct = {
   <!-- ════════ STICKY CTA BAR (Mobile & Desktop con Apple Glassmorphism) ════════ -->
   <div
     id="stickyCTA"
-    class="fixed bottom-[68px] md:bottom-8 left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-[94%] md:max-w-[520px] z-[1600] border-t md:border px-3.5 py-2.5 md:p-2.5 md:rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] translate-y-[150%] opacity-0 pointer-events-none"
+    class="fixed bottom-[68px] md:bottom-8 left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-[94%] md:max-w-[520px] z-[90] border-t md:border px-3.5 py-2.5 md:p-2.5 md:rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] translate-y-[150%] opacity-0 pointer-events-none"
   >
     <div class="flex items-center gap-2.5 sm:gap-3 max-w-[520px] mx-auto md:mx-0">
       <!-- Miniatura -->
@@ -550,6 +551,7 @@ const currentProduct = {
       background-color: #ffffff;
       border-color: rgba(231, 229, 228, 0.95);
       box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+      z-index: 90 !important;
     }
     #stickyCTA.is-visible { transform: translate(0, 0); opacity: 1; pointer-events: auto; }
     @media (min-width: 768px) { 
@@ -557,6 +559,15 @@ const currentProduct = {
       #stickyCTA {
         box-shadow: 0 16px 45px rgba(0, 0, 0, 0.14);
       }
+    }
+
+    /* Ocultar y enviar al fondo cuando el carrito esté abierto */
+    :global(body.scroll-lock) #stickyCTA,
+    :global(body:has(#cartPanel.open)) #stickyCTA {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(150%) !important;
+      z-index: 10 !important;
     }
 
     /* Efecto Glassmorphism exclusivo para iPhone, iPad y Mac */
@@ -618,7 +629,9 @@ const currentProduct = {
           if (btnText) btnText.textContent = orig;
 
           // Abrir carrito
-          if (typeof toggleCart === 'function') {
+          if (typeof openCart === 'function') {
+            openCart();
+          } else if (typeof toggleCart === 'function') {
             toggleCart();
           }
         }, 700);
