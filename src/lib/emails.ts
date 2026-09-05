@@ -22,7 +22,17 @@ const SVG_ICONS = {
   mail: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8c5fad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
   phone: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
   mapPin: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8c5fad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
-  camera: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8c5fad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`
+  camera: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8c5fad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`,
+  copy: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
+  clock: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  cardHeart: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8c5fad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`,
+  tag: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><circle cx="7" cy="7" r="1.5"/></svg>`,
+  arrowRight: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-left:6px;"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`,
+  shieldCheck: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8c5fad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`,
+  whatsapp: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+  pillarFlower: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8c5fad" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 6px;display:block;"><circle cx="12" cy="12" r="3"/><path d="M12 2a4 4 0 0 1 4 4c0 2-4 6-4 6s-4-4-4-6a4 4 0 0 1 4-4Z"/><path d="M12 22a4 4 0 0 1-4-4c0-2 4-6 4-6s4 4 4 6a4 4 0 0 1-4 4Z"/><path d="M2 12a4 4 0 0 1 4-4c2 0 6 4 6 4s-4 4-6 4a4 4 0 0 1-4-4Z"/><path d="M22 12a4 4 0 0 1-4 4c-2 0-6-4-6-4s4-4 6-4a4 4 0 0 1 4 4Z"/></svg>`,
+  pillarTruck: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8c5fad" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 6px;display:block;"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
+  pillarCard: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8c5fad" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 6px;display:block;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`
 };
 
 // ── ESTILOS COMPARTIDOS ──
@@ -252,7 +262,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
     const config = await getEmailConfig(locals);
 
     if (!config.resendApiKey) {
-      console.error('[sendNuditosEmail] ❌ Error: Falta RESEND_API_KEY en variables de entorno o en la tabla config de Supabase.');
+      console.error('[sendNuditosEmail] [Error] Falta RESEND_API_KEY en variables de entorno o en la tabla config de Supabase.');
       return { 
         success: false, 
         error: 'Falta la API Key de Resend. Configúrala en el panel admin (Configuración > Correos).' 
@@ -376,7 +386,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
                 <div style="font-size:18px;font-weight:700;color:${textPrimary};margin-bottom:18px;">${escapeHtml(carrier)}</div>
                 <div style="font-size:12px;color:${textMuted};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Número de Guía</div>
                 <div class="email-guia" style="display:inline-block;background:linear-gradient(135deg,${brandColor},${brandDark});color:#fff;padding:12px 28px;border-radius:12px;font-size:22px;font-weight:700;letter-spacing:2px;user-select:all;">${escapeHtml(guia)}</div>
-                <div style="margin-top:12px;"><span style="display:inline-block;background:#f0ebf8;border:1.5px dashed ${brandColor};color:${brandDark};padding:6px 16px;border-radius:30px;font-size:12px;font-weight:700;">📋 Toca para copiar guía</span></div>
+                <div style="margin-top:12px;"><span style="display:inline-block;background:#f0ebf8;border:1.5px dashed ${brandColor};color:${brandDark};padding:6px 16px;border-radius:30px;font-size:12px;font-weight:700;">${SVG_ICONS.copy} Toca para copiar guía</span></div>
               </div>
             </div>
           </td></tr>
@@ -488,7 +498,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
           <tr><td class="email-pad" style="padding:8px 40px 24px;">
             <div class="email-card" style="background:#ecfdf5;border-radius:16px;border:1px solid #a7f3d0;padding:24px;text-align:center;box-shadow:0 2px 16px rgba(5,150,105,0.08);">
               <div class="email-card-inner">
-                <p style="font-size:16px;color:#047857;margin:0 0 10px;font-weight:600;">Esperamos que disfrutes mucho tus flores eternas 🌸</p>
+                <p style="font-size:16px;color:#047857;margin:0 0 10px;font-weight:600;">Esperamos que disfrutes mucho tus flores eternas</p>
                 <p class="email-body" style="font-size:14px;color:#065f46;margin:0;line-height:1.6;">
                   ¡Nos encantaría ver cómo quedó! Comparte una foto etiquetándonos:<br>
                   <strong>@nuditos_tejidos</strong> en Instagram
@@ -546,7 +556,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
     // ══════════════════════════════════════════════════════════════════
     else if (type === 'notificacion_admin') {
       to = config.adminEmail;
-      subject = `🌸 NUEVA VENTA! Pedido #${data.pedidoId} — $${Number(data.total || 0).toLocaleString('es-CO')}`;
+      subject = `[Nueva Venta] Pedido #${data.pedidoId} — $${Number(data.total || 0).toLocaleString('es-CO')}`;
 
       const parsedItems = parseItemsSafe(data.items);
       let adminItemsHtml = '';
@@ -651,7 +661,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
     else if (type === 'carrito_abandonado') {
       const clienteNombre = String(data.clienteNombre || '').trim();
       const primerNombre = clienteNombre.split(' ')[0] || 'Hola';
-      subject = data.subject || `🌸 ${primerNombre}, ¿guardamos tus flores en el taller? (+10% de regalo)`;
+      subject = data.subject || `${primerNombre}, ¿guardamos tus flores en el taller? (+10% de regalo)`;
 
       const parsedItems = parseItemsSafe(data.items);
       let cartItemsHtml = '';
@@ -670,7 +680,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
                   <td style="vertical-align:middle;padding-left:16px;">
                     <span style="display:inline-block;background:#fdf4ff;color:${brandColor};font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;border:1px solid #f5d0fe;">Tejido a Mano con Amor</span>
                     <div style="font-size:16px;font-weight:700;color:${textPrimary};line-height:1.3;">${escapeHtml(item.name)}</div>
-                    <div style="font-size:13px;color:${textSecondary};margin-top:4px;">Cantidad: <strong>${item.qty}</strong> · Incluye tarjeta con dedicatoria 💌</div>
+                    <div style="font-size:13px;color:${textSecondary};margin-top:4px;">Cantidad: <strong>${item.qty}</strong> · ${SVG_ICONS.cardHeart} Incluye tarjeta con dedicatoria</div>
                   </td>
                 </tr>
               </table>
@@ -679,7 +689,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
       }
 
       const checkoutUrl = `https://nuditos.com.co/checkout?coupon=NUDITOS10&utm_source=email&utm_medium=remarketing&utm_campaign=carrito_abandonado`;
-      const waMsg = encodeURIComponent(`¡Hola Nuditos! 🌸 Estaba completando mi pedido de ${parsedItems[0]?.name || 'flores'} y quiero consultar un detalle antes de finalizar.`);
+      const waMsg = encodeURIComponent(`¡Hola Nuditos! Estaba completando mi pedido de ${parsedItems[0]?.name || 'flores'} y quiero consultar un detalle antes de finalizar.`);
       const waUrl = `https://wa.me/573144931525?text=${waMsg}`;
 
       html = emailWrapper(`
@@ -687,7 +697,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
           <tr><td style="padding:16px 20px 0;text-align:center;">
             <div style="display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:800;letter-spacing:1px;padding:6px 14px;border-radius:20px;text-transform:uppercase;border:1px solid #fde68a;">
-              ⏳ Tu carrito está reservado en nuestro taller
+              ${SVG_ICONS.clock}Tu carrito está reservado en nuestro taller
             </div>
           </td></tr>
         </table>
@@ -725,7 +735,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
           <tr><td class="email-pad" style="padding:0 40px 24px;">
             <div style="background:linear-gradient(135deg, #fffbeb, #fef3c7);border:2px dashed #f59e0b;border-radius:16px;padding:20px;text-align:center;">
-              <div style="font-size:12px;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:1px;">🎁 Regalo exclusivo de recuperación</div>
+              <div style="font-size:12px;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:1px;">${SVG_ICONS.tag}Beneficio exclusivo de compra</div>
               <div style="font-size:22px;font-weight:800;color:#92400e;margin:6px 0;font-family:Georgia,serif;">10% DE DESCUENTO ADICIONAL</div>
               <p style="font-size:13px;color:#78350f;margin:0 0 12px;line-height:1.5;">
                 Usa el código al finalizar tu compra o haz clic en el botón de abajo para aplicarlo automáticamente:
@@ -741,9 +751,9 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
           <tr><td class="email-pad" style="padding:0 40px 24px;text-align:center;">
             <a href="${checkoutUrl}" class="email-btn" style="display:inline-block;background:linear-gradient(135deg, ${brandColor}, ${brandDark});color:#fff;text-decoration:none;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;letter-spacing:0.5px;box-shadow:0 6px 20px rgba(140,95,173,0.35);">
-              🌸 Completar mi Pedido con 10% OFF →
+              Completar mi Pedido con 10% OFF ${SVG_ICONS.arrowRight}
             </a>
-            <div style="font-size:12px;color:${textMuted};margin-top:10px;">✨ Despachamos a toda Colombia con guía de rastreo</div>
+            <div style="font-size:12px;color:${textMuted};margin-top:10px;">${SVG_ICONS.shieldCheck}Despachamos a toda Colombia con guía de rastreo</div>
           </td></tr>
         </table>
 
@@ -753,17 +763,17 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#faf5ff;border-radius:16px;padding:18px 20px;border:1px solid #f3e8ff;">
               <tr>
                 <td width="33%" style="text-align:center;padding:8px;vertical-align:top;">
-                  <div style="font-size:22px;margin-bottom:4px;">🌻</div>
+                  ${SVG_ICONS.pillarFlower}
                   <div style="font-size:12px;font-weight:700;color:${textPrimary};">Flores Eternas</div>
                   <div style="font-size:11px;color:${textSecondary};margin-top:2px;">Nunca se marchitan, duran para siempre</div>
                 </td>
                 <td width="33%" style="text-align:center;padding:8px;vertical-align:top;border-left:1px solid #e9d5ff;border-right:1px solid #e9d5ff;">
-                  <div style="font-size:22px;margin-bottom:4px;">📦</div>
+                  ${SVG_ICONS.pillarTruck}
                   <div style="font-size:12px;font-weight:700;color:${textPrimary};">Envío Seguro</div>
                   <div style="font-size:11px;color:${textSecondary};margin-top:2px;">Coordinadora / Interrapidísimo</div>
                 </td>
                 <td width="33%" style="text-align:center;padding:8px;vertical-align:top;">
-                  <div style="font-size:22px;margin-bottom:4px;">💌</div>
+                  ${SVG_ICONS.pillarCard}
                   <div style="font-size:12px;font-weight:700;color:${textPrimary};">Dedicatoria Gratis</div>
                   <div style="font-size:11px;color:${textSecondary};margin-top:2px;">Incluye tarjetita personalizada</div>
                 </td>
@@ -779,7 +789,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
               ¿Tienes alguna duda con tu pedido o prefieres pagar por <strong>Nequi / Daviplata</strong>?
             </div>
             <a href="${waUrl}" target="_blank" style="display:inline-flex;align-items:center;color:#047857;background:#ecfdf5;border:1.5px solid #a7f3d0;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;">
-              💬 Hablar con una Tejedora por WhatsApp (+57 314 493 1525)
+              ${SVG_ICONS.whatsapp}Hablar con una Tejedora por WhatsApp (+57 314 493 1525)
             </a>
           </td></tr>
         </table>
@@ -790,7 +800,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
     // 9. TEST EMAIL (Diagnóstico desde Panel Admin)
     // ══════════════════════════════════════════════════════════════════
     else if (type === 'test_email') {
-      subject = `✅ Prueba de Conexión de Correo Exitosa — Nuditos`;
+      subject = `Prueba de Conexión de Correo Exitosa — Nuditos`;
       const fechaNow = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
 
       html = emailWrapper(`
@@ -857,7 +867,7 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
       };
     }
 
-    console.log(`[sendNuditosEmail] ✓ Correo [${type}] enviado a ${cleanTo} (ID: ${resJson?.id || 'ok'})`);
+    console.log(`[sendNuditosEmail] [OK] Correo [${type}] enviado a ${cleanTo} (ID: ${resJson?.id || 'ok'})`);
     return { 
       success: true, 
       messageId: resJson?.id || 'ok',
