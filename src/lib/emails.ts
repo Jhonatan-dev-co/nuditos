@@ -646,27 +646,31 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
     }
 
     // ══════════════════════════════════════════════════════════════════
-    // 8. CARRITO ABANDONADO
+    // 8. CARRITO ABANDONADO — REMARKETING DE ALTA CONVERSIÓN
     // ══════════════════════════════════════════════════════════════════
     else if (type === 'carrito_abandonado') {
-      subject = `Dejaste algo hermoso en tu carrito 🌸 — Nuditos Tejidos`;
+      const clienteNombre = String(data.clienteNombre || '').trim();
+      const primerNombre = clienteNombre.split(' ')[0] || 'Hola';
+      subject = data.subject || `🌸 ${primerNombre}, ¿guardamos tus flores en el taller? (+10% de regalo)`;
+
       const parsedItems = parseItemsSafe(data.items);
       let cartItemsHtml = '';
 
       for (const item of parsedItems) {
         const imgUrl = await getProductImageSafe(item.name, config.sbUrl, config.sbKey);
-        const thumbUrl = imgUrl.replace('/upload/', '/upload/w_120,h_120,c_fill,q_auto,f_auto/');
+        const thumbUrl = imgUrl.replace('/upload/', '/upload/w_200,h_200,c_fill,q_auto,f_auto/');
         cartItemsHtml += `
           <tr>
-            <td style="padding:10px 0;border-bottom:1px solid ${borderLight};">
+            <td style="padding:16px 0;border-bottom:1px solid ${borderLight};">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td width="64" style="vertical-align:top;">
-                    <img src="${thumbUrl}" alt="${escapeHtml(item.name)}" width="56" height="56" class="email-product-img" style="border-radius:12px;object-fit:cover;display:block;border:1px solid ${borderLight};" />
+                  <td width="90" style="vertical-align:top;">
+                    <img src="${thumbUrl}" alt="${escapeHtml(item.name)}" width="80" height="80" class="email-product-img" style="border-radius:14px;object-fit:cover;display:block;border:1.5px solid ${borderLight};box-shadow:0 3px 10px rgba(140,95,173,0.12);" />
                   </td>
-                  <td style="vertical-align:middle;padding-left:12px;">
-                    <div style="font-size:15px;font-weight:600;color:${textPrimary};">${escapeHtml(item.name)}</div>
-                    <div class="email-info-text" style="font-size:13px;color:${textMuted};margin-top:2px;">Cantidad: ${item.qty}</div>
+                  <td style="vertical-align:middle;padding-left:16px;">
+                    <span style="display:inline-block;background:#fdf4ff;color:${brandColor};font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;border:1px solid #f5d0fe;">Tejido a Mano con Amor</span>
+                    <div style="font-size:16px;font-weight:700;color:${textPrimary};line-height:1.3;">${escapeHtml(item.name)}</div>
+                    <div style="font-size:13px;color:${textSecondary};margin-top:4px;">Cantidad: <strong>${item.qty}</strong> · Incluye tarjeta con dedicatoria 💌</div>
                   </td>
                 </tr>
               </table>
@@ -674,27 +678,109 @@ export async function sendNuditosEmail({ type, data, locals }: SendEmailParams):
           </tr>`;
       }
 
+      const checkoutUrl = `https://nuditos.com.co/checkout?coupon=NUDITOS10&utm_source=email&utm_medium=remarketing&utm_campaign=carrito_abandonado`;
+      const waMsg = encodeURIComponent(`¡Hola Nuditos! 🌸 Estaba completando mi pedido de ${parsedItems[0]?.name || 'flores'} y quiero consultar un detalle antes de finalizar.`);
+      const waUrl = `https://wa.me/573144931525?text=${waMsg}`;
+
       html = emailWrapper(`
+        <!-- Banner Superior de Reserva -->
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-          <tr><td class="email-pad email-hero-pad" style="padding:32px 40px 16px;text-align:center;">
-            <div style="margin-bottom:12px;">${SVG_ICONS.shoppingCart}</div>
-            <h1 class="email-h1" style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:400;color:${textPrimary};margin:0;line-height:1.3;">¡Hola ${escapeHtml(data.clienteNombre || '')}!</h1>
-            <p class="email-body" style="font-size:15px;color:${textSecondary};margin:12px 0 0;line-height:1.6;">Notamos que dejaste algunos nuditos en tu carrito.<br>Como cada pieza es hecha a mano, ¡asegura tu ramo antes de que se agote!</p>
+          <tr><td style="padding:16px 20px 0;text-align:center;">
+            <div style="display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:800;letter-spacing:1px;padding:6px 14px;border-radius:20px;text-transform:uppercase;border:1px solid #fde68a;">
+              ⏳ Tu carrito está reservado en nuestro taller
+            </div>
           </td></tr>
         </table>
-        ${cartItemsHtml ? `
+
+        <!-- Hero Emocional -->
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-          <tr><td class="email-pad" style="padding:8px 40px 24px;">
-            <div class="email-card" style="background:${cardBg};border-radius:16px;border:1px solid ${borderLight};padding:20px 24px;box-shadow:0 2px 16px rgba(140,95,173,0.08);">
+          <tr><td class="email-pad email-hero-pad" style="padding:24px 40px 16px;text-align:center;">
+            <div style="margin-bottom:12px;">${SVG_ICONS.gift}</div>
+            <h1 class="email-h1" style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:400;color:${textPrimary};margin:0;line-height:1.3;">
+              ¿Guardamos tu pedido, ${escapeHtml(primerNombre)}?
+            </h1>
+            <p class="email-body" style="font-size:15px;color:${textSecondary};margin:14px 0 0;line-height:1.6;">
+              Vimos que te enamoraste de nuestras flores tejidas. Al ser piezas artesanales hechas punto por punto, la disponibilidad es limitada, pero <strong>hemos apartado tus piezas en el taller</strong> para que no pierdas tu turno de tejido.
+            </p>
+          </td></tr>
+        </table>
+
+        <!-- Card de Productos del Carrito -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+          <tr><td class="email-pad" style="padding:8px 40px 20px;">
+            <div class="email-card" style="background:${cardBg};border-radius:18px;border:1px solid ${borderLight};padding:22px 24px;box-shadow:0 4px 20px rgba(140,95,173,0.08);">
+              <div style="font-size:11px;font-weight:700;color:${textMuted};text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Piezas apartadas para ti:</div>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                ${cartItemsHtml}
+                ${cartItemsHtml || `
+                  <tr><td style="padding:12px 0;font-size:14px;color:${textSecondary};">
+                    Ramo Artesanal Nuditos Tejidos
+                  </td></tr>
+                `}
               </table>
             </div>
           </td></tr>
-        </table>` : ''}
+        </table>
+
+        <!-- Cupón Exclusivo de Remarketing -->
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-          <tr><td class="email-pad" style="padding:0 40px 12px;text-align:center;">
-            <a href="https://nuditos.com.co/checkout" class="email-btn" style="display:inline-block;background:linear-gradient(135deg, ${brandColor}, ${brandDark});color:#fff;text-decoration:none;padding:16px 32px;border-radius:12px;font-size:15px;font-weight:600;letter-spacing:0.5px;box-shadow:0 4px 14px rgba(140,95,173,0.25);">Terminar mi pedido</a>
+          <tr><td class="email-pad" style="padding:0 40px 24px;">
+            <div style="background:linear-gradient(135deg, #fffbeb, #fef3c7);border:2px dashed #f59e0b;border-radius:16px;padding:20px;text-align:center;">
+              <div style="font-size:12px;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:1px;">🎁 Regalo exclusivo de recuperación</div>
+              <div style="font-size:22px;font-weight:800;color:#92400e;margin:6px 0;font-family:Georgia,serif;">10% DE DESCUENTO ADICIONAL</div>
+              <p style="font-size:13px;color:#78350f;margin:0 0 12px;line-height:1.5;">
+                Usa el código al finalizar tu compra o haz clic en el botón de abajo para aplicarlo automáticamente:
+              </p>
+              <div style="display:inline-block;background:#ffffff;border:1.5px solid #d97706;padding:8px 20px;border-radius:10px;font-family:monospace;font-size:18px;font-weight:700;color:#b45309;letter-spacing:2px;">
+                NUDITOS10
+              </div>
+            </div>
+          </td></tr>
+        </table>
+
+        <!-- Botón Principal CTA -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+          <tr><td class="email-pad" style="padding:0 40px 24px;text-align:center;">
+            <a href="${checkoutUrl}" class="email-btn" style="display:inline-block;background:linear-gradient(135deg, ${brandColor}, ${brandDark});color:#fff;text-decoration:none;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;letter-spacing:0.5px;box-shadow:0 6px 20px rgba(140,95,173,0.35);">
+              🌸 Completar mi Pedido con 10% OFF →
+            </a>
+            <div style="font-size:12px;color:${textMuted};margin-top:10px;">✨ Despachamos a toda Colombia con guía de rastreo</div>
+          </td></tr>
+        </table>
+
+        <!-- Garantías y Razones para Comprar en Nuditos -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+          <tr><td class="email-pad" style="padding:0 40px 24px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#faf5ff;border-radius:16px;padding:18px 20px;border:1px solid #f3e8ff;">
+              <tr>
+                <td width="33%" style="text-align:center;padding:8px;vertical-align:top;">
+                  <div style="font-size:22px;margin-bottom:4px;">🌻</div>
+                  <div style="font-size:12px;font-weight:700;color:${textPrimary};">Flores Eternas</div>
+                  <div style="font-size:11px;color:${textSecondary};margin-top:2px;">Nunca se marchitan, duran para siempre</div>
+                </td>
+                <td width="33%" style="text-align:center;padding:8px;vertical-align:top;border-left:1px solid #e9d5ff;border-right:1px solid #e9d5ff;">
+                  <div style="font-size:22px;margin-bottom:4px;">📦</div>
+                  <div style="font-size:12px;font-weight:700;color:${textPrimary};">Envío Seguro</div>
+                  <div style="font-size:11px;color:${textSecondary};margin-top:2px;">Coordinadora / Interrapidísimo</div>
+                </td>
+                <td width="33%" style="text-align:center;padding:8px;vertical-align:top;">
+                  <div style="font-size:22px;margin-bottom:4px;">💌</div>
+                  <div style="font-size:12px;font-weight:700;color:${textPrimary};">Dedicatoria Gratis</div>
+                  <div style="font-size:11px;color:${textSecondary};margin-top:2px;">Incluye tarjetita personalizada</div>
+                </td>
+              </tr>
+            </table>
+          </td></tr>
+        </table>
+
+        <!-- Bloque de Ayuda / WhatsApp -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+          <tr><td class="email-pad" style="padding:0 40px 28px;text-align:center;">
+            <div style="font-size:14px;color:${textSecondary};margin-bottom:10px;">
+              ¿Tienes alguna duda con tu pedido o prefieres pagar por <strong>Nequi / Daviplata</strong>?
+            </div>
+            <a href="${waUrl}" target="_blank" style="display:inline-flex;align-items:center;color:#047857;background:#ecfdf5;border:1.5px solid #a7f3d0;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;">
+              💬 Hablar con una Tejedora por WhatsApp (+57 314 493 1525)
+            </a>
           </td></tr>
         </table>
       `);

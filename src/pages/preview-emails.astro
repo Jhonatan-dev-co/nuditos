@@ -257,24 +257,94 @@ const emails = [
   },
   {
     id: 'carrito_abandonado',
-    title: 'Carrito Abandonado',
-    subtitle: 'Se envía automáticamente 30 minutos después de que un cliente abandona su carrito',
+    title: 'Carrito Abandonado (Remarketing)',
+    subtitle: 'Plantilla de alta conversión con reserva en taller, cupón 10% OFF y botón de WhatsApp',
     html: wrap(`
-      <div style="padding:32px 40px 16px;text-align:center;">
-        <div style="margin-bottom:12px;">${SVG_ICONS.shoppingCart}</div>
-        <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:400;color:${textPrimary};margin:0;">¡Hola ${d.clienteNombre}!</h1>
-        <p style="font-size:14px;color:${textSecondary};margin:12px 0 0;line-height:1.5;">Notamos que dejaste algunos nuditos en tu carrito.<br>Las flores eternas se agotan rápido, ¡no te quedes sin las tuyas!</p>
-      </div>
-      <div style="padding:8px 40px 24px;">
-        <div style="background:${cardBg};border-radius:16px;border:1px solid ${borderLight};padding:16px 24px;box-shadow:0 2px 12px rgba(140,95,173,0.06);">
-          ${sampleProducts.map(p => productRow(p)).join('')}
+      <!-- Banner Superior de Reserva -->
+      <div style="padding:16px 20px 0;text-align:center;">
+        <div style="display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:800;letter-spacing:1px;padding:6px 14px;border-radius:20px;text-transform:uppercase;border:1px solid #fde68a;">
+          ⏳ Tu carrito está reservado en nuestro taller
         </div>
       </div>
-      <div style="padding:0 40px 12px;text-align:center;">
-        <a href="https://nuditos.com.co/checkout" style="display:inline-block;background:${brandColor};color:#fff;text-decoration:none;padding:16px 36px;border-radius:50px;font-size:15px;font-weight:600;">Terminar mi compra</a>
+
+      <!-- Hero Emocional -->
+      <div style="padding:24px 40px 16px;text-align:center;">
+        <div style="margin-bottom:12px;">${SVG_ICONS.gift}</div>
+        <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:400;color:${textPrimary};margin:0;line-height:1.3;">
+          ¿Guardamos tu pedido, Karen?
+        </h1>
+        <p style="font-size:15px;color:${textSecondary};margin:14px 0 0;line-height:1.6;">
+          Vimos que te enamoraste de nuestras flores tejidas. Al ser piezas artesanales hechas punto por punto, la disponibilidad es limitada, pero <strong>hemos apartado tus piezas en el taller</strong> para que no pierdas tu turno de tejido.
+        </p>
       </div>
-      <div style="padding:0 40px 32px;text-align:center;">
-        <a href="https://nuditos.com.co/catalogo" style="display:inline-block;color:${brandColor};text-decoration:none;padding:12px 36px;border-radius:50px;font-size:14px;font-weight:600;border:2px solid ${brandColor};">Agregar más productos</a>
+
+      <!-- Card de Productos del Carrito -->
+      <div style="padding:8px 40px 20px;">
+        <div style="background:${cardBg};border-radius:18px;border:1px solid ${borderLight};padding:22px 24px;box-shadow:0 4px 20px rgba(140,95,173,0.08);">
+          <div style="font-size:11px;font-weight:700;color:${textMuted};text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Piezas apartadas para ti:</div>
+          <div style="display:flex;align-items:center;gap:16px;padding:12px 0;">
+            <img src="https://res.cloudinary.com/dzxgu27wr/image/upload/w_200,h_200,c_fill,q_auto,f_auto/v1788543259/nuditos-products/super-combo-dos-ramos-flores-amarillas-crochet-9ei8.jpg" alt="Super Combo Flores Amarillas" width="80" height="80" style="border-radius:14px;object-fit:cover;border:1.5px solid ${borderLight};box-shadow:0 3px 10px rgba(140,95,173,0.12);" />
+            <div>
+              <span style="display:inline-block;background:#fdf4ff;color:${brandColor};font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;border:1px solid #f5d0fe;">Edición Especial Tejida</span>
+              <div style="font-size:16px;font-weight:700;color:${textPrimary};">Super Combo Flores Amarillas: Dos Ramos</div>
+              <div style="font-size:13px;color:${textSecondary};margin-top:4px;">Cantidad: <strong>1</strong> · Incluye tarjeta con dedicatoria 💌</div>
+              <div style="font-size:14px;color:${accentGreen};font-weight:700;margin-top:4px;">$110.000 COP <span style="font-size:12px;color:${textMuted};text-decoration:line-through;font-weight:400;">$160.000 COP</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cupón Exclusivo de Remarketing -->
+      <div style="padding:0 40px 24px;">
+        <div style="background:linear-gradient(135deg, #fffbeb, #fef3c7);border:2px dashed #f59e0b;border-radius:16px;padding:20px;text-align:center;">
+          <div style="font-size:12px;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:1px;">🎁 Regalo exclusivo de recuperación</div>
+          <div style="font-size:22px;font-weight:800;color:#92400e;margin:6px 0;font-family:Georgia,serif;">10% DE DESCUENTO ADICIONAL</div>
+          <p style="font-size:13px;color:#78350f;margin:0 0 12px;line-height:1.5;">
+            Usa el código al finalizar tu compra o haz clic en el botón de abajo para aplicarlo automáticamente:
+          </p>
+          <div style="display:inline-block;background:#ffffff;border:1.5px solid #d97706;padding:8px 20px;border-radius:10px;font-family:monospace;font-size:18px;font-weight:700;color:#b45309;letter-spacing:2px;">
+            NUDITOS10
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón Principal CTA -->
+      <div style="padding:0 40px 24px;text-align:center;">
+        <a href="https://nuditos.com.co/checkout?coupon=NUDITOS10" style="display:inline-block;background:linear-gradient(135deg, ${brandColor}, ${brandDark});color:#fff;text-decoration:none;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;letter-spacing:0.5px;box-shadow:0 6px 20px rgba(140,95,173,0.35);">
+          🌸 Completar mi Pedido con 10% OFF →
+        </a>
+        <div style="font-size:12px;color:${textMuted};margin-top:10px;">✨ Despachamos a toda Colombia con guía de rastreo</div>
+      </div>
+
+      <!-- Beneficios Nuditos -->
+      <div style="padding:0 40px 24px;">
+        <div style="background:#faf5ff;border-radius:16px;padding:18px 20px;border:1px solid #f3e8ff;display:flex;justify-content:space-around;text-align:center;">
+          <div>
+            <div style="font-size:22px;margin-bottom:4px;">🌻</div>
+            <div style="font-size:12px;font-weight:700;color:${textPrimary};">Flores Eternas</div>
+            <div style="font-size:11px;color:${textSecondary};margin-top:2px;">Duran para siempre</div>
+          </div>
+          <div style="border-left:1px solid #e9d5ff;border-right:1px solid #e9d5ff;padding:0 12px;">
+            <div style="font-size:22px;margin-bottom:4px;">📦</div>
+            <div style="font-size:12px;font-weight:700;color:${textPrimary};">Envío Seguro</div>
+            <div style="font-size:11px;color:${textSecondary};margin-top:2px;">Interrapidísimo</div>
+          </div>
+          <div>
+            <div style="font-size:22px;margin-bottom:4px;">💌</div>
+            <div style="font-size:12px;font-weight:700;color:${textPrimary};">Dedicatoria Gratis</div>
+            <div style="font-size:11px;color:${textSecondary};margin-top:2px;">Tarjetita de regalo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón WhatsApp -->
+      <div style="padding:0 40px 28px;text-align:center;">
+        <div style="font-size:14px;color:${textSecondary};margin-bottom:10px;">
+          ¿Tienes alguna duda o prefieres pagar por <strong>Nequi / Daviplata</strong>?
+        </div>
+        <a href="https://wa.me/573144931525" target="_blank" style="display:inline-flex;align-items:center;color:#047857;background:#ecfdf5;border:1.5px solid #a7f3d0;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;">
+          💬 Hablar con una Tejedora por WhatsApp (+57 314 493 1525)
+        </a>
       </div>
     `)
   },
