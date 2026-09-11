@@ -103,6 +103,16 @@ import Icon from '../Icon.astro';
           <div style="font-size: 0.65rem; color: #999; margin-top: 3px;">Deja vacío para usar automáticamente la segunda imagen del catálogo de la categoría.</div>
         </div>
 
+        <div class="field field-full" style="grid-column: 1/-1; border-top: 1px solid #e5e7eb; padding-top: 1rem; margin-top: 0.5rem;">
+          <h4 style="color: #4338ca; font-size: 0.85rem; margin-bottom: 0.8rem;">🎵 Analítica y TikTok Pixel</h4>
+        </div>
+
+        <div class="field field-full" style="grid-column: 1/-1;">
+          <label>TikTok Pixel ID (Opcional - Campañas Dedicadas)</label>
+          <input type="text" id="landTikTokPixelId" placeholder="Ej: DAHLODRC77UDHLL3RNV0">
+          <div style="font-size: 0.65rem; color: #999; margin-top: 3px;">Si se especifica, cargará este Pixel de TikTok en la landing y rastreará pageview y eventos.</div>
+        </div>
+
       </div>
 
       <!-- Botones -->
@@ -187,6 +197,7 @@ import Icon from '../Icon.astro';
     document.getElementById('landUnboxingVideo').value = '';
     document.getElementById('landUnboxingImg').value = '';
     document.getElementById('landCategory').value = '';
+    document.getElementById('landTikTokPixelId').value = '';
     
     document.getElementById('landingEditorTitle').textContent = '✨ Nueva Landing Page';
     document.getElementById('landingEditor').style.display = 'block';
@@ -212,6 +223,7 @@ import Icon from '../Icon.astro';
     document.getElementById('landUnboxingVideo').value = c.unboxingVideo || '';
     document.getElementById('landUnboxingImg').value = c.unboxingImg || '';
     document.getElementById('landCategory').value = c.categorySlug || '';
+    document.getElementById('landTikTokPixelId').value = c.tiktokPixelId || (l.slug === 'flores-amarillas' ? 'DAHLODRC77UDHLL3RNV0' : '');
     
     document.getElementById('landingEditorTitle').textContent = '✏️ Editando: ' + l.title;
     document.getElementById('landingEditor').style.display = 'block';
@@ -244,7 +256,8 @@ import Icon from '../Icon.astro';
       heroImg: document.getElementById('landHeroImg').value.trim(),
       unboxingVideo: document.getElementById('landUnboxingVideo').value.trim(),
       unboxingImg: document.getElementById('landUnboxingImg').value.trim(),
-      categorySlug: document.getElementById('landCategory').value
+      categorySlug: document.getElementById('landCategory').value,
+      tiktokPixelId: document.getElementById('landTikTokPixelId').value.trim()
     };
     
     btn.innerHTML = '⏳ Guardando...';
