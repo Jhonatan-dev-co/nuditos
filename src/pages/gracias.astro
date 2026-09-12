@@ -3,62 +3,189 @@ import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import { getLiveConfig } from '../lib/supabase';
 
-// Nuditos: Página de Agradecimiento
+// Nuditos: Página de Agradecimiento y Validación de Pago
 export const prerender = false;
 
 const config = await getLiveConfig();
-const ref = Astro.url.searchParams.get('ref') || '';
+const transactionId = Astro.url.searchParams.get('id') || Astro.url.searchParams.get('ref') || '';
+
+// Si alguien entra directamente a /gracias sin un ID de transacción, redirigir al catálogo para evitar visitas huérfanas
+if (!transactionId) {
+  return Astro.redirect('/catalogo');
+}
+
+// Consultar estado real de la transacción en Wompi API
+let status = 'APPROVED'; // fallback si Wompi API no responde temporalmente
+let wompiAmount = 0;
+let wompiRef = transactionId;
+let errorMessage = '';
+
+try {
+  const isProd = config?.wompiKey?.startsWith('pub_prod_');
+  const wompiBase = isProd ? 'https://production.wompi.co/v1' : 'https://sandbox.wompi.co/v1';
+  const headers: Record<string, string> = {};
+  if (config?.wompiKey) {
+    headers['Authorization'] = `Bearer ${config.wompiKey}`;
+  }
+  const res = await fetch(`${wompiBase}/transactions/${transactionId}`, { headers });
+  if (res.ok) {
+    const json = await res.json();
+    if (json?.data) {
+      status = json.data.status;
+      wompiAmount = Math.round((json.data.amount_in_cents || 0) / 100);
+      wompiRef = json.data.reference || transactionId;
+      if (json.data.status_message) {
+        errorMessage = json.data.status_message;
+      }
+    }
+  }
+} catch (e) {
+  console.error('[gracias] Error consultando Wompi API:', e);
+}
+
+const isApproved = status === 'APPROVED';
+const isDeclined = status === 'DECLINED' || status === 'ERROR' || status === 'VOIDED';
+const isPending = status === 'PENDING';
 ---
 
 <Layout
-  title="¡Gracias por tu compra! — Nuditos"
-  description="Tu pedido ha sido procesado exitosamente."
+  title={isApproved ? "¡Gracias por tu compra! — Nuditos" : (isPending ? "Pago en verificación — Nuditos" : "Pago no completado — Nuditos")}
+  description="Estado de tu pedido en Nuditos Tejidos."
   noIndex={true}
 >
   <div class="max-w-[700px] mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center flex flex-col items-center">
-    <div class="w-20 h-20 bg-emerald-50 border border-emerald-200/60 text-emerald-600 rounded-3xl flex items-center justify-center mb-6 shadow-xs">
-      <Icon name="checkbox-circle" class="text-4xl" />
-    </div>
     
-    <div class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/70 text-emerald-900 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4">
-      Pedido Confirmado
-    </div>
+    {isApproved && (
+      <>
+        <div class="w-20 h-20 bg-emerald-50 border border-emerald-200/60 text-emerald-600 rounded-3xl flex items-center justify-center mb-6 shadow-xs">
+          <Icon name="checkbox-circle" class="text-4xl" />
+        </div>
+        
+        <div class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/70 text-emerald-900 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4">
+          Pedido Confirmado
+        </div>
 
-    <h1 class="font-serif text-3xl md:text-5xl font-light text-slate-800 mb-4 leading-tight">
-      ¡Gracias por tu <em class="italic text-amber-600 font-normal">compra!</em>
-    </h1>
-    <p class="text-slate-500 mb-8 max-w-md text-xs sm:text-sm leading-relaxed">
-      Hemos recibido tu orden correctamente. Nuestro taller artesano está tejiendo con todo el amor para ti. Te notificaremos cada avance de tu envío.
-    </p>
+        <h1 class="font-serif text-3xl md:text-5xl font-light text-slate-800 mb-4 leading-tight">
+          ¡Gracias por tu <em class="italic text-amber-600 font-normal">compra!</em>
+        </h1>
+        <p class="text-slate-500 mb-8 max-w-md text-xs sm:text-sm leading-relaxed">
+          Hemos recibido tu orden correctamente. Nuestro taller artesano está tejiendo con todo el amor para ti. Te notificaremos cada avance de tu envío.
+        </p>
 
-    {ref && (
-      <div class="bg-amber-50/70 border border-amber-200/70 py-3 px-6 rounded-2xl text-xs text-amber-900 font-medium mb-8 uppercase tracking-wider">
-        Referencia de pago: <strong class="text-slate-900">{ref}</strong>
-      </div>
+        {wompiRef && (
+          <div class="bg-amber-50/70 border border-amber-200/70 py-3 px-6 rounded-2xl text-xs text-amber-900 font-medium mb-8 uppercase tracking-wider">
+            Referencia de pago: <strong class="text-slate-900">{wompiRef}</strong>
+          </div>
+        )}
+
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="/" class="inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white font-bold uppercase tracking-wider text-xs px-8 py-4 rounded-2xl transition-all shadow-lg active:scale-95">
+            <Icon name="shopping-bag-3" class="w-4 h-4 text-amber-400" />
+            <span>Volver al Inicio</span>
+          </a>
+          <a href={`https://wa.me/573144931525?text=${encodeURIComponent('¡Hola Nuditos! Acabo de hacer el pedido con referencia ' + wompiRef)}`} target="_blank" class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-xs px-6 py-4 rounded-2xl transition-all shadow-md active:scale-95">
+            <Icon name="whatsapp" class="w-4 h-4" />
+            <span>Consultar por WhatsApp</span>
+          </a>
+        </div>
+      </>
     )}
 
-    <div class="flex flex-col sm:flex-row gap-3">
-      <a href="/" class="inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white font-bold uppercase tracking-wider text-xs px-8 py-4 rounded-2xl transition-all shadow-lg active:scale-95">
-        <Icon name="shopping-bag-3" class="w-4 h-4 text-amber-400" />
-        <span>Volver al Inicio</span>
-      </a>
-      <a href="https://wa.me/573144931525" target="_blank" class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-xs px-6 py-4 rounded-2xl transition-all shadow-md active:scale-95">
-        <Icon name="whatsapp" class="w-4 h-4" />
-        <span>Consultar por WhatsApp</span>
-      </a>
-    </div>
+    {isDeclined && (
+      <>
+        <div class="w-20 h-20 bg-rose-50 border border-rose-200/60 text-rose-600 rounded-3xl flex items-center justify-center mb-6 shadow-xs">
+          <Icon name="close-circle" class="text-4xl" />
+        </div>
+        
+        <div class="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-200/70 text-rose-900 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4">
+          Pago No Procesado
+        </div>
+
+        <h1 class="font-serif text-3xl md:text-5xl font-light text-slate-800 mb-4 leading-tight">
+          El pago <em class="italic text-rose-600 font-normal">no se completó</em>
+        </h1>
+        <p class="text-slate-500 mb-6 max-w-md text-xs sm:text-sm leading-relaxed">
+          {errorMessage || 'Tu transacción fue declinada por la entidad financiera o cancelada. No se ha realizado ningún cobro a tu cuenta.'}
+        </p>
+
+        {wompiRef && (
+          <div class="bg-stone-50 border border-stone-200 py-2.5 px-5 rounded-2xl text-xs text-stone-600 font-medium mb-8">
+            Referencia: <strong class="text-stone-900">{wompiRef}</strong>
+          </div>
+        )}
+
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="/checkout" class="inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white font-bold uppercase tracking-wider text-xs px-8 py-4 rounded-2xl transition-all shadow-lg active:scale-95">
+            <Icon name="refresh" class="w-4 h-4 text-amber-400" />
+            <span>Reintentar Pago</span>
+          </a>
+          <a href="https://wa.me/573144931525?text=Hola%20Nuditos,%20tuve%20un%20problema%20con%20el%20pago%20en%20Wompi,%20me%20ayudan?" target="_blank" class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-xs px-6 py-4 rounded-2xl transition-all shadow-md active:scale-95">
+            <Icon name="whatsapp" class="w-4 h-4" />
+            <span>Pagar por WhatsApp</span>
+          </a>
+        </div>
+      </>
+    )}
+
+    {isPending && (
+      <>
+        <div class="w-20 h-20 bg-amber-50 border border-amber-200/60 text-amber-600 rounded-3xl flex items-center justify-center mb-6 shadow-xs">
+          <Icon name="time" class="text-4xl" />
+        </div>
+        
+        <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200/70 text-amber-900 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4">
+          Pago en Validación
+        </div>
+
+        <h1 class="font-serif text-3xl md:text-5xl font-light text-slate-800 mb-4 leading-tight">
+          Estamos verificando <em class="italic text-amber-600 font-normal">tu pago</em>
+        </h1>
+        <p class="text-slate-500 mb-6 max-w-md text-xs sm:text-sm leading-relaxed">
+          Tu entidad financiera está procesando la transacción (común en PSE o corresponsales bancarios). Tan pronto se confirme, comenzaremos a tejer tu pedido.
+        </p>
+
+        {wompiRef && (
+          <div class="bg-amber-50/70 border border-amber-200/70 py-2.5 px-5 rounded-2xl text-xs text-amber-900 font-medium mb-8">
+            Referencia: <strong class="text-slate-900">{wompiRef}</strong>
+          </div>
+        )}
+
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="/" class="inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white font-bold uppercase tracking-wider text-xs px-8 py-4 rounded-2xl transition-all shadow-lg active:scale-95">
+            <span>Volver al Inicio</span>
+          </a>
+          <a href={`https://wa.me/573144931525?text=${encodeURIComponent('Hola Nuditos, tengo un pago pendiente con ref ' + wompiRef)}`} target="_blank" class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-xs px-6 py-4 rounded-2xl transition-all shadow-md active:scale-95">
+            <Icon name="whatsapp" class="w-4 h-4" />
+            <span>Consultar por WhatsApp</span>
+          </a>
+        </div>
+      </>
+    )}
+
   </div>
 
-  <script is:inline>
+  <script is:inline define:vars={{ isApproved, transactionId, wompiAmount }}>
     document.addEventListener('astro:page-load', () => {
-      // 1. Check local storage for cart
-      let totalAmount = 0;
+      // ⚠️ BLINDAJE 1: Si el pago NO fue aprobado por Wompi, NUNCA disparar evento de compra
+      if (!isApproved) {
+        return;
+      }
+
+      // ⚠️ BLINDAJE 2: Prevención de recargas (F5). Si esta transacción ya fue registrada en esta sesión, no duplicar
+      const dedupeKey = 'nuditos_tx_tracked_' + transactionId;
+      if (sessionStorage.getItem(dedupeKey)) {
+        console.log('[pixel] Transacción ya registrada anteriormente. Omitiendo duplicado.');
+        return;
+      }
+
+      // 1. Obtener items del carrito para los metadatos del evento
+      let totalAmount = wompiAmount || 0;
       let orderItems = [];
       try {
         const cartStr = localStorage.getItem('nuditos_cart');
         if (cartStr) {
           orderItems = JSON.parse(cartStr);
-          if (Array.isArray(orderItems)) {
+          if (Array.isArray(orderItems) && !totalAmount) {
             const subtotal = orderItems.reduce((acc, i) => acc + (i.price * i.qty), 0);
             totalAmount = subtotal;
             try {
@@ -74,17 +201,25 @@ const ref = Astro.url.searchParams.get('ref') || '';
         }
       } catch (e) {}
 
-      // 2. Track Facebook & TikTok Pixel Purchase Events
-      if (typeof window.fbq === 'function' && totalAmount > 0) {
+      // Si no hay monto positivo, evitar disparar
+      if (totalAmount <= 0) return;
+
+      // Marcar transacción como enviada de inmediato
+      sessionStorage.setItem(dedupeKey, '1');
+
+      // 2. Disparar evento de Compra en Meta Pixel con deduplicación por eventID
+      if (typeof window.fbq === 'function') {
         window.fbq('track', 'Purchase', {
           content_ids: orderItems.map(i => i.id ? i.id.toString() : ''),
           value: totalAmount,
           currency: 'COP',
           num_items: orderItems.reduce((acc, i) => acc + (i.qty || 1), 0),
           content_type: 'product'
-        });
+        }, { eventID: transactionId });
       }
-      if (typeof window.ttq === 'object' && totalAmount > 0) {
+
+      // 3. Disparar evento en TikTok Pixel con deduplicación por event_id
+      if (typeof window.ttq === 'object') {
         window.ttq.track('CompletePayment', {
           contents: orderItems.map(i => ({
             content_id: i.id ? i.id.toString() : '',
@@ -95,22 +230,15 @@ const ref = Astro.url.searchParams.get('ref') || '';
           })),
           value: totalAmount,
           currency: 'COP'
-        });
+        }, { event_id: transactionId });
       }
 
-      // 3. Clear cart after successful purchase
+      // 4. Limpiar el carrito de compras tras compra exitosa
       if (window.$cart && typeof window.$cart.set === 'function') {
         window.$cart.set([]);
-      } else {
-        localStorage.removeItem('nuditos_cart');
       }
-      if (window.$discount && typeof window.$discount.set === 'function') {
-        window.$discount.set(null);
-      } else {
-        localStorage.removeItem('nuditos_discount');
-      }
-
-      // 4. Limpiar datos de checkout persistentes
+      localStorage.removeItem('nuditos_cart');
+      localStorage.removeItem('nuditos_discount');
       localStorage.removeItem('nuditos_checkout_data_v2');
     });
   </script>

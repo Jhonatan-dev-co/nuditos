@@ -175,14 +175,14 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
           fbq('track', 'PageView');
         });
       </script>
-      <noscript><img height="1" width="1" style="display:none" src={`https://www.facebook.com/tr?id=${config.metaPixelId || '919518317518571'}&ev=PageView&noscript=1`} /></noscript>
+      <noscript><img height="1" width="1" style="display:none" src={`https://www.facebook.com/tr?id=${config?.metaPixelId || '919518317518571'}&ev=PageView&noscript=1`} /></noscript>
     </>
   )}
 
   <!-- TikTok Pixel -->
-  {(config?.tiktokPixelActivo || !config?.tiktokPixelId) && (
+  {(config?.tiktokPixelActivo ?? true) && (
     <>
-      <script is:inline define:vars={{ ttPixelId: config.tiktokPixelId || 'D9TUK0RC77UD9334IFE0' }}>
+      <script is:inline define:vars={{ ttPixelId: config?.tiktokPixelId || 'D9TUK0RC77UD9334IFE0' }}>
         !(function (w, d, t) {
           w.TiktokAnalyticsObject = t;
           var ttq = (w[t] = w[t] || []);

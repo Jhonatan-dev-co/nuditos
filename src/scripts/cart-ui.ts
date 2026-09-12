@@ -204,6 +204,30 @@ document.addEventListener('astro:page-load', () => {
     const fn = (window as any).sbTrackCartEvent;
     if (fn) fn(getOrCreateSessionId(), 'add_to_cart', { product_id: p.id, product_name: p.name, quantity: 1, cart_total: getCartTotal() });
 
+    // Meta Pixel & TikTok Pixel AddToCart
+    if (typeof (window as any).fbq === 'function') {
+      (window as any).fbq('track', 'AddToCart', {
+        content_name: p.name,
+        content_ids: [p.id.toString()],
+        content_type: 'product',
+        value: Number(p.price) || 0,
+        currency: 'COP'
+      });
+    }
+    if (typeof (window as any).ttq === 'object') {
+      (window as any).ttq.track('AddToCart', {
+        contents: [{
+          content_id: p.id.toString(),
+          content_name: p.name,
+          content_type: 'product',
+          price: Number(p.price) || 0,
+          quantity: 1
+        }],
+        value: Number(p.price) || 0,
+        currency: 'COP'
+      });
+    }
+
     document.querySelectorAll(`#padd-${p.id}`).forEach(btn => {
       btn.classList.add('added');
       const originalHTML = btn.innerHTML;
