@@ -49,10 +49,6 @@ export function addToCart(product: any) {
   }
 }
 
-export function removeFromCart(id: number | string) {
-  $cart.set($cart.get().filter(item => String(item.id) !== String(id)));
-}
-
 export function changeQty(id: number | string, delta: number) {
   const current = $cart.get();
   const index = current.findIndex(item => String(item.id) === String(id));

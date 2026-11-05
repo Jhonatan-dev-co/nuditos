@@ -2,6 +2,7 @@
 import Icon from '../components/Icon.astro';
 import '../styles/main.css';
 import SearchOverlay from '../components/SearchOverlay.astro';
+import WelcomeVideoModal from '../components/WelcomeVideoModal.astro';
 import BoutiqueHighlights from '../components/BoutiqueHighlights.astro';
 import Footer from '../components/Footer.astro';
 import { ViewTransitions } from 'astro:transitions';
@@ -60,13 +61,26 @@ const {
 const fullTitle = title === 'Nuditos' ? siteTitle : `${title} | Nuditos`;
 
 const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
+const showWelcomeVideo = !hideNav && !Astro.url.pathname.startsWith('/checkout') && !Astro.url.pathname.startsWith('/gracias') && !Astro.url.pathname.startsWith('/admin');
 ---
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-CO" xml:lang="es-CO" translate="no">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="content-language" content="es-CO" />
+  <meta name="language" content="Spanish" />
+  <meta name="google" content="notranslate" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="format-detection" content="telephone=no, address=no, email=no" />
+
+  <!-- Apple Web App & iOS Optimizations -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Nuditos" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
+  <link rel="mask-icon" href="/favicon.svg" color="#7c3aed" />
+
   <meta name="facebook-domain-verification" content="klq9w8ypl5a07xxn6pwjtni92v2afa" />
 
   <!-- SEO básico -->
@@ -126,7 +140,10 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
       (window as any).toggleMenuAccordion = (btn: HTMLElement) => {
         const item = btn.closest('.menu-accordion-item');
-        item?.classList.toggle('open');
+        if (item) {
+          const isOpen = item.classList.toggle('open');
+          btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
       };
     });
   </script>
@@ -268,6 +285,9 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  {preloadImage && (
+    <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />
+  )}
   
 
 
@@ -355,10 +375,33 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
   <script is:inline>
     (function() {
-      var isApple = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) && !window.MSStream;
-      if (isApple) {
-        document.documentElement.classList.add('is-apple');
+      function detectAppleAndLiquidGlass() {
+        try {
+          var ua = navigator.userAgent || '';
+          var plat = navigator.platform || '';
+          var isIOS = /iPhone|iPod/.test(ua) || (navigator.maxTouchPoints > 1 && /iPad/.test(ua));
+          var isIPad = /iPad/.test(ua) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua));
+          var isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(plat) && !isIPad;
+          var isApple = isIOS || isIPad || isMac;
+          var doc = document.documentElement;
+
+          if (isApple) doc.classList.add('is-apple');
+          if (isIOS) doc.classList.add('is-ios');
+          if (isIPad) doc.classList.add('is-ipados');
+          if (isMac) doc.classList.add('is-macos');
+
+          // Soporte real de Liquid Glass (Hardware accelerated backdrop filter)
+          var supportsGlass = (window.CSS && CSS.supports && (
+            CSS.supports('backdrop-filter', 'blur(20px)') ||
+            CSS.supports('-webkit-backdrop-filter', 'blur(20px)')
+          ));
+          if (supportsGlass) {
+            doc.classList.add('supports-liquid-glass');
+          }
+        } catch (e) {}
       }
+      detectAppleAndLiquidGlass();
+      document.addEventListener('astro:after-swap', detectAppleAndLiquidGlass);
     })();
   </script>
 </head>
@@ -515,7 +558,27 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
           <Icon name="menu"  />
         </button>
         <ul class="nav-desktop-links">
-          <li><a href="/catalogo">Catálogo</a></li>
+          <li class="nav-dropdown-item">
+            <a href="/catalogo" class="flex items-center gap-1 group/cat">
+              Catálogo
+              <Icon name="arrow-down-s" class="w-3.5 h-3.5 opacity-60 transition-transform duration-200 group-hover/cat:rotate-180" />
+            </a>
+            <div class="nav-dropdown-menu">
+              <div class="nav-dropdown-card">
+                <span class="nav-dropdown-title">Colecciones</span>
+                {categories.filter(c => c.id !== 'todos').map(cat => (
+                  <a href={`/catalogo?categoria=${cat.id}`} class="nav-dropdown-link">
+                    <span>{cat.name}</span>
+                    <Icon name="arrow-right-s" class="w-3.5 h-3.5 nav-dd-icon opacity-40 transition-all" />
+                  </a>
+                ))}
+                <a href="/catalogo" class="nav-dropdown-link nav-dropdown-all">
+                  <span>Ver Catálogo Completo</span>
+                  <Icon name="arrow-right" class="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+          </li>
           <li><a href="/#personalizado">Personalizado</a></li>
           <li><a href="/blog">Blog</a></li>
           <li><a href="/sobre-nosotros">Nosotros</a></li>
@@ -565,21 +628,27 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
         Confianza <Icon name="arrow-right"  />
       </a>
 
-      <!-- Acordeón de Categorías -->
+      <!-- Acordeón de Categorías Ergonómico -->
       <div class="menu-accordion-item">
-        <button class="menu-nav-item accordion-trigger" onclick="toggleMenuAccordion(this)">
-          Categorías 
+        <button class="menu-nav-item accordion-trigger" onclick="toggleMenuAccordion(this)" aria-label="Ver lista de categorías" aria-expanded="false">
+          <span>Colección & Ramos</span> 
           <div class="acc-arrow transition-transform duration-300">
             <Icon name="arrow-down-s"  />
           </div>
         </button>
         <div class="menu-submenu-collapsible">
-          {categories.filter(c => c.id !== 'todos').map(cat => (
-            <a class="menu-sub-item" href={`/catalogo?categoria=${cat.id}`} onclick="toggleMenu()">
-              {cat.name}
-              <Icon name="arrow-right-s" class="opacity-20 ml-auto" />
+          <div class="grid grid-cols-2 gap-2 p-2">
+            {categories.filter(c => c.id !== 'todos').map(cat => (
+              <a class="menu-sub-tile" href={`/catalogo?categoria=${cat.id}`} onclick="toggleMenu()">
+                <span class="tile-name">{cat.name}</span>
+                <Icon name="arrow-right-s" class="tile-icon" />
+              </a>
+            ))}
+            <a class="menu-sub-tile menu-sub-tile-all col-span-2" href="/catalogo" onclick="toggleMenu()">
+              <span>Ver Todo el Catálogo</span>
+              <Icon name="arrow-right" class="w-3.5 h-3.5 ml-auto" />
             </a>
-          ))}
+          </div>
         </div>
       </div>
 
@@ -603,44 +672,48 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <slot />
 
   {!hideNav && (
-    <!-- ════════ MOBILE BOTTOM NAV ════════ -->
-    <nav class="mobile-bottom-nav" transition:persist>
-    <a href="/catalogo" class="mb-nav-item" id="nav-catalogo" aria-label="Ir al Catálogo">
-      <Icon name="store-2"  />
-      <span>Catálogo</span>
-    </a>
-    <button class="mb-nav-item" onclick="toggleSearch()" aria-label="Buscar productos">
-      <Icon name="search"  />
-      <span>Buscar</span>
-    </button>
-    <a href="/#personalizado" class="mb-nav-item" id="nav-personalizado" aria-label="Ramos Personalizados">
-      <Icon name="magic"  />
-      <span>Ramos</span>
-    </a>
-    <a href="/" class="mb-nav-item" id="nav-home" aria-label="Ir al Inicio">
-      <Icon name="home"  />
-      <span>Inicio</span>
-    </a>
-  </nav>
+    <!-- ════════ MOBILE BOTTOM NAV (App-Like 5 Items Ergonómico) ════════ -->
+    <nav class="mobile-bottom-nav" transition:persist aria-label="Navegación inferior móvil">
+      <a href="/" class="mb-nav-item" id="nav-home" aria-label="Ir al Inicio" data-astro-prefetch="viewport">
+        <Icon name="home" class="mb-nav-icon" />
+        <span>Inicio</span>
+      </a>
+      <a href="/catalogo" class="mb-nav-item" id="nav-catalogo" aria-label="Ir al Catálogo" data-astro-prefetch="viewport">
+        <Icon name="store-2" class="mb-nav-icon" />
+        <span>Catálogo</span>
+      </a>
+      <button class="mb-nav-item" id="nav-search" onclick="toggleSearch()" aria-label="Buscar productos">
+        <Icon name="search" class="mb-nav-icon" />
+        <span>Buscar</span>
+      </button>
+      <button class="mb-nav-item relative" id="nav-cart" onclick="toggleCart()" aria-label="Abrir carrito de compras">
+        <div class="mb-cart-icon-wrap relative">
+          <Icon name="shopping-bag" class="mb-nav-icon" />
+          <span class="mb-cart-badge hidden" id="mbCartCount">0</span>
+        </div>
+        <span>Carrito</span>
+      </button>
+      <button class="mb-nav-item" id="nav-menu" onclick="toggleMenu()" aria-label="Abrir menú de navegación">
+        <Icon name="menu" class="mb-nav-icon" />
+        <span>Menú</span>
+      </button>
+    </nav>
   )}
 
   <script is:inline>
-    // Lógica Simple de Active State para Mobile Nav
+    // Lógica Refinada de Active State para Mobile Nav
     function updateActiveNav() {
       const path = window.location.pathname;
-      const hash = window.location.hash;
+      const navHome = document.getElementById('nav-home');
       const navCatalogo = document.getElementById('nav-catalogo');
-      const navPersonalizado = document.getElementById('nav-personalizado');
 
-      if (!navCatalogo || !navPersonalizado) return;
+      navHome?.classList.remove('active');
+      navCatalogo?.classList.remove('active');
 
-      navCatalogo.classList.remove('active');
-      navPersonalizado.classList.remove('active');
-
-      if (path.includes('/catalogo')) {
-        navCatalogo.classList.add('active');
-      } else if (hash === '#personalizado') {
-        navPersonalizado.classList.add('active');
+      if (path === '/' || path === '') {
+        navHome?.classList.add('active');
+      } else if (path.includes('/catalogo') || path.startsWith('/ramo/') || path.startsWith('/l/')) {
+        navCatalogo?.classList.add('active');
       }
     }
 
@@ -686,7 +759,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   <div class="cart-panel fixed top-0 right-0 w-full max-w-[100vw] md:max-w-md border-l border-white/50 z-[201] translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col shadow-2xl" id="cartPanel" style="height: 100svh; background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));">
     <div class="p-4 md:p-6 border-b border-stone-200/60 flex items-center justify-center shrink-0 relative z-10 min-h-[60px] md:min-h-[80px]">
       <span class="font-sans text-xl md:text-2xl font-bold tracking-[0.1em] text-stone-800 uppercase">Carrito</span>
-      <button class="absolute right-4 md:right-6 w-10 h-10 rounded-2xl border border-stone-200/60 bg-white/40 shadow-sm flex items-center justify-center hover:bg-white transition-colors z-[203]" onclick="toggleCart()" aria-label="Cerrar carrito">
+      <button class="absolute right-4 md:right-6 w-11 h-11 rounded-2xl border border-stone-200/60 bg-white/40 shadow-xs flex items-center justify-center hover:bg-white active:scale-95 transition-all z-[203] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500" onclick="toggleCart()" aria-label="Cerrar carrito">
         <Icon name="close" class="text-lg flex" />
       </button>
     </div>
@@ -695,12 +768,12 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     
     <div class="p-6 md:p-8 bg-white/40 border-t border-stone-200/50 shrink-0 hidden relative z-10" id="cartFoot">
       <div class="flex flex-col gap-2 mb-6" id="discountWrapper">
-        <button class="text-[10px] uppercase tracking-widest text-stone-500 font-bold self-start hover:text-amber-600 transition-colors pb-1 border-b border-dotted border-stone-300/50" onclick="document.getElementById('discountInputContainer').classList.toggle('hidden');">
+        <button class="text-[10px] uppercase tracking-widest text-stone-500 font-bold self-start hover:text-amber-600 transition-colors pb-1 border-b border-dotted border-stone-300/50 cursor-pointer" onclick="document.getElementById('discountInputContainer').classList.toggle('hidden');">
           ¿Tienes código de descuento?
         </button>
         <div class="hidden flex gap-2 w-full mt-2" id="discountInputContainer">
           <input class="flex-1 bg-white/70 border border-stone-200/60 rounded-2xl px-4 py-3 text-[11px] font-bold focus:border-amber-500 focus:bg-white focus:outline-none uppercase transition-all shadow-sm" id="discountInput" placeholder="INGRESAR CÓDIGO" maxlength="20" />
-          <button class="bg-[#1a1220] text-white px-5 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-md active:scale-95" onclick="applyDiscount()">Aplicar</button>
+          <button class="bg-[#1a1220] text-white px-5 min-h-[42px] rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-md active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500" onclick="applyDiscount()">Aplicar</button>
         </div>
         <div class="text-[10px] uppercase font-bold tracking-widest hidden mt-1" id="discountMsg"></div>
       </div>
@@ -723,7 +796,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
           <span class="text-[10px] font-bold text-emerald-700">A todo Colombia</span>
         </div>
 
-        <a href="/checkout" class="w-full bg-[#1a1220] text-white rounded-2xl py-4 flex items-center justify-center gap-3 hover:bg-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg" onclick="toggleCart()">
+        <a href="/checkout" class="w-full bg-[#1a1220] text-white rounded-2xl py-4 min-h-[50px] flex items-center justify-center gap-3 hover:bg-black hover:scale-[1.01] active:scale-[0.98] transition-all shadow-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500" onclick="toggleCart()">
           <Icon name="bank-card" class="text-lg leading-none text-amber-400" />
           <span class="text-[11px] font-bold uppercase tracking-[0.1em]">Ir a Pagar</span>
         </a>
@@ -761,6 +834,7 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
   </div>
 
   <SearchOverlay />
+  {showWelcomeVideo && <WelcomeVideoModal />}
 
   <!-- ════════ WHATSAPP FLOTANTE ════════ -->
   <div class="wa-float-wrap">
@@ -778,7 +852,6 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 
 
   <!-- ════════ SCRIPTS (Diferidos y Ligeros) ════════ -->
-  <script src="/scripts/supabase.js" defer is:inline></script>
   <script src="../scripts/cart-ui.ts"></script>
 
   <!-- Lógica Global de UI y Controles Móviles -->

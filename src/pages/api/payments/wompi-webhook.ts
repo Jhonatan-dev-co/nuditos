@@ -4,6 +4,15 @@ import type { APIRoute } from 'astro';
 import { getLiveConfig } from '../../../lib/supabase';
 import { sendNuditosEmail } from '../../../lib/emails';
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 async function verifyWebhookSignature(body: any, eventsSecret: string) {
   if (!eventsSecret || !body?.signature?.checksum) return false;
   const { data, timestamp, signature } = body;
@@ -11,7 +20,6 @@ async function verifyWebhookSignature(body: any, eventsSecret: string) {
   
   let rawString = '';
   if (Array.isArray(properties) && properties.length > 0) {
-    // Si Wompi envía las propiedades específicas a concatenar
     for (const prop of properties) {
       const parts = prop.split('.');
       let val: any = data;
@@ -22,7 +30,6 @@ async function verifyWebhookSignature(body: any, eventsSecret: string) {
     }
     rawString += `${timestamp}${eventsSecret}`;
   } else {
-    // Fallback estándar de transacción Wompi
     const transaction = data?.transaction || {};
     rawString = `${transaction.id || ''}${transaction.status || ''}${transaction.amount_in_cents || ''}${timestamp}${eventsSecret}`;
   }
@@ -31,9 +38,9 @@ async function verifyWebhookSignature(body: any, eventsSecret: string) {
   const dataUint8 = encoder.encode(rawString);
   const hashBuffer = await crypto.subtle.digest('SHA-256', dataUint8);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toLowerCase();
 
-  return hashHex.toLowerCase() === String(signature.checksum).toLowerCase();
+  return timingSafeEqual(hashHex, String(signature.checksum).toLowerCase());
 }
 
 export const GET: APIRoute = async () => {
@@ -50,7 +57,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const SB_URL = env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL;
     const SB_KEY = env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY || env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return new Response(JSON.stringify({ error: 'invalid_json' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
     const eventId = body?.data?.transaction?.id || 'unknown';
     console.log(`[wompi-webhook] Evento recibido. ID Transacción: ${eventId}`);
 
@@ -58,18 +69,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
       console.error('[wompi-webhook] ❌ Error: Faltan variables de entorno de Supabase (URL/KEY).');
     }
 
-    const config = await getLiveConfig();
-    const eventSecret = config?.wompiEvents;
+    const config = await getLiveConfig(SB_KEY);
+    const eventSecret = env.WOMPI_EVENTS_SECRET || import.meta.env.WOMPI_EVENTS_SECRET || config?.wompiEvents;
 
-    // 1. Validar la firma siempre y cuando esté configurada
-    if (eventSecret) {
-      const isValid = await verifyWebhookSignature(body, eventSecret);
-      if (!isValid) {
-        console.warn('[wompi-webhook] ❌ Rechazado: Firma de evento inválida.');
-        return new Response(JSON.stringify({ error: 'invalid_signature' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-      }
-    } else {
-        console.log('[wompi-webhook] ⚠️ Advertencia: Validando evento sin firma de seguridad.');
+    // 1. Validar la firma OBLIGATORIAMENTE (Fail-closed de seguridad)
+    if (!eventSecret) {
+      console.error('[wompi-webhook] ❌ Rechazado: Secret de eventos no configurado.');
+      return new Response(JSON.stringify({ error: 'event_secret_not_configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const isValid = await verifyWebhookSignature(body, eventSecret);
+    if (!isValid) {
+      console.warn('[wompi-webhook] ❌ Rechazado: Firma de evento inválida.');
+      return new Response(JSON.stringify({ error: 'invalid_signature' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
     // 2. Procesar el Evento

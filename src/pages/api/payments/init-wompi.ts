@@ -196,8 +196,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     
     return new Response(JSON.stringify({ 
         error: 'server_exception', 
-        message: 'Error inesperado en el servidor.',
-        debug: errorMsg
+        message: 'Error inesperado en el servidor.'
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 };

@@ -1,5 +1,4 @@
-const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL || 'https://fpyhkxikxdwjhukltmqf.supabase.co';
-const SB_ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweWhreGlreGR3amh1a2x0bXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzE1OTIsImV4cCI6MjA4ODI0NzU5Mn0.U1fHtV23e3uTlaH9qoeibzbm1d6MEcUaFE7rDhnokgM';
+import { SB_URL, SB_ANON } from './supabase-public';
 
 import { slugify, type Product, products as fallbackProducts } from '../data/datos';
 
@@ -168,12 +167,14 @@ export async function getLiveBanners(): Promise<any[]> {
   });
 }
 
-export async function getLiveConfig() {
+export async function getLiveConfig(serverKey?: string) {
   if (!SB_URL || !SB_ANON) return null;
-  return getCached('live_config', async () => {
+  const keyToUse = serverKey || import.meta.env.SUPABASE_SERVICE_ROLE_KEY || SB_ANON;
+  const cacheKey = 'live_config_' + (serverKey ? 'custom' : (import.meta.env.SUPABASE_SERVICE_ROLE_KEY ? 'srv' : 'anon'));
+  return getCached(cacheKey, async () => {
     try {
       const res = await fetchWithTimeout(`${SB_URL}/rest/v1/config?select=clave,valor`, {
-        headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` }
+        headers: { apikey: SB_ANON, Authorization: `Bearer ${keyToUse}` }
       });
       if (!res.ok) return null;
       const rows = await res.json();
@@ -216,11 +217,37 @@ export async function getLiveConfig() {
   });
 }
 
+/**
+ * Retorna ÚNICAMENTE las propiedades públicas requeridas por el frontend.
+ * Previene activamente cualquier fuga de credenciales o secretos hacia window.NUDITOS_CONFIG.
+ */
 export async function getPublicConfig() {
   const config = await getLiveConfig();
   if (!config) return null;
-  const { wompiIntegrity, wompiEvents, resendApiKey, ...safeConfig } = config;
-  return safeConfig;
+  return {
+    descuentoActivo:      !!config.descuentoActivo,
+    descuentoCodigo:      config.descuentoCodigo || 'NUDITOS10',
+    descuentoPorcentaje:  config.descuentoPorcentaje || 10,
+    descuentoTexto:       config.descuentoTexto || '',
+    carruselHero:         config.carruselHero || [],
+    ramoDestacado:        config.ramoDestacado || 0,
+    wompiActivo:          !!config.wompiActivo,
+    wompiKey:             config.wompiKey || '',
+    catViews:             config.catViews || {},
+    seleccionNuditos:     config.seleccionNuditos || [],
+    metaPixelActivo:      !!config.metaPixelActivo,
+    metaPixelId:          config.metaPixelId || '',
+    socialProofMode:      config.socialProofMode || 'trust_badges',
+    seoTitle:             config.seoTitle || '',
+    seoDescription:       config.seoDescription || '',
+    seoOgImage:           config.seoOgImage || '',
+    socialInstagram:      config.socialInstagram || '',
+    socialWhatsapp:       config.socialWhatsapp || '',
+    gaId:                 config.gaId || '',
+    gaActive:             !!config.gaActive,
+    tiktokPixelActivo:    !!config.tiktokPixelActivo,
+    tiktokPixelId:        config.tiktokPixelId || '',
+  };
 }
 
 export async function getLiveProductBySlug(slug: string) {

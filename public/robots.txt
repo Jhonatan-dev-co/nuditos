@@ -8,8 +8,6 @@ Disallow: /gracias
 Disallow: /gracias/
 Disallow: /preview-emails
 Disallow: /preview-emails/
-Disallow: /test-video
-Disallow: /test-video/
 Disallow: /api/
 
 Sitemap: https://nuditos.com.co/sitemap.xml

@@ -29,12 +29,18 @@ const sbCategories = await getLiveCategories();
 const liveCategories = sbCategories && sbCategories.length > 0 ? sbCategories : FALLBACK_CATEGORIES;
 const liveBanners = await getLiveBanners();
 
+// Banners Editoriales Dinámicos
+const homeBanner1 = liveBanners.find(b => b.afterCat === 'home1');
+const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
+
 // Preparar hero products
 const heroIds = liveConfig.carruselHero || [];
 const heroProducts = heroIds.map(id => liveProducts.find(p => p.id === id)).filter(p => p !== undefined);
 
 // Imagen crítica para precarga (LCP)
 const firstHeroImg = heroProducts[0]?.img || null;
+const lcpImage = homeBanner1?.imgUrl || (homeBanner1 as any)?.img || firstHeroImg;
+const lcpPreloadUrl = lcpImage ? clUrl(lcpImage, 1200) : undefined;
 
 // Ramo destacado
 const ramoDestacado = liveProducts.find(p => p.id === liveConfig.ramoDestacado);
@@ -55,16 +61,13 @@ const safeProducts = liveProducts.map(p => ({
 }));
 
 const safeCategories = liveCategories || [];
-
-// Banners Editoriales Dinámicos
-const homeBanner1 = liveBanners.find(b => b.afterCat === 'home1');
-const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
 ---
 
 <Layout
   title="Nuditos Tejidos — Detalles y Regalos Originales | Ramos de Crochet en Colombia"
   description="Encuentra el detalle perfecto: ramos de crochet hechos a mano y amigurumis. Regalos que nunca se marchitan. Envíos a todo Colombia."
   ogType="website"
+  preloadImage={lcpPreloadUrl}
 >
   <h1 class="sr-only">Nuditos Tejidos — Expertos en Detalles y Regalos de Flores Eternas a Crochet en Colombia</h1>
 
@@ -140,7 +143,7 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
                 Ver todo
               </a>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-x-2 gap-y-6 md:gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-5 sm:gap-4 md:gap-6">
               {items.map(p => <ProductCard p={p} parentView="grid" idScope={section.id} />)}
             </div>
           </section>
@@ -151,12 +154,12 @@ const homeBanner2 = liveBanners.find(b => b.afterCat === 'home2');
   
   <!-- ════════ FILTRO ACTIVO (Oculto por defecto) ════════ -->
   <div id="filteredView" style="display: none;" class="pb-24 pt-12">
-    <div class="max-w-[1400px] mx-auto px-6">
+    <div class="max-w-[1400px] mx-auto px-4 md:px-6">
       <div class="flex items-center justify-between mb-8 pb-2 border-b border-stone-200">
         <h2 class="uppercase font-bold tracking-widest text-[#1a1220] text-sm" id="filteredTitle">Resultados</h2>
         <button class="text-[10px] tracking-widest uppercase font-bold text-stone-500 border border-stone-200 px-3 py-1 rounded-lg" onclick="location.reload()">VER INICIO</button>
       </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6" id="filteredGrid"></div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-5 sm:gap-4 md:gap-6" id="filteredGrid"></div>
     </div>
   </div>
 

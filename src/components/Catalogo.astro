@@ -157,17 +157,11 @@ let globalIdx = 0;
         setTimeout(initSwipers, 60);
       }
 
-      // CRÍTICO: forzar carga de imágenes lazy que estaban en display:none
-      // El navegador no descarga imágenes lazy dentro de elementos ocultos
+      // Asegurar carga de imágenes lazy si usan data-src
       requestAnimationFrame(() => {
         document.querySelectorAll('#catalogRows img[loading="lazy"]').forEach(img => {
-          if (!img.src && img.dataset.src) {
-            img.src = img.dataset.src;
-          } else if (img.src) {
-            // Forzar re-evaluación del IntersectionObserver
-            const src = img.src;
-            img.src = '';
-            img.src = src;
+          if (!img.src && (img as any).dataset?.src) {
+            img.src = (img as any).dataset.src;
           }
         });
       });

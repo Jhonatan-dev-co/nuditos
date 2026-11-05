@@ -151,8 +151,6 @@ function sbRestoreSession() {
   return false;
 }
 
-function sbIsAuth() { return !!_sbToken; }
-
 /* ════════════════════════════
    CONVERSIÓN DE CAMPOS
    Supabase (snake_case) ↔ App (camelCase)
@@ -210,8 +208,8 @@ function productToSb(p) {
 
 function sbToConfig(rows) {
   const m = {};
-  rows.forEach(r => { m[r.clave] = r.valor; });
-  return {
+  (rows || []).forEach(r => { m[r.clave] = r.valor; });
+  const cfg = {
     descuentoActivo:      m.descuento_activo    === 'true',
     descuentoCodigo:      m.descuento_codigo    || 'NUDITOS10',
     descuentoPorcentaje:  parseInt(m.descuento_porcentaje) || 10,
@@ -220,8 +218,6 @@ function sbToConfig(rows) {
     ramoDestacado:        parseInt(m.ramo_destacado)  || 17,
     wompiActivo:          m.wompi_activo        === 'true',
     wompiKey:             m.wompi_key           || '',
-    wompiIntegrity:       m.wompi_integrity_secret || '',
-    wompiEvents:          m.wompi_events_secret || '',
     catViews:             JSON.parse(m.cat_views || '{}'),
     seleccionNuditos:     JSON.parse(m.seleccion_nuditos || '[]'),
     metaPixelActivo:      m.meta_pixel_activo === 'true',
@@ -236,10 +232,14 @@ function sbToConfig(rows) {
     gaActive:             m.ga_active === 'true',
     tiktokPixelActivo:    m.tiktok_pixel_activo === 'true',
     tiktokPixelId:        m.tiktok_pixel_id || '',
-    resendApiKey:         m.resend_api_key || '',
-    adminEmail:           m.admin_email || 'jhona@nuditos.com.co',
-    emailFrom:            m.email_from || 'Nuditos Tejidos <hola@nuditos.com.co>',
   };
+  // Secretos solo si están presentes en la respuesta (sesión administrativa autorizada)
+  if (m.wompi_integrity_secret) cfg.wompiIntegrity = m.wompi_integrity_secret;
+  if (m.wompi_events_secret) cfg.wompiEvents = m.wompi_events_secret;
+  if (m.resend_api_key) cfg.resendApiKey = m.resend_api_key;
+  if (m.admin_email) cfg.adminEmail = m.admin_email;
+  if (m.email_from) cfg.emailFrom = m.email_from;
+  return cfg;
 }
 
 function sbToBanner(b) {
@@ -301,80 +301,6 @@ function categoryToSb(c) {
     orden:  c.orden  || 0,
     activo: c.activo !== false
   };
-}
-
-/* ════════════════════════════
-   API PÚBLICA (tienda)
-════════════════════════════ */
-async function sbGetCategories() {
-  try {
-    const rows = await _get('categorias', 'activo=eq.true&order=orden.asc');
-    return rows.map(sbToCategory);
-  } catch { return []; }
-}
-
-async function sbGetProducts() {
-  try {
-    const rows = await _get('productos', 'activo=eq.true&order=id.asc');
-    return rows.map(sbToProduct);
-  } catch { return null; }
-}
-
-async function sbGetConfig() {
-  try {
-    const rows = await _get('config', 'select=clave,valor');
-    return sbToConfig(rows);
-  } catch { return null; }
-}
-
-async function sbGetBanners() {
-  try {
-    const rows = await _get('banners', 'order=orden.asc');
-    return rows.map(sbToBanner);
-  } catch { return null; }
-}
-
-async function sbCheckCupon(codigo) {
-  try {
-    const rows = await _get('cupones', `codigo=eq.${encodeURIComponent(codigo)}&activo=eq.true`);
-    return rows[0] || null;
-  } catch { return null; }
-}
-
-async function sbInsertPedido(data) {
-  try {
-    return await _post('pedidos', data);
-  } catch { return null; }
-}
-
-async function sbUpsertCarrito(sessionId, items, total, estado = 'activo') {
-  try {
-    const res = await fetch(`${SB_URL}/rest/v1/carritos?on_conflict=session_id`, {
-      method: 'POST',
-      headers: {
-        ..._h(false),
-        'Prefer': 'resolution=merge-duplicates,return=minimal'
-      },
-      body: JSON.stringify({
-        session_id: sessionId,
-        items,
-        total,
-        estado
-      })
-    });
-    return res.ok;
-  } catch { return false; }
-}
-
-async function sbTrackCartEvent(sessionId, eventName, data = {}) {
-  try {
-    const payload = {
-      session_id: sessionId,
-      event: eventName,
-      ...data
-    };
-    await _post('cart_events', payload, false, 'return=minimal');
-  } catch { /* ignore errors in tracking */ }
 }
 
 /* ════════════════════════════
@@ -522,20 +448,6 @@ async function sbAdminSaveBanners(banners) {
   return _post('banners', data, true, 'return=minimal');
 }
 
-async function sbAdminUpsertProducts(products) {
-  const existing = products.filter(p => p.id && !p._isNew);
-  if (!existing.length) return true;
-  // Guardar uno por uno con PATCH para evitar conflictos
-  for (const p of existing) {
-    try {
-      await _patch('productos', `id=eq.${p.id}`, productToSb(p), true);
-    } catch(e) {
-      console.warn('Error guardando producto', p.id, e);
-    }
-  }
-  return true;
-}
-
 async function sbAdminSavePedido(data) {
   const sbData = {
     cliente_nombre:    data.cliente        || '',
@@ -617,7 +529,10 @@ async function sbAdminSendEmail(type, data) {
   try {
     const res = await fetch('/api/send-email', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${_sbToken || ''}`
+      },
       body: JSON.stringify({ type, data })
     });
     const json = await res.json().catch(() => ({}));

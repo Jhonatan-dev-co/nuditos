@@ -274,7 +274,7 @@ const landingTikTokPixelId = content.tiktokPixelId || (slug === 'flores-amarilla
             type="button" 
             data-product-id={heroProductId}
             onclick="handleHeroBuy(this)"
-            class="flex-1 inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white px-5 sm:px-7 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-lg active:scale-95 cursor-pointer relative overflow-hidden group"
+            class="flex-1 inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white px-5 sm:px-7 py-3.5 sm:py-4 min-h-[48px] rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-lg active:scale-95 cursor-pointer relative overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <Icon name="shopping-bag-3" class="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
             <span id="btnHeroBuyText">Agregar al carrito</span>
@@ -283,7 +283,7 @@ const landingTikTokPixelId = content.tiktokPixelId || (slug === 'flores-amarilla
             id="heroWaBtn"
             href={waUrl} 
             target="_blank" 
-            class="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-6 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-md active:scale-95 whitespace-nowrap"
+            class="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-6 py-3.5 sm:py-4 min-h-[48px] rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-md active:scale-95 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
           >
             <Icon name="whatsapp" class="w-4 h-4" />
             <span>WhatsApp</span>
@@ -336,7 +336,7 @@ const landingTikTokPixelId = content.tiktokPixelId || (slug === 'flores-amarilla
             <button
               type="button"
               id="btnToggleAudio"
-              class="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/75 hover:bg-black/90 backdrop-blur-md text-white text-xs font-semibold tracking-wide border border-white/25 shadow-lg transition-all active:scale-95 cursor-pointer"
+              class="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full bg-black/75 hover:bg-black/90 backdrop-blur-md text-white text-xs font-semibold tracking-wide border border-white/25 shadow-lg transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
               title="Activar o desactivar sonido"
             >
               <span id="audioIcon" class="flex items-center justify-center">
@@ -371,7 +371,7 @@ const landingTikTokPixelId = content.tiktokPixelId || (slug === 'flores-amarilla
         <div class="flex items-center justify-center gap-2" id="whyTabs">
           <button
             type="button"
-            class="why-tab active flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer select-none"
+            class="why-tab active flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full text-xs font-bold transition-all cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             data-slide-index="0"
           >
             <Icon name="video" class="w-3.5 h-3.5" />
@@ -379,7 +379,7 @@ const landingTikTokPixelId = content.tiktokPixelId || (slug === 'flores-amarilla
           </button>
           <button
             type="button"
-            class="why-tab flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium text-stone-600 bg-stone-100 hover:bg-stone-200/80 border border-stone-200 transition-all cursor-pointer select-none"
+            class="why-tab flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full text-xs font-medium text-stone-600 bg-stone-100 hover:bg-stone-200/80 border border-stone-200 transition-all cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             data-slide-index="1"
           >
             <Icon name="package" class="w-3.5 h-3.5" />
@@ -594,7 +594,7 @@ const landingTikTokPixelId = content.tiktokPixelId || (slug === 'flores-amarilla
   <!-- ════════ STICKY CTA BAR (Mobile/Desktop) ════════ -->
   <div
     id="stickyCTA"
-    class="fixed bottom-[68px] md:bottom-8 left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-[94%] md:max-w-[520px] z-[90] border-t md:border px-3.5 py-2.5 md:p-2.5 md:rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] translate-y-[150%] opacity-0 pointer-events-none"
+    class="fixed left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-[94%] md:max-w-[520px] z-[140] border-t md:border px-3.5 py-2.5 md:p-2.5 md:rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] translate-y-[150%] opacity-0 pointer-events-none"
   >
     <div class="flex items-center gap-2.5 sm:gap-3 max-w-[520px] mx-auto md:mx-0">
       <!-- Miniatura -->
@@ -619,7 +619,7 @@ const landingTikTokPixelId = content.tiktokPixelId || (slug === 'flores-amarilla
         type="button" 
         data-product-id={heroProductId}
         onclick="handleHeroBuy(this)"
-        class="bg-[#1a1220] hover:bg-black text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-full text-xs font-bold tracking-wide active:scale-95 transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap cursor-pointer"
+        class="bg-[#1a1220] hover:bg-black text-white px-4 sm:px-6 py-2.5 sm:py-3 min-h-[44px] rounded-xl sm:rounded-full text-xs font-bold tracking-wide active:scale-95 transition-all shadow-md flex items-center justify-center gap-1.5 flex-shrink-0 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
       >
         <Icon name="shopping-bag-3" class="w-3.5 h-3.5 text-amber-400" />
         <span id="btnStickyBuyText">Agregar al carrito</span>
@@ -636,20 +636,23 @@ const landingTikTokPixelId = content.tiktokPixelId || (slug === 'flores-amarilla
       background-color: #ffffff;
       border-color: rgba(231, 229, 228, 0.95);
       box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-      z-index: 50 !important;
+      z-index: 140 !important;
+      bottom: calc(66px + env(safe-area-inset-bottom, 0px)) !important;
     }
     #stickyCTA.is-visible { transform: translate(0, 0); opacity: 1; pointer-events: auto; }
     @media (min-width: 768px) { 
-      #stickyCTA.is-visible { transform: translate(-50%, 0); } 
       #stickyCTA {
+        bottom: 2rem !important;
         box-shadow: 0 16px 45px rgba(0, 0, 0, 0.14);
       }
+      #stickyCTA.is-visible { transform: translate(-50%, 0); } 
     }
 
-    /* Ocultar y enviar al fondo cuando el carrito esté abierto */
+    /* Ocultar y enviar al fondo cuando el carrito o menú estén abiertos */
     :global(body.scroll-lock) #stickyCTA,
     :global(body:has(#cartPanel.open)) #stickyCTA,
-    :global(body:has(#cartOverlay.open)) #stickyCTA {
+    :global(body:has(#cartOverlay.open)) #stickyCTA,
+    :global(body:has(#menuPanel.open)) #stickyCTA {
       opacity: 0 !important;
       pointer-events: none !important;
       transform: translateY(150%) !important;

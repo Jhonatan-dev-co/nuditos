@@ -370,7 +370,10 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
         try {
           const signRes = await fetch('/api/cloudinary-sign', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${_sbToken || ''}`
+            },
             body: JSON.stringify({ public_id: publicId })
           });
           if (signRes.ok) {

@@ -269,10 +269,6 @@
 select.co-input { padding-top: 1.1rem; cursor: pointer; }
 
 /* Campos en fila */
-.co-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-@media (max-width: 480px) {
-  .co-row { grid-template-columns: 1fr; }
-}
 
 /* ── Botones de navegación del form ── */
 .co-btn-wrap {
@@ -294,96 +290,10 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
   box-shadow: 0 12px 25px rgba(26, 18, 32, 0.3);
 }
 .co-btn-primary:active { transform: scale(0.98); }
-.co-btn-back {
-  background: white; border: 1px solid var(--border-dark);
-  color: var(--text-soft);
-  padding: 1.05rem 1.2rem;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.7rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-  border-radius: 1rem; cursor: pointer; transition: all 0.2s;
-  display: flex; align-items: center; gap: 0.4rem; white-space: nowrap;
-}
-.co-btn-back:hover { border-color: var(--text); color: var(--text); background: var(--bg-soft); }
 
 /* ── Paso 3: Selección de Método de Pago ── */
-.co-payment-methods { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.5rem; }
-.co-payment-option {
-  display: flex; align-items: center; gap: 1rem;
-  padding: 1rem 1.2rem;
-  border: 1.5px solid var(--border-dark); border-radius: 1rem;
-  cursor: pointer; transition: all 0.2s;
-  position: relative;
-  background: white;
-}
-.co-payment-option:hover { border-color: #1a1220; }
-.co-payment-option.selected {
-  border-color: #1a1220;
-  background: #fafaf9;
-  box-shadow: 0 4px 14px rgba(26, 18, 32, 0.06);
-}
-.co-payment-option input[type="radio"] { display: none; }
-.co-payment-icon { font-size: 1.5rem; flex-shrink: 0; }
-.co-payment-info { flex: 1; }
-.co-payment-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
-.co-payment-desc { font-size: 0.68rem; color: var(--text-soft); margin-top: 0.1rem; }
-.co-payment-check {
-  width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid var(--border-dark);
-  flex-shrink: 0; transition: all 0.2s;
-  display: flex; align-items: center; justify-content: center;
-}
-.co-payment-option.selected .co-payment-check {
-  background: #1a1220; border-color: #1a1220;
-}
-.co-payment-option.selected .co-payment-check::after {
-  content: '✓'; color: white; font-size: 0.65rem; font-weight: 700;
-}
-.co-payment-tag {
-  position: absolute; top: -1px; right: 10px;
-  background: var(--mint-dark); color: white;
-  font-size: 0.5rem; letter-spacing: 1px; text-transform: uppercase;
-  padding: 0.15rem 0.5rem; border-radius: 0 0 4px 4px; font-weight: 700;
-}
 
 /* ── Botones de pago final (Premium) ── */
-.co-payment-info-box {
-  text-align: center;
-  padding: 1.5rem 0;
-  margin-bottom: 1rem;
-}
-.co-payment-text {
-  font-size: 0.95rem;
-  color: var(--text-soft);
-  margin-bottom: 2rem;
-  max-width: 450px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.6;
-}
-.co-trust-badges {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin-bottom: 1rem;
-}
-.co-trust-item {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #0e8541; /* Verde más fuerte, oficial y legal */
-}
-.co-trust-icon {
-  width: 22px;
-  height: 22px;
-}
-
-.co-btn-pay-wrap {
-  display: flex;
-  justify-content: center;
-  padding: 2rem 0;
-}
 
 .co-btn-pay-premium {
   background: var(--accent);
@@ -417,49 +327,9 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
 }
 
 /* â”€â”€ Resumen de datos (paso 3) â”€â”€ */
-.co-review-block {
-  background: var(--cream); border: 1px solid var(--border-dark);
-  border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem;
-}
-.co-review-row {
-  display: flex; align-items: flex-start; gap: 0.8rem;
-  padding: 1rem 1.2rem;
-  border-bottom: 1px solid var(--border-dark);
-}
-.co-review-row:last-child { border-bottom: none; }
-.co-review-label {
-  display: flex; align-items: center; gap: 0.4rem;
-  font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase;
-  color: var(--text-soft); font-weight: 700;
-  min-width: 75px; flex-shrink: 0; padding-top: 0.15rem;
-}
-.co-review-icon { width: 14px; height: 14px; color: var(--lila-dark); flex-shrink: 0; }
-.co-review-value { flex: 1; font-size: 0.82rem; color: var(--text); line-height: 1.5; }
-.co-review-edit {
-  background: none; border: 1px solid var(--border-dark); border-radius: 6px;
-  width: 28px; height: 28px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; flex-shrink: 0;
-}
-.co-review-edit:hover { border-color: var(--lila-dark); background: var(--lila-xlight); }
-.co-review-edit-icon { width: 13px; height: 13px; color: var(--text-soft); }
 
 /* â”€â”€ Ãconos dentro de botones y labels â”€â”€ */
-.co-btn-icon { width: 14px; height: 14px; flex-shrink: 0; }
 .co-secure-icon { width: 14px; height: 14px; }
-.co-mobile-icon { width: 16px; height: 16px; }
-.co-summary-icon { width: 16px; height: 16px; color: var(--text-soft); }
-.co-trust-icon { width: 15px; height: 15px; color: var(--mint-dark); flex-shrink: 0; }
-.co-envio-tag { display: flex; align-items: center; gap: 0.3rem; }
-.co-envio-icon { width: 14px; height: 14px; color: var(--text-soft); }
-.co-note-icon { width: 14px; height: 14px; color: var(--mint-dark); flex-shrink: 0; }
-.co-shipping-note {
-  padding: 0.8rem 1.5rem;
-  background: var(--cream); font-size: 0.65rem;
-  color: var(--text-soft); line-height: 1.6;
-  border-top: 1px solid var(--border-dark);
-  display: flex; align-items: flex-start; gap: 0.5rem;
-}
 
 /* â”€â”€ Spinner de carga â”€â”€ */
 .co-spinner {
@@ -471,23 +341,6 @@ select.co-input { padding-top: 1.1rem; cursor: pointer; }
 
 /* ── Antiguo bloque mobile eliminado ── */
 /* â”€â”€ ConfirmaciÃ³n de Pedido â”€â”€ */
-.co-confirmation {
-  text-align: center; padding: 3rem 2rem;
-}
-.co-confirm-icon {
-  width: 70px; height: 70px; border-radius: 50%;
-  background: var(--mint-light); border: 2px solid var(--mint-dark);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2rem; margin: 0 auto 1.5rem;
-  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.co-confirm-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2rem; font-weight: 400; margin-bottom: 0.5rem;
-  color: var(--text);
-}
-.co-confirm-title em { color: var(--lila-dark); font-style: italic; }
-.co-confirm-subtitle { font-size: 0.85rem; color: var(--text-soft); line-height: 1.7; }
 
 /* ── Panel de Resumen Premium ── */
 .co-summary-panel {

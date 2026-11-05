@@ -1,0 +1,526 @@
+---
+import Icon from './Icon.astro';
+
+export interface Props {
+  videoUrl?: string;
+  posterUrl?: string;
+}
+
+const {
+  videoUrl = 'https://res.cloudinary.com/dzxgu27wr/video/upload/q_auto:best,vc_auto/v1788554686/nuditos-products/iswxjie5xmwei8o1d8nn.mp4',
+  posterUrl = 'https://res.cloudinary.com/dzxgu27wr/video/upload/so_1,q_auto:best,f_auto/v1788554686/nuditos-products/iswxjie5xmwei8o1d8nn.jpg'
+} = Astro.props;
+---
+
+<!-- ════════ MODAL EDITORIAL DE BIENVENIDA: VIDEO DE EMPAQUE ════════ -->
+<div
+  id="welcomeVideoModal"
+  class="fixed inset-0 z-[300] flex items-center justify-center p-3.5 sm:p-5 opacity-0 pointer-events-none transition-opacity duration-300"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="welcomeVideoTitle"
+  aria-hidden="true"
+>
+  <!-- Backdrop suave idéntico al del Carrito / Search de Nuditos -->
+  <div
+    id="welcomeVideoBackdrop"
+    class="absolute inset-0 bg-[#1a1220]/40 backdrop-blur-sm cursor-pointer"
+    aria-label="Cerrar ventana"
+  ></div>
+
+  <!-- Tarjeta Editorial con el sistema Glass / Crema Boutique de la tienda -->
+  <div
+    id="welcomeVideoCard"
+    class="relative z-10 w-full max-w-[360px] sm:max-w-[390px] max-h-[92dvh] flex flex-col rounded-[2rem] border border-stone-200/80 shadow-[0_20px_50px_rgba(26,18,32,0.16)] overflow-hidden p-3.5 sm:p-4 transform translate-y-3 scale-[0.98] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+    style="background: var(--glass-bg, rgba(254, 252, 232, 0.95)); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);"
+  >
+    <!-- Cabecera Editorial -->
+    <div class="flex items-center justify-between gap-3 px-1 pb-3 shrink-0">
+      <div class="min-w-0">
+        <span class="text-[9px] uppercase tracking-[0.2em] font-bold text-amber-700 block mb-0.5">
+          Empaque & Envíos
+        </span>
+        <h2 id="welcomeVideoTitle" class="font-serif text-2xl sm:text-[1.65rem] font-light text-[#1a1220] leading-none truncate">
+          Así viaja <em class="italic text-amber-600 font-normal">tu ramo</em>
+        </h2>
+      </div>
+
+      <!-- Botón Cerrar con el estilo exacto del Carrito de la tienda -->
+      <button
+        type="button"
+        id="btnCloseWelcomeTop"
+        class="w-10 h-10 rounded-2xl border border-stone-200/70 bg-white/75 hover:bg-white text-[#1a1220] shadow-xs flex items-center justify-center active:scale-95 transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+        aria-label="Cerrar video"
+        title="Cerrar"
+      >
+        <Icon name="close" class="w-4 h-4 text-stone-700" />
+      </button>
+    </div>
+
+    <!-- Contenedor del Video (Proporción 4:5 editorial de Nuditos) -->
+    <div
+      class="relative w-full aspect-[4/5] max-h-[58dvh] sm:max-h-[62dvh] rounded-2xl bg-stone-900 border border-stone-200/70 overflow-hidden select-none flex items-center justify-center shadow-xs"
+      id="welcomeVideoStage"
+    >
+      <video
+        id="welcomePackingVideo"
+        class="w-full h-full object-cover cursor-pointer"
+        src={videoUrl}
+        poster={posterUrl}
+        playsinline
+        loop
+        preload="metadata"
+      ></video>
+
+      <!-- Píldora superior de Sonido concéntrica -->
+      <button
+        type="button"
+        id="btnWelcomeQuickAudio"
+        class="absolute top-3 left-3 z-20 inline-flex items-center gap-2 pl-1.5 pr-3 py-1 h-8 rounded-full bg-white/95 hover:bg-white backdrop-blur-md text-[#1a1220] text-[10px] uppercase tracking-[0.08em] font-bold border border-stone-200/70 shadow-md transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+      >
+        <span id="ctrlIconMuted" class="w-5 h-5 rounded-full bg-amber-50 border border-amber-200/70 flex items-center justify-center text-amber-600 shrink-0">
+          <Icon name="volume-mute" class="w-3 h-3" />
+        </span>
+        <span id="ctrlIconUnmuted" class="hidden w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/70 items-center justify-center text-emerald-600 shrink-0">
+          <Icon name="volume-up" class="w-3 h-3" />
+        </span>
+        <span id="welcomeQuickAudioText" class="leading-none">Activar sonido</span>
+      </button>
+
+      <!-- Spinner sutil de carga -->
+      <div
+        id="welcomeVideoLoader"
+        class="pointer-events-none absolute inset-0 flex items-center justify-center z-10 opacity-0 transition-opacity duration-200"
+      >
+        <div class="w-10 h-10 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+      </div>
+
+      <!-- Feedback central suave al tocar el video (Play / Pause) -->
+      <div
+        id="welcomeCenterStatus"
+        class="pointer-events-none absolute inset-0 flex items-center justify-center z-10 opacity-0 transition-opacity duration-200"
+      >
+        <div class="w-14 h-14 rounded-full bg-white/90 backdrop-blur-md border border-white/60 flex items-center justify-center text-[#1a1220] shadow-lg">
+          <svg id="centerIconPlay" class="w-6 h-6 ml-0.5 hidden" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          <svg id="centerIconPause" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- ════════ BARRA DE CONTROLES CONCÉNTRICA (Encaje perfecto) ════════ -->
+      <div
+        class="absolute inset-x-3 bottom-3 z-20 h-11 p-1.5 rounded-full bg-[#1a1220]/80 backdrop-blur-md border border-white/15 flex items-center gap-2 shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
+        onclick="event.stopPropagation()"
+      >
+        <!-- Botón Play / Pause (Círculo concéntrico de 32px dentro de barra de 44px) -->
+        <button
+          type="button"
+          id="btnWelcomePlayPause"
+          class="w-8 h-8 rounded-full bg-white text-[#1a1220] hover:bg-amber-50 flex items-center justify-center transition active:scale-90 cursor-pointer shrink-0 shadow-xs focus-visible:outline-none"
+          aria-label="Reproducir o pausar"
+        >
+          <svg id="ctrlIconPlay" class="w-3.5 h-3.5 ml-0.5 hidden" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          <svg id="ctrlIconPause" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+          </svg>
+        </button>
+
+        <!-- Barra de Progreso Personalizada (100% centrada y fluida en todos los navegadores) -->
+        <div class="relative flex-1 min-w-0 h-8 flex items-center mx-1 group/seek">
+          <!-- Pista de fondo -->
+          <div class="w-full h-1.5 bg-white/25 rounded-full overflow-hidden">
+            <div
+              id="welcomeSeekFill"
+              class="h-full bg-amber-400 rounded-full"
+              style="width: 0%;"
+            ></div>
+          </div>
+          <!-- Indicador circular (Thumb) perfectamente centrado -->
+          <div
+            id="welcomeSeekThumb"
+            class="w-3 h-3 rounded-full bg-white border-2 border-amber-400 shadow-sm absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-transform duration-150 group-hover/seek:scale-125"
+            style="left: 0%;"
+          ></div>
+          <!-- Input nativo invisible encima para capturar toque/arrastre con área cómoda -->
+          <input
+            type="range"
+            id="welcomeVideoSeek"
+            min="0"
+            max="100"
+            step="0.1"
+            value="0"
+            aria-label="Adelantar o retroceder video"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 m-0"
+          />
+        </div>
+
+        <!-- Tiempo actual / Duración -->
+        <span
+          id="welcomeTimeDisplay"
+          class="text-[11px] font-medium text-white/90 tabular-nums leading-none tracking-tight px-1 shrink-0"
+        >
+          0:00
+        </span>
+
+        <!-- Botón Reiniciar (Círculo concéntrico de 32px) -->
+        <button
+          type="button"
+          id="btnWelcomeRestart"
+          class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/90 hover:text-white transition active:scale-90 cursor-pointer shrink-0 focus-visible:outline-none"
+          aria-label="Ver desde el principio"
+          title="Reiniciar"
+        >
+          <Icon name="refresh" class="w-3.5 h-3.5" />
+        </button>
+
+        <!-- Botón Pantalla completa (Círculo concéntrico de 32px) -->
+        <button
+          type="button"
+          id="btnWelcomeFullscreen"
+          class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/90 hover:text-white transition active:scale-90 cursor-pointer shrink-0 focus-visible:outline-none"
+          aria-label="Pantalla completa"
+          title="Pantalla completa"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pie Editorial: Garantía + Botón Primario de la Tienda -->
+    <div class="pt-3 flex flex-col gap-2.5 shrink-0">
+      <div class="flex items-center justify-between bg-emerald-50/80 border border-emerald-200/60 rounded-xl px-3 py-2">
+        <div class="flex items-center gap-1.5">
+          <Icon name="package" class="text-emerald-600 w-3.5 h-3.5 shrink-0" />
+          <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-800">Caja rígida reforzada</span>
+        </div>
+        <span class="text-[10px] font-bold text-emerald-700">Envío gratis</span>
+      </div>
+
+      <button
+        type="button"
+        id="btnCloseWelcomeBottom"
+        class="w-full bg-[#1a1220] hover:bg-black text-white rounded-2xl py-3.5 min-h-[46px] flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-[0.14em]">Continuar a la tienda</span>
+        <Icon name="arrow-right" class="w-3.5 h-3.5 text-amber-400" />
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ PÍLDORA DISCRETA ESTILO BOUTIQUE PARA REABRIR ════════ -->
+<button
+  type="button"
+  id="btnReopenWelcomeVideo"
+  class="fixed left-3.5 bottom-[74px] md:bottom-6 z-[120] hidden items-center gap-2 bg-white/95 hover:bg-white backdrop-blur-md text-[#1a1220] pl-2 pr-3.5 py-1.5 min-h-[38px] rounded-full shadow-md border border-stone-200/90 text-[10px] font-bold uppercase tracking-[0.1em] transition-all active:scale-95 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+  aria-label="Ver video de cómo empacamos tu ramo"
+>
+  <span class="w-6 h-6 rounded-full bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-700 group-hover:scale-110 transition-transform">
+    <Icon name="video" class="w-3 h-3" />
+  </span>
+  <span class="leading-none">Ver empaque</span>
+</button>
+
+<style>
+  #welcomeVideoModal.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #welcomeVideoModal.is-open #welcomeVideoCard {
+    transform: translateY(0) scale(1);
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var STORAGE_KEY = 'nuditos_welcome_packing_seen_v1';
+
+    function formatTime(seconds) {
+      if (!seconds || isNaN(seconds)) return '0:00';
+      var mins = Math.floor(seconds / 60);
+      var secs = Math.floor(seconds % 60);
+      return mins + ':' + (secs < 10 ? '0' : '') + secs;
+    }
+
+    function initWelcomeVideoModal() {
+      var modal = document.getElementById('welcomeVideoModal');
+      var backdrop = document.getElementById('welcomeVideoBackdrop');
+      var video = document.getElementById('welcomePackingVideo');
+      var stage = document.getElementById('welcomeVideoStage');
+      var loader = document.getElementById('welcomeVideoLoader');
+      var btnCloseTop = document.getElementById('btnCloseWelcomeTop');
+      var btnCloseBottom = document.getElementById('btnCloseWelcomeBottom');
+      var btnReopen = document.getElementById('btnReopenWelcomeVideo');
+
+      var btnPlayPause = document.getElementById('btnWelcomePlayPause');
+      var ctrlIconPlay = document.getElementById('ctrlIconPlay');
+      var ctrlIconPause = document.getElementById('ctrlIconPause');
+
+      var centerStatus = document.getElementById('welcomeCenterStatus');
+      var centerIconPlay = document.getElementById('centerIconPlay');
+      var centerIconPause = document.getElementById('centerIconPause');
+
+      var btnQuickAudio = document.getElementById('btnWelcomeQuickAudio');
+      var quickAudioText = document.getElementById('welcomeQuickAudioText');
+      var ctrlIconMuted = document.getElementById('ctrlIconMuted');
+      var ctrlIconUnmuted = document.getElementById('ctrlIconUnmuted');
+
+      var seekSlider = document.getElementById('welcomeVideoSeek');
+      var seekFill = document.getElementById('welcomeSeekFill');
+      var seekThumb = document.getElementById('welcomeSeekThumb');
+      var timeDisplay = document.getElementById('welcomeTimeDisplay');
+      var btnRestart = document.getElementById('btnWelcomeRestart');
+      var btnFullscreen = document.getElementById('btnWelcomeFullscreen');
+
+      if (!modal || !video) return;
+      if (modal.dataset.bound === '1') return;
+      modal.dataset.bound = '1';
+
+      var centerStatusTimer = null;
+      var isScrubbing = false;
+
+      function setSeekVisual(pct) {
+        var clamped = Math.max(0, Math.min(100, pct || 0));
+        if (seekFill) seekFill.style.width = clamped + '%';
+        if (seekThumb) seekThumb.style.left = clamped + '%';
+      }
+
+      function syncPlayPauseUI() {
+        var paused = video.paused;
+        if (ctrlIconPlay && ctrlIconPause) {
+          ctrlIconPlay.classList.toggle('hidden', !paused);
+          ctrlIconPause.classList.toggle('hidden', paused);
+        }
+      }
+
+      function syncAudioUI() {
+        var isMuted = video.muted || video.volume === 0;
+        if (ctrlIconMuted && ctrlIconUnmuted) {
+          ctrlIconMuted.classList.toggle('hidden', !isMuted);
+          ctrlIconMuted.classList.toggle('flex', isMuted);
+          ctrlIconUnmuted.classList.toggle('hidden', isMuted);
+          ctrlIconUnmuted.classList.toggle('flex', !isMuted);
+        }
+        if (quickAudioText) {
+          quickAudioText.textContent = isMuted ? 'Activar sonido' : 'Sonido activo';
+        }
+      }
+
+      function flashCenterIndicator(isPlaying) {
+        if (!centerStatus || !centerIconPlay || !centerIconPause) return;
+        clearTimeout(centerStatusTimer);
+        centerIconPlay.classList.toggle('hidden', !isPlaying);
+        centerIconPause.classList.toggle('hidden', isPlaying);
+        centerStatus.classList.remove('opacity-0');
+        centerStatus.classList.add('opacity-100');
+        centerStatusTimer = setTimeout(function () {
+          centerStatus.classList.remove('opacity-100');
+          centerStatus.classList.add('opacity-0');
+        }, 420);
+      }
+
+      function openWelcomeModal(withSound) {
+        var bgUnboxing = document.getElementById('unboxingVideo');
+        if (bgUnboxing && !bgUnboxing.paused) {
+          bgUnboxing.pause();
+        }
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('scroll-lock');
+        if (btnReopen) {
+          btnReopen.classList.add('hidden');
+          btnReopen.classList.remove('inline-flex', 'flex');
+        }
+
+        video.muted = !withSound;
+        var playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(function () {
+              syncPlayPauseUI();
+              syncAudioUI();
+            })
+            .catch(function () {
+              video.muted = true;
+              video.play().catch(function () {});
+              syncPlayPauseUI();
+              syncAudioUI();
+            });
+        } else {
+          syncPlayPauseUI();
+          syncAudioUI();
+        }
+      }
+
+      function closeWelcomeModal() {
+        if (!modal.classList.contains('is-open')) return;
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('scroll-lock');
+        video.pause();
+        try {
+          sessionStorage.setItem(STORAGE_KEY, '1');
+        } catch (e) {}
+        if (btnReopen) {
+          btnReopen.classList.remove('hidden');
+          btnReopen.classList.add('inline-flex');
+        }
+      }
+
+      window.openWelcomePackingVideo = function () {
+        openWelcomeModal(true);
+      };
+      window.closeWelcomePackingVideo = closeWelcomeModal;
+
+      if (btnCloseTop) btnCloseTop.addEventListener('click', closeWelcomeModal);
+      if (btnCloseBottom) btnCloseBottom.addEventListener('click', closeWelcomeModal);
+      if (backdrop) backdrop.addEventListener('click', closeWelcomeModal);
+      if (btnReopen) {
+        btnReopen.addEventListener('click', function () {
+          openWelcomeModal(true);
+        });
+      }
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+          closeWelcomeModal();
+        }
+      });
+
+      function togglePlayPause() {
+        if (video.paused) {
+          video.play().catch(function () {});
+          flashCenterIndicator(true);
+        } else {
+          video.pause();
+          flashCenterIndicator(false);
+        }
+        syncPlayPauseUI();
+      }
+
+      video.addEventListener('click', togglePlayPause);
+      if (btnPlayPause) btnPlayPause.addEventListener('click', togglePlayPause);
+      video.addEventListener('play', syncPlayPauseUI);
+      video.addEventListener('pause', syncPlayPauseUI);
+
+      if (loader) {
+        video.addEventListener('waiting', function () {
+          loader.classList.remove('opacity-0');
+          loader.classList.add('opacity-100');
+        });
+        video.addEventListener('playing', function () {
+          loader.classList.remove('opacity-100');
+          loader.classList.add('opacity-0');
+        });
+        video.addEventListener('canplay', function () {
+          loader.classList.remove('opacity-100');
+          loader.classList.add('opacity-0');
+        });
+      }
+
+      if (btnRestart) {
+        btnRestart.addEventListener('click', function () {
+          video.currentTime = 0;
+          video.play().catch(function () {});
+          syncPlayPauseUI();
+          updateProgressUI();
+        });
+      }
+
+      if (btnQuickAudio) {
+        btnQuickAudio.addEventListener('click', function (e) {
+          e.stopPropagation();
+          video.muted = !video.muted;
+          if (!video.muted && video.volume === 0) {
+            video.volume = 1;
+          }
+          if (video.paused) {
+            video.play().catch(function () {});
+          }
+          syncAudioUI();
+        });
+      }
+
+      function updateProgressUI() {
+        var dur = video.duration || 0;
+        var cur = video.currentTime || 0;
+        if (!isScrubbing && seekSlider && dur > 0) {
+          var pct = (cur / dur) * 100;
+          seekSlider.value = String(pct);
+          setSeekVisual(pct);
+        }
+        if (timeDisplay) {
+          timeDisplay.textContent = dur > 0 ? formatTime(cur) + ' / ' + formatTime(dur) : formatTime(cur);
+        }
+      }
+
+      video.addEventListener('timeupdate', updateProgressUI);
+      video.addEventListener('loadedmetadata', updateProgressUI);
+
+      if (seekSlider) {
+        seekSlider.addEventListener('mousedown', function () { isScrubbing = true; });
+        seekSlider.addEventListener('touchstart', function () { isScrubbing = true; }, { passive: true });
+        seekSlider.addEventListener('input', function () {
+          var dur = video.duration || 0;
+          var pct = parseFloat(seekSlider.value) || 0;
+          setSeekVisual(pct);
+          if (dur > 0) {
+            var targetTime = (pct / 100) * dur;
+            if (timeDisplay) {
+              timeDisplay.textContent = formatTime(targetTime) + ' / ' + formatTime(dur);
+            }
+          }
+        });
+        seekSlider.addEventListener('change', function () {
+          var dur = video.duration || 0;
+          var pct = parseFloat(seekSlider.value) || 0;
+          setSeekVisual(pct);
+          if (dur > 0) {
+            video.currentTime = (pct / 100) * dur;
+          }
+          isScrubbing = false;
+        });
+      }
+
+      if (btnFullscreen) {
+        btnFullscreen.addEventListener('click', function () {
+          if (document.fullscreenElement) {
+            document.exitFullscreen().catch(function () {});
+          } else if (stage && stage.requestFullscreen) {
+            stage.requestFullscreen().catch(function () {});
+          } else if (video.webkitEnterFullscreen) {
+            video.webkitEnterFullscreen();
+          }
+        });
+      }
+
+      var alreadySeen = false;
+      try {
+        alreadySeen = sessionStorage.getItem(STORAGE_KEY) === '1';
+      } catch (e) {}
+
+      var forceOpen = window.location.search.indexOf('video=1') !== -1;
+
+      if (!alreadySeen || forceOpen) {
+        openWelcomeModal(false);
+      } else if (btnReopen) {
+        btnReopen.classList.remove('hidden');
+        btnReopen.classList.add('inline-flex');
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initWelcomeVideoModal);
+    } else {
+      initWelcomeVideoModal();
+    }
+    document.addEventListener('astro:page-load', initWelcomeVideoModal);
+  })();
+</script>

@@ -7,4 +7,19 @@ dist
 .DS_Store
 .vscode
 .gemini
+.wrangler
+
+# Archivos temporales, dumps y scripts de prueba
+scratch/
+tmp.*
+tmp_*
+admin_dump.html
+test_script.js
+*.log
+*.dump
+
+# Scripts SQL con datos o migraciones locales
+*.sql
+!supabase-security-hardening.sql
+
 

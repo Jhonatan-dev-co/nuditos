@@ -1,4 +1,4 @@
-import { slugify, categories } from '../data/datos';
+import { slugify, categories, clUrl } from '../data/datos';
 import { getIconSvg } from '../lib/icons';
 
 document.addEventListener('astro:page-load', () => {
@@ -19,26 +19,13 @@ document.addEventListener('astro:page-load', () => {
   closeBtn.addEventListener('click', closeSearch);
   overlay.addEventListener('click', e => { if (e.target === overlay) closeSearch(); });
 
-  let searchTimer: any = null;
-  input.addEventListener('input', e => {
-    const q = (e.target as HTMLInputElement).value.trim().toLowerCase();
-    
-    // Facebook & TikTok Pixel Track - Search (Debounced)
-    clearTimeout(searchTimer);
-    if (q.length >= 3) {
-      searchTimer = setTimeout(() => {
-        if (typeof window.fbq === 'function') {
-          window.fbq('track', 'Search', { search_string: q });
-        }
-        if (typeof (window as any).ttq === 'object') {
-          (window as any).ttq.track('Search', { query: q });
-        }
-      }, 700);
-    }
+  let searchPixelTimer: any = null;
+  let renderDebounceTimer: any = null;
 
+  function doSearch(q: string) {
     if (q.length < 2) { 
-        results.innerHTML = ''; 
-        return; 
+      results.innerHTML = ''; 
+      return; 
     }
     
     const liveProducts = (window as any).NUDITOS_LIVE_PRODUCTS || [];
@@ -67,10 +54,8 @@ document.addEventListener('astro:page-load', () => {
     }
 
     results.innerHTML = found.map((p: any) => {
-      // Optimización de imagen de búsqueda a 80px
-      const thumbUrl = p.img && p.img.includes('res.cloudinary.com') 
-        ? p.img.replace(/upload\/v?/, 'upload/q_auto,f_auto,w_80/') : p.img;
-      const thumb = p.img ? `<img src="${thumbUrl}" alt="${p.name}" width="40" height="40">` : `<span>${p.emoji || '🌸'}</span>`;
+      const thumbUrl = clUrl(p.img, 80);
+      const thumb = p.img ? `<img src="${thumbUrl}" alt="${p.name}" width="40" height="40" loading="lazy" decoding="async">` : `<span>${p.emoji || '🌸'}</span>`;
       const priceText = p.price > 0 ? `$${p.price.toLocaleString('es-CO')} COP` : 'Consultar';
       return `
         <a class="search-item" href="/ramo/${slugify(p.name)}" style="text-decoration:none;color:inherit">
@@ -84,8 +69,33 @@ document.addEventListener('astro:page-load', () => {
     }).join('');
 
     document.querySelectorAll('.search-item').forEach(el => {
-        el.addEventListener('click', closeSearch);
+      el.addEventListener('click', closeSearch, { once: true });
     });
+  }
+
+  input.addEventListener('input', e => {
+    const q = (e.target as HTMLInputElement).value.trim().toLowerCase();
+    
+    // Facebook & TikTok Pixel Track - Search (Debounced 700ms)
+    clearTimeout(searchPixelTimer);
+    if (q.length >= 3) {
+      searchPixelTimer = setTimeout(() => {
+        if (typeof window.fbq === 'function') {
+          window.fbq('track', 'Search', { search_string: q });
+        }
+        if (typeof (window as any).ttq === 'object') {
+          (window as any).ttq.track('Search', { query: q });
+        }
+      }, 700);
+    }
+
+    // Input UI Debounce (150ms) para respuesta ultra fluida sin bloquear el hilo principal (INP)
+    clearTimeout(renderDebounceTimer);
+    if (q.length < 2) {
+      results.innerHTML = '';
+    } else {
+      renderDebounceTimer = setTimeout(() => doSearch(q), 150);
+    }
   });
 
   // Cerrar con tecla ESC

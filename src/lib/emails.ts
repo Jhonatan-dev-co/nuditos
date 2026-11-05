@@ -59,7 +59,7 @@ function escapeHtml(unsafe: any): string {
 }
 
 // ── PARSEADOR ROBUSTO DE ITEMS (soporta string separado por comas o array de objetos) ──
-export function parseItemsSafe(itemsRaw: any): Array<{ qty: number; name: string }> {
+function parseItemsSafe(itemsRaw: any): Array<{ qty: number; name: string }> {
   if (!itemsRaw) return [];
   if (Array.isArray(itemsRaw)) {
     return itemsRaw.map(i => ({
@@ -76,7 +76,7 @@ export function parseItemsSafe(itemsRaw: any): Array<{ qty: number; name: string
 }
 
 // ── BÚSQUEDA DE IMAGEN EN SUPABASE CON FALLBACK ──
-export async function getProductImageSafe(productName: string, sbUrl?: string, sbKey?: string): Promise<string> {
+async function getProductImageSafe(productName: string, sbUrl?: string, sbKey?: string): Promise<string> {
   const fallback = 'https://res.cloudinary.com/dzxgu27wr/image/upload/w_140,h_140,c_fill,q_auto,f_auto/v1776121095/nuditos-products/flor-y-miel-ramo-tejido-crochet-r4qg.jpg';
   if (!sbUrl || !sbKey || !productName) return fallback;
   try {
@@ -94,7 +94,7 @@ export async function getProductImageSafe(productName: string, sbUrl?: string, s
 }
 
 // ── CONTENEDOR MAESTRO DE CORREO (RESPONSIVE) ──
-export function emailWrapper(content: string): string {
+function emailWrapper(content: string): string {
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -175,7 +175,7 @@ export function emailWrapper(content: string): string {
 }
 
 // ── BARRA DE PROGRESO DE ENVÍO CON ÍCONOS SVG VECTORIALES ──
-export function shippingProgress(step: number): string {
+function shippingProgress(step: number): string {
   const steps = ['Confirmado', 'Preparando', 'Enviado', 'En camino', 'Entregado'];
   const svgIcons = [
     `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
@@ -201,7 +201,7 @@ export function shippingProgress(step: number): string {
 }
 
 // ── OBTENER CONFIGURACIÓN DINÁMICA (ENV + SUPABASE CONFIG) ──
-export async function getEmailConfig(locals?: any): Promise<{
+async function getEmailConfig(locals?: any): Promise<{
   resendApiKey: string;
   adminEmail: string;
   emailFrom: string;

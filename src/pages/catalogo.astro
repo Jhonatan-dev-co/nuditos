@@ -151,12 +151,12 @@ const schemaItemList = {
               type="text"
               id="catSearch"
               placeholder="¿Qué buscas?"
-              class="w-full bg-stone-50 border border-stone-200 rounded-full py-2.5 pl-9 pr-4 text-xs font-sans focus:bg-white focus:border-amber-400 focus:outline-none transition-all shadow-inner"
+              class="w-full bg-stone-50 border border-stone-200 rounded-full py-2.5 min-h-[42px] pl-9 pr-4 text-xs font-sans focus:bg-white focus:border-amber-400 focus:outline-none transition-all shadow-inner"
             />
           </div>
 
           <div class="relative">
-            <select id="catSort" class="appearance-none bg-[#1a1220] hover:bg-black text-white rounded-full py-2.5 pl-4 pr-9 text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-colors focus:outline-none shadow-sm">
+            <select id="catSort" class="appearance-none bg-[#1a1220] hover:bg-black text-white rounded-full py-2.5 min-h-[42px] pl-4 pr-9 text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-colors focus:outline-none shadow-sm">
               <option value="default">Recomendado</option>
               <option value="price-asc">Precio: Bajo a Alto</option>
               <option value="price-desc">Precio: Alto a Bajo</option>
@@ -185,7 +185,7 @@ const schemaItemList = {
       </h2>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6" id="catalogGrid">
+    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 gap-y-5 sm:gap-4 md:gap-6" id="catalogGrid">
       {allProducts.map(p => (
         <ProductCard p={p} catName={catMap[p.cat]} class="product-item" idScope="catalog" />
       ))}
@@ -225,7 +225,7 @@ const schemaItemList = {
 
   /* Nuevos Chips de Categoria */
   .cat-pill {
-    @apply flex-shrink-0 flex items-center justify-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-600 bg-stone-50 border border-stone-200/80 shadow-sm transition-all duration-200 whitespace-nowrap select-none;
+    @apply flex-shrink-0 flex items-center justify-center px-4 sm:px-5 py-2.5 sm:py-3 min-h-[42px] rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-600 bg-stone-50 border border-stone-200/80 shadow-sm transition-all duration-200 whitespace-nowrap select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500;
   }
   .cat-pill:hover {
     @apply bg-white text-stone-900 border-amber-300 shadow-sm transform -translate-y-px;

@@ -1,6 +1,35 @@
 import { $cart, addToCart, changeQty, getCartTotal, $discount } from '../store/cart';
-import { products } from '../data/datos';
+import { products, clUrl } from '../data/datos';
 import { getIconSvg } from '../lib/icons';
+import { SB_URL, SB_ANON } from '../lib/supabase-public';
+
+// ─── Tracking de carrito en Supabase (antes en public/scripts/supabase.js) ────
+const SB_HEADERS = {
+  apikey: SB_ANON,
+  Authorization: `Bearer ${SB_ANON}`,
+  'Content-Type': 'application/json',
+};
+
+async function sbUpsertCarrito(sessionId: string, items: unknown[], total: number, estado = 'activo') {
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/carritos?on_conflict=session_id`, {
+      method: 'POST',
+      headers: { ...SB_HEADERS, Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ session_id: sessionId, items, total, estado }),
+    });
+    return res.ok;
+  } catch { return false; }
+}
+
+async function sbTrackCartEvent(sessionId: string, eventName: string, data: Record<string, unknown> = {}) {
+  try {
+    await fetch(`${SB_URL}/rest/v1/cart_events`, {
+      method: 'POST',
+      headers: { ...SB_HEADERS, Prefer: 'return=minimal' },
+      body: JSON.stringify({ session_id: sessionId, event: eventName, ...data }),
+    });
+  } catch { /* ignorar errores de tracking */ }
+}
 
 // ─── Sesión persistente del visitante ────────────────────────────────────────
 function getOrCreateSessionId(): string {
@@ -14,7 +43,7 @@ function getOrCreateSessionId(): string {
 }
 
 
-// Función para mostrar el toast (copiada de app.js para independencia)
+// Toast global de notificaciones
 function showToast(msg: string) {
   const t = document.getElementById('toast');
   if (t) {
@@ -64,8 +93,8 @@ function updateCartUI(cart: readonly any[]) {
       
       body.innerHTML = cart.map((item, idx) => {
         const isUrl = item.img && item.img.startsWith('http');
-        const imgUrl = isUrl ? item.img.replace('/upload/', '/upload/w_200,q_auto,f_auto/') : item.img;
-        const thumb = item.img ? `<img src="${imgUrl}" alt="${item.name}" class="w-full h-full object-cover rounded-xl shadow-inner">` : `<span class="text-3xl opacity-50 drop-shadow-sm">${item.emoji || '🌸'}</span>`;
+        const imgUrl = isUrl ? clUrl(item.img, 160) : item.img;
+        const thumb = item.img ? `<img src="${imgUrl}" alt="${item.name}" width="64" height="64" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-xl shadow-inner">` : `<span class="text-3xl opacity-50 drop-shadow-sm">${item.emoji || '🌸'}</span>`;
         return `
           <div class="cart-item-wrap relative overflow-hidden group border-b border-stone-200/50 animate-cart-item" style="animation-delay: ${idx * 60}ms" data-id="${item.id}" data-qty="${item.qty}">
             <!-- Base roja oculta (Swipe Delete a la DERECHA) -->
@@ -90,14 +119,14 @@ function updateCartUI(cart: readonly any[]) {
               </div>
               
               <!-- Controles de cantidad -->
-              <div class="flex items-center gap-2 shrink-0 bg-stone-50 rounded-2xl px-1.5 py-1.5 border border-stone-200/50 cursor-pointer pointer-events-auto" onclick="event.stopPropagation()">
-                <button class="w-7 h-7 rounded-xl flex items-center justify-center bg-white text-stone-500 shadow-sm hover:bg-stone-900 hover:text-white transition-all active:scale-90" onclick="changeQtyWithAnim(${item.id}, -1, this)">${getIconSvg('subtract', 'text-sm flex')}</button>
-                <span class="text-xs font-bold w-4 text-center text-stone-800">${item.qty}</span>
-                <button class="w-7 h-7 rounded-xl flex items-center justify-center bg-white text-stone-500 shadow-sm hover:bg-stone-900 hover:text-white transition-all active:scale-90" onclick="changeQtyWithAnim(${item.id}, 1, this)">${getIconSvg('add', 'text-sm flex')}</button>
+              <div class="flex items-center gap-1.5 shrink-0 bg-stone-50 rounded-2xl px-2 py-1.5 border border-stone-200/50 cursor-pointer pointer-events-auto" onclick="event.stopPropagation()">
+                <button class="w-8 h-8 rounded-xl flex items-center justify-center bg-white text-stone-600 shadow-xs hover:bg-stone-900 hover:text-white transition-all active:scale-90 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500" onclick="changeQtyWithAnim(${item.id}, -1, this)" aria-label="Restar 1 a ${item.name}">${getIconSvg('subtract', 'text-xs flex')}</button>
+                <span class="text-xs font-bold w-5 text-center text-stone-800 tabular-nums">${item.qty}</span>
+                <button class="w-8 h-8 rounded-xl flex items-center justify-center bg-white text-stone-600 shadow-xs hover:bg-stone-900 hover:text-white transition-all active:scale-90 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500" onclick="changeQtyWithAnim(${item.id}, 1, this)" aria-label="Sumar 1 a ${item.name}">${getIconSvg('add', 'text-xs flex')}</button>
               </div>
 
               <!-- Botón X de eliminar (Especial para PC) -->
-              <button class="ml-2 w-8 h-8 flex items-center justify-center text-stone-300 hover:text-rose-500 transition-colors pointer-events-auto" onclick="event.stopPropagation(); changeQtyWithAnim(${item.id}, -999, this)" title="Eliminar producto">
+              <button class="ml-1 w-9 h-9 flex items-center justify-center text-stone-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all cursor-pointer pointer-events-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400" onclick="event.stopPropagation(); changeQtyWithAnim(${item.id}, -999, this)" title="Eliminar ${item.name}" aria-label="Eliminar ${item.name}">
                 ${getIconSvg('close', 'text-lg')}
               </button>
             </div>
@@ -141,12 +170,10 @@ function syncCartToSupabase(cart: readonly any[], estado = 'activo') {
   if (_syncTimer) clearTimeout(_syncTimer);
   if (cart.length === 0) return; // no registrar carrito vacío
   _syncTimer = setTimeout(async () => {
-    const fn = (window as any).sbUpsertCarrito;
-    if (!fn) return;
     const sessionId = getOrCreateSessionId();
     const total = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
     const items = cart.map(({ id, name, price, qty, img, slug }) => ({ id, name, price, qty, img, slug }));
-    await fn(sessionId, items, total, estado);
+    await sbUpsertCarrito(sessionId, items, total, estado);
   }, 1500);
 }
 
@@ -201,8 +228,7 @@ document.addEventListener('astro:page-load', () => {
       }
     }
 
-    const fn = (window as any).sbTrackCartEvent;
-    if (fn) fn(getOrCreateSessionId(), 'add_to_cart', { product_id: p.id, product_name: p.name, quantity: 1, cart_total: getCartTotal() });
+    sbTrackCartEvent(getOrCreateSessionId(), 'add_to_cart', { product_id: p.id, product_name: p.name, quantity: 1, cart_total: getCartTotal() });
 
     // Meta Pixel & TikTok Pixel AddToCart
     if (typeof (window as any).fbq === 'function') {
@@ -262,8 +288,7 @@ document.addEventListener('astro:page-load', () => {
     } else {
       changeQty(id, delta);
     }
-    const fn = (window as any).sbTrackCartEvent;
-    if (fn) fn(getOrCreateSessionId(), 'remove_item', { product_id: id, product_name: item.name });
+    sbTrackCartEvent(getOrCreateSessionId(), 'remove_item', { product_id: id, product_name: item.name });
   } else {
     changeQty(id, delta);
   }
@@ -286,7 +311,7 @@ document.addEventListener('astro:page-load', () => {
   
   if (cart.length === 0) return showToast('Agrega productos para pedir');
 
-  let text = `*NUEVO PEDIDO - NUDITOS TRJIDOS* 🌸\n\n`;
+  let text = `*NUEVO PEDIDO - NUDITOS TEJIDOS* 🌸\n\n`;
   text += `🛒 *Detalle de compra:*\n`;
   
   cart.forEach(i => {
@@ -311,16 +336,12 @@ document.addEventListener('astro:page-load', () => {
   
   // Registrar eventos en Supabase
   const sid = getOrCreateSessionId();
-  const trackFn = (window as any).sbTrackCartEvent;
-  if (trackFn) trackFn(sid, 'checkout_wa', { cart_total: total });
+  sbTrackCartEvent(sid, 'checkout_wa', { cart_total: total });
 
   syncCartToSupabase($cart.get(), 'checkout_wa');
   if (_syncTimer) { clearTimeout(_syncTimer); _syncTimer = null; }
-  const upsertFn = (window as any).sbUpsertCarrito;
-  if (upsertFn) {
-    const items = $cart.get().map(({ id, name, price, qty, img }) => ({ id, name, price, qty, img }));
-    upsertFn(sid, items, total, 'checkout_wa');
-  }
+  const items = $cart.get().map(({ id, name, price, qty, img }) => ({ id, name, price, qty, img }));
+  sbUpsertCarrito(sid, items, total, 'checkout_wa');
 };
 
 // ✅ Redirigir al checkout completo (flujo real de Wompi está en checkout.astro)

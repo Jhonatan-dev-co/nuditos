@@ -6,14 +6,31 @@ export interface Props {
   class?: string;
   id?: string;
   style?: string;
+  'aria-label'?: string;
+  'aria-hidden'?: 'true' | 'false' | boolean;
+  role?: string;
 }
 
-const { name, class: className = '', id, style } = Astro.props;
+const { 
+  name, 
+  class: className = '', 
+  id, 
+  style,
+  'aria-label': ariaLabel,
+  'aria-hidden': ariaHidden,
+  role
+} = Astro.props;
+
 const content = ICONS[name];
 
 if (!content) {
   console.warn(`Icon "${name}" not found in ICONS.`);
 }
+
+// Si tiene aria-label o role, no es decorativo; de lo contrario, aria-hidden="true" para cumplir WCAG
+const computedAriaHidden = ariaHidden !== undefined 
+  ? String(ariaHidden) 
+  : (ariaLabel || role ? undefined : 'true');
 ---
 <svg 
   xmlns="http://www.w3.org/2000/svg" 
@@ -24,5 +41,8 @@ if (!content) {
   id={id}
   style={style}
   fill="currentColor" 
+  role={role || (ariaLabel ? 'img' : undefined)}
+  aria-label={ariaLabel}
+  aria-hidden={computedAriaHidden}
   set:html={content || ''} 
 />

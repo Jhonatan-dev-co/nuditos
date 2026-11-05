@@ -114,8 +114,11 @@ const displayCards = communityMoments.map((moment, index) => {
           <img 
             src={clUrl(item.imgUrl, 600)} 
             alt={item.caption} 
-            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
+            width="300"
+            height="375"
             loading="lazy" 
+            decoding="async"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
           />
 
           <!-- Gradiente sombreado para legibilidad -->

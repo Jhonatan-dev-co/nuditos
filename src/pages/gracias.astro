@@ -15,7 +15,7 @@ if (!transactionId) {
 }
 
 // Consultar estado real de la transacción en Wompi API
-let status = 'APPROVED'; // fallback si Wompi API no responde temporalmente
+let status = 'PENDING';
 let wompiAmount = 0;
 let wompiRef = transactionId;
 let errorMessage = '';

@@ -25,7 +25,7 @@ const whatsappLink = `https://wa.me/${whatsappNum}`;
     
     <!-- Columna 1: Marca & Filosofía -->
     <div class="footer-col brand-col accordion-item">
-      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)" aria-label="Abrir sección de filosofía de la marca" aria-expanded="false">
         <span class="footer-logo">NUDITOS<em>.</em></span>
         <Icon name="add" class="acc-icon w-5 h-5" />
       </button>
@@ -47,7 +47,7 @@ const whatsappLink = `https://wa.me/${whatsappNum}`;
 
     <!-- Columna 2: Explora (SEO Comercial) -->
     <div class="footer-col accordion-item">
-      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)" aria-label="Abrir sección Explora Nuditos" aria-expanded="false">
         <h4 class="footer-title">Explora Nuditos</h4>
         <Icon name="add" class="acc-icon w-5 h-5" />
       </button>
@@ -66,7 +66,7 @@ const whatsappLink = `https://wa.me/${whatsappNum}`;
 
     <!-- Columna 3: Envíos Locales (SEO Local) -->
     <div class="footer-col accordion-item">
-      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)" aria-label="Abrir sección de Envíos Locales" aria-expanded="false">
         <h4 class="footer-title">Envíos Locales</h4>
         <Icon name="add" class="acc-icon w-5 h-5" />
       </button>
@@ -84,7 +84,7 @@ const whatsappLink = `https://wa.me/${whatsappNum}`;
 
     <!-- Columna 4: Soporte -->
     <div class="footer-col accordion-item">
-      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)" aria-label="Abrir sección Ayuda y Soporte" aria-expanded="false">
         <h4 class="footer-title">Ayuda y Soporte</h4>
         <Icon name="add" class="acc-icon w-5 h-5" />
       </button>
@@ -97,7 +97,7 @@ const whatsappLink = `https://wa.me/${whatsappNum}`;
 
     <!-- Columna 5: Transparencia -->
     <div class="footer-col accordion-item">
-      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)">
+      <button class="accordion-trigger" onclick="window.toggleFooterAcc(this)" aria-label="Abrir sección de Confianza y Garantías" aria-expanded="false">
         <h4 class="footer-title">Confianza</h4>
         <Icon name="add" class="acc-icon w-5 h-5" />
       </button>
@@ -180,8 +180,8 @@ const whatsappLink = `https://wa.me/${whatsappNum}`;
     gap: 1rem;
   }
   .social-icon-btn {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.02);
@@ -198,6 +198,11 @@ const whatsappLink = `https://wa.me/${whatsappNum}`;
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 4px 10px rgba(167, 139, 250, 0.15);
   }
+  .social-icon-btn:focus-visible {
+    outline: none;
+    ring: 2px;
+    box-shadow: 0 0 0 2px #a78bfa;
+  }
 
   .footer-title {
     font-size: 0.75rem;
@@ -211,13 +216,14 @@ const whatsappLink = `https://wa.me/${whatsappNum}`;
   .footer-links {
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 0.75rem;
   }
   .footer-links a {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.55);
     transition: all 0.25s ease;
     width: fit-content;
+    padding: 0.2rem 0;
   }
   .footer-links a:hover {
     color: #a78bfa;
@@ -338,16 +344,22 @@ const whatsappLink = `https://wa.me/${whatsappNum}`;
 
       const isActive = item.classList.contains('active');
       
-      // Cerrar otros abiertos
+      // Cerrar otros abiertos y actualizar aria-expanded
       document.querySelectorAll('.accordion-item').forEach(el => {
-        if (el !== item) el.classList.remove('active');
+        if (el !== item) {
+          el.classList.remove('active');
+          const trigger = el.querySelector('.accordion-trigger');
+          if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        }
       });
       
       // Alternar actual
       if (isActive) {
         item.classList.remove('active');
+        btn.setAttribute('aria-expanded', 'false');
       } else {
         item.classList.add('active');
+        btn.setAttribute('aria-expanded', 'true');
       }
     };
   });

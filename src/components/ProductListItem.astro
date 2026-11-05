@@ -4,24 +4,32 @@ import { slugify, clUrl } from '../data/datos';
 const { p } = Astro.props;
 ---
 <a class="group flex items-center bg-white rounded-2xl overflow-hidden border border-stone-200/80 shadow-sm hover:shadow-md hover:border-violet-200/80 transition-all duration-300 p-2 gap-4" href={`/ramo/${slugify(p.name)}`} aria-label={`Ver detalles de ${p.name}`}>
-  <div class="w-20 h-20 flex-shrink-0 bg-stone-50 rounded-xl overflow-hidden">
+  <div class="w-20 h-20 flex-shrink-0 bg-stone-50 rounded-xl overflow-hidden relative">
     {p.img ? (
-      <img src={clUrl(p.img, 200)} alt={p.name} loading="lazy" class="w-full h-full object-cover transition-transform group-hover:scale-110" />
+      <img src={clUrl(p.img, 200)} alt={p.name} width="80" height="80" loading="lazy" decoding="async" class={`w-full h-full object-cover transition-transform group-hover:scale-110 ${p.stock === 0 ? 'grayscale-[50%] brightness-95' : ''}`} />
     ) : (
       <div class="w-full h-full flex items-center justify-center text-3xl opacity-80 group-hover:scale-110 transition-transform">
         {p.emoji}
       </div>
     )}
+    {p.stock === 0 && (
+      <div class="absolute inset-0 bg-stone-100/60 flex items-center justify-center rounded-xl">
+        <span class="text-[9px] font-black uppercase tracking-widest text-stone-400">Agotado</span>
+      </div>
+    )}
   </div>
   <div class="flex-1 min-w-0 py-1">
-    <div class="text-sm font-bold text-stone-800 line-clamp-1 mb-0.5 group-hover:text-violet-700 transition-colors">{p.name}</div>
+    <div class={`text-sm font-bold line-clamp-1 mb-0.5 transition-colors ${p.stock === 0 ? 'text-stone-400' : 'text-stone-800 group-hover:text-violet-700'}`}>{p.name}</div>
     <div class="text-[11px] text-stone-500 line-clamp-1 mb-2">{p.desc}</div>
-    <div class="text-sm font-semibold text-stone-700">
-      {p.price > 0 ? `$${p.price.toLocaleString('es-CO')}` : <span class="text-[10px] uppercase font-bold text-violet-600">Consultar</span>}
+    <div class={`text-sm font-semibold ${p.stock === 0 ? 'text-stone-400' : 'text-stone-700'}`}>
+      {p.stock === 0
+        ? <span class="text-[10px] uppercase font-bold text-stone-400">No disponible</span>
+        : p.price > 0 ? `$${p.price.toLocaleString('es-CO')}` : <span class="text-[10px] uppercase font-bold text-violet-600">Consultar</span>
+      }
     </div>
   </div>
   <div class="flex flex-col items-center gap-2 pr-2">
-    {p.price > 0 && (
+    {p.price > 0 && p.stock !== 0 && (
       <button 
         class="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center text-stone-600 hover:bg-violet-600 hover:text-white transition-all shadow-sm"
         id={`padd-${p.id}`} 

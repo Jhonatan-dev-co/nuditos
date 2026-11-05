@@ -11,7 +11,7 @@ export default defineConfig({
     imageService: 'passthrough'
   }),
   prefetch: {
-    prefetchAll: true,
+    prefetchAll: false,
     defaultStrategy: 'viewport',
   },
   integrations: [sitemap({
@@ -20,8 +20,7 @@ export default defineConfig({
     filter: (page) =>
       !page.includes('/admin') &&
       !page.includes('/checkout') &&
-      !page.includes('/gracias') &&
-      !page.includes('/test-video'),
+      !page.includes('/gracias'),
     serialize(item) {
       if (item.url === 'https://nuditos.com.co/') {
         item.priority = 1.0;

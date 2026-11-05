@@ -48,6 +48,7 @@ Todas las skills viven en `.agents/skills/<nombre>/SKILL.md` (registradas en `.a
 ---
 
 ## 📋 Reglas de Flujo y Código
+- **Git & Commits:** NUNCA ejecutar `git commit` ni `git push` sin autorización previa y explícita del usuario. Todos los cambios deben permanecer locales en el árbol de trabajo hasta que el usuario decida confirmarlos o te ordene hacerlo expresamente.
 - **Autoverificación:** Antes de confirmar una tarea que modifique código o dependencias, ejecuta siempre `npm run build` en la terminal para garantizar que el proyecto compile limpiamente sin errores de TypeScript o Astro.
 - **Imágenes:** No añadas fotos grandes al repositorio local; deben subirse a Cloudinary o servirse desde su CDN.
 - **Idiomas:** La interfaz de usuario y todas las respuestas al usuario deben ser en español.

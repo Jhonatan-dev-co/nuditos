@@ -103,6 +103,8 @@ const currentProduct = {
   cat: product.cat || '',
   desc: product.desc || ''
 };
+
+const productPreloadUrl = mainImg ? (mainImg.includes('res.cloudinary.com') ? clUrl(mainImg, 800) : mainImg) : undefined;
 ---
 
 <Layout
@@ -111,6 +113,7 @@ const currentProduct = {
   ogImage={mainImg.startsWith('http') ? mainImg : `${SITE_URL}${mainImg}`}
   ogType="product"
   canonical={pageUrl}
+  preloadImage={productPreloadUrl}
 >
 
   <Fragment slot="head">
@@ -216,7 +219,7 @@ const currentProduct = {
         <div class="hidden md:flex gap-3 overflow-x-auto pb-2 scrollbar-none mt-3.5">
           {allImgs.map((url: string, i: number) => (
             <button 
-              class={`ramo-thumb w-18 aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 cursor-pointer ${i === 0 ? 'border-amber-500 opacity-100 shadow-sm ring-2 ring-amber-400/30' : 'border-transparent opacity-60 hover:opacity-100'}`}
+              class={`ramo-thumb w-[72px] aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 cursor-pointer ${i === 0 ? 'border-amber-500 opacity-100 shadow-sm ring-2 ring-amber-400/30' : 'border-transparent opacity-60 hover:opacity-100'}`}
               onclick={`if(window.gallerySwiper) window.gallerySwiper.slideTo(${i})`}
               data-thumb={i}
             >
@@ -281,7 +284,7 @@ const currentProduct = {
             type="button" 
             data-product-id={product.id}
             onclick={`addToCartFromPage(${product.id})`}
-            class="flex-1 inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white px-5 sm:px-7 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-lg active:scale-95 cursor-pointer relative overflow-hidden group"
+            class="flex-1 inline-flex items-center justify-center gap-2 bg-[#1a1220] hover:bg-black text-white px-5 sm:px-7 py-3.5 sm:py-4 min-h-[48px] rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-lg active:scale-95 cursor-pointer relative overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <Icon name="shopping-bag-3" class="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
             <span id="ramoCartBtnText">Comprar ramo</span>
@@ -290,7 +293,7 @@ const currentProduct = {
             id="heroWaBtn"
             href={waUrl} 
             target="_blank" 
-            class="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-6 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-md active:scale-95 whitespace-nowrap"
+            class="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-6 py-3.5 sm:py-4 min-h-[48px] rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold tracking-wide transition-all shadow-md active:scale-95 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
           >
             <Icon name="whatsapp" class="w-4 h-4" />
             <span>WhatsApp</span>
@@ -307,19 +310,19 @@ const currentProduct = {
            </p>
            <div class="space-y-2.5">
              <div class="flex items-start gap-2.5">
-               <span class="w-4.5 h-4.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
+               <span class="w-5 h-5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
                <span class="text-slate-600 text-xs sm:text-[13px] leading-snug"><strong class="text-slate-800">No se marchita</strong> — Dura años, no días como las flores naturales</span>
              </div>
              <div class="flex items-start gap-2.5">
-               <span class="w-4.5 h-4.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
+               <span class="w-5 h-5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
                <span class="text-slate-600 text-xs sm:text-[13px] leading-snug"><strong class="text-slate-800">100% artesanal</strong> — Cada pétalo tejido a mano con hilos premium</span>
              </div>
              <div class="flex items-start gap-2.5">
-               <span class="w-4.5 h-4.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
+               <span class="w-5 h-5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
                <span class="text-slate-600 text-xs sm:text-[13px] leading-snug"><strong class="text-slate-800">Hipoalergénico</strong> — Sin polen, apto para cualquier persona</span>
              </div>
              <div class="flex items-start gap-2.5">
-               <span class="w-4.5 h-4.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
+               <span class="w-5 h-5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5" set:html={checkIconSvg}></span>
                <span class="text-slate-600 text-xs sm:text-[13px] leading-snug"><strong class="text-slate-800">Envío nacional seguro</strong> — Empaque rígido protector listo para regalar</span>
              </div>
            </div>
@@ -509,7 +512,7 @@ const currentProduct = {
   <!-- ════════ STICKY CTA BAR (Mobile & Desktop con Apple Glassmorphism) ════════ -->
   <div
     id="stickyCTA"
-    class="fixed bottom-[68px] md:bottom-8 left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-[94%] md:max-w-[520px] z-[90] border-t md:border px-3.5 py-2.5 md:p-2.5 md:rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] translate-y-[150%] opacity-0 pointer-events-none"
+    class="fixed left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-[94%] md:max-w-[520px] z-[140] border-t md:border px-3.5 py-2.5 md:p-2.5 md:rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] translate-y-[150%] opacity-0 pointer-events-none"
   >
     <div class="flex items-center gap-2.5 sm:gap-3 max-w-[520px] mx-auto md:mx-0">
       <!-- Miniatura -->
@@ -534,7 +537,7 @@ const currentProduct = {
         type="button" 
         data-product-id={product.id}
         onclick={`addToCartFromPage(${product.id})`}
-        class="bg-[#1a1220] hover:bg-black text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-full text-xs font-bold tracking-wide active:scale-95 transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap cursor-pointer"
+        class="bg-[#1a1220] hover:bg-black text-white px-4 sm:px-6 py-2.5 sm:py-3 min-h-[44px] rounded-xl sm:rounded-full text-xs font-bold tracking-wide active:scale-95 transition-all shadow-md flex items-center justify-center gap-1.5 flex-shrink-0 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
       >
         <Icon name="shopping-bag-3" class="w-3.5 h-3.5 text-amber-400" />
         <span id="btnStickyBuyText">Comprar</span>
@@ -551,23 +554,28 @@ const currentProduct = {
       background-color: #ffffff;
       border-color: rgba(231, 229, 228, 0.95);
       box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-      z-index: 90 !important;
+      z-index: 140 !important;
+      bottom: calc(66px + env(safe-area-inset-bottom, 0px)) !important;
     }
     #stickyCTA.is-visible { transform: translate(0, 0); opacity: 1; pointer-events: auto; }
     @media (min-width: 768px) { 
-      #stickyCTA.is-visible { transform: translate(-50%, 0); } 
       #stickyCTA {
+        bottom: 2rem !important;
         box-shadow: 0 16px 45px rgba(0, 0, 0, 0.14);
       }
+      #stickyCTA.is-visible { transform: translate(-50%, 0); } 
     }
 
-    /* Ocultar y enviar al fondo cuando el carrito esté abierto */
+    /* Ocultar y enviar al fondo cuando el carrito o menú estén abiertos */
     :global(body.scroll-lock) #stickyCTA,
-    :global(body:has(#cartPanel.open)) #stickyCTA {
+    :global(body:has(#cartPanel.open)) #stickyCTA,
+    :global(body:has(#cartOverlay.open)) #stickyCTA,
+    :global(body:has(#menuPanel.open)) #stickyCTA {
       opacity: 0 !important;
       pointer-events: none !important;
       transform: translateY(150%) !important;
-      z-index: 10 !important;
+      z-index: -1 !important;
+      display: none !important;
     }
 
     /* Efecto Glassmorphism exclusivo para iPhone, iPad y Mac */
